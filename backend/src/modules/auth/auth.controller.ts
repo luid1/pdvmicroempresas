@@ -1,9 +1,9 @@
 import { Controller, Post, Get, Body, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { Public } from '../../common/decorators/context.decorator';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Public, CurrentTenant } from '../../common/decorators/context.decorator';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginPorIdDto, RegisterTenantDto } from './dto/auth.dto';
+import { LoginDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto } from './dto/auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -35,6 +35,22 @@ export class AuthController {
   @ApiOperation({ summary: 'Login visual: seleciona usuário pelo ID e digita a senha' })
   loginPorId(@Body() body: LoginPorIdDto) {
     return this.auth.loginPorId(body.usuarioId, body.password);
+  }
+
+  // Anti-brute-force: no máximo 8 tentativas de PIN por minuto por IP.
+  @Throttle({ default: { limit: 8, ttl: 60000 } })
+  @Public()
+  @Post('login-pin')
+  @ApiOperation({ summary: 'Login rápido: seleciona o perfil e digita o PIN de 4 dígitos' })
+  loginPorPin(@Body() body: LoginPorPinDto) {
+    return this.auth.loginPorPin(body.usuarioId, body.pin);
+  }
+
+  @ApiBearerAuth()
+  @Post('definir-pin')
+  @ApiOperation({ summary: 'Define/troca o PIN de um usuário da própria empresa' })
+  definirPin(@CurrentTenant() tenantId: string, @Body() body: DefinirPinDto) {
+    return this.auth.definirPin(tenantId, body.usuarioId, body.pin);
   }
 
   @Public()

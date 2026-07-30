@@ -4,6 +4,8 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
+  IsNumberString,
+  Length,
   MinLength,
   MaxLength,
 } from 'class-validator';
@@ -32,6 +34,30 @@ export class LoginPorIdDto {
   @IsNotEmpty({ message: 'Senha é obrigatória.' })
   @MaxLength(128)
   password: string;
+}
+
+export class LoginPorPinDto {
+  @ApiProperty({ description: 'ID do usuário selecionado na tela visual' })
+  @IsString()
+  @IsNotEmpty({ message: 'usuarioId é obrigatório.' })
+  usuarioId: string;
+
+  @ApiProperty({ example: '1234', description: 'PIN de 4 dígitos' })
+  @IsNumberString({}, { message: 'O PIN deve conter apenas números.' })
+  @Length(4, 4, { message: 'O PIN deve ter 4 dígitos.' })
+  pin: string;
+}
+
+export class DefinirPinDto {
+  @ApiProperty({ description: 'ID do usuário que receberá o PIN' })
+  @IsString()
+  @IsNotEmpty({ message: 'usuarioId é obrigatório.' })
+  usuarioId: string;
+
+  @ApiProperty({ example: '1234', description: 'PIN de 4 dígitos' })
+  @IsNumberString({}, { message: 'O PIN deve conter apenas números.' })
+  @Length(4, 4, { message: 'O PIN deve ter 4 dígitos.' })
+  pin: string;
 }
 
 export class RegisterTenantDto {

@@ -316,6 +316,7 @@ model Usuario {
   nome         String
   email        String
   passwordHash String
+  pinHash      String? // PIN de 4 dígitos (hash) para login rápido no caixa
   cpf          String?
   ativo        Boolean   @default(true)
   ultimoAcesso DateTime?

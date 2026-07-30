@@ -27,12 +27,13 @@ export class AuthService {
       resolvedTenantId = tenant.id;
     }
 
-    return this.prisma.usuario.findMany({
+    const usuarios = await this.prisma.usuario.findMany({
       where: { tenantId: resolvedTenantId, ativo: true },
       select: {
         id: true,
         nome: true,
         email: true,
+        pinHash: true,
         role: { select: { nome: true } },
         ultimoAcesso: true,
       },
@@ -41,6 +42,9 @@ export class AuthService {
         { nome: 'asc' },
       ],
     });
+
+    // Nunca expõe o hash — só informa se o perfil já tem PIN configurado.
+    return usuarios.map(({ pinHash, ...u }) => ({ ...u, temPin: !!pinHash }));
   }
 
   async registerTenant(dto: {
@@ -110,19 +114,20 @@ export class AuthService {
     };
   }
 
-  async login(email: string, password: string) {
-    const usuario = await this.prisma.usuario.findFirst({
-      where: { email, ativo: true },
+  /** Busca o usuário completo (tenant + filiais + role) para montar a sessão. */
+  private async buscarUsuarioCompleto(where: { email?: string; id?: string }) {
+    return this.prisma.usuario.findFirst({
+      where: { ...where, ativo: true },
       include: {
         tenant: true,
         filiais: { include: { filial: true } },
         role: true,
       },
     });
+  }
 
-    if (!usuario || !(await bcrypt.compare(password, usuario.passwordHash))) {
-      throw new UnauthorizedException('Senha incorreta.');
-    }
+  /** Monta o payload de sessão (token + usuário + tenant) e grava o último acesso. */
+  private async montarSessao(usuario: any) {
     if (!usuario.tenant.ativo) throw new UnauthorizedException('Empresa inativa.');
 
     await this.prisma.usuario.update({
@@ -146,7 +151,7 @@ export class AuthService {
         telas: usuario.role.telas || [],
         telaInicial: usuario.role.telaInicial || null,
         acoes: usuario.role.acoes || {},
-        filiais: usuario.filiais.map((uf) => ({
+        filiais: usuario.filiais.map((uf: any) => ({
           id: uf.filial.id,
           codigo: uf.filial.codigo,
           nome: uf.filial.nome,
@@ -160,55 +165,55 @@ export class AuthService {
     };
   }
 
+  async login(email: string, password: string) {
+    const usuario = await this.buscarUsuarioCompleto({ email });
+    if (!usuario || !(await bcrypt.compare(password, usuario.passwordHash))) {
+      throw new UnauthorizedException('Senha incorreta.');
+    }
+    return this.montarSessao(usuario);
+  }
+
   /** Login por userId direto (usado após seleção visual do usuário) */
   async loginPorId(usuarioId: string, password: string) {
-    const usuario = await this.prisma.usuario.findFirst({
-      where: { id: usuarioId, ativo: true },
-      include: {
-        tenant: true,
-        filiais: { include: { filial: true } },
-        role: true,
-      },
-    });
-
+    const usuario = await this.buscarUsuarioCompleto({ id: usuarioId });
     if (!usuario) throw new UnauthorizedException('Usuário não encontrado.');
     if (!(await bcrypt.compare(password, usuario.passwordHash))) {
       throw new UnauthorizedException('Senha incorreta.');
     }
-    if (!usuario.tenant.ativo) throw new UnauthorizedException('Empresa inativa.');
+    return this.montarSessao(usuario);
+  }
 
-    await this.prisma.usuario.update({
-      where: { id: usuario.id },
-      data: { ultimoAcesso: new Date() },
+  /** Login rápido por PIN de 4 dígitos (após seleção visual do usuário). */
+  async loginPorPin(usuarioId: string, pin: string) {
+    if (!/^\d{4}$/.test(pin || '')) {
+      throw new UnauthorizedException('O PIN deve ter 4 dígitos.');
+    }
+    const usuario = await this.buscarUsuarioCompleto({ id: usuarioId });
+    if (!usuario) throw new UnauthorizedException('Usuário não encontrado.');
+    if (!usuario.pinHash) {
+      throw new UnauthorizedException('Este perfil ainda não tem PIN. Entre com a senha.');
+    }
+    if (!(await bcrypt.compare(pin, usuario.pinHash))) {
+      throw new UnauthorizedException('PIN incorreto.');
+    }
+    return this.montarSessao(usuario);
+  }
+
+  /**
+   * Define/troca o PIN de um usuário. Só permite dentro do mesmo tenant de quem
+   * está autenticado (admin define pra si ou para a equipe da própria loja).
+   */
+  async definirPin(tenantId: string, alvoUsuarioId: string, pin: string) {
+    if (!/^\d{4}$/.test(pin || '')) {
+      throw new UnauthorizedException('O PIN deve ter 4 dígitos.');
+    }
+    const alvo = await this.prisma.usuario.findFirst({
+      where: { id: alvoUsuarioId, tenantId, ativo: true },
     });
+    if (!alvo) throw new UnauthorizedException('Usuário não encontrado nesta empresa.');
 
-    const token = this.jwt.sign({
-      sub: usuario.id,
-      tenantId: usuario.tenantId,
-      roleId: usuario.roleId,
-    });
-
-    return {
-      token,
-      usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email,
-        role: usuario.role.nome,
-        telas: usuario.role.telas || [],
-        telaInicial: usuario.role.telaInicial || null,
-        acoes: usuario.role.acoes || {},
-        filiais: usuario.filiais.map((uf) => ({
-          id: uf.filial.id,
-          codigo: uf.filial.codigo,
-          nome: uf.filial.nome,
-        })),
-      },
-      tenant: {
-        id: usuario.tenant.id,
-        razaoSocial: usuario.tenant.razaoSocial,
-        nomeFantasia: usuario.tenant.nomeFantasia,
-      },
-    };
+    const pinHash = await bcrypt.hash(pin, 10);
+    await this.prisma.usuario.update({ where: { id: alvo.id }, data: { pinHash } });
+    return { ok: true };
   }
 }

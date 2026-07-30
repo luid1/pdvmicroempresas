@@ -150,34 +150,39 @@ async function main() {
       nome:     'Administrador',
       email:    'admin@mercado.com',
       password: 'admin123',
+      pin:      '1234',
       role:     'ADMIN',
     },
     {
       nome:     'Operador de Caixa',
       email:    'caixa@mercado.com',
       password: 'caixa123',
+      pin:      '3456',
       role:     'OPERADOR_CAIXA',
     },
     {
       nome:     'Gerente',
       email:    'gerente@mercado.com',
       password: 'gerente123',
+      pin:      '2345',
       role:     'GERENTE',
     },
     {
       nome:     'Estoquista',
       email:    'estoque@mercado.com',
       password: 'estoque123',
+      pin:      '4567',
       role:     'ESTOQUISTA',
     },
   ];
 
   for (const u of usuariosBase) {
+    const hash = await bcrypt.hash(u.password, 12);
+    const pinHash = await bcrypt.hash(u.pin, 10);
     const existe = await prisma.usuario.findUnique({
       where: { tenantId_email: { tenantId: tenant.id, email: u.email } },
     });
     if (!existe) {
-      const hash = await bcrypt.hash(u.password, 12);
       const novo = await prisma.usuario.create({
         data: {
           tenantId:     tenant.id,
@@ -185,12 +190,15 @@ async function main() {
           nome:         u.nome,
           email:        u.email,
           passwordHash: hash,
+          pinHash,
           filiais:      { create: { filialId: filial.id } },
         },
       });
-      console.log(`✅ Usuário criado: ${novo.nome} (${u.role}) — senha: ${u.password}`);
+      console.log(`✅ Usuário criado: ${novo.nome} (${u.role}) — senha: ${u.password} · PIN: ${u.pin}`);
     } else {
-      console.log(`ℹ️  Usuário já existe: ${u.nome}`);
+      // Garante que o PIN exista mesmo em bancos já semeados antes desta feature.
+      await prisma.usuario.update({ where: { id: existe.id }, data: { pinHash } });
+      console.log(`ℹ️  Usuário já existe: ${u.nome} — PIN atualizado: ${u.pin}`);
     }
   }
 
@@ -449,11 +457,11 @@ async function main() {
 
   console.log('\n🎉 Seed concluído com sucesso!\n');
   console.log('─────────────────────────────────────');
-  console.log('🔑 Credenciais de acesso:');
-  console.log('   Admin (dono)      → admin@mercado.com    / admin123    → Dashboard');
-  console.log('   Gerente           → gerente@mercado.com  / gerente123  → Dashboard');
-  console.log('   Operador de Caixa → caixa@mercado.com    / caixa123    → Caixa (PDV)');
-  console.log('   Estoquista        → estoque@mercado.com  / estoque123  → Estoque');
+  console.log('🔑 Credenciais de acesso (senha · PIN):');
+  console.log('   Admin (dono)      → admin@mercado.com    / admin123    · PIN 1234 → Dashboard');
+  console.log('   Gerente           → gerente@mercado.com  / gerente123  · PIN 2345 → Dashboard');
+  console.log('   Operador de Caixa → caixa@mercado.com    / caixa123    · PIN 3456 → Caixa (PDV)');
+  console.log('   Estoquista        → estoque@mercado.com  / estoque123  · PIN 4567 → Estoque');
   console.log('─────────────────────────────────────\n');
 }
 
