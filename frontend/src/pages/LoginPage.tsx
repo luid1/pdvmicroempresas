@@ -17,7 +17,7 @@ type Perfil = {
 };
 
 const PAIR_KEY = 'wms_paired_tenant';
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lumin-pdv.netlify.app';
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.netlify.app';
 
 /** Aparência de cada perfil na tela de seleção (paleta verde/âmbar da marca). */
 const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string; bg: string; text: string }> = {
