@@ -433,7 +433,7 @@
   })();
 
   // Links de login → URL do sistema (front React).
-  const APP_URL = window.LUMIN_APP_URL || (location.hostname === 'localhost' ? 'http://localhost:3013' : 'https://preeminent-trifle-c6611a.netlify.app');
+  const APP_URL = window.LUMIN_APP_URL || (location.hostname === 'localhost' ? 'http://localhost:3013' : 'https://app-lumin.netlify.app');
   document.querySelectorAll('a[href^="http://localhost:3013"]').forEach(a => { a.href = a.href.replace('http://localhost:3013', APP_URL); });
 </script>
 </body>

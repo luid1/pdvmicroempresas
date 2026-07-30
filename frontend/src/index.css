@@ -122,12 +122,16 @@
 }
 .login-canvas {
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(56,189,248,0.18), transparent 55%),
-    radial-gradient(120% 120% at 100% 100%, rgba(99,102,241,0.20), transparent 55%),
-    linear-gradient(125deg, #080d16 0%, #0d1a2e 35%, #14133c 65%, #090e18 100%);
+    radial-gradient(120% 120% at 0% 0%, rgba(52,211,153,0.16), transparent 55%),
+    radial-gradient(120% 120% at 100% 100%, rgba(16,185,129,0.18), transparent 55%),
+    linear-gradient(125deg, #05090c 0%, #071310 40%, #0a1512 65%, #05090c 100%);
   background-size: 160% 160%, 160% 160%, 320% 320%;
   animation: loginPan 24s ease-in-out infinite;
 }
+
+/* Fonte de destaque (mesma da landing Lumin PDV) */
+.font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
+.font-plex-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
 
 @keyframes orbFloat1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(14%,10%) scale(1.18); } 66% { transform: translate(-10%,16%) scale(0.9); } }
 @keyframes orbFloat2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-16%,-12%) scale(1.22); } }

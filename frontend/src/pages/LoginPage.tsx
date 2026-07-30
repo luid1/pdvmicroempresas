@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import {
-  Eye, EyeOff, Lock, Mail, ShoppingCart, ArrowLeft, Delete,
+  Eye, EyeOff, Lock, Mail, ArrowLeft, Delete,
   Store, Shield, Crown, ShoppingBag, Boxes, User as UserIcon,
 } from 'lucide-react';
 import { rotaInicial } from '../config/telas';
@@ -17,18 +17,30 @@ type Perfil = {
 };
 
 const PAIR_KEY = 'wms_paired_tenant';
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lumin-pdv.netlify.app';
 
-/** Aparência de cada perfil na tela de seleção. */
+/** Aparência de cada perfil na tela de seleção (paleta verde/âmbar da marca). */
 const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string; bg: string; text: string }> = {
   ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-amber-400/40',   bg: 'bg-amber-500/15',   text: 'text-amber-300' },
-  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-sky-400/40',     bg: 'bg-sky-500/15',     text: 'text-sky-300' },
+  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-teal-400/40',    bg: 'bg-teal-500/15',    text: 'text-teal-300' },
   OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-emerald-400/40', bg: 'bg-emerald-500/15', text: 'text-emerald-300' },
-  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-violet-400/40',  bg: 'bg-violet-500/15',  text: 'text-violet-300' },
+  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-lime-400/40',    bg: 'bg-lime-500/15',    text: 'text-lime-300' },
 };
 const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-slate-400/40', bg: 'bg-slate-500/15', text: 'text-slate-300' };
 
 const iniciais = (nome: string) =>
   nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
+
+/** Logotipo da marca — ponto verde + nome (igual à landing). */
+function Brand({ size = 'md' }: { size?: 'sm' | 'md' }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_14px_rgba(52,211,153,0.9)]" />
+      <span className={`font-display font-bold text-white ${size === 'sm' ? 'text-sm' : 'text-lg'}`}>Lumin PDV</span>
+      <span className="font-plex-mono text-[10px] text-emerald-400/70 tracking-[0.12em] uppercase">· Frente de caixa</span>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const [hora, setHora] = useState(new Date());
@@ -96,43 +108,36 @@ export default function LoginPage() {
   return (
     <div className="login-canvas relative overflow-hidden min-h-screen flex">
 
-      {/* Fundo animado */}
+      {/* Fundo animado — orbes verdes/menta */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <div className="login-orb-1 absolute -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-sky-500/[0.28] blur-[120px]" />
-        <div className="login-orb-2 absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-indigo-500/[0.22] blur-[130px]" />
-        <div className="login-orb-3 absolute -bottom-32 -right-28 h-[520px] w-[520px] rounded-full bg-violet-500/[0.24] blur-[120px]" />
-        <div className="login-orb-1 absolute top-1/3 right-1/4 h-[360px] w-[360px] rounded-full bg-cyan-500/[0.14] blur-[130px]" />
+        <div className="login-orb-1 absolute -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-emerald-500/[0.22] blur-[120px]" />
+        <div className="login-orb-2 absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-emerald-400/[0.16] blur-[130px]" />
+        <div className="login-orb-3 absolute -bottom-32 -right-28 h-[520px] w-[520px] rounded-full bg-teal-500/[0.18] blur-[120px]" />
+        <div className="login-orb-1 absolute top-1/3 right-1/4 h-[360px] w-[360px] rounded-full bg-lime-500/[0.10] blur-[130px]" />
       </div>
 
       {/* ═══════════ BANNER LATERAL ═══════════ */}
       <aside className="hidden lg:flex w-[42%] xl:w-[38%] relative z-10 flex-col justify-between overflow-hidden border-r border-white/[0.06] p-10">
-        <div className="relative flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-500/15 drop-shadow-[0_2px_12px_rgba(56,189,248,0.25)]">
-            <ShoppingCart className="h-6 w-6 text-sky-400" />
-          </div>
-          <div>
-            <p className="text-white text-lg font-bold leading-none tracking-tight">Lumin PDV</p>
-            <p className="text-slate-400 text-xs mt-1.5">Gestão e Frente de Caixa</p>
-          </div>
-        </div>
+        <Brand />
 
         <div className="relative">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.9)] animate-pulse" />
-            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.28em]">ERP</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
+            <span className="font-plex-mono text-[11px] font-medium text-emerald-300/80 uppercase tracking-[0.28em]">Ponto de venda</span>
           </div>
-          <h1 className="text-4xl xl:text-5xl font-extrabold text-white leading-[1.1] tracking-tight">
-            Sua venda<br />
-            <span className="bg-gradient-to-r from-sky-300 via-cyan-200 to-indigo-300 bg-clip-text text-transparent">rápida e simples.</span>
+          <h1 className="font-display text-4xl xl:text-5xl font-bold text-white leading-[1.08]">
+            O caixa que<br />
+            <span className="bg-gradient-to-r from-emerald-300 via-emerald-200 to-lime-300 bg-clip-text text-transparent">continua vendendo</span>
+            <br />mesmo sem internet.
           </h1>
           <p className="text-slate-400 text-base mt-5 max-w-md leading-relaxed">
-            Feito para micro e pequenas empresas: frente de caixa, estoque e caixa do dia em um só lugar — do produto ao cupom.
+            Venda, estoque e financeiro na mesma tela. Cada pessoa entra pelo seu perfil, com um PIN rápido de 4 dígitos.
           </p>
         </div>
 
         <div className="relative flex items-end justify-between">
           <div>
-            <p className="text-white text-3xl font-mono font-bold tabular-nums leading-none">
+            <p className="text-white text-3xl font-plex-mono font-medium tabular-nums leading-none">
               {hora.toLocaleTimeString('pt-BR')}
             </p>
             <p className="text-slate-500 text-sm mt-1.5 capitalize">
@@ -148,11 +153,8 @@ export default function LoginPage() {
 
       {/* ═══════════ ÁREA DIREITA ═══════════ */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 sm:p-10 relative z-10">
-        <div className="lg:hidden flex items-center gap-2.5 mb-8">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-500/15">
-            <ShoppingCart className="h-4 w-4 text-sky-400" />
-          </div>
-          <p className="text-white text-sm font-bold">Lumin PDV</p>
+        <div className="lg:hidden mb-8">
+          <Brand size="sm" />
         </div>
 
         {modo === 'PAIR' && (
@@ -161,11 +163,12 @@ export default function LoginPage() {
             setLoading={setLoading}
             error={error}
             setError={setError}
-            onPaired={(tenant, data) => {
+            onPaired={(tenant) => {
               const p = { id: tenant.id, nome: tenant.nomeFantasia || tenant.razaoSocial };
               localStorage.setItem(PAIR_KEY, JSON.stringify(p));
               setPaired(p);
-              entrar(data); // o 1º login já entra direto com quem vinculou
+              setError('');
+              setModo('PICKER'); // vincula e mostra os perfis (não entra direto)
             }}
           />
         )}
@@ -228,7 +231,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
   setLoading: (v: boolean) => void;
   error: string;
   setError: (v: string) => void;
-  onPaired: (tenant: any, data: any) => void;
+  onPaired: (tenant: any) => void;
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -248,7 +251,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'E-mail ou senha incorretos.');
-      onPaired(data.tenant, data);
+      onPaired(data.tenant);
     } catch (err: any) {
       setError(err.message);
       setPassword('');
@@ -259,27 +262,27 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
   return (
     <div className="w-full max-w-sm space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-sky-500/10 border border-sky-400/20 px-3 py-1 mb-3">
-          <Store className="h-3.5 w-3.5 text-sky-400" />
-          <span className="text-[11px] font-semibold text-sky-300 uppercase tracking-wider">Primeiro acesso</span>
+        <div className="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-400/25 px-3 py-1 mb-3">
+          <Store className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="font-plex-mono text-[11px] font-medium text-emerald-300 uppercase tracking-wider">Primeiro acesso</span>
         </div>
-        <h2 className="text-2xl font-bold text-white">Vincular este computador</h2>
-        <p className="text-slate-500 text-sm mt-1">
-          Entre uma vez com o acesso da sua loja. Depois é só clicar no perfil e digitar o PIN.
+        <h2 className="font-display text-2xl font-bold text-white">Vincular este computador</h2>
+        <p className="text-slate-400 text-sm mt-1">
+          Entre <b className="text-slate-300">uma vez</b> com o acesso da sua loja. Depois é só clicar no perfil e digitar o PIN.
         </p>
       </div>
 
       <div className="relative bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 space-y-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent" aria-hidden />
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1.5">E-mail</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">E-mail da loja</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
               <input
                 ref={emailRef}
                 type="email"
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
                 placeholder="voce@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -290,12 +293,12 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
           </div>
 
           <div>
-            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
               <input
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
                 placeholder="Digite sua senha..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -317,21 +320,21 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-sky-500/20"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
+                <span className="animate-spin h-4 w-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full" />
                 Verificando...
               </span>
-            ) : 'Vincular e entrar'}
+            ) : 'Vincular e ver perfis'}
           </button>
         </form>
       </div>
 
       <p className="text-center text-slate-500 text-xs">
         Ainda não tem uma conta?{' '}
-        <a href={`${import.meta.env.VITE_SITE_URL || 'http://localhost:4010'}/assinar.html`} className="text-sky-400 hover:text-sky-300 font-semibold">
+        <a href={`${SITE_URL}/assinar.html`} className="text-emerald-400 hover:text-emerald-300 font-semibold">
           Comece agora
         </a>
       </p>
@@ -355,11 +358,11 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] border border-white/[0.08] px-3 py-1 mb-3">
-            <Store className="h-3.5 w-3.5 text-sky-400" />
+            <Store className="h-3.5 w-3.5 text-emerald-400" />
             <span className="text-[11px] font-semibold text-slate-300 tracking-wide">{tenantNome}</span>
           </div>
-          <h2 className="text-2xl font-bold text-white">Quem vai usar agora?</h2>
-          <p className="text-slate-500 text-sm mt-1">Toque no seu perfil para entrar.</p>
+          <h2 className="font-display text-2xl font-bold text-white">Quem vai usar agora?</h2>
+          <p className="text-slate-400 text-sm mt-1">Toque no seu perfil para entrar.</p>
         </div>
       </div>
 
@@ -388,7 +391,7 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
                 className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 transition-all hover:bg-white/[0.06] hover:-translate-y-0.5 hover:border-white/20 focus:outline-none focus:ring-2 ${ui.ring}`}
               >
                 <div className={`flex h-14 w-14 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
-                  <span className={`text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
+                  <span className={`font-display text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
                 </div>
                 <div className="text-center">
                   <p className="text-white text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
@@ -459,7 +462,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
       {/* Cabeçalho do perfil selecionado */}
       <div className="flex flex-col items-center text-center gap-3">
         <div className={`flex h-16 w-16 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
-          <span className={`text-xl font-bold ${ui.text}`}>{iniciais(perfil.nome)}</span>
+          <span className={`font-display text-xl font-bold ${ui.text}`}>{iniciais(perfil.nome)}</span>
         </div>
         <div>
           <p className="text-white text-lg font-bold leading-tight">{perfil.nome}</p>
@@ -478,7 +481,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className={`h-3.5 w-3.5 rounded-full transition-all ${i < pin.length ? 'bg-sky-400 scale-110 shadow-[0_0_10px_rgba(56,189,248,0.7)]' : 'bg-white/15'}`}
+                className={`h-3.5 w-3.5 rounded-full transition-all ${i < pin.length ? 'bg-emerald-400 scale-110 shadow-[0_0_10px_rgba(52,211,153,0.7)]' : 'bg-white/15'}`}
               />
             ))}
           </div>
@@ -492,7 +495,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
                 key={t}
                 onClick={() => digitar(t)}
                 disabled={loading}
-                className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-semibold hover:bg-white/[0.09] active:scale-95 transition-all disabled:opacity-40"
+                className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-display font-semibold hover:bg-white/[0.09] hover:border-emerald-400/30 active:scale-95 transition-all disabled:opacity-40"
               >
                 {t}
               </button>
@@ -501,7 +504,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
             <button
               onClick={() => digitar('0')}
               disabled={loading}
-              className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-semibold hover:bg-white/[0.09] active:scale-95 transition-all disabled:opacity-40"
+              className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-display font-semibold hover:bg-white/[0.09] hover:border-emerald-400/30 active:scale-95 transition-all disabled:opacity-40"
             >
               0
             </button>
@@ -532,13 +535,13 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
           className="space-y-4"
         >
           <div>
-            <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
               <input
                 autoFocus
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all"
+                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 transition-all"
                 placeholder="Digite sua senha..."
                 value={senha}
                 onChange={(e) => { setError(''); setSenha(e.target.value); }}
@@ -559,11 +562,11 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
           <button
             type="submit"
             disabled={loading || !senha}
-            className="w-full bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-sky-500/20"
+            className="w-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
+                <span className="animate-spin h-4 w-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full" /> Entrando...
               </span>
             ) : 'Entrar no Sistema'}
           </button>
