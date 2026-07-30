@@ -1,0 +1,22 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Netlify — config na RAIZ do repo (monorepo: o front está em /frontend).
+# O comando entra em frontend/, builda, e publica frontend/dist.
+# Isso evita depender de configurar "Base directory" no painel.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/dist"
+
+# Encaminha as chamadas de API para o backend no Render (mesma origem, sem CORS).
+[[redirects]]
+  from = "/api/*"
+  to = "https://lumin-pdv-api.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback — qualquer rota volta pro index.html (React Router).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
