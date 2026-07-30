@@ -1,0 +1,29 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Netlify — Front do sistema Lumin PDV (React + Vite)
+#
+# Como usar:
+#   1. Em https://netlify.com → Add new site → Import from Git → conecte o repo.
+#   2. Base directory: frontend   (Netlify lê este arquivo dentro dela)
+#   3. TROQUE a URL do backend abaixo pela do seu serviço no Render.
+#
+# O proxy /api/* faz o front e a API ficarem na MESMA origem, então não há
+# CORS e você pode deixar FRONTEND_URL vazio no Render.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+  command = "npm install && npm run build"
+  publish = "dist"
+
+# Encaminha as chamadas de API para o backend no Render (same-origin).
+# >>> TROQUE "lumin-pdv-api.onrender.com" pela URL real do seu Render <<<
+[[redirects]]
+  from = "/api/*"
+  to = "https://lumin-pdv-api.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback — qualquer rota volta para o index.html (React Router).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

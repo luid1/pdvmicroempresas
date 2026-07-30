@@ -1,0 +1,39 @@
+version: '3.9'
+
+# Infra dedicada do Mercado PDV (portas e volumes próprios)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercado_pdv_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_password
+      POSTGRES_DB: mercado_pdv
+    ports:
+      - "5434:5432"
+    volumes:
+      - mercado_pdv_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d mercado_pdv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mercado_pdv_redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    volumes:
+      - mercado_pdv_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mercado_pdv_postgres_data:
+  mercado_pdv_redis_data:

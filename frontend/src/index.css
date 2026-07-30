@@ -1,0 +1,262 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   HETROS DESIGN SYSTEM — "Dark Tech / Glass"
+   Canvas espacial #0B0F17 · vidro cirúrgico (blur + borda de
+   cristal 1px) · microinterações táteis · tipografia oversized.
+   ============================================================ */
+
+@layer base {
+  html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  body { @apply antialiased text-sm; }
+
+  /* Microinteração tátil global: todo botão responde ao toque */
+  button { @apply transition-all duration-200 ease-out; }
+  button:not(:disabled):active { transform: scale(0.98); }
+}
+
+@layer components {
+  /* Placa de vidro — superfícies flutuantes (cards, painéis) */
+  .glass {
+    @apply backdrop-blur-xl border border-white/[0.06] rounded-2xl;
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+  .glass-hover {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  .glass-hover:hover {
+    @apply border-white/[0.12];
+    box-shadow: 0 14px 40px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Card legado (Dashboard e telas antigas) → vira vidro automaticamente */
+  .card {
+    @apply rounded-2xl transition-all duration-300 ease-in-out;
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+  .card:hover {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.44), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-sky-600 text-white rounded-lg text-xs font-semibold hover:bg-sky-500 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-sky-900/30 active:scale-[0.98]; }
+  .btn-secondary { @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 active:scale-[0.98]; }
+  .btn-danger { @apply inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-500 transition-all duration-300 active:scale-[0.98]; }
+  .input { @apply w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 placeholder:text-gray-400; }
+  .label { @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5; }
+  .th { @apply text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider; }
+  .td { @apply px-4 py-3; }
+}
+
+/* Scrollbar minimalista */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+
+/* Animações — modais e conteúdo entram com fade + slide sutil */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.animate-fade-in-up { animation: fadeInUp 0.32s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-fade-in { animation: fadeIn 0.25s ease-out; }
+
+/* Pop-up com física: entra com escala + leve rotação de perspectiva + blur */
+@keyframes modalPop {
+  from { opacity: 0; transform: translateY(24px) scale(0.92); filter: blur(8px); }
+  60%  { filter: blur(0); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.animate-modal { animation: modalPop 0.42s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Backdrop desfoca o mundo ao redor de forma progressiva */
+@keyframes backdropIn { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(14px); } }
+.animate-backdrop { animation: backdropIn 0.3s ease-out forwards; }
+
+/* Aurora — blobs de fundo derivam lentamente, dando vida ao canvas */
+@keyframes auroraDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(6%, 4%) scale(1.08); }
+  66%  { transform: translate(-4%, 6%) scale(0.96); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.animate-aurora { animation: auroraDrift 22s ease-in-out infinite; }
+.animate-aurora-slow { animation: auroraDrift 30s ease-in-out infinite reverse; }
+
+/* Shimmer — skeleton de carregamento em vez de tela vazia */
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton {
+  position: relative; overflow: hidden;
+  background: rgba(255,255,255,0.04); border-radius: 0.5rem;
+}
+.skeleton::after {
+  content: ''; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* Glow pulsante para indicadores "ao vivo" */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 6px rgba(52,211,153,0.6); }
+  50%      { box-shadow: 0 0 14px rgba(52,211,153,0.95); }
+}
+.animate-pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
+
+/* ============================================================
+   LOGIN — fundo animado (gradiente que respira + orbs flutuantes
+   + grade tech que deriva). Movimento contínuo e vivo.
+   ============================================================ */
+@keyframes loginPan {
+  0%   { background-position: 0% 50%, 100% 50%, 0% 50%; }
+  50%  { background-position: 40% 60%, 60% 40%, 100% 50%; }
+  100% { background-position: 0% 50%, 100% 50%, 0% 50%; }
+}
+.login-canvas {
+  background:
+    radial-gradient(120% 120% at 0% 0%, rgba(56,189,248,0.18), transparent 55%),
+    radial-gradient(120% 120% at 100% 100%, rgba(99,102,241,0.20), transparent 55%),
+    linear-gradient(125deg, #080d16 0%, #0d1a2e 35%, #14133c 65%, #090e18 100%);
+  background-size: 160% 160%, 160% 160%, 320% 320%;
+  animation: loginPan 24s ease-in-out infinite;
+}
+
+@keyframes orbFloat1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(14%,10%) scale(1.18); } 66% { transform: translate(-10%,16%) scale(0.9); } }
+@keyframes orbFloat2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-16%,-12%) scale(1.22); } }
+@keyframes orbFloat3 { 0%,100% { transform: translate(0,0) scale(1); } 40% { transform: translate(12%,-14%) scale(1.12); } 75% { transform: translate(-8%,8%) scale(0.94); } }
+.login-orb-1 { animation: orbFloat1 17s ease-in-out infinite; }
+.login-orb-2 { animation: orbFloat2 23s ease-in-out infinite; }
+.login-orb-3 { animation: orbFloat3 20s ease-in-out infinite; }
+
+@keyframes gridDrift { from { background-position: 0 0; } to { background-position: 44px 44px; } }
+.login-grid {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: gridDrift 9s linear infinite;
+  -webkit-mask-image: radial-gradient(circle at 30% 38%, #000 0%, transparent 72%);
+          mask-image: radial-gradient(circle at 30% 38%, #000 0%, transparent 72%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora, .animate-aurora-slow, .animate-pulse-glow, .skeleton::after,
+  .login-canvas, .login-orb-1, .login-orb-2, .login-orb-3, .login-grid { animation: none !important; }
+}
+
+/* ============================================================
+   TEMA DARK GLOBAL — remapeia as telas legadas (claras) para o
+   canvas espacial. Telas já dark (slate/hex) não são afetadas.
+   A DANFE/impressos abrem em janela própria (ficam brancos).
+   ============================================================ */
+:root { color-scheme: dark; }
+body { background-color: #0b0f17 !important; color: #e2e8f0 !important; }
+
+/* Superfícies (paleta espacial) */
+.bg-white { background-color: #0e141f !important; }
+.bg-gray-50, .bg-slate-50 { background-color: #0b0f17 !important; }
+.bg-gray-100, .bg-slate-100 { background-color: #131b29 !important; }
+.bg-gray-200 { background-color: #182133 !important; }
+
+/* Hovers claros → escuros */
+.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover { background-color: #131b29 !important; }
+.hover\:bg-gray-100:hover, .hover\:bg-slate-100:hover { background-color: #182133 !important; }
+
+/* Textos */
+.text-gray-900, .text-slate-900, .text-gray-800, .text-slate-800 { color: #e2e8f0 !important; }
+.text-gray-700, .text-slate-700, .text-gray-600, .text-slate-600 { color: #cbd5e1 !important; }
+.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 { color: #94a3b8 !important; }
+
+/* Bordas de cristal */
+.border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200 { border-color: rgba(255, 255, 255, 0.06) !important; }
+.border-gray-300, .border-slate-300 { border-color: rgba(255, 255, 255, 0.12) !important; }
+
+/* Inputs / selects / textarea */
+input, select, textarea { color-scheme: dark; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: #131b29; color: #e2e8f0; }
+input::placeholder, textarea::placeholder { color: #64748b; }
+
+/* Componentes utilitários legados */
+.btn-secondary { background-color: rgba(255, 255, 255, 0.04) !important; color: #cbd5e1 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+.btn-secondary:hover { background-color: rgba(255, 255, 255, 0.08) !important; }
+.input { background-color: #131b29 !important; color: #e2e8f0 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+.th { color: #94a3b8 !important; }
+
+/* Tabelas legadas: linhas respiram com hover de vidro */
+tbody tr { transition: background-color 0.2s ease-out; }
+tbody tr:hover { background-color: rgba(255, 255, 255, 0.025) !important; }
+
+/* Foco de input mais presente — anel sky sutil ao redor do vidro */
+.input:focus, input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(56, 189, 248, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14) !important;
+}
+
+/* ============================================================
+   DROPDOWNS NATIVOS — a lista aberta do <select> herdava o branco
+   do SO. Força o popup e as opções para o canvas escuro.
+   ============================================================ */
+select { color-scheme: dark; }
+option, optgroup {
+  background-color: #0e141f !important;
+  color: #e2e8f0 !important;
+}
+optgroup { color: #94a3b8 !important; }
+
+/* ============================================================
+   TINTS CLARAS LEGADAS → versões escuras. Garante que nenhuma tela
+   (mesmo não redesenhada) mostre caixas claras fora do padrão.
+   As telas novas usam classes de opacidade (bg-sky-500/15) e não
+   são afetadas por estas regras.
+   ============================================================ */
+.bg-amber-50  { background-color: rgba(245,158,11,0.08) !important; }
+.bg-amber-100 { background-color: rgba(245,158,11,0.15) !important; }
+.bg-yellow-50  { background-color: rgba(234,179,8,0.08) !important; }
+.bg-yellow-100 { background-color: rgba(234,179,8,0.12) !important; }
+.bg-yellow-200 { background-color: rgba(234,179,8,0.16) !important; }
+.bg-blue-50   { background-color: rgba(56,189,248,0.06) !important; }
+.bg-blue-100  { background-color: rgba(56,189,248,0.14) !important; }
+.bg-sky-50    { background-color: rgba(56,189,248,0.06) !important; }
+.bg-sky-100   { background-color: rgba(56,189,248,0.14) !important; }
+.bg-green-50  { background-color: rgba(16,185,129,0.08) !important; }
+.bg-green-100 { background-color: rgba(16,185,129,0.14) !important; }
+.bg-emerald-50  { background-color: rgba(16,185,129,0.08) !important; }
+.bg-emerald-100 { background-color: rgba(16,185,129,0.14) !important; }
+.bg-red-50    { background-color: rgba(244,63,94,0.08) !important; }
+.bg-red-100   { background-color: rgba(244,63,94,0.14) !important; }
+.bg-rose-50   { background-color: rgba(244,63,94,0.08) !important; }
+.bg-rose-100  { background-color: rgba(244,63,94,0.14) !important; }
+.bg-orange-50  { background-color: rgba(249,115,22,0.08) !important; }
+.bg-orange-100 { background-color: rgba(249,115,22,0.14) !important; }
+.bg-purple-50  { background-color: rgba(139,92,246,0.08) !important; }
+.bg-purple-100 { background-color: rgba(139,92,246,0.14) !important; }
+.bg-violet-50  { background-color: rgba(139,92,246,0.08) !important; }
+.bg-violet-100 { background-color: rgba(139,92,246,0.14) !important; }
+.bg-cyan-50   { background-color: rgba(6,182,212,0.08) !important; }
+.bg-cyan-100  { background-color: rgba(6,182,212,0.14) !important; }
+.bg-indigo-50  { background-color: rgba(99,102,241,0.08) !important; }
+.bg-indigo-100 { background-color: rgba(99,102,241,0.14) !important; }
+
+/* Textos escuros feitos para tints claras → clareia p/ contraste no dark */
+.text-blue-700, .text-blue-800, .text-blue-900 { color: #7dd3fc !important; }
+.text-sky-700, .text-sky-800 { color: #7dd3fc !important; }
+.text-green-700, .text-green-800, .text-green-900 { color: #6ee7b7 !important; }
+.text-emerald-700, .text-emerald-800 { color: #6ee7b7 !important; }
+.text-red-700, .text-red-800, .text-red-900 { color: #fda4af !important; }
+.text-rose-700, .text-rose-800 { color: #fda4af !important; }
+.text-yellow-700, .text-yellow-800, .text-yellow-900 { color: #fde68a !important; }
+.text-amber-700, .text-amber-800, .text-amber-900 { color: #fcd34d !important; }
+.text-orange-600, .text-orange-700, .text-orange-800 { color: #fdba74 !important; }
+.text-purple-700, .text-purple-800 { color: #c4b5fd !important; }
+.text-violet-700, .text-violet-800 { color: #c4b5fd !important; }
+.text-cyan-700, .text-cyan-800 { color: #67e8f9 !important; }
+.text-indigo-700, .text-indigo-800 { color: #a5b4fc !important; }
