@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Users, ShieldCheck, Plus, Pencil, Power, KeyRound, X, Check, Trash2, Building2, Monitor,
+  Hash, Eye, EyeOff,
 } from 'lucide-react';
 import api from '../../../services/api';
 import { FAB } from '../../cadastros/ui';
@@ -127,6 +128,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
   const [filialIds, setFilialIds] = useState<string[]>(u?.filiais?.map(f => f.filial.id) || []);
   const [erro, setErro] = useState('');
   const [salvando, setSalvando] = useState(false);
+  const [pinAberto, setPinAberto] = useState(false);
 
   const toggleFilial = (id: string) => setFilialIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
 
@@ -193,12 +195,80 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
           <div className="flex gap-2">
             {!novo && <button onClick={resetSenha} className="flex items-center gap-1 text-xs text-gray-600 hover:text-sky-600 px-2 py-1.5 rounded border border-gray-300"><KeyRound className="h-3.5 w-3.5" /> Trocar senha</button>}
+            {!novo && <button onClick={() => setPinAberto(true)} className="flex items-center gap-1 text-xs text-gray-600 hover:text-emerald-600 px-2 py-1.5 rounded border border-gray-300"><Hash className="h-3.5 w-3.5" /> Definir PIN</button>}
             {!novo && u?.ativo && <button onClick={inativar} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Power className="h-3.5 w-3.5" /> Inativar</button>}
           </div>
           <div className="flex gap-2">
             <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
             <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
+        </div>
+      </div>
+      {pinAberto && u && <ModalPin usuario={u} onClose={() => setPinAberto(false)} />}
+    </div>
+  ), document.body);
+}
+
+// ─────────── Modal PIN ───────────
+function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void }) {
+  const [pin, setPin] = useState('');
+  const [conf, setConf] = useState('');
+  const [mostrar, setMostrar] = useState(false);
+  const [erro, setErro] = useState('');
+  const [salvando, setSalvando] = useState(false);
+
+  const soDigitos = (v: string) => v.replace(/\D/g, '').slice(0, 4);
+  const podeSalvar = pin.length === 4 && conf.length === 4 && !salvando;
+
+  const salvar = async () => {
+    setErro('');
+    if (pin.length !== 4) { setErro('O PIN deve ter exatamente 4 dígitos.'); return; }
+    if (pin !== conf) { setErro('Os PINs não conferem.'); return; }
+    setSalvando(true);
+    try {
+      await api.post('/auth/definir-pin', { usuarioId: usuario.id, pin });
+      toast(`PIN de ${usuario.nome} definido com sucesso.`, 'success');
+      onClose();
+    } catch (e: any) {
+      setErro(e.response?.data?.message || 'Erro ao definir o PIN.');
+    } finally { setSalvando(false); }
+  };
+
+  const pinInp = 'w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-slate-100 focus:outline-none focus:border-emerald-500';
+
+  return createPortal((
+    <div className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 animate-backdrop" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
+          <h2 className="font-bold text-slate-100 flex items-center gap-2"><Hash className="h-4 w-4 text-emerald-400" /> Definir PIN</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-100"><X className="h-5 w-5" /></button>
+        </div>
+        <div className="p-5 space-y-3">
+          <p className="text-xs text-slate-400">
+            PIN de 4 dígitos de <b className="text-slate-200">{usuario.nome}</b> para o login rápido no caixa (selecionar o perfil + digitar o PIN).
+          </p>
+          <div>
+            <label className={lbl}>Novo PIN (4 dígitos)</label>
+            <input type={mostrar ? 'text' : 'password'} inputMode="numeric" autoFocus autoComplete="off"
+              value={pin} onChange={e => setPin(soDigitos(e.target.value))}
+              onKeyDown={e => { if (e.key === 'Enter' && podeSalvar) salvar(); }}
+              className={pinInp} placeholder="••••" />
+          </div>
+          <div>
+            <label className={lbl}>Confirmar PIN</label>
+            <input type={mostrar ? 'text' : 'password'} inputMode="numeric" autoComplete="off"
+              value={conf} onChange={e => setConf(soDigitos(e.target.value))}
+              onKeyDown={e => { if (e.key === 'Enter' && podeSalvar) salvar(); }}
+              className={pinInp} placeholder="••••" />
+          </div>
+          <button type="button" onClick={() => setMostrar(m => !m)} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200">
+            {mostrar ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />} {mostrar ? 'Ocultar' : 'Mostrar'} dígitos
+          </button>
+          {erro && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">{erro}</p>}
+        </div>
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/10">
+          <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+          <button onClick={salvar} disabled={!podeSalvar} className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar PIN</button>
         </div>
       </div>
     </div>
