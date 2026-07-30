@@ -49,6 +49,11 @@ services:
         value: ./uploads
       - key: MAX_FILE_SIZE_MB
         value: "10"
+      # ── NFC-e (nota fiscal do consumidor) ───────────────────────────────────
+      # "simulado" = gera chave/QR fake em cada venda, sem transmitir ao SEFAZ.
+      # Em produção real: "focus" + FOCUS_NFE_TOKEN + certificado A1 + dados fiscais.
+      - key: NFCE_MODO
+        value: simulado
       # ── Mercado Pago (assinaturas) ──────────────────────────────────────────
       # Comece em "simulado" para testar sem cobrança. Em produção: "producao"
       # + MP_ACCESS_TOKEN de produção (APP_USR-...) + FRONT_URL público https.
