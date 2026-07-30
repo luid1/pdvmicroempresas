@@ -65,10 +65,11 @@ Organizado por prioridade. Atualizado a cada avanço.
 
 ## 4. Funcionalidades do sistema
 
-### 4.1 Tela de PIN em Gerencial › Usuários 🟡
-- O endpoint `/auth/definir-pin` **existe**, mas **não há tela** para o gerente definir/trocar o PIN de cada usuário.
-- Hoje os PINs vêm apenas do **seed** (dados de demonstração).
-- **Falta:** adicionar botão **"Definir PIN"** na tela de Usuários.
+### 4.1 Tela de PIN em Gerencial › Usuários ✅
+- **Feito.** No modal de edição de usuário há o botão **"Definir PIN"**, que abre
+  uma tela com PIN + confirmação (só dígitos, 4 casas) e chama `POST /auth/definir-pin`.
+- O gerente já consegue definir/trocar o PIN de cada pessoa da loja pela interface
+  (não depende mais do seed).
 
 ### 4.2 Gaveta de dinheiro — validar com hardware 🟡
 - Código pronto (Web Serial), **nunca testado com gaveta física**. Validar na 1ª instalação.
@@ -109,4 +110,4 @@ Rodar o roteiro ponta a ponta com hardware real (ver **GUIA-INSTALACAO.md**):
 | **NFC-e real** | **Depende do cliente** | 🔴 Config + certificado |
 | NF-e modelo 55 | Só se emitir p/ empresa | 🟡 A implementar |
 | Produção (Render/MP/e-mail) | Não p/ demo | 🟡 Virar chave no go-live |
-| Tela de PIN | Não | 🟡 A construir |
+| Tela de PIN | Não | ✅ Pronta |
