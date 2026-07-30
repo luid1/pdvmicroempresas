@@ -77,6 +77,53 @@ export class PdvService {
   }
 
   /**
+   * Autocomplete do caixa: busca produtos por parte da descrição OU início do
+   * código/código de barras. Retorna uma lista curta já com preço e estoque,
+   * no mesmo formato de `buscarProduto`. Usado quando o operador digita o nome.
+   */
+  async buscarProdutos(tenantId: string, termo: string, filialId?: string) {
+    const t = (termo || '').trim();
+    if (t.length < 2) return [];
+
+    const produtos = await this.prisma.produto.findMany({
+      where: {
+        tenantId,
+        ativo: true,
+        OR: [
+          { descricao: { contains: t, mode: 'insensitive' } },
+          { codigo: { startsWith: t } },
+          { codigoBarras: { startsWith: t } },
+        ],
+      },
+      include: {
+        unidadeMedida: { select: { sigla: true } },
+        estoques: filialId
+          ? { where: { filialId }, select: { quantidade: true, quantidadeReservada: true } }
+          : { select: { quantidade: true, quantidadeReservada: true } },
+      },
+      orderBy: { descricao: 'asc' },
+      take: 12,
+    });
+
+    return produtos.map((produto) => {
+      const disponivel = produto.estoques.reduce(
+        (s, e) => s + (Number(e.quantidade) - Number(e.quantidadeReservada)),
+        0,
+      );
+      return {
+        id: produto.id,
+        codigo: produto.codigo,
+        codigoBarras: produto.codigoBarras,
+        descricao: produto.descricao,
+        unidade: produto.vendidoPorPeso ? 'KG' : (produto.unidadeMedida?.sigla || 'UN'),
+        vendidoPorPeso: produto.vendidoPorPeso,
+        precoVenda: Number(produto.precoVenda),
+        estoqueDisponivel: disponivel,
+      };
+    });
+  }
+
+  /**
    * Registra uma venda de frente de caixa:
    *  1. Cria um Pedido (VENDA / FATURADO) com seus itens;
    *  2. Baixa o estoque (FEFO) de cada item;

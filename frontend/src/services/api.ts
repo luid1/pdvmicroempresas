@@ -61,6 +61,8 @@ export const pedidosApi = {
 export const pdvApi = {
   buscarProduto: (codigo: string, filialId?: string) =>
     api.get('/pdv/produto', { params: { codigo, filialId } }),
+  buscarProdutos: (termo: string, filialId?: string) =>
+    api.get('/pdv/produtos', { params: { termo, filialId } }),
   registrarVenda: (data: {
     filialId: string;
     formaPagamento?: string;

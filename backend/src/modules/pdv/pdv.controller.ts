@@ -32,6 +32,17 @@ export class PdvController {
     return this.service.buscarProduto(tenantId, codigo, filialId);
   }
 
+  @Get('produtos')
+  @RequirePermissao('PEDIDOS:READ')
+  @ApiOperation({ summary: 'Buscar produtos por nome/código (autocomplete do caixa)' })
+  buscarProdutos(
+    @CurrentTenant() tenantId: string,
+    @Query('termo') termo: string,
+    @Query('filialId') filialId?: string,
+  ) {
+    return this.service.buscarProdutos(tenantId, termo, filialId);
+  }
+
   @Post('venda')
   @RequirePermissao('PEDIDOS:CREATE')
   @ApiOperation({ summary: 'Registrar venda de frente de caixa (baixa estoque + entrada no caixa)' })

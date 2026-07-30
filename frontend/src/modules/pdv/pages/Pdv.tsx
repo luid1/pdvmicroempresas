@@ -29,6 +29,18 @@ type ItemVenda = {
   quantidade: number;
 };
 
+// Produto retornado pela busca por nome/código (autocomplete do caixa).
+type ProdutoBusca = {
+  id: string;
+  codigo: string;
+  codigoBarras: string | null;
+  descricao: string;
+  unidade: string;
+  vendidoPorPeso: boolean;
+  precoVenda: number;
+  estoqueDisponivel: number;
+};
+
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -54,6 +66,10 @@ export default function Pdv() {
   // Ex.: digita "5*" no campo, ou clica no chip ×5, e bipa o produto → 5 un.
   const [mult, setMult] = useState(1);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Autocomplete por nome: sugestões de produtos enquanto o operador digita.
+  const [sugestoes, setSugestoes] = useState<ProdutoBusca[]>([]);
+  const [sugIdx, setSugIdx] = useState(-1);
+  const buscaSeq = useRef(0); // descarta respostas fora de ordem (debounce)
 
   // Sessão / turno de caixa
   const [sessao, setSessao] = useState<SessaoRel | null>(null);
@@ -137,43 +153,7 @@ export default function Pdv() {
     setAviso(null);
     try {
       const { data: prod } = await pdvApi.buscarProduto(c, filialAtiva?.id);
-      beepOk();
-      setUltimoCupom(null);
-      // Produto por peso: não dá pra assumir 1 kg — pede o peso ao operador.
-      if (prod.vendidoPorPeso) {
-        setPesoModal({
-          produtoId: prod.id,
-          codigoBarras: prod.codigoBarras || prod.codigo,
-          descricao: prod.descricao,
-          precoUnit: Number(prod.precoVenda),
-          unidade: prod.unidade || 'KG',
-          qtdMult: qtd > 0 ? qtd : 1, // preserva o ×N; só consome ao confirmar o peso
-        });
-        setCodigo('');
-        return;
-      }
-      const add = qtd > 0 ? qtd : 1;
-      setItens((prev) => {
-        const idx = prev.findIndex((i) => i.produtoId === prod.id);
-        if (idx >= 0) {
-          const copy = [...prev];
-          copy[idx] = { ...copy[idx], quantidade: copy[idx].quantidade + add };
-          return copy;
-        }
-        return [
-          ...prev,
-          {
-            produtoId: prod.id,
-            codigoBarras: prod.codigoBarras || prod.codigo,
-            descricao: prod.descricao,
-            precoUnit: Number(prod.precoVenda),
-            unidade: prod.unidade || 'UN',
-            quantidade: add,
-          },
-        ];
-      });
-      setMult(1); // consumiu o multiplicador
-      setCodigo('');
+      inserirNoCarrinho(prod, qtd);
     } catch (e: any) {
       beepErro();
       const msg = e?.response?.data?.message || `Código ${c} não encontrado`;
@@ -183,6 +163,87 @@ export default function Pdv() {
       setBuscando(false);
     }
   }
+
+  /**
+   * Insere no carrinho um produto já resolvido — tanto do bipe exato quanto de
+   * uma sugestão escolhida por nome. Trata produto por peso (abre o modal de
+   * pesagem) e o multiplicador de quantidade.
+   */
+  function inserirNoCarrinho(prod: ProdutoBusca, qtd: number) {
+    beepOk();
+    setUltimoCupom(null);
+    setSugestoes([]);
+    setSugIdx(-1);
+    // Produto por peso: não dá pra assumir 1 kg — pede o peso ao operador.
+    if (prod.vendidoPorPeso) {
+      setPesoModal({
+        produtoId: prod.id,
+        codigoBarras: prod.codigoBarras || prod.codigo,
+        descricao: prod.descricao,
+        precoUnit: Number(prod.precoVenda),
+        unidade: prod.unidade || 'KG',
+        qtdMult: qtd > 0 ? qtd : 1, // preserva o ×N; só consome ao confirmar o peso
+      });
+      setCodigo('');
+      return;
+    }
+    const add = qtd > 0 ? qtd : 1;
+    setItens((prev) => {
+      const idx = prev.findIndex((i) => i.produtoId === prod.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], quantidade: copy[idx].quantidade + add };
+        return copy;
+      }
+      return [
+        ...prev,
+        {
+          produtoId: prod.id,
+          codigoBarras: prod.codigoBarras || prod.codigo,
+          descricao: prod.descricao,
+          precoUnit: Number(prod.precoVenda),
+          unidade: prod.unidade || 'UN',
+          quantidade: add,
+        },
+      ];
+    });
+    setMult(1); // consumiu o multiplicador
+    setCodigo('');
+  }
+
+  // Escolhe uma sugestão da lista (clique ou Enter/seta) e a lança no carrinho.
+  function selecionarSugestao(prod: ProdutoBusca) {
+    inserirNoCarrinho(prod, mult > 0 ? mult : 1);
+    focar();
+  }
+
+  // Busca por nome/código enquanto digita (debounce). Não sugere para código
+  // de barras puro (só dígitos) nem quando há multiplicador ("5*"), preservando
+  // o fluxo do leitor. Descarta respostas antigas via `buscaSeq`.
+  useEffect(() => {
+    const termo = codigo.trim();
+    const soDigitos = /^\d+$/.test(termo);
+    if (termo.length < 2 || soDigitos || /[*xX]/.test(termo)) {
+      setSugestoes([]);
+      setSugIdx(-1);
+      return;
+    }
+    const seq = ++buscaSeq.current;
+    const t = setTimeout(async () => {
+      try {
+        const { data } = await pdvApi.buscarProdutos(termo, filialAtiva?.id);
+        if (seq !== buscaSeq.current) return;
+        setSugestoes(data);
+        setSugIdx(data.length ? 0 : -1);
+      } catch {
+        if (seq === buscaSeq.current) {
+          setSugestoes([]);
+          setSugIdx(-1);
+        }
+      }
+    }, 250);
+    return () => clearTimeout(t);
+  }, [codigo, filialAtiva?.id]);
 
   /**
    * Chip ×N: se houver uma linha selecionada, define a quantidade dela para N
@@ -258,6 +319,8 @@ export default function Pdv() {
     setMult(1);
     setSelecionadoId(null); // evita seleção "fantasma" de item que não existe mais
     setAviso(null);
+    setSugestoes([]);
+    setSugIdx(-1);
     focar();
   }
 
@@ -477,21 +540,74 @@ export default function Pdv() {
                 adicionarPorCodigo(codigo);
               }}
             >
-              <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 focus-within:border-sky-500">
-                {buscando ? (
-                  <Loader2 className="h-6 w-6 shrink-0 animate-spin text-sky-400" />
-                ) : (
-                  <ScanLine className="h-6 w-6 shrink-0 text-sky-400" />
+              <div className="relative">
+                <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 focus-within:border-sky-500">
+                  {buscando ? (
+                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-sky-400" />
+                  ) : (
+                    <ScanLine className="h-6 w-6 shrink-0 text-sky-400" />
+                  )}
+                  <input
+                    ref={inputRef}
+                    autoFocus
+                    value={codigo}
+                    onChange={(e) => setCodigo(e.target.value)}
+                    onBlur={() => setTimeout(() => { setSugestoes([]); setSugIdx(-1); }, 120)}
+                    onKeyDown={(e) => {
+                      if (sugestoes.length === 0) return;
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault(); e.stopPropagation();
+                        setSugIdx((i) => Math.min(sugestoes.length - 1, i + 1));
+                      } else if (e.key === 'ArrowUp') {
+                        e.preventDefault(); e.stopPropagation();
+                        setSugIdx((i) => Math.max(0, i - 1));
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault(); e.stopPropagation();
+                        setSugestoes([]); setSugIdx(-1);
+                      } else if (e.key === 'Enter' && sugIdx >= 0 && sugIdx < sugestoes.length) {
+                        // Enter com uma sugestão destacada lança o produto (não submete o form).
+                        e.preventDefault();
+                        selecionarSugestao(sugestoes[sugIdx]);
+                      }
+                    }}
+                    placeholder="Bipe o código de barras ou digite o nome do produto"
+                    className="w-full bg-transparent text-lg outline-none placeholder:text-gray-600"
+                    autoComplete="off"
+                  />
+                </div>
+
+                {/* Sugestões por nome/código */}
+                {sugestoes.length > 0 && (
+                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
+                    {sugestoes.map((p, idx) => (
+                      <li
+                        key={p.id}
+                        onMouseDown={(e) => { e.preventDefault(); selecionarSugestao(p); }}
+                        onMouseEnter={() => setSugIdx(idx)}
+                        className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2 ${
+                          idx === sugIdx ? 'bg-sky-500/15' : 'hover:bg-gray-800'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-medium text-gray-100">{p.descricao}</div>
+                          <div className="truncate text-xs text-gray-500">
+                            {p.codigoBarras || p.codigo}
+                            <span className={p.estoqueDisponivel > 0 ? 'text-gray-500' : 'text-rose-400'}>
+                              {' · '}
+                              {p.vendidoPorPeso
+                                ? `${p.estoqueDisponivel.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg`
+                                : `${p.estoqueDisponivel} un`}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="shrink-0 tabular-nums text-sm font-semibold text-emerald-400">
+                          {brl(p.precoVenda)}
+                          {p.vendidoPorPeso && <span className="text-xs text-gray-500">/kg</span>}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
                 )}
-                <input
-                  ref={inputRef}
-                  autoFocus
-                  value={codigo}
-                  onChange={(e) => setCodigo(e.target.value)}
-                  placeholder="Bipe ou digite o código de barras e tecle Enter"
-                  className="w-full bg-transparent text-lg outline-none placeholder:text-gray-600"
-                  inputMode="numeric"
-                />
               </div>
             </form>
             {/* Multiplicador de quantidade — clique rápido (ou digite "5*" no campo). */}
