@@ -1,0 +1,22 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Netlify — Site de apresentação + checkout (landing "index.html" e "assinar.html")
+#
+# Este é um site ESTÁTICO (HTML puro), sem build. Basta publicar a pasta.
+# Como usar:
+#   1. Em https://netlify.com → Add new site → arraste esta pasta,
+#      ou conecte o repo e aponte o "publish directory" para ela.
+#   2. TROQUE a URL do backend abaixo pela do seu serviço no Render.
+#
+# O proxy /api/* deixa o checkout na MESMA origem da API (sem CORS). O
+# assinar.html usa "/api/v1" automaticamente quando não está em localhost.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+  publish = "."
+
+# >>> TROQUE "lumin-pdv-api.onrender.com" pela URL real do seu Render <<<
+[[redirects]]
+  from = "/api/*"
+  to = "https://lumin-pdv-api.onrender.com/api/:splat"
+  status = 200
+  force = true

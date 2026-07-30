@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import PwaPrompt from './components/PwaPrompt';
 import AppShell from './components/layout/AppShell';
-import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PosicaoEstoque from './modules/estoque/pages/PosicaoEstoque';
@@ -55,13 +54,11 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Página de apresentação (marketing) — pública, na raiz */}
-          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           {/* PDV — tela cheia (sem AppShell), mas exige login (operador de caixa) */}
           <Route path="/pdv" element={<Guard><Pdv /></Guard>} />
-          {/* Sistema — layout com AppShell (sem path próprio; filhos são rotas absolutas) */}
-          <Route element={<Guard><AppShell /></Guard>}>
+          <Route path="/" element={<Guard><AppShell /></Guard>}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
 
             {/* Cadastros */}
