@@ -1,0 +1,144 @@
+/* ============================================================
+   LUMIN PDV — TEMA DA AQUISIÇÃO (etapa 1 do handoff)
+   ------------------------------------------------------------
+   Tokens, tipografia base e o brilho âmbar de assinatura das
+   telas públicas de aquisição (planos, demo, cadastro,
+   boas-vindas). Todos os valores vêm da seção 2 do
+   HANDOFF-lumin-pdv.md — não redesenhar, apenas converter.
+
+   IMPORTANTE: tudo é escopado sob `.lumin-root` para NÃO colidir
+   com o tema "Hetros glass" do ERP (que usa overrides globais com
+   !important em index.css). Nada aqui vaza para as telas legadas.
+
+   Fontes auto-hospedadas via @fontsource (bundle do Vite) — os
+   arquivos .woff2 são importados no componente LuminRoot.tsx, sem
+   <link> do Google Fonts em produção.
+   ============================================================ */
+
+.lumin-root {
+  /* Cores — seção 2 do handoff */
+  --ink: #0B0F2B;         /* fundo da página */
+  --panel: #151A3D;       /* cards padrão */
+  --panel-2: #1C2250;     /* card em destaque / resumo */
+  --line: #2A3068;        /* bordas e divisores */
+  --lumin: #FFC24B;       /* acento, CTA primário */
+  --lumin-deep: #C98A22;  /* acento secundário, marcadores */
+  --text: #E9EAF5;        /* texto principal */
+  --muted: #8E93BC;       /* texto de apoio */
+  --radius: 18px;         /* cards */
+
+  /* Famílias tipográficas (nomes do @fontsource variable) */
+  --font-display: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter Tight Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  min-height: 100%;
+  background-color: var(--ink);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark;
+}
+
+/* ---- Tipografia base ---------------------------------------- */
+.lumin-root h1,
+.lumin-root h2,
+.lumin-root h3,
+.lumin-root .lumin-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.lumin-root h4,
+.lumin-root h5,
+.lumin-root h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.lumin-root p { color: var(--text); }
+.lumin-root .lumin-muted { color: var(--muted); }
+
+/* Eyebrow / numeração de passos — utilitária monoespaçada */
+.lumin-root .lumin-eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lumin-deep);
+}
+
+/* Preços e números — mono com dígitos tabulares (seção 2) */
+.lumin-root .lumin-price,
+.lumin-root .lumin-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.lumin-root .lumin-price { font-weight: 700; }
+
+/* ---- Superfícies base --------------------------------------- */
+.lumin-root .lumin-panel {
+  background-color: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.lumin-root .lumin-panel-2 {
+  background-color: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+/* ---- Acento / CTA primário ---------------------------------- */
+.lumin-root .lumin-accent { color: var(--lumin); }
+.lumin-root a { color: var(--lumin); text-decoration: none; }
+.lumin-root a:hover { text-decoration: underline; }
+
+/* ---- Brilho âmbar radial de assinatura ----------------------
+   Seção 2: "o brilho âmbar radial atrás do conteúdo principal
+   (radial-gradient no ::before da seção)". Aplique a classe
+   `.lumin-glow` na seção que deve carregar a marca. */
+.lumin-root .lumin-glow { position: relative; isolation: isolate; }
+.lumin-root .lumin-glow::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 50% 0%,
+      rgba(255, 194, 75, 0.16) 0%,
+      rgba(255, 194, 75, 0.06) 38%,
+      transparent 70%);
+}
+
+/* ---- Foco visível (regra global da seção 1) ----------------- */
+.lumin-root :focus-visible {
+  outline: 2px solid var(--lumin);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---- Movimento reduzido (regra global da seção 1) ----------- */
+@media (prefers-reduced-motion: reduce) {
+  .lumin-root *,
+  .lumin-root *::before,
+  .lumin-root *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
