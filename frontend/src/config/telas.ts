@@ -31,80 +31,97 @@ export interface TelaDef {
   badgeColor?: string;
   /** Fora do menu lateral, mas ainda acessível por rota/permissão. */
   oculto?: boolean;
+  /**
+   * Item "pasta": NÃO é uma página (o `key` é sintético, não uma rota).
+   * Serve só de abridor — ao passar o mouse, o submenu lista as páginas
+   * reais de conteúdo. Cada página do submenu existe também como TelaDef
+   * própria (marcada `oculto`) para herdar rota/permissão.
+   */
+  pasta?: boolean;
   /** Sub-páginas exibidas num flyout ao passar o mouse (hover) sobre este item. */
   submenu?: SubTela[];
 }
 
 export const TELAS: TelaDef[] = [
-  // Operação de loja
+  // ── Operação ──────────────────────────────────────────────────────────
   { key: '/pdv', label: 'Caixa (PDV)', grupo: 'Operação', icon: ShoppingCart, highlight: true },
   { key: '/dashboard', label: 'Dashboard', grupo: 'Operação', icon: LayoutDashboard },
 
-  // A · Cadastros
-  { key: '/cadastros/produtos', label: 'Produtos & Código de Barras', grupo: 'A · Cadastros', icon: Package },
-  { key: '/cadastros/tabelas-preco', label: 'Preços & Ofertas', grupo: 'A · Cadastros', icon: Tags },
-  { key: '/cadastros/fornecedores', label: 'Fornecedores', grupo: 'A · Cadastros', icon: Building2 },
-  { key: '/cadastros/clientes', label: 'Clientes (fiado)', grupo: 'A · Cadastros', icon: Users },
-  { key: '/cadastros/filiais', label: 'Lojas', grupo: 'A · Cadastros', icon: Warehouse },
+  // ── Cadastros ─────────────────────────────────────────────────────────
+  { key: '/cadastros/produtos', label: 'Produtos & Código de Barras', grupo: 'Cadastros', icon: Package },
+  { key: '/cadastros/tabelas-preco', label: 'Preços & Ofertas', grupo: 'Cadastros', icon: Tags },
+  { key: '/cadastros/fornecedores', label: 'Fornecedores', grupo: 'Cadastros', icon: Building2 },
+  { key: '/cadastros/clientes', label: 'Clientes (fiado)', grupo: 'Cadastros', icon: Users },
+  { key: '/cadastros/filiais', label: 'Lojas', grupo: 'Cadastros', icon: Warehouse },
 
-  // B · Estoque / WMS
-  { key: '/wms/posicao', label: 'Posição de Estoque', grupo: 'B · Estoque / WMS', icon: Warehouse, submenu: [
+  // ── Estoque & Compras ─────────────────────────────────────────────────
+  // Pasta "Estoque" (abridor; não é rota). As páginas reais vêm logo abaixo (oculto).
+  { key: 'grupo:estoque', label: 'Estoque', grupo: 'Estoque & Compras', icon: Warehouse, pasta: true, submenu: [
+    { key: '/wms/posicao', label: 'Posição de Estoque', icon: Warehouse, hint: 'Saldo por produto/local' },
     { key: '/wms/movimentacoes', label: 'Movimentações', icon: BarChart3, hint: 'Entradas e saídas' },
     { key: '/wms/inventario', label: 'Inventário', icon: ClipboardList, hint: 'Contagem e ajustes' },
     { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', icon: BarChart3, hint: 'Físico vs. sistema' },
   ] },
-  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'B · Estoque / WMS', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
-  { key: '/wms/compras', label: 'Ordens de Compra', grupo: 'B · Estoque / WMS', icon: ShoppingCart },
-  { key: '/compras/app', label: 'App de Compras', grupo: 'B · Estoque / WMS', icon: ShoppingCart, highlight: true },
-  { key: '/wms/entradas', label: 'Entradas (XML NF-e)', grupo: 'B · Estoque / WMS', icon: ClipboardList },
-  { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'B · Estoque / WMS', icon: Undo2 },
-  { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'B · Estoque / WMS', icon: BarChart3 },
-  { key: '/wms/inventario', label: 'Inventário', grupo: 'B · Estoque / WMS', icon: ClipboardList },
-  { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', grupo: 'B · Estoque / WMS', icon: BarChart3, highlight: true },
+  { key: '/wms/posicao', label: 'Posição de Estoque', grupo: 'Estoque & Compras', icon: Warehouse, oculto: true },
+  { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'Estoque & Compras', icon: BarChart3, oculto: true },
+  { key: '/wms/inventario', label: 'Inventário', grupo: 'Estoque & Compras', icon: ClipboardList, oculto: true },
+  { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', grupo: 'Estoque & Compras', icon: BarChart3, oculto: true },
+  // Páginas soltas de Estoque & Compras
+  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque & Compras', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
+  { key: '/wms/compras', label: 'Ordens de Compra', grupo: 'Estoque & Compras', icon: ShoppingCart },
+  { key: '/compras/app', label: 'App de Compras', grupo: 'Estoque & Compras', icon: ShoppingCart, highlight: true },
+  { key: '/wms/entradas', label: 'Entradas (XML NF-e)', grupo: 'Estoque & Compras', icon: ClipboardList },
+  { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'Estoque & Compras', icon: Undo2 },
 
-  // D · Fiscal / DFe
-  { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'D · Fiscal', icon: Receipt, highlight: true, submenu: [
-    { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras de tributação' },
-  ] },
-  { key: '/fiscal/gestao', label: 'Gestão Fiscal', grupo: 'D · Fiscal', icon: Receipt, submenu: [
+  // ── Fiscal & Financeiro ───────────────────────────────────────────────
+  // Pasta "Fiscal"
+  { key: 'grupo:fiscal', label: 'Fiscal', grupo: 'Fiscal & Financeiro', icon: Receipt, pasta: true, submenu: [
+    { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', icon: Receipt, hint: 'Venda com nota' },
     { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', icon: Receipt, hint: 'Documentos autorizados' },
     { key: '/fiscal/painel', label: 'Painel de Vendas', icon: BarChart3, hint: 'Gráficos e indicadores' },
+    { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras de tributação' },
   ] },
-  { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'D · Fiscal', icon: FileText },
-  // Painel de Faturamento (dashboard de gráficos) fundido na Gestão Fiscal — fora do menu, acessível por rota.
-  { key: '/fiscal/painel', label: 'Painel de Faturamento', grupo: 'D · Fiscal / DFe', icon: BarChart3, oculto: true },
-  // NF-e Emitidas: fundida na Gestão Fiscal — fora do menu, mas acessível.
-  { key: '/fiscal/nfe', label: 'NF-e Emitidas', grupo: 'D · Fiscal / DFe', icon: Receipt, oculto: true },
+  { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'Fiscal & Financeiro', icon: Receipt, oculto: true },
+  { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal & Financeiro', icon: Receipt, oculto: true },
+  { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal & Financeiro', icon: BarChart3, oculto: true },
+  { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'Fiscal & Financeiro', icon: FileText, oculto: true },
+  // Hub que reúne NF-e + Painel — fora do menu, mas acessível por rota.
+  { key: '/fiscal/gestao', label: 'Gestão Fiscal', grupo: 'Fiscal & Financeiro', icon: Receipt, oculto: true },
 
-  // E · Financeiro
-  { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'E · Financeiro', icon: BarChart3, highlight: true, submenu: [
+  // Pasta "Financeiro"
+  { key: 'grupo:financeiro', label: 'Financeiro', grupo: 'Fiscal & Financeiro', icon: BarChart3, pasta: true, submenu: [
+    { key: '/financeiro/dre', label: 'DRE & Relatórios', icon: BarChart3, hint: 'Resultado do período' },
     { key: '/financeiro/controladoria', label: 'Controladoria', icon: Landmark, hint: 'Visão consolidada' },
     { key: '/financeiro/fluxo-caixa', label: 'Fluxo de Caixa', icon: Landmark, hint: 'Entradas e saídas' },
     { key: '/financeiro/tesouraria', label: 'Tesouraria', icon: Landmark, hint: 'Contas, caixa e conciliação' },
     { key: '/financeiro/receber', label: 'Contas a Receber', icon: DollarSign, hint: 'Títulos de clientes' },
     { key: '/financeiro/pagar', label: 'Contas a Pagar', icon: DollarSign, hint: 'Títulos a fornecedores' },
-    { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', icon: Repeat, hint: 'Aluguéis e assinaturas automáticas' },
+    { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', icon: Repeat, hint: 'Aluguéis e assinaturas' },
     { key: '/financeiro/plano-contas', label: 'Plano de Contas', icon: Landmark, hint: 'Categorias do DRE' },
   ] },
-  { key: '/financeiro/custos', label: 'Custos & Margem', grupo: 'E · Financeiro', icon: Coins },
-  { key: '/financeiro/plano-contas', label: 'Plano de Contas', grupo: 'E · Financeiro', icon: Landmark, oculto: true },
-  // Unificados dentro do hub DRE — fora do menu, mas acessíveis por rota.
-  { key: '/financeiro/controladoria', label: 'Controladoria (Financeiro)', grupo: 'E · Financeiro', icon: Landmark, oculto: true },
-  { key: '/financeiro/fluxo-caixa', label: 'Fluxo de Caixa', grupo: 'E · Financeiro', icon: Landmark, oculto: true },
-  { key: '/financeiro/tesouraria', label: 'Tesouraria', grupo: 'E · Financeiro', icon: Landmark, oculto: true },
-  { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', grupo: 'E · Financeiro', icon: Repeat, oculto: true },
-  { key: '/financeiro/receber', label: 'Contas a Receber', grupo: 'E · Financeiro', icon: DollarSign, oculto: true },
-  { key: '/financeiro/pagar', label: 'Contas a Pagar', grupo: 'E · Financeiro', icon: DollarSign, oculto: true },
+  { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'Fiscal & Financeiro', icon: BarChart3, oculto: true },
+  { key: '/financeiro/controladoria', label: 'Controladoria', grupo: 'Fiscal & Financeiro', icon: Landmark, oculto: true },
+  { key: '/financeiro/fluxo-caixa', label: 'Fluxo de Caixa', grupo: 'Fiscal & Financeiro', icon: Landmark, oculto: true },
+  { key: '/financeiro/tesouraria', label: 'Tesouraria', grupo: 'Fiscal & Financeiro', icon: Landmark, oculto: true },
+  { key: '/financeiro/receber', label: 'Contas a Receber', grupo: 'Fiscal & Financeiro', icon: DollarSign, oculto: true },
+  { key: '/financeiro/pagar', label: 'Contas a Pagar', grupo: 'Fiscal & Financeiro', icon: DollarSign, oculto: true },
+  { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', grupo: 'Fiscal & Financeiro', icon: Repeat, oculto: true },
+  { key: '/financeiro/plano-contas', label: 'Plano de Contas', grupo: 'Fiscal & Financeiro', icon: Landmark, oculto: true },
+  // Página solta
+  { key: '/financeiro/custos', label: 'Custos & Margem', grupo: 'Fiscal & Financeiro', icon: Coins },
 
-  // F · Gerencial
-  { key: '/gerencial/relatorios', label: 'Relatórios Gerenciais', grupo: 'F · Gerencial', icon: BarChart3 },
-  { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'F · Gerencial', icon: ShieldCheck },
-  { key: '/gerencial/usuarios', label: 'Usuários & Acessos', grupo: 'F · Gerencial', icon: Users, submenu: [
+  // ── Gerência ──────────────────────────────────────────────────────────
+  { key: '/gerencial/relatorios', label: 'Relatórios Gerenciais', grupo: 'Gerência', icon: BarChart3 },
+  // Pasta "Administração"
+  { key: 'grupo:admin', label: 'Administração', grupo: 'Gerência', icon: ShieldCheck, pasta: true, submenu: [
+    { key: '/gerencial/usuarios', label: 'Usuários & Acessos', icon: Users, hint: 'Perfis e permissões' },
     { key: '/gerencial/configuracoes', label: 'Configurações', icon: Settings, hint: 'Parâmetros do sistema' },
     { key: '/gerencial/auditoria', label: 'Logs de Auditoria', icon: ShieldCheck, hint: 'Trilha de eventos' },
   ] },
-  { key: '/gerencial/configuracoes', label: 'Configurações', grupo: 'F · Gerencial', icon: Settings },
-  { key: '/gerencial/assinatura', label: 'Minha Assinatura', grupo: 'F · Gerencial', icon: Gauge },
+  { key: '/gerencial/usuarios', label: 'Usuários & Acessos', grupo: 'Gerência', icon: Users, oculto: true },
+  { key: '/gerencial/configuracoes', label: 'Configurações', grupo: 'Gerência', icon: Settings, oculto: true },
+  { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'Gerência', icon: ShieldCheck, oculto: true },
+  { key: '/gerencial/assinatura', label: 'Minha Assinatura', grupo: 'Gerência', icon: Gauge },
 ];
 
 function agrupar(lista: TelaDef[]) {
@@ -114,10 +131,11 @@ function agrupar(lista: TelaDef[]) {
   }, {});
 }
 
-/** Todas as telas agrupadas — usado pela matriz de permissões (Usuários & Acessos). */
-export const TELAS_POR_GRUPO = agrupar(TELAS);
+/** Todas as telas reais agrupadas — usado pela matriz de permissões (Usuários & Acessos).
+ *  Pastas (abridores sintéticos) não entram: não são telas. */
+export const TELAS_POR_GRUPO = agrupar(TELAS.filter((t) => !t.pasta));
 
-/** Só os itens que aparecem no menu lateral (exclui ocultos). */
+/** Só os itens que aparecem no menu lateral (exclui ocultos; inclui pastas). */
 export const TELAS_MENU = TELAS.filter((t) => !t.oculto);
 
 /** Telas do menu agrupadas — usado pela sidebar (AppShell). */
@@ -160,6 +178,7 @@ export function podeAcao(
 export function rotaInicial(telas: string[] | undefined, role: string | undefined, telaInicial: string | null | undefined): string {
   if (role === 'ADMIN' || telas?.includes('*')) return telaInicial || '/dashboard';
   if (telaInicial && podeVerTela(telas, role, telaInicial)) return telaInicial;
-  const primeira = TELAS_MENU.find((t) => podeVerTela(telas, role, t.key));
+  // Busca a 1ª tela REAL permitida (ignora pastas sintéticas; considera até as ocultas).
+  const primeira = TELAS.find((t) => !t.pasta && podeVerTela(telas, role, t.key));
   return primeira?.key || '/dashboard';
 }

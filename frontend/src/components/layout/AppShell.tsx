@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight, LogOut, Building2, Menu, X, Circle,
 } from 'lucide-react';
 
-interface NavItem { to: string; icon: React.ElementType; label: string; badge?: string; badgeColor?: string; highlight?: boolean; submenu?: SubTela[] }
+interface NavItem { to: string; icon: React.ElementType; label: string; badge?: string; badgeColor?: string; highlight?: boolean; pasta?: boolean; submenu?: SubTela[] }
 interface NavGroup { group: string; items: NavItem[] }
 
 // Menu derivado da FONTE ÚNICA (config/telas.ts) — sem lista paralela.
@@ -22,6 +22,7 @@ const navigation: NavGroup[] = Object.entries(TELAS_MENU_POR_GRUPO).map(([group,
     badge: t.badge,
     badgeColor: t.badgeColor,
     highlight: t.highlight,
+    pasta: t.pasta,
     submenu: t.submenu,
   })),
 }));
@@ -35,6 +36,7 @@ export default function AppShell() {
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const sw = collapsed ? 'w-14' : 'w-56';
 
   // Alterna a barra e lembra da escolha na próxima visita.
@@ -52,11 +54,15 @@ export default function AppShell() {
     .map((g) => ({
       ...g,
       items: g.items
-        .filter((i) => podeVerTela(user?.telas, user?.role, i.to))
+        // Filtra os subitens do flyout pela permissão da própria rota.
         .map((i) => ({
           ...i,
           submenu: i.submenu?.filter((s) => podeVerTela(user?.telas, user?.role, s.key)),
-        })),
+        }))
+        // Pasta: aparece se tiver ao menos um filho visível. Página: pela permissão da rota.
+        .filter((i) => i.pasta
+          ? !!(i.submenu && i.submenu.length > 0)
+          : podeVerTela(user?.telas, user?.role, i.to)),
     }))
     .filter((g) => g.items.length > 0), [user?.telas, user?.role]);
 
@@ -126,8 +132,44 @@ export default function AppShell() {
               )}
               <div className="space-y-0.5">
                 {group.items.map((item) => {
-                  const { to, icon: Icon, label, badge, badgeColor, highlight, submenu } = item;
+                  const { to, icon: Icon, label, badge, badgeColor, highlight, pasta, submenu } = item;
                   const temSub = !!submenu?.length;
+
+                  // ── PASTA: abridor (não navega para si). Abre o flyout no hover
+                  //     e navega para o 1º filho ao clicar. Fica ativa quando uma
+                  //     das suas páginas está aberta.
+                  if (pasta) {
+                    const ativo = submenu?.some((s) => location.pathname === s.key) ?? false;
+                    return (
+                      <div key={to} onMouseEnter={(e) => abrirFlyout(e, item)} onMouseLeave={agendarFecho}>
+                        <button
+                          type="button"
+                          title={collapsed ? label : undefined}
+                          onClick={() => { const first = submenu?.[0]?.key; if (first) navigate(first); }}
+                          className={`
+                            w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-medium
+                            transition-all duration-300 ease-in-out group relative active:scale-[0.98]
+                            ${ativo
+                              ? 'bg-gradient-to-r from-amber-400/[0.18] to-amber-400/[0.04] text-amber-200 shadow-[inset_0_1px_0_0_rgba(255,194,75,0.15)]'
+                              : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100'}
+                            ${collapsed ? 'justify-center' : ''}
+                          `}
+                        >
+                          {ativo && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-amber-400 shadow-[0_0_8px_rgba(255,194,75,0.7)]" />}
+                          <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${ativo ? 'text-amber-300' : 'text-slate-500 group-hover:text-slate-200'}`} />
+                          {!collapsed && <span className="truncate">{label}</span>}
+                          {!collapsed && <ChevronRight className="ml-auto h-3 w-3 shrink-0 text-slate-600 group-hover:text-slate-300 transition-colors duration-200" />}
+                          {collapsed && <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-amber-400/70" />}
+                          {collapsed && (
+                            <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151A3D]/95 backdrop-blur-xl border border-white/[0.08] text-slate-200 text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
+                              {label}
+                            </span>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  }
+
                   return (
                   <div key={to} onMouseEnter={(e) => abrirFlyout(e, item)} onMouseLeave={agendarFecho}>
                   <NavLink
