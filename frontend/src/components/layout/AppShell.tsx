@@ -6,7 +6,7 @@ import { podeVerTela, rotaInicial, TELAS_MENU_POR_GRUPO, type SubTela } from '..
 import { FeedbackHost } from '../ui/feedback';
 import NotificacoesSino from './NotificacoesSino';
 import {
-  ChevronLeft, ChevronRight, LogOut, Building2, Menu, X, Circle, ShoppingCart,
+  ChevronLeft, ChevronRight, LogOut, Building2, Menu, X, Circle,
 } from 'lucide-react';
 
 interface NavItem { to: string; icon: React.ElementType; label: string; badge?: string; badgeColor?: string; highlight?: boolean; submenu?: SubTela[] }
@@ -29,11 +29,22 @@ const navigation: NavGroup[] = Object.entries(TELAS_MENU_POR_GRUPO).map(([group,
 interface FlyoutState { label: string; items: SubTela[]; top: number; left: number }
 
 export default function AppShell() {
-  const [collapsed,   setCollapsed]   = useState(false);
+  const [collapsed,   setCollapsed]   = useState(() => {
+    try { return localStorage.getItem('lumin_sidebar_collapsed') === '1'; } catch { return false; }
+  });
   const [mobileOpen,  setMobileOpen]  = useState(false);
-  const { user, filialAtiva, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const sw = collapsed ? 'w-14' : 'w-56';
+
+  // Alterna a barra e lembra da escolha na próxima visita.
+  const toggleCollapsed = useCallback(() => {
+    setCollapsed((c) => {
+      const nv = !c;
+      try { localStorage.setItem('lumin_sidebar_collapsed', nv ? '1' : '0'); } catch { /* ignore */ }
+      return nv;
+    });
+  }, []);
 
   // Filtra o menu pelas telas que o perfil do usuário pode ver.
   // Também filtra os subitens do flyout pela permissão (herdam a permissão da própria rota).
@@ -70,12 +81,12 @@ export default function AppShell() {
   }, []);
 
   return (
-    <div className="relative flex h-screen overflow-hidden" style={{ backgroundColor: '#0B0F17' }}>
+    <div className="relative flex h-screen overflow-hidden" style={{ backgroundColor: '#0B0F2B' }}>
       {/* Glow ambiente — profundidade no canvas (não intercepta cliques) */}
       <div className="pointer-events-none fixed inset-0 z-0" aria-hidden>
-        <div className="absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full bg-sky-500/[0.06] blur-[140px] animate-aurora" />
-        <div className="absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-indigo-500/[0.05] blur-[140px] animate-aurora-slow" />
-        <div className="absolute top-1/3 right-1/4 h-[360px] w-[360px] rounded-full bg-violet-500/[0.035] blur-[150px] animate-aurora" />
+        <div className="absolute -top-40 -left-40 h-[480px] w-[480px] rounded-full bg-amber-500/[0.06] blur-[140px] animate-aurora" />
+        <div className="absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-amber-700/[0.05] blur-[140px] animate-aurora-slow" />
+        <div className="absolute top-1/3 right-1/4 h-[360px] w-[360px] rounded-full bg-amber-400/[0.035] blur-[150px] animate-aurora" />
       </div>
 
       {mobileOpen && (
@@ -85,26 +96,24 @@ export default function AppShell() {
       {/* Sidebar — placa de vidro */}
       <aside className={`fixed lg:relative z-50 h-full flex flex-col bg-white/[0.02] backdrop-blur-xl border-r border-white/[0.05] transition-all duration-300 ease-in-out shrink-0 ${sw} ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
-        {/* Logo */}
-        <div className={`flex items-center border-b border-white/[0.05] h-12 px-3 shrink-0 ${collapsed ? 'justify-center' : 'justify-between'}`}>
-          {!collapsed && (
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/15 shrink-0">
-                <ShoppingCart className="h-4 w-4 text-sky-400" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-white text-xs font-bold leading-none truncate tracking-tight">Lumin PDV</p>
-                <p className="text-slate-500 text-[10px] truncate">{filialAtiva?.nome || '—'}</p>
-              </div>
-            </div>
-          )}
-          {collapsed && (
-            <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-sky-500/15">
-              <ShoppingCart className="h-4 w-4 text-sky-400" />
-            </div>
-          )}
-          <button onClick={() => setCollapsed(!collapsed)} className="hidden lg:flex h-5 w-5 items-center justify-center rounded text-slate-500 hover:text-slate-200 hover:bg-white/[0.06] transition-all duration-300 shrink-0 active:scale-[0.9]">
-            {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+        {/* Logo — passar o mouse revela o controle de abrir/fechar; ao sair, volta a ser a logo. */}
+        <div className="group/logo relative flex items-center justify-center border-b border-white/[0.05] h-12 px-3 shrink-0">
+          <button
+            onClick={toggleCollapsed}
+            title={collapsed ? 'Abrir menu' : 'Recolher menu'}
+            aria-label={collapsed ? 'Abrir menu' : 'Recolher menu'}
+            className="relative flex h-full w-full items-center justify-center focus:outline-none"
+          >
+            {/* Wordmark Lumin (expandida) / L (recolhida) — padrão */}
+            <span className={`font-logo text-amber-400 leading-none transition-opacity duration-200 group-hover/logo:opacity-0 ${collapsed ? 'text-2xl' : 'text-xl'}`}>
+              {collapsed ? 'L' : 'Lumin'}
+            </span>
+            {/* Controle de abrir/fechar — aparece no lugar da logo ao passar o mouse */}
+            <span className="absolute inset-0 flex items-center justify-center gap-1.5 text-slate-200 opacity-0 group-hover/logo:opacity-100 transition-opacity duration-200">
+              {collapsed
+                ? <ChevronRight className="h-4 w-4" />
+                : (<><ChevronLeft className="h-4 w-4" /><span className="text-[11px] font-medium">Recolher</span></>)}
+            </span>
           </button>
         </div>
 
@@ -128,7 +137,7 @@ export default function AppShell() {
                       flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-medium
                       transition-all duration-300 ease-in-out group relative active:scale-[0.98]
                       ${isActive
-                        ? 'bg-gradient-to-r from-sky-400/[0.18] to-sky-400/[0.04] text-sky-200 shadow-[inset_0_1px_0_0_rgba(56,189,248,0.15)]'
+                        ? 'bg-gradient-to-r from-amber-400/[0.18] to-amber-400/[0.04] text-amber-200 shadow-[inset_0_1px_0_0_rgba(255,194,75,0.15)]'
                         : highlight
                           ? 'text-amber-300/90 hover:bg-white/[0.05]'
                           : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100'
@@ -139,8 +148,8 @@ export default function AppShell() {
                     {({ isActive }) => (
                       <>
                         {/* Indicador cirúrgico de foco */}
-                        {isActive && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.7)]" />}
-                        <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${isActive ? 'text-sky-300' : highlight && !isActive ? 'text-amber-300/80' : 'text-slate-500 group-hover:text-slate-200'}`} />
+                        {isActive && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-amber-400 shadow-[0_0_8px_rgba(255,194,75,0.7)]" />}
+                        <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${isActive ? 'text-amber-300' : highlight && !isActive ? 'text-amber-300/80' : 'text-slate-500 group-hover:text-slate-200'}`} />
                         {!collapsed && <span className="truncate">{label}</span>}
                         {badge && !collapsed && (
                           <span className={`ml-auto h-3.5 w-3.5 rounded-full text-[8px] font-bold text-white flex items-center justify-center ${badgeColor}`}>
@@ -152,10 +161,10 @@ export default function AppShell() {
                           <ChevronRight className={`h-3 w-3 shrink-0 text-slate-600 group-hover:text-slate-300 transition-colors duration-200 ${badge ? '' : 'ml-auto'}`} />
                         )}
                         {temSub && collapsed && (
-                          <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-sky-400/70" />
+                          <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-amber-400/70" />
                         )}
                         {collapsed && (
-                          <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#0E141F]/90 backdrop-blur-xl border border-white/[0.08] text-slate-200 text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
+                          <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#151A3D]/95 backdrop-blur-xl border border-white/[0.08] text-slate-200 text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
                             {label}
                           </span>
                         )}
@@ -175,7 +184,7 @@ export default function AppShell() {
           {!collapsed ? (
             <div>
               <div className="flex items-center gap-2 px-1 mb-1.5">
-                <div className="h-6 w-6 rounded-full bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-300 text-[10px] font-bold shrink-0">
+                <div className="h-6 w-6 rounded-full bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 text-[10px] font-bold shrink-0">
                   {user?.nome?.[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -222,7 +231,7 @@ export default function AppShell() {
       {/* Flyout de submenu — abre ao passar o mouse sobre um item com sub-páginas */}
       {flyout && createPortal(
         <div
-          className="fixed z-[60] w-60 rounded-xl border border-white/[0.09] bg-[#0E141F]/95 backdrop-blur-2xl shadow-[0_16px_48px_0_rgba(0,0,0,0.55)] py-1.5 animate-fade-in"
+          className="fixed z-[60] w-60 rounded-xl border border-white/[0.09] bg-[#151A3D]/95 backdrop-blur-2xl shadow-[0_16px_48px_0_rgba(0,0,0,0.55)] py-1.5 animate-fade-in"
           style={{ top: Math.min(flyout.top, window.innerHeight - (flyout.items.length * 46 + 56)), left: flyout.left }}
           onMouseEnter={cancelarFecho}
           onMouseLeave={agendarFecho}
@@ -235,11 +244,11 @@ export default function AppShell() {
                 key={s.key}
                 to={s.key}
                 onClick={() => setFlyout(null)}
-                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-sky-400/[0.12] text-sky-200' : 'text-slate-300 hover:bg-white/[0.06] hover:text-slate-100'}`}
+                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-amber-400/[0.12] text-amber-200' : 'text-slate-300 hover:bg-white/[0.06] hover:text-slate-100'}`}
               >
                 {({ isActive }) => (
                   <>
-                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-sky-300' : 'text-slate-500'}`} />
+                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-amber-300' : 'text-slate-500'}`} />
                     <span className="min-w-0">
                       <span className="block font-medium truncate">{s.label}</span>
                       {s.hint && <span className="block text-[10px] text-slate-500 truncate">{s.hint}</span>}
@@ -272,7 +281,7 @@ function FilialSelector() {
     <div className="flex items-center gap-1.5">
       <Building2 className="h-3.5 w-3.5 text-slate-500" />
       <select
-        className="text-xs rounded-lg px-2 py-1 text-slate-300 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] focus:outline-none focus:border-sky-400/50 transition-all duration-300 cursor-pointer"
+        className="text-xs rounded-lg px-2 py-1 text-slate-300 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] focus:outline-none focus:border-amber-400/50 transition-all duration-300 cursor-pointer"
         value={filialAtiva?.id || ''}
         onChange={(e) => { const f = filiais?.find((f) => f.id === e.target.value); if (f) setFilialAtiva(f); }}
       >

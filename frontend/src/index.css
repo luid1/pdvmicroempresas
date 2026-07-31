@@ -9,7 +9,7 @@
    ============================================================ */
 
 @layer base {
-  html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  html { font-family: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
   body { @apply antialiased text-sm; }
 
   /* Microinteração tátil global: todo botão responde ao toque */
@@ -46,10 +46,10 @@
     box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.44), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
   }
 
-  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-sky-600 text-white rounded-lg text-xs font-semibold hover:bg-sky-500 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-sky-900/30 active:scale-[0.98]; }
+  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-amber-400 text-slate-900 rounded-lg text-xs font-semibold hover:bg-amber-300 active:bg-amber-500 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-amber-900/30 active:scale-[0.98]; }
   .btn-secondary { @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 active:scale-[0.98]; }
   .btn-danger { @apply inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-500 transition-all duration-300 active:scale-[0.98]; }
-  .input { @apply w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/30 focus:border-sky-400 placeholder:text-gray-400; }
+  .input { @apply w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/25 focus:border-amber-400 placeholder:text-gray-400; }
   .label { @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5; }
   .th { @apply text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider; }
   .td { @apply px-4 py-3; }
@@ -129,9 +129,11 @@
   animation: loginPan 24s ease-in-out infinite;
 }
 
-/* Fonte de destaque (mesma da landing Lumin PDV) */
-.font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -0.02em; }
-.font-plex-mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+/* Fontes de destaque (mesmas da landing Lumin PDV) */
+.font-display { font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif; letter-spacing: -0.02em; }
+.font-plex-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+/* Logo — usada só no wordmark "Lumin" / "L" */
+.font-logo { font-family: 'Comfortaa', 'Bricolage Grotesque', sans-serif; font-weight: 700; letter-spacing: 0.01em; }
 
 @keyframes orbFloat1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(14%,10%) scale(1.18); } 66% { transform: translate(-10%,16%) scale(0.9); } }
 @keyframes orbFloat2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-16%,-12%) scale(1.22); } }
@@ -161,23 +163,54 @@
    canvas espacial. Telas já dark (slate/hex) não são afetadas.
    A DANFE/impressos abrem em janela própria (ficam brancos).
    ============================================================ */
-:root { color-scheme: dark; }
-body { background-color: #0b0f17 !important; color: #e2e8f0 !important; }
+:root {
+  color-scheme: dark;
 
-/* Superfícies (paleta espacial) */
-.bg-white { background-color: #0e141f !important; }
-.bg-gray-50, .bg-slate-50 { background-color: #0b0f17 !important; }
-.bg-gray-100, .bg-slate-100 { background-color: #131b29 !important; }
-.bg-gray-200 { background-color: #182133 !important; }
+  /* ── Tokens de marca (navy + âmbar) — alinhados ao site Lumin ────────── */
+  --ink: #0B0F2B;        /* canvas/fundo */
+  --panel: #151A3D;      /* cards/painéis */
+  --panel-2: #1C2250;    /* elevado */
+  --line: #2A3068;       /* bordas/linhas */
+  --lumin: #FFC24B;      /* acento (marca) */
+  --lumin-deep: #C98A22; /* acento hover/gradiente */
+  --text: #E9EAF5;       /* texto principal */
+  --muted: #8E93BC;      /* texto secundário */
+
+  /* ── Cores semânticas (papéis fixos) ────────────────────────────────── */
+  --ok: #34D399;         /* sucesso (verde) */
+  --err: #F43F5E;        /* erro (vermelho) */
+  --warn: #FFC24B;       /* atenção (âmbar) */
+
+  /* ── Forma e sombra ─────────────────────────────────────────────────── */
+  --radius-card: 18px;
+  --radius-control: 12px;
+  --shadow-card: 0 8px 32px rgba(0,0,0,0.37), inset 0 1px 0 rgba(255,255,255,0.06);
+  --shadow-elevated: 0 14px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+
+  /* ── Paleta de gráficos (âmbar principal + apoio; verde/vermelho só semânticos) */
+  --chart-1: #FFC24B;
+  --chart-2: #C98A22;
+  --chart-3: #8E93BC;
+  --chart-4: #6366F1;
+  --chart-5: #34D399;
+  --chart-6: #F43F5E;
+}
+body { background-color: var(--ink) !important; color: var(--text) !important; }
+
+/* Superfícies (paleta navy do site) */
+.bg-white { background-color: var(--panel) !important; }
+.bg-gray-50, .bg-slate-50 { background-color: var(--ink) !important; }
+.bg-gray-100, .bg-slate-100 { background-color: var(--panel) !important; }
+.bg-gray-200 { background-color: var(--panel-2) !important; }
 
 /* Hovers claros → escuros */
-.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover { background-color: #131b29 !important; }
-.hover\:bg-gray-100:hover, .hover\:bg-slate-100:hover { background-color: #182133 !important; }
+.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover { background-color: var(--panel) !important; }
+.hover\:bg-gray-100:hover, .hover\:bg-slate-100:hover { background-color: var(--panel-2) !important; }
 
 /* Textos */
-.text-gray-900, .text-slate-900, .text-gray-800, .text-slate-800 { color: #e2e8f0 !important; }
+.text-gray-900, .text-slate-900, .text-gray-800, .text-slate-800 { color: var(--text) !important; }
 .text-gray-700, .text-slate-700, .text-gray-600, .text-slate-600 { color: #cbd5e1 !important; }
-.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 { color: #94a3b8 !important; }
+.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 { color: var(--muted) !important; }
 
 /* Bordas de cristal */
 .border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200 { border-color: rgba(255, 255, 255, 0.06) !important; }
@@ -185,24 +218,24 @@ body { background-color: #0b0f17 !important; color: #e2e8f0 !important; }
 
 /* Inputs / selects / textarea */
 input, select, textarea { color-scheme: dark; }
-input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: #131b29; color: #e2e8f0; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: var(--panel); color: var(--text); }
 input::placeholder, textarea::placeholder { color: #64748b; }
 
 /* Componentes utilitários legados */
 .btn-secondary { background-color: rgba(255, 255, 255, 0.04) !important; color: #cbd5e1 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
 .btn-secondary:hover { background-color: rgba(255, 255, 255, 0.08) !important; }
-.input { background-color: #131b29 !important; color: #e2e8f0 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
-.th { color: #94a3b8 !important; }
+.input { background-color: var(--panel) !important; color: var(--text) !important; border: 1px solid var(--line) !important; }
+.th { color: var(--muted) !important; }
 
 /* Tabelas legadas: linhas respiram com hover de vidro */
 tbody tr { transition: background-color 0.2s ease-out; }
 tbody tr:hover { background-color: rgba(255, 255, 255, 0.025) !important; }
 
-/* Foco de input mais presente — anel sky sutil ao redor do vidro */
+/* Foco de input mais presente — anel âmbar sutil ao redor do vidro */
 .input:focus, input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
   outline: none;
-  border-color: rgba(56, 189, 248, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.14) !important;
+  border-color: rgba(255, 194, 75, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(255, 194, 75, 0.16) !important;
 }
 
 /* ============================================================
@@ -211,10 +244,10 @@ tbody tr:hover { background-color: rgba(255, 255, 255, 0.025) !important; }
    ============================================================ */
 select { color-scheme: dark; }
 option, optgroup {
-  background-color: #0e141f !important;
-  color: #e2e8f0 !important;
+  background-color: var(--panel) !important;
+  color: var(--text) !important;
 }
-optgroup { color: #94a3b8 !important; }
+optgroup { color: var(--muted) !important; }
 
 /* ============================================================
    TINTS CLARAS LEGADAS → versões escuras. Garante que nenhuma tela
@@ -227,10 +260,10 @@ optgroup { color: #94a3b8 !important; }
 .bg-yellow-50  { background-color: rgba(234,179,8,0.08) !important; }
 .bg-yellow-100 { background-color: rgba(234,179,8,0.12) !important; }
 .bg-yellow-200 { background-color: rgba(234,179,8,0.16) !important; }
-.bg-blue-50   { background-color: rgba(56,189,248,0.06) !important; }
-.bg-blue-100  { background-color: rgba(56,189,248,0.14) !important; }
-.bg-sky-50    { background-color: rgba(56,189,248,0.06) !important; }
-.bg-sky-100   { background-color: rgba(56,189,248,0.14) !important; }
+.bg-blue-50   { background-color: rgba(255,194,75,0.08) !important; }
+.bg-blue-100  { background-color: rgba(255,194,75,0.15) !important; }
+.bg-sky-50    { background-color: rgba(255,194,75,0.08) !important; }
+.bg-sky-100   { background-color: rgba(255,194,75,0.15) !important; }
 .bg-green-50  { background-color: rgba(16,185,129,0.08) !important; }
 .bg-green-100 { background-color: rgba(16,185,129,0.14) !important; }
 .bg-emerald-50  { background-color: rgba(16,185,129,0.08) !important; }
@@ -251,8 +284,8 @@ optgroup { color: #94a3b8 !important; }
 .bg-indigo-100 { background-color: rgba(99,102,241,0.14) !important; }
 
 /* Textos escuros feitos para tints claras → clareia p/ contraste no dark */
-.text-blue-700, .text-blue-800, .text-blue-900 { color: #7dd3fc !important; }
-.text-sky-700, .text-sky-800 { color: #7dd3fc !important; }
+.text-blue-700, .text-blue-800, .text-blue-900 { color: #fcd34d !important; }
+.text-sky-700, .text-sky-800 { color: #fcd34d !important; }
 .text-green-700, .text-green-800, .text-green-900 { color: #6ee7b7 !important; }
 .text-emerald-700, .text-emerald-800 { color: #6ee7b7 !important; }
 .text-red-700, .text-red-800, .text-red-900 { color: #fda4af !important; }
