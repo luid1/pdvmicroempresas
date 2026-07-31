@@ -168,7 +168,7 @@ export default function DashboardPage() {
   const abrir = (key: string): DetalheCard | null => {
     switch (key) {
       case 'faturamento': return {
-        icon: TrendingUp, tone: 'emerald', titulo: 'Faturamento', valorPrincipal: R$c(f?.faturamento ?? 0),
+        icon: TrendingUp, tone: 'amber', titulo: 'Faturamento', valorPrincipal: R$c(f?.faturamento ?? 0),
         subtitulo: d?.periodoLabel, delta: f?.faturamentoDelta,
         serie: d?.serieFaturamento,
         linhas: [
@@ -191,7 +191,7 @@ export default function DashboardPage() {
         },
       };
       case 'ticket': return {
-        icon: Receipt, tone: 'teal', titulo: 'Ticket Médio', valorPrincipal: R$c(f?.ticketMedio ?? 0), subtitulo: 'valor médio por venda',
+        icon: Receipt, tone: 'amber', titulo: 'Ticket Médio', valorPrincipal: R$c(f?.ticketMedio ?? 0), subtitulo: 'valor médio por venda',
         linhas: [
           { label: 'Faturamento', valor: R$c(f?.faturamento ?? 0) },
           { label: 'Vendas', valor: num(f?.vendas ?? 0) },
@@ -209,7 +209,7 @@ export default function DashboardPage() {
         rota: '/financeiro/dre', verMaisLabel: 'Ver DRE',
       };
       case 'receber': return {
-        icon: Wallet, tone: 'blue', titulo: 'A Receber', valorPrincipal: R$c(f?.receber.total ?? 0), subtitulo: `${num(f?.receber.qtd ?? 0)} títulos`,
+        icon: Wallet, tone: 'amber', titulo: 'A Receber', valorPrincipal: R$c(f?.receber.total ?? 0), subtitulo: `${num(f?.receber.qtd ?? 0)} títulos`,
         linhas: [...agingLinhas(f?.receber), { label: 'Inadimplência', valor: pct(f?.inadimplenciaPct ?? 0), cor: (f?.inadimplenciaPct ?? 0) > 0 ? 'text-rose-400' : 'text-emerald-400' }],
         rota: '/financeiro/receber', verMaisLabel: 'Ver contas a receber',
         atalhos: [{ label: 'Fluxo de caixa', rota: '/financeiro/fluxo-caixa' }],
@@ -247,7 +247,7 @@ export default function DashboardPage() {
         rota: '/financeiro/fluxo-caixa', verMaisLabel: 'Ver fluxo de caixa',
       };
       case 'itens': return {
-        icon: Package, tone: 'sky', titulo: 'Itens c/ Saldo', valorPrincipal: num(e?.itensComSaldo ?? 0), subtitulo: `de ${num(e?.produtosAtivos ?? 0)} ativos`,
+        icon: Package, tone: 'amber', titulo: 'Itens c/ Saldo', valorPrincipal: num(e?.itensComSaldo ?? 0), subtitulo: `de ${num(e?.produtosAtivos ?? 0)} ativos`,
         linhas: [
           { label: 'Produtos ativos', valor: num(e?.produtosAtivos ?? 0) },
           { label: 'Valor do estoque', valor: R$c(e?.valorEstoque ?? 0) },
@@ -255,7 +255,7 @@ export default function DashboardPage() {
         rota: '/wms/posicao', verMaisLabel: 'Ver posição de estoque',
       };
       case 'valorEstoque': return {
-        icon: CircleDollarSign, tone: 'emerald', titulo: 'Valor do Estoque', valorPrincipal: R$c(e?.valorEstoque ?? 0), subtitulo: 'a custo médio',
+        icon: CircleDollarSign, tone: 'amber', titulo: 'Valor do Estoque', valorPrincipal: R$c(e?.valorEstoque ?? 0), subtitulo: 'a custo médio',
         linhas: [
           { label: 'Itens c/ saldo', valor: num(e?.itensComSaldo ?? 0) },
           { label: 'Produtos ativos', valor: num(e?.produtosAtivos ?? 0) },
@@ -309,7 +309,7 @@ export default function DashboardPage() {
         },
       };
       case 'movimentacoes': return {
-        icon: Activity, tone: 'indigo', titulo: 'Movimentações', valorPrincipal: num(d?.kpis.movimentacoesHoje ?? 0), subtitulo: 'no período',
+        icon: Activity, tone: 'amber', titulo: 'Movimentações', valorPrincipal: num(d?.kpis.movimentacoesHoje ?? 0), subtitulo: 'no período',
         linhas: [
           { label: 'Perdas/quebras', valor: R$c(e?.perdaValor ?? 0), cor: (e?.perdaValor ?? 0) ? 'text-rose-400' : undefined },
         ],
@@ -320,20 +320,20 @@ export default function DashboardPage() {
   };
 
   const abrirCliente = (c: { clienteId: string; nome: string; valor: number; pedidos: number }): DetalheCard => ({
-    icon: Users, tone: 'violet', titulo: c.nome, valorPrincipal: R$c(c.valor), subtitulo: 'faturamento no período',
+    icon: Users, tone: 'amber', titulo: c.nome, valorPrincipal: R$c(c.valor), subtitulo: 'faturamento no período',
     linhas: [{ label: 'Pedidos', valor: num(c.pedidos) }, { label: 'Ticket médio', valor: R$c(c.pedidos ? c.valor / c.pedidos : 0) }],
     rota: '/fiscal/gestao', verMaisLabel: 'Ver gestão fiscal',
   });
 
   const abrirProduto = (p: { codigo: string; descricao: string; qtd: number; custo: number }): DetalheCard => ({
-    icon: Boxes, tone: 'teal', titulo: p.descricao, valorPrincipal: R$c(p.custo), subtitulo: `Código ${p.codigo}`,
+    icon: Boxes, tone: 'amber', titulo: p.descricao, valorPrincipal: R$c(p.custo), subtitulo: `Código ${p.codigo}`,
     linhas: [{ label: 'Quantidade (saída)', valor: kg(p.qtd) }, { label: 'Valor (custo)', valor: R$c(p.custo) }],
     rota: '/wms/posicao', verMaisLabel: 'Ver posição de estoque',
   });
 
   const abrirStatus = (s: { status: string; label: string; valor: number }): DetalheCard => ({
-    icon: PackageCheck, tone: 'sky', titulo: `Pedidos — ${s.label}`, valorPrincipal: num(s.valor), subtitulo: 'pedidos neste status',
-    linhas: Object.entries(d?.pedidosPorStatus || {}).filter(([, v]) => v > 0).map(([k, v]) => ({ label: STATUS_INFO[k]?.label || k, valor: num(v), cor: k === s.status ? 'text-sky-300' : undefined })),
+    icon: PackageCheck, tone: 'amber', titulo: `Pedidos — ${s.label}`, valorPrincipal: num(s.valor), subtitulo: 'pedidos neste status',
+    linhas: Object.entries(d?.pedidosPorStatus || {}).filter(([, v]) => v > 0).map(([k, v]) => ({ label: STATUS_INFO[k]?.label || k, valor: num(v), cor: k === s.status ? 'text-amber-300' : undefined })),
     rota: STATUS_INFO[s.status]?.rota || '/logistica/pedidos', verMaisLabel: 'Ver pedidos',
     listaTitulo: `Pedidos — ${s.label}`, listaVazia: 'Nenhum pedido neste status.',
     carregarLista: async (): Promise<DetalheRegistro[]> => {
@@ -348,7 +348,7 @@ export default function DashboardPage() {
   });
 
   const abrirFluxo = (item: { titulo: string; valor: string; rota: string }): DetalheCard => ({
-    icon: Activity, tone: 'sky', titulo: item.titulo, valorPrincipal: item.valor, subtitulo: 'fluxo do dia',
+    icon: Activity, tone: 'amber', titulo: item.titulo, valorPrincipal: item.valor, subtitulo: 'fluxo do dia',
     linhas: [
       { label: 'Entradas recebidas', valor: num(d?.fluxoDia.entradas ?? 0) },
       { label: 'Pedidos faturados', valor: num(d?.fluxoDia.faturados ?? 0) },
@@ -401,12 +401,12 @@ export default function DashboardPage() {
       {/* ═══ FINANCEIRO ═══ */}
       <Secao icon={CircleDollarSign} titulo={`Financeiro · ${d?.periodoLabel || ''}`} cor="#34d399">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Kpi icon={TrendingUp} label="Faturamento" value={R$c(f?.faturamento ?? 0)} tone="emerald" delta={f?.faturamentoDelta}
+          <Kpi icon={TrendingUp} label="Faturamento" value={R$c(f?.faturamento ?? 0)} tone="amber" delta={f?.faturamentoDelta}
             sub={`${num(f?.vendas ?? 0)} vendas`} onClick={() => setDetalhe(abrir('faturamento'))} />
-          <Kpi icon={Receipt} label="Ticket Médio" value={R$c(f?.ticketMedio ?? 0)} tone="teal" sub="por venda" onClick={() => setDetalhe(abrir('ticket'))} />
+          <Kpi icon={Receipt} label="Ticket Médio" value={R$c(f?.ticketMedio ?? 0)} tone="amber" sub="por venda" onClick={() => setDetalhe(abrir('ticket'))} />
           <Kpi icon={Percent} label="Margem Bruta" value={pct(f?.margemBruta ?? 0)} tone={(f?.margemBruta ?? 0) >= 0 ? 'emerald' : 'rose'}
             sub="do DRE realizado" onClick={() => setDetalhe(abrir('margem'))} />
-          <Kpi icon={Wallet} label="A Receber" value={R$c(f?.receber.total ?? 0)} tone="blue"
+          <Kpi icon={Wallet} label="A Receber" value={R$c(f?.receber.total ?? 0)} tone="amber"
             sub={<span className={f?.receber.vencido ? 'text-rose-400' : ''}>{f?.receber.vencido ? `${R$c(f.receber.vencido)} vencido` : `${num(f?.receber.qtd ?? 0)} títulos`}</span>}
             onClick={() => setDetalhe(abrir('receber'))} />
           <Kpi icon={Landmark} label="A Pagar" value={R$c(f?.pagar.total ?? 0)} tone="amber"
@@ -483,13 +483,13 @@ export default function DashboardPage() {
       {/* ═══ ESTOQUE / WMS ═══ */}
       <Secao icon={Boxes} titulo="Estoque & WMS" cor="#FFC24B">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Kpi icon={Package} label="Itens c/ Saldo" value={num(e?.itensComSaldo ?? 0)} tone="sky" sub={`de ${num(e?.produtosAtivos ?? 0)} ativos`} onClick={() => setDetalhe(abrir('itens'))} />
-          <Kpi icon={CircleDollarSign} label="Valor do Estoque" value={R$c(e?.valorEstoque ?? 0)} tone="emerald" sub="a custo médio" onClick={() => setDetalhe(abrir('valorEstoque'))} />
+          <Kpi icon={Package} label="Itens c/ Saldo" value={num(e?.itensComSaldo ?? 0)} tone="amber" sub={`de ${num(e?.produtosAtivos ?? 0)} ativos`} onClick={() => setDetalhe(abrir('itens'))} />
+          <Kpi icon={CircleDollarSign} label="Valor do Estoque" value={R$c(e?.valorEstoque ?? 0)} tone="amber" sub="a custo médio" onClick={() => setDetalhe(abrir('valorEstoque'))} />
           <Kpi icon={AlertTriangle} label="Validade" value={num((e?.validade.vencido ?? 0) + (e?.validade.ate3 ?? 0) + (e?.validade.ate7 ?? 0))} tone={(e?.validade.vencido ?? 0) ? 'rose' : 'amber'}
             sub={`${e?.validade.vencido ?? 0} venc · ${e?.validade.ate3 ?? 0} em 3d`} onClick={() => setDetalhe(abrir('validade'))} />
           <Kpi icon={TrendingDown} label="Perdas/Quebras" value={R$c(e?.perdaValor ?? 0)} tone={(e?.perdaValor ?? 0) ? 'rose' : 'slate'} sub={kg(e?.perdaQtd ?? 0)} onClick={() => setDetalhe(abrir('perdas'))} />
           <Kpi icon={ShoppingCart} label="Ruptura" value={num(e?.rupturas ?? 0)} tone={(e?.rupturas ?? 0) ? 'amber' : 'slate'} sub="produtos zerados" onClick={() => setDetalhe(abrir('ruptura'))} />
-          <Kpi icon={Activity} label="Movimentações" value={num(d?.kpis.movimentacoesHoje ?? 0)} tone="indigo" sub="no período" onClick={() => setDetalhe(abrir('movimentacoes'))} />
+          <Kpi icon={Activity} label="Movimentações" value={num(d?.kpis.movimentacoesHoje ?? 0)} tone="amber" sub="no período" onClick={() => setDetalhe(abrir('movimentacoes'))} />
         </div>
       </Secao>
 
@@ -513,7 +513,7 @@ export default function DashboardPage() {
         {/* Top clientes */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2"><Users className="h-4 w-4 text-violet-400" /> Top clientes</h3>
+            <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2"><Users className="h-4 w-4 text-amber-400" /> Top clientes</h3>
             <span className="text-[10px] text-slate-500">por faturamento</span>
           </div>
           <div className="space-y-2.5">
@@ -526,7 +526,7 @@ export default function DashboardPage() {
                   <span className="font-bold text-slate-200 tabular-nums shrink-0 ml-2">{R$c(c.valor)}</span>
                 </div>
                 <div className="h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-violet-500 to-fuchsia-400 rounded-full group-hover:brightness-110" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
+                  <div className="h-full bg-gradient-to-r from-amber-500 to-amber-300 rounded-full group-hover:brightness-110" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
                 </div>
               </button>
             ))}
@@ -537,7 +537,7 @@ export default function DashboardPage() {
         {/* Top produtos */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2"><Boxes className="h-4 w-4 text-teal-400" /> Top produtos (saída)</h3>
+            <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2"><Boxes className="h-4 w-4 text-amber-400" /> Top produtos (saída)</h3>
             <div className="flex rounded-md border border-white/[0.08] p-0.5 text-[10px]">
               <button onClick={() => setOrdProduto('custo')} className={`px-2 py-0.5 rounded ${ordProduto === 'custo' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-500'}`}>R$</button>
               <button onClick={() => setOrdProduto('qtd')} className={`px-2 py-0.5 rounded ${ordProduto === 'qtd' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-500'}`}>kg</button>

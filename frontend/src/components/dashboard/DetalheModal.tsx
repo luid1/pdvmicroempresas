@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowUpRight, ArrowDownRight, ChevronRight, ArrowRight, X } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -103,7 +104,7 @@ export default function DetalheModal({
     navigate(r);
   };
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[210] p-4 animate-fade-in"
       onClick={onClose}
@@ -235,7 +236,7 @@ export default function DetalheModal({
           {rota && (
             <button
               onClick={() => irPara(rota)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-bold transition-all duration-300 active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 text-sm font-bold transition-all duration-300 active:scale-[0.98]"
             >
               {verMaisLabel || 'Ver mais'}
               <ArrowRight className="h-4 w-4" />
@@ -243,6 +244,7 @@ export default function DetalheModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
