@@ -274,8 +274,8 @@ function EditableCell({
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const toneBg = tone === 'sky' ? 'bg-sky-500/[0.06]' : tone === 'violet' ? 'bg-violet-500/[0.06]' : 'bg-amber-500/[0.06]';
-  const toneText = tone === 'sky' ? 'text-sky-200' : tone === 'violet' ? 'text-violet-200' : 'text-amber-200';
+  const toneBg = tone === 'sky' ? 'bg-amber-500/[0.06]' : tone === 'violet' ? 'bg-violet-500/[0.06]' : 'bg-amber-500/[0.06]';
+  const toneText = tone === 'sky' ? 'text-amber-200' : tone === 'violet' ? 'text-violet-200' : 'text-amber-200';
 
   const iniciar = () => {
     setDraft(String(value));
@@ -291,7 +291,7 @@ function EditableCell({
   if (editing) {
     return (
       <td className={`px-2 py-1.5 ${toneBg} ${className}`}>
-        <div className="flex items-center bg-slate-900 border-2 border-blue-500 rounded-md overflow-hidden ring-2 ring-blue-500/30 w-32 ml-auto">
+        <div className="flex items-center bg-slate-900 border-2 border-amber-500 rounded-md overflow-hidden ring-2 ring-amber-500/30 w-32 ml-auto">
           {prefix && <span className="pl-2 text-slate-500 text-xs">{prefix}</span>}
           <input
             ref={inputRef}
@@ -413,7 +413,7 @@ export default function Custos() {
               </button>
             )}
             <button onClick={() => window.print()} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-semibold text-sm px-3 py-1.5 rounded-lg transition-colors">
-              <Printer className="h-4 w-4 text-sky-400" /> Imprimir
+              <Printer className="h-4 w-4 text-amber-400" /> Imprimir
             </button>
           </div>
         </div>
@@ -502,7 +502,7 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                 <th className="px-3 py-3 text-right font-semibold bg-violet-500/10 text-violet-200">Peso Total KG</th>
                 <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Custo/Un</Ed></th>
                 <th className="px-3 py-3 text-right font-semibold">Custo Médio/kg</th>
-                <th className="px-3 py-3 text-right font-semibold bg-sky-500/10 text-sky-200"><Ed>Venda/Un</Ed></th>
+                <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Venda/Un</Ed></th>
                 <th className="px-3 py-3 text-right font-semibold">Venda Média/kg</th>
                 <th className="px-3 py-3 text-right font-semibold">Lucro Bruto</th>
                 <th className="px-3 py-3 text-right font-semibold">% Margem</th>
@@ -514,7 +514,7 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                 const abaixoCusto = c.vendaMedioKg < c.custoMedioKg;
                 return (
                   <tr key={p.codigo} className="border-t border-slate-800 hover:bg-slate-800/40">
-                    <td className="px-3 py-2 font-mono text-xs font-bold text-sky-300 sticky left-0 bg-slate-900/95">{p.codigo}</td>
+                    <td className="px-3 py-2 font-mono text-xs font-bold text-amber-300 sticky left-0 bg-slate-900/95">{p.codigo}</td>
                     <td className="px-3 py-2 sticky left-[92px] bg-slate-900/95">
                       <span className="font-semibold text-slate-100">{p.nome}</span>
                     </td>
@@ -523,7 +523,7 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                       <select
                         value={p.unidade}
                         onChange={(e) => dispProd({ tipo: 'setUnidade', codigo: p.codigo, valor: e.target.value as Unidade })}
-                        className="bg-slate-900 border border-slate-600 rounded-md px-1.5 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-blue-500"
+                        className="bg-slate-900 border border-slate-600 rounded-md px-1.5 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500"
                       >
                         {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                       </select>
@@ -533,7 +533,7 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                     <EditableCell value={p.custoUnit} step={0.01} tone="amber" prefix="R$" onCommit={(v) => dispProd({ tipo: 'setNum', codigo: p.codigo, campo: 'custoUnit', valor: v })} format={(v) => R$(v)} />
                     <td className="px-3 py-2 text-right font-mono text-slate-400">{R$(c.custoMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
                     <EditableCell value={p.vendaUnit} step={0.01} tone="sky" prefix="R$" onCommit={(v) => dispProd({ tipo: 'setNum', codigo: p.codigo, campo: 'vendaUnit', valor: v })} format={(v) => R$(v)} />
-                    <td className="px-3 py-2 text-right font-mono font-bold text-sky-300 bg-sky-500/[0.06]">{R$(c.vendaMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
+                    <td className="px-3 py-2 text-right font-mono font-bold text-amber-300 bg-amber-500/[0.06]">{R$(c.vendaMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
                     <td className={`px-3 py-2 text-right font-mono font-bold ${abaixoCusto ? 'text-rose-400' : 'text-slate-100'}`}>{R$(c.lucroBruto)}</td>
                     <td className={`px-3 py-2 text-right font-mono font-extrabold ${corMargem(c.margem)}`}>{pct(c.margem)}</td>
                   </tr>
@@ -547,7 +547,7 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                 <td className="px-3 py-2.5 text-right font-mono text-violet-200">{nkg(totais.pesoKg)} kg</td>
                 <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.custo)}</td>
                 <td />
-                <td className="px-3 py-2.5 text-right font-mono text-sky-300">{R$(totais.receita)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.receita)}</td>
                 <td />
                 <td className="px-3 py-2.5 text-right font-mono text-emerald-300">{R$(totais.lucro)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corMargem(totais.margem)}`}>{pct(totais.margem)}</td>
@@ -780,7 +780,7 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
                 return (
                   <tr key={f.rotulo} className="border-t border-slate-800 hover:bg-slate-800/40">
                     <td className="px-3 py-2.5 font-semibold text-slate-100 sticky left-0 bg-slate-900/95">{f.rotulo}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-sky-300">{R$(f.vendas)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(f.vendas)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-500">{R$(f.devolucoes)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-amber-300/90">{R$(f.custos)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(f.frete)}</td>
@@ -789,7 +789,7 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
                     <td className="px-3 py-2.5 text-right font-mono text-slate-300">{nkg(f.peso)}</td>
                     <td className="px-3 py-2.5">
                       <div className="h-2 rounded-full bg-slate-700/50 overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-sky-500 to-emerald-400" style={{ width: `${(f.vendas / maxVendas) * 100}%` }} />
+                        <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400" style={{ width: `${(f.vendas / maxVendas) * 100}%` }} />
                       </div>
                     </td>
                   </tr>
@@ -799,7 +799,7 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
             <tfoot>
               <tr className="bg-slate-900 border-t-2 border-amber-400/40 font-bold sticky bottom-0">
                 <td className="px-3 py-2.5 text-slate-200 sticky left-0 bg-slate-900">CONSOLIDADO · {fonte.length} períodos</td>
-                <td className="px-3 py-2.5 text-right font-mono text-sky-300">{R$(totais.vendas)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.vendas)}</td>
                 <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(totais.devolucoes)}</td>
                 <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.custos)}</td>
                 <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(totais.frete)}</td>
@@ -977,7 +977,7 @@ export const _X = X;
    ════════════════════════════════════════════════════════════════════════════ */
 const CORES: Record<string, string> = {
   amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-sky-400/10 text-sky-300',
+  sky: 'bg-amber-400/10 text-amber-300',
   rose: 'bg-rose-400/10 text-rose-300',
   emerald: 'bg-emerald-400/10 text-emerald-300',
   violet: 'bg-violet-400/10 text-violet-300',

@@ -98,7 +98,7 @@ export default function NotasEmitidas() {
         subtitulo={`${notasFiltradas.length} de ${notas.length} nota(s)`}
         actions={
           <button onClick={carregar} className={btnGlass}>
-            <RefreshCw className="h-3.5 w-3.5 text-sky-400" /> Atualizar
+            <RefreshCw className="h-3.5 w-3.5 text-amber-400" /> Atualizar
           </button>
         }
       />
@@ -110,7 +110,7 @@ export default function NotasEmitidas() {
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por chave, nº ou cliente..."
-            className="w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-sky-400/60" />
+            className="w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-amber-400/60" />
         </div>
         <label className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold">De
           <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className="border border-gray-300 rounded px-2 py-1.5 text-sm" />
@@ -128,7 +128,7 @@ export default function NotasEmitidas() {
 
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
-          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-sky-500 border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" /></div>
         ) : notasFiltradas.length === 0 ? (
           <div className="text-center text-gray-400 py-16"><FileText className="h-10 w-10 mx-auto mb-2 text-gray-200" /> Nenhuma NF-e encontrada com os filtros atuais.</div>
         ) : (
@@ -139,7 +139,7 @@ export default function NotasEmitidas() {
               </thead>
               <tbody>
                 {notasFiltradas.map(n => (
-                  <tr key={n.id} className="border-t border-gray-100 hover:bg-sky-50/40 cursor-pointer" onClick={() => abrirDetalhe(n.id)}>
+                  <tr key={n.id} className="border-t border-gray-100 hover:bg-amber-50/40 cursor-pointer" onClick={() => abrirDetalhe(n.id)}>
                     <td className="px-3 py-2 font-bold text-gray-800">{String(n.numero).padStart(6, '0')}/{n.serie}</td>
                     <td className="px-3 py-2 text-xs">{n.finalidade === '4' ? <span className="text-orange-600 font-bold">DEVOLUÇÃO</span> : 'Venda'}</td>
                     <td className="px-3 py-2 text-gray-500">{n.pedido?.numero ? `nº ${n.pedido.numero}` : '—'}</td>
@@ -151,7 +151,7 @@ export default function NotasEmitidas() {
                       {n._count?.cartasCorrecao > 0 && <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">CC-e {n._count.cartasCorrecao}</span>}
                     </td>
                     <td className="px-3 py-2 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
-                      <button onClick={() => abrirDanfe(n.id)} className="text-gray-400 hover:text-sky-600 p-1" title="Imprimir DANFE"><Printer className="h-4 w-4" /></button>
+                      <button onClick={() => abrirDanfe(n.id)} className="text-gray-400 hover:text-amber-600 p-1" title="Imprimir DANFE"><Printer className="h-4 w-4" /></button>
                       {n.status === 'EMITIDO' && n.finalidade !== '4' && <>
                         <button onClick={() => enviarCce(n.id)} className="text-gray-400 hover:text-blue-600 p-1" title="Carta de Correção"><FileText className="h-4 w-4" /></button>
                         <button onClick={() => devolver(n.id)} className="text-gray-400 hover:text-orange-600 p-1" title="Devolução"><Undo2 className="h-4 w-4" /></button>

@@ -138,7 +138,7 @@ export default function PainelFaturamento() {
               {/* Esquerda: maiores clientes faturados */}
               <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5">
                 <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2 mb-4">
-                  <Users className="h-4 w-4 text-sky-300" /> Maiores clientes faturados
+                  <Users className="h-4 w-4 text-slate-400" /> Maiores clientes faturados
                 </h3>
                 {porCliente.length === 0 ? (
                   <p className="text-sm text-slate-500 py-8 text-center">Nenhum cliente faturado.</p>
@@ -202,8 +202,8 @@ export default function PainelFaturamento() {
 const CORES: Record<string, string> = {
   emerald: 'bg-emerald-400/10 text-emerald-300',
   amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-sky-400/10 text-sky-300',
-  violet: 'bg-violet-400/10 text-violet-300',
+  sky: 'bg-white/[0.06] text-slate-300',
+  violet: 'bg-white/[0.06] text-slate-300',
 };
 function Kpi({ icon, label, valor, cor }: { icon: any; label: string; valor: string; cor: string }) {
   return (

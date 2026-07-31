@@ -77,7 +77,7 @@ export default function PlanoContas() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-indigo-400/10 text-indigo-300 flex items-center justify-center">
+          <span className="h-11 w-11 rounded-2xl bg-amber-400/10 text-amber-300 flex items-center justify-center">
             <Landmark className="h-5 w-5" />
           </span>
           <div>
@@ -90,7 +90,7 @@ export default function PlanoContas() {
             <button onClick={semear} disabled={semeando} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-2 rounded-lg disabled:opacity-40">
               <Sprout className="h-4 w-4" /> Semear padrão
             </button>
-            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
+            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
               <Plus className="h-4 w-4" /> Nova conta
             </button>
           </div>
@@ -101,7 +101,7 @@ export default function PlanoContas() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por código ou descrição…"
-            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-400" />
+            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
         </div>
         <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
           <input type="checkbox" checked={incluirInativas} onChange={(e) => setIncluirInativas(e.target.checked)} />
@@ -196,17 +196,17 @@ function ModalConta({ conta, onClose, onDone }: { conta?: Conta; onClose: () => 
           <label className="block">
             <span className="text-xs text-slate-400">Código {edicao && <span className="text-slate-600">(não editável)</span>}</span>
             <input value={codigo} onChange={e => setCodigo(e.target.value)} disabled={edicao} placeholder="ex.: 3.4.08"
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono disabled:opacity-50 focus:outline-none focus:border-indigo-400" />
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 font-mono disabled:opacity-50 focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Descrição</span>
             <input value={descricao} onChange={e => setDescricao(e.target.value)}
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-400" />
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Natureza</span>
             <select value={tipo} onChange={e => setTipo(e.target.value as 'DEBITO' | 'CREDITO')}
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-400">
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
               <option value="DEBITO">Débito (despesa/custo)</option>
               <option value="CREDITO">Crédito (receita)</option>
             </select>
@@ -222,7 +222,7 @@ function ModalConta({ conta, onClose, onDone }: { conta?: Conta; onClose: () => 
             </label>
           )}
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> {edicao ? 'Salvar' : 'Criar'}
         </button>
       </div>

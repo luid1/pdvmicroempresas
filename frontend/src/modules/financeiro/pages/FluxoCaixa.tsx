@@ -42,7 +42,7 @@ export default function FluxoCaixa() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Landmark className="h-5 w-5 text-sky-300" /> Fluxo de Caixa
+              <Landmark className="h-5 w-5 text-amber-300" /> Fluxo de Caixa
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">Caixa realizado · entradas pagas − saídas pagas por competência, com saldo acumulado</p>
           </div>
@@ -50,7 +50,7 @@ export default function FluxoCaixa() {
             <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
               {(['mes', 'dia'] as const).map(a => (
                 <button key={a} onClick={() => setAgrupamento(a)}
-                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${agrupamento === a ? 'bg-sky-500/20 text-sky-300' : 'text-slate-400 hover:text-slate-200'}`}>
+                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${agrupamento === a ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'}`}>
                   {a === 'mes' ? 'Mensal' : 'Diário'}
                 </button>
               ))}
@@ -77,7 +77,7 @@ export default function FluxoCaixa() {
 
         <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
           <h3 className="font-semibold text-sm text-slate-200 px-5 py-3 border-b border-slate-700/60 flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-sky-300" /> Movimento por {agrupamento === 'mes' ? 'mês' : 'dia'}
+            <CalendarDays className="h-4 w-4 text-amber-300" /> Movimento por {agrupamento === 'mes' ? 'mês' : 'dia'}
           </h3>
           {loading ? (
             <div className="p-5 space-y-3">
@@ -110,7 +110,7 @@ export default function FluxoCaixa() {
                     <td className="px-4 py-2.5 text-right font-mono text-emerald-300">{R$(p.entradas)}</td>
                     <td className="px-4 py-2.5 text-right font-mono text-rose-300">{R$(p.saidas)}</td>
                     <td className={`px-4 py-2.5 text-right font-mono font-bold ${p.saldoPeriodo < 0 ? 'text-rose-400' : 'text-slate-100'}`}>{R$(p.saldoPeriodo)}</td>
-                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-rose-400' : 'text-sky-300'}`}>{R$(p.saldoAcumulado)}</td>
+                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-rose-400' : 'text-emerald-300'}`}>{R$(p.saldoAcumulado)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -124,13 +124,13 @@ export default function FluxoCaixa() {
 
 const CORES: Record<string, string> = {
   amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-sky-400/10 text-sky-300',
+  sky: 'bg-amber-400/10 text-amber-300',
   rose: 'bg-rose-400/10 text-rose-300',
   emerald: 'bg-emerald-400/10 text-emerald-300',
 };
 function Kpi({ icon, label, valor, cor, destaque }: { icon: any; label: string; valor: string | null; cor: string; destaque?: boolean }) {
   return (
-    <div className={`bg-slate-800/50 rounded-2xl border p-5 ${destaque ? 'border-sky-500/30' : 'border-slate-700/60'}`}>
+    <div className={`bg-slate-800/50 rounded-2xl border p-5 ${destaque ? 'border-amber-500/30' : 'border-slate-700/60'}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
         <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>

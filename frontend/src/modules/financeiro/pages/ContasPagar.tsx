@@ -15,7 +15,7 @@ const numBR = (v: string) => v === '' ? 0 : parseFloat(String(v).replace(',', '.
 const dataBR = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  ABERTO: { label: 'Pendente', cls: 'bg-sky-400/10 text-sky-300 border-sky-400/20' },
+  ABERTO: { label: 'Pendente', cls: 'bg-slate-400/10 text-slate-300 border-slate-400/20' },
   PARCIAL: { label: 'Parcial', cls: 'bg-amber-400/10 text-amber-300 border-amber-400/20' },
   PAGO: { label: 'Pago', cls: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' },
   VENCIDO: { label: 'Atrasado', cls: 'bg-rose-400/10 text-rose-300 border-rose-400/20' },
@@ -339,7 +339,7 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
 
 const CORES: Record<string, string> = {
   amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-sky-400/10 text-sky-300',
+  sky: 'bg-amber-400/10 text-amber-300',
   rose: 'bg-rose-400/10 text-rose-300',
   emerald: 'bg-emerald-400/10 text-emerald-300',
 };

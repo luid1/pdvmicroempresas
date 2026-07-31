@@ -95,7 +95,7 @@ export default function Faturamento() {
         actions={
           <>
             <input type="date" value={data} onChange={e => setData(e.target.value)}
-              className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-slate-100 [color-scheme:dark] focus:outline-none focus:border-sky-400/60" />
+              className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-slate-100 [color-scheme:dark] focus:outline-none focus:border-amber-400/60" />
             <button onClick={carregar} className={btnGlass}>
               <RefreshCw className="h-3.5 w-3.5 text-emerald-400" /> Atualizar
             </button>
@@ -146,7 +146,7 @@ export default function Faturamento() {
                 {pedidos.map(p => (
                   <tr key={p.id} className={`border-t border-gray-100 ${sel.has(p.id) ? 'bg-emerald-50/50' : 'hover:bg-gray-50'}`}>
                     <td className="px-3 py-2"><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggle(p.id)} className="accent-emerald-600 h-4 w-4" /></td>
-                    <td className="px-3 py-2 font-bold text-blue-700">{p.numero}</td>
+                    <td className="px-3 py-2 font-bold text-amber-700">{p.numero}</td>
                     <td className="px-3 py-2 font-semibold text-gray-900">{p.cliente?.nomeFantasia || p.cliente?.razaoSocial}</td>
                     <td className="px-3 py-2 text-center">{p._count?.itens ?? '—'}</td>
                     <td className="px-3 py-2 text-right font-mono">{(Number(p.pesoTotal) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 3 })}</td>
@@ -154,7 +154,7 @@ export default function Faturamento() {
                     <td className="px-3 py-2 text-right">
                       <div className="flex items-center gap-1 justify-end">
                         <button onClick={() => conferir(p)} disabled={processando}
-                          className="flex items-center gap-1 bg-white border border-violet-300 text-violet-700 hover:bg-violet-50 rounded px-2.5 py-1.5 text-xs font-bold disabled:opacity-40">
+                          className="flex items-center gap-1 bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 rounded px-2.5 py-1.5 text-xs font-bold disabled:opacity-40">
                           <ShieldCheck className="h-3.5 w-3.5" /> Conferir
                         </button>
                         <button onClick={() => faturarLinha(p.id)} disabled={processando}
@@ -177,12 +177,12 @@ export default function Faturamento() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setConferindo(null)}>
           <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 sticky top-0 bg-[#0E141F]/95 backdrop-blur-xl z-10">
-              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-violet-500" /> Conferência — Pedido {conferindo.numero} · {conferindo.cliente?.nomeFantasia || conferindo.cliente?.razaoSocial}</h2>
+              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-amber-500" /> Conferência — Pedido {conferindo.numero} · {conferindo.cliente?.nomeFantasia || conferindo.cliente?.razaoSocial}</h2>
               <button onClick={() => setConferindo(null)}><X className="h-5 w-5 text-gray-400" /></button>
             </div>
 
             {carregandoConf ? (
-              <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-violet-500 border-t-transparent rounded-full" /></div>
+              <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" /></div>
             ) : (
               <div className="p-5 space-y-5">
                 {/* Checklist */}

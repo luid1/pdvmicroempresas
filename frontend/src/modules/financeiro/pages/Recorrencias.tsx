@@ -104,8 +104,8 @@ export default function Recorrencias() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-indigo-500/30 to-purple-500/20 border border-white/10 flex items-center justify-center">
-            <Repeat className="h-5 w-5 text-indigo-300" />
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-amber-500/30 to-amber-400/20 border border-white/10 flex items-center justify-center">
+            <Repeat className="h-5 w-5 text-amber-300" />
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Despesas Recorrentes</h1>
@@ -122,7 +122,7 @@ export default function Recorrencias() {
             </button>
           )}
           {podeConfigurar && (
-            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
+            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
               <Plus className="h-4 w-4" /> Nova recorrência
             </button>
           )}
@@ -223,7 +223,7 @@ export default function Recorrencias() {
   );
 }
 
-const inputCls = 'mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-400';
+const inputCls = 'mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400';
 
 function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose: () => void; onDone: () => void }) {
   const edicao = !!rec;
@@ -336,7 +336,7 @@ function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose
             <textarea value={observacoes} onChange={e => setObservacoes(e.target.value)} rows={2} className={inputCls} />
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> {edicao ? 'Salvar' : 'Criar'}
         </button>
       </div>
@@ -356,7 +356,7 @@ function ModalPreview({ rec, onClose }: { rec: Recorrencia; onClose: () => void 
       <div className="relative w-full max-w-sm bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-indigo-300" />
+            <CalendarClock className="h-4 w-4 text-amber-300" />
             <h2 className="font-bold text-white">Próximas ocorrências</h2>
           </div>
           <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>

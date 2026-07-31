@@ -29,7 +29,7 @@ const STATUS_META: Record<string, { label: string; cls: string }> = {
   CANCELADO: { label: 'Cancelada', cls: 'bg-rose-500/15 text-rose-300 border-rose-500/30' },
   DENEGADO: { label: 'Denegada', cls: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
   INUTILIZADO: { label: 'Inutilizada', cls: 'bg-slate-500/15 text-slate-400 border-slate-500/30' },
-  CONTINGENCIA: { label: 'Contingência', cls: 'bg-sky-500/15 text-sky-300 border-sky-500/30' },
+  CONTINGENCIA: { label: 'Contingência', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
 };
 
 interface Nota {
@@ -160,7 +160,7 @@ export default function GestaoFiscal() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-sky-300" /> Gestão Fiscal
+              <Receipt className="h-5 w-5 text-amber-300" /> Gestão Fiscal
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">Notas fiscais eletrônicas (NF-e) emitidas no faturamento</p>
           </div>
@@ -174,7 +174,7 @@ export default function GestaoFiscal() {
             <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-700">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
-            <a href="/fiscal/emitir" className="flex items-center gap-1.5 bg-sky-500/90 hover:bg-sky-500 text-white text-sm font-semibold px-3 py-1.5 rounded-lg">
+            <a href="/fiscal/emitir" className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-3 py-1.5 rounded-lg">
               <Plus className="h-4 w-4" /> Nova nota
             </a>
           </div>
@@ -183,17 +183,17 @@ export default function GestaoFiscal() {
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Kpi icon={<FileStack className="h-4 w-4" />} cor="sky" label="Notas no período" valor={loading ? null : String(resumo.totalNotas)} />
+          <Kpi icon={<FileStack className="h-4 w-4" />} cor="neutral" label="Notas no período" valor={loading ? null : String(resumo.totalNotas)} />
           <Kpi icon={<CheckCircle2 className="h-4 w-4" />} cor="emerald" label="Valor emitido" valor={loading ? null : R$(resumo.valorEmitido)} />
           <Kpi icon={<Receipt className="h-4 w-4" />} cor="amber" label="Impostos totais" valor={loading ? null : R$(resumo.valorImpostosTotal)} />
-          <Kpi icon={<FileText className="h-4 w-4" />} cor="rose" label="Valor bruto total" valor={loading ? null : R$(resumo.valorBrutoTotal)} />
+          <Kpi icon={<FileText className="h-4 w-4" />} cor="neutral" label="Valor bruto total" valor={loading ? null : R$(resumo.valorBrutoTotal)} />
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
             {(['', 'RASCUNHO', 'EMITIDO', 'CANCELADO', 'DENEGADO'] as const).map(s => (
               <button key={s || 'all'} onClick={() => setStatus(s)}
-                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-sky-500/20 text-sky-300' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'}`}>
                 {s === '' ? 'Todas' : STATUS_META[s].label}
               </button>
             ))}
@@ -249,7 +249,7 @@ export default function GestaoFiscal() {
                         )}
                         {podeOperar && n.status === 'EMITIDO' && (
                           <>
-                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-sky-300 hover:bg-sky-500/15"><FileText className="h-4 w-4" /></button>
+                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-600/40"><FileText className="h-4 w-4" /></button>
                             <button onClick={() => devolver(n.id)} title="Devolução" className="p-1.5 rounded-lg text-amber-300 hover:bg-amber-500/15"><Undo2 className="h-4 w-4" /></button>
                             <button onClick={() => cancelar(n.id)} title="Cancelar nota" className="p-1.5 rounded-lg text-rose-300 hover:bg-rose-500/15"><Ban className="h-4 w-4" /></button>
                           </>
@@ -309,7 +309,7 @@ export default function GestaoFiscal() {
                   <h3 className="font-bold text-xs text-slate-300 mb-1">Cartas de Correção (CC-e)</h3>
                   <div className="space-y-1">
                     {detalhe.cartasCorrecao.map((c: any) => (
-                      <div key={c.id} className="text-xs bg-sky-500/10 text-sky-200 rounded px-2 py-1">
+                      <div key={c.id} className="text-xs bg-white/[0.06] text-slate-300 rounded px-2 py-1">
                         <b>#{c.sequencia}</b> · {dataBR(c.dataEvento)} — {c.correcao}
                       </div>
                     ))}
@@ -321,7 +321,7 @@ export default function GestaoFiscal() {
               <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm flex items-center gap-1 hover:bg-slate-700"><Printer className="h-4 w-4" /> DANFE</button>
               {podeOperar && detalhe.status === 'EMITIDO' && detalhe.finalidade !== '4' && (
                 <>
-                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-sky-500/40 text-sky-300 text-sm flex items-center gap-1 hover:bg-sky-500/10"><FileText className="h-4 w-4" /> CC-e</button>
+                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm flex items-center gap-1 hover:bg-slate-700"><FileText className="h-4 w-4" /> CC-e</button>
                   <button disabled={busy} onClick={() => devolver(detalhe.id)} className="px-3 py-2 rounded-lg border border-amber-500/40 text-amber-300 text-sm flex items-center gap-1 disabled:opacity-40 hover:bg-amber-500/10"><Undo2 className="h-4 w-4" /> Devolução</button>
                   <button onClick={() => cancelar(detalhe.id)} className="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm flex items-center gap-1"><Ban className="h-4 w-4" /> Cancelar</button>
                 </>
@@ -340,7 +340,7 @@ function Info({ label, value, className = '' }: { label: string; value: any; cla
 
 const CORES: Record<string, string> = {
   amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-sky-400/10 text-sky-300',
+  neutral: 'bg-white/[0.06] text-slate-300',
   rose: 'bg-rose-400/10 text-rose-300',
   emerald: 'bg-emerald-400/10 text-emerald-300',
 };
