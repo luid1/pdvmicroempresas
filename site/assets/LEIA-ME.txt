@@ -1,0 +1,30 @@
+LUMIN PDV — ARQUIVOS DE MÍDIA DO SITE
+=====================================
+
+Coloque os arquivos reais nesta pasta com EXATAMENTE estes nomes.
+Enquanto o arquivo não existir, o site mostra um placeholder no lugar.
+Assim que você soltar o arquivo certo aqui, ele aparece sozinho — não precisa mexer em código.
+
+ARQUIVOS ESPERADOS
+------------------
+
+1) demo.mp4            -> Vídeo de demonstração (60-90s, 1920x1080, MP4/H.264)
+                          Aparece na seção "Veja funcionando" da landing.
+
+2) demo-poster.jpg     -> (Opcional) Imagem de capa do vídeo, 1920x1080.
+                          Mostrada antes de dar play. Se não colocar, o vídeo
+                          abre em preto até o play — funciona igual.
+
+3) print-1.png         -> Print da FRENTE DE CAIXA (recomendado 16:10, ex. 1600x1000)
+4) print-2.png         -> Print do ESTOQUE
+5) print-3.png         -> Print do FECHAMENTO / FINANCEIRO
+
+OBSERVAÇÕES
+-----------
+- PNG ou JPG servem para os prints; se usar JPG, mantenha o nome .png OU
+  me avise para trocar a extensão no código.
+- A FOTO 200x200 da tela de boas-vindas (item do handoff) NAO vai aqui:
+  ela pertence ao fluxo /boas-vindas do sistema (app React), que ainda
+  nao existe. Guarde ela separado por enquanto.
+- Depois de colocar os arquivos, é só subir a pasta 'site' no Netlify
+  (arrastar a pasta) que já entra no ar.
