@@ -159,7 +159,7 @@ export default function ControladoriaHub() {
             <button className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
               <Download className="h-4 w-4 text-neutral-400" /> Exportar
             </button>
-            <button className="flex items-center gap-2 rounded-xl bg-neutral-900 text-white px-3.5 py-2.5 text-sm font-semibold hover:bg-black">
+            <button className="flex items-center gap-2 rounded-xl bg-amber-400 text-slate-900 px-3.5 py-2.5 text-sm font-semibold hover:bg-amber-300">
               <Plus className="h-4 w-4" /> Novo lançamento
             </button>
           </div>
@@ -368,7 +368,7 @@ function AbaReceber() {
                         <Link2 className="h-4 w-4" />
                       </button>
                       {t.status !== 'PAGO' && (
-                        <button onClick={() => receber(t.id)} className="rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-[12px] font-semibold hover:bg-black">
+                        <button onClick={() => receber(t.id)} className="rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300">
                           Receber
                         </button>
                       )}
@@ -503,7 +503,7 @@ function AbaPagar() {
                         <FileText className="h-4 w-4" />
                       </button>
                       {t.status === 'APROVACAO_PENDENTE' ? (
-                        <button onClick={() => aprovar(t.id)} className="rounded-lg bg-neutral-900 text-white px-3 py-1.5 text-[12px] font-semibold hover:bg-black flex items-center gap-1.5">
+                        <button onClick={() => aprovar(t.id)} className="rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300 flex items-center gap-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
                         </button>
                       ) : t.status === 'APROVADO' ? (
@@ -546,22 +546,22 @@ function Kpi({
   tendencia?: number;
 }) {
   const cor =
-    tom === 'positivo' || tom === 'destaque'
-      ? 'text-emerald-600'
-      : tom === 'negativo'
-        ? 'text-rose-600'
-        : tom === 'processando'
-          ? 'text-amber-600'
+    tom === 'destaque' || tom === 'processando'
+      ? 'text-amber-600'
+      : tom === 'positivo'
+        ? 'text-emerald-600'
+        : tom === 'negativo'
+          ? 'text-rose-600'
           : 'text-neutral-900';
   const chip =
-    tom === 'positivo' || tom === 'destaque'
-      ? 'bg-emerald-50 text-emerald-600'
-      : tom === 'negativo'
-        ? 'bg-rose-50 text-rose-600'
-        : tom === 'processando'
-          ? 'bg-amber-50 text-amber-600'
+    tom === 'destaque' || tom === 'processando'
+      ? 'bg-amber-50 text-amber-600'
+      : tom === 'positivo'
+        ? 'bg-emerald-50 text-emerald-600'
+        : tom === 'negativo'
+          ? 'bg-rose-50 text-rose-600'
           : 'bg-neutral-100 text-neutral-500';
-  const moldura = tom === 'destaque' ? 'ring-1 ring-emerald-100 bg-emerald-50/30' : 'border border-neutral-200 bg-white';
+  const moldura = tom === 'destaque' ? 'ring-1 ring-amber-200 bg-amber-50/40' : 'border border-neutral-200 bg-white';
 
   return (
     <div className={`rounded-2xl p-5 ${moldura}`}>
@@ -627,12 +627,12 @@ function Tab({ ativo, icon: Icon, label, onClick }: { ativo: boolean; icon: Reac
     <button
       onClick={onClick}
       className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-        ativo ? 'text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'
+        ativo ? 'text-amber-600' : 'text-neutral-500 hover:text-neutral-700'
       }`}
     >
-      <Icon className={`h-4 w-4 ${ativo ? 'text-neutral-900' : 'text-neutral-400'}`} />
+      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-600' : 'text-neutral-400'}`} />
       {label}
-      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-neutral-900 rounded-full" />}
+      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-500 rounded-full" />}
     </button>
   );
 }
