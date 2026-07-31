@@ -69,7 +69,7 @@ export default function Configuracoes() {
         subtitulo="Parâmetros da empresa, fiscais e do sistema"
         extra={podeSalvar ? (
           <button onClick={salvar}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 transition-all duration-300 active:scale-[0.98]">
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-lg shadow-amber-500/20 transition-all duration-300 active:scale-[0.98]">
             {salvo ? <><Check className="h-3.5 w-3.5" /> Salvo</> : <><Save className="h-3.5 w-3.5" /> Salvar</>}
           </button>
         ) : undefined}
@@ -81,7 +81,7 @@ export default function Configuracoes() {
           {SECOES.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setSecao(key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-300 active:scale-[0.98] ${
-                secao === key ? 'bg-sky-400/[0.12] text-sky-200 border border-sky-400/20' : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100 border border-transparent'
+                secao === key ? 'bg-amber-400/[0.12] text-amber-200 border border-amber-400/20' : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100 border border-transparent'
               }`}>
               <Icon className="h-4 w-4 shrink-0" /> {label}
             </button>
@@ -100,13 +100,13 @@ export default function Configuracoes() {
               <div className="space-y-2">
                 {filiais.map((f) => (
                   <div key={f.id} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all ${
-                    f.id === filialAtiva?.id ? 'bg-sky-400/[0.08] border-sky-400/25' : 'bg-white/[0.02] border-white/[0.06]'
+                    f.id === filialAtiva?.id ? 'bg-amber-400/[0.08] border-amber-400/25' : 'bg-white/[0.02] border-white/[0.06]'
                   }`}>
                     <Warehouse className="h-4 w-4 text-slate-500 shrink-0" />
                     <div className="min-w-0">
                       <p className="text-slate-200 text-sm font-medium truncate">{f.codigo} — {f.nome}</p>
                     </div>
-                    {f.id === filialAtiva?.id && <span className="ml-auto text-[10px] font-bold text-sky-300 uppercase tracking-wide">Ativa</span>}
+                    {f.id === filialAtiva?.id && <span className="ml-auto text-[10px] font-bold text-amber-300 uppercase tracking-wide">Ativa</span>}
                   </div>
                 ))}
                 {filiais.length === 0 && <p className="text-slate-500 text-sm">Nenhuma filial vinculada.</p>}
@@ -154,7 +154,7 @@ export default function Configuracoes() {
                 </Campo>
               </div>
               <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <div className="h-2.5 w-2.5 rounded-full bg-sky-400" />
+                <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
                 <p className="text-slate-300 text-sm">Tema <b>Dark Tech</b> — padrão do sistema.</p>
               </div>
             </Bloco>

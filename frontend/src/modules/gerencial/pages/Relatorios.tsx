@@ -97,8 +97,8 @@ export default function Relatorios() {
       {/* Cabeçalho */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-sky-500/15 border border-sky-400/25 flex items-center justify-center">
-            <BarChart3 className="h-4 w-4 text-sky-300" />
+          <div className="h-9 w-9 rounded-xl bg-amber-500/15 border border-amber-400/25 flex items-center justify-center">
+            <BarChart3 className="h-4 w-4 text-amber-300" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-white tracking-tight">Relatórios Gerenciais</h1>
@@ -124,7 +124,7 @@ export default function Relatorios() {
               onClick={() => setAba(a.id)}
               className={`flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all ${
                 ativo
-                  ? 'bg-sky-400/[0.14] border-sky-400/30 text-sky-200'
+                  ? 'bg-amber-400/[0.14] border-amber-400/30 text-amber-200'
                   : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:bg-white/[0.05]'
               }`}
             >
@@ -143,7 +143,7 @@ export default function Relatorios() {
               type="date"
               value={de}
               onChange={(e) => setDe(e.target.value)}
-              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-sky-400/50"
+              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
             />
           </label>
           <label className="text-[10px] text-slate-500">
@@ -152,7 +152,7 @@ export default function Relatorios() {
               type="date"
               value={ate}
               onChange={(e) => setAte(e.target.value)}
-              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-sky-400/50"
+              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
             />
           </label>
           {aba === 'abc' && (
@@ -161,7 +161,7 @@ export default function Relatorios() {
               <select
                 value={abcTipo}
                 onChange={(e) => setAbcTipo(e.target.value as any)}
-                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-sky-400/50"
+                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
               >
                 <option value="produto">Por produto</option>
                 <option value="cliente">Por cliente</option>
@@ -174,7 +174,7 @@ export default function Relatorios() {
               <select
                 value={rankTipo}
                 onChange={(e) => setRankTipo(e.target.value as any)}
-                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-sky-400/50"
+                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
               >
                 <option value="vendedor">Vendedores</option>
                 <option value="cliente">Clientes</option>
@@ -235,7 +235,7 @@ function PainelABC({ dados, tipo }: { dados: any; tipo: string }) {
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <Kpi titulo="Faturamento total" valor={brl(dados.total)} cor="text-sky-300" />
+        <Kpi titulo="Faturamento total" valor={brl(dados.total)} cor="text-amber-300" />
         <Kpi titulo="Classe A" valor={`${dados.resumo.A.itens} • ${brl(dados.resumo.A.valor)}`} cor="text-emerald-300" />
         <Kpi titulo="Classe B" valor={`${dados.resumo.B.itens} • ${brl(dados.resumo.B.valor)}`} cor="text-amber-300" />
         <Kpi titulo="Classe C" valor={`${dados.resumo.C.itens} • ${brl(dados.resumo.C.valor)}`} cor="text-slate-300" />
@@ -427,7 +427,7 @@ function PainelAging({ dados }: { dados: any }) {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <Kpi titulo="Total a receber" valor={brl(dados.aReceber.total)} cor="text-emerald-300" />
         <Kpi titulo="Total a pagar" valor={brl(dados.aPagar.total)} cor="text-rose-300" />
-        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-sky-300' : 'text-rose-300'} />
+        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'} />
       </div>
       <BotaoExportar onClick={exportar} />
       <div className="overflow-x-auto rounded-xl border border-white/[0.06]">

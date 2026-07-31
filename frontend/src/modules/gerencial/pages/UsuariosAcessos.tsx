@@ -18,7 +18,7 @@ interface Usuario {
 }
 
 const lbl = 'block text-[11px] font-semibold text-gray-500 mb-1';
-const inp = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-400';
+const inp = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-amber-400';
 
 export default function UsuariosAcessos() {
   const [aba, setAba] = useState<'usuarios' | 'perfis'>('usuarios');
@@ -40,13 +40,13 @@ export default function UsuariosAcessos() {
       {/* Header + abas (compacto, uma linha) */}
       <div className="bg-white border-b border-gray-200 px-5 py-1.5 shrink-0 flex items-center gap-4">
         <h1 className="text-sm font-bold text-gray-900 flex items-center gap-2 shrink-0">
-          <Users className="h-4 w-4 text-sky-500" /> Usuários & Acessos
+          <Users className="h-4 w-4 text-amber-500" /> Usuários & Acessos
         </h1>
         <div className="flex gap-1">
-          <button onClick={() => setAba('usuarios')} className={`px-3 py-1.5 text-sm font-semibold rounded-lg ${aba === 'usuarios' ? 'bg-sky-50 text-sky-600' : 'text-gray-500 hover:text-gray-700'}`}>
+          <button onClick={() => setAba('usuarios')} className={`px-3 py-1.5 text-sm font-semibold rounded-lg ${aba === 'usuarios' ? 'bg-amber-50 text-amber-600' : 'text-gray-500 hover:text-gray-700'}`}>
             <Users className="h-4 w-4 inline mr-1" /> Usuários ({usuarios.length})
           </button>
-          <button onClick={() => setAba('perfis')} className={`px-3 py-1.5 text-sm font-semibold rounded-lg ${aba === 'perfis' ? 'bg-sky-50 text-sky-600' : 'text-gray-500 hover:text-gray-700'}`}>
+          <button onClick={() => setAba('perfis')} className={`px-3 py-1.5 text-sm font-semibold rounded-lg ${aba === 'perfis' ? 'bg-amber-50 text-amber-600' : 'text-gray-500 hover:text-gray-700'}`}>
             <ShieldCheck className="h-4 w-4 inline mr-1" /> Perfis ({roles.length})
           </button>
         </div>
@@ -65,12 +65,12 @@ export default function UsuariosAcessos() {
                     <tr key={u.id} className={`border-t border-gray-100 ${!u.ativo ? 'opacity-50' : ''}`}>
                       <td className="px-3 py-1.5 font-semibold text-gray-900">{u.nome}</td>
                       <td className="px-3 py-1.5 text-gray-600">{u.email}</td>
-                      <td className="px-3 py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-700">{u.role?.nome}</span></td>
+                      <td className="px-3 py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">{u.role?.nome}</span></td>
                       <td className="px-3 py-1.5 text-gray-500 text-xs">{u.filiais?.map(f => f.filial.codigo).join(', ') || '—'}</td>
                       <td className="px-3 py-1.5 text-gray-400 text-xs">{u.ultimoAcesso ? new Date(u.ultimoAcesso).toLocaleString('pt-BR') : 'Nunca'}</td>
                       <td className="px-3 py-1.5">{u.ativo ? <span className="text-emerald-600 text-xs font-bold">Ativo</span> : <span className="text-gray-400 text-xs">Inativo</span>}</td>
                       <td className="px-3 py-1.5 text-right">
-                        <button onClick={() => setModalUser(u)} className="text-gray-400 hover:text-sky-600 p-1"><Pencil className="h-4 w-4" /></button>
+                        <button onClick={() => setModalUser(u)} className="text-gray-400 hover:text-amber-600 p-1"><Pencil className="h-4 w-4" /></button>
                       </td>
                     </tr>
                   ))}
@@ -87,10 +87,10 @@ export default function UsuariosAcessos() {
                   <div key={r.id} className="bg-white rounded-xl border border-gray-200 p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold text-gray-900 flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-sky-500" /> {r.nome}</p>
+                        <p className="font-bold text-gray-900 flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-amber-500" /> {r.nome}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{r.descricao || '—'}</p>
                       </div>
-                      <button onClick={() => setModalRole(r)} className="text-gray-400 hover:text-sky-600 p-1"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => setModalRole(r)} className="text-gray-400 hover:text-amber-600 p-1"><Pencil className="h-4 w-4" /></button>
                     </div>
                     <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
                       <span className="flex items-center gap-1"><Monitor className="h-3.5 w-3.5" /> {todas ? 'Todas as telas' : `${r.telas.length} tela(s)`}</span>
@@ -181,26 +181,26 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
             <div className="flex flex-wrap gap-1.5">
               {filiais.map(f => (
                 <button key={f.id} onClick={() => toggleFilial(f.id)} type="button"
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border ${filialIds.includes(f.id) ? 'bg-sky-600 text-white border-sky-600' : 'bg-white border-gray-300 text-gray-600'}`}>
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium border ${filialIds.includes(f.id) ? 'bg-amber-400 text-slate-900 border-amber-400' : 'bg-white border-gray-300 text-gray-600'}`}>
                   {f.codigo} — {f.nome}
                 </button>
               ))}
             </div>
           </div>
           <label className="flex items-center gap-2 text-sm text-gray-700">
-            <input type="checkbox" checked={ativo} onChange={e => setAtivo(e.target.checked)} className="accent-sky-600 h-4 w-4" /> Usuário ativo
+            <input type="checkbox" checked={ativo} onChange={e => setAtivo(e.target.checked)} className="accent-amber-600 h-4 w-4" /> Usuário ativo
           </label>
           {erro && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">{erro}</p>}
         </div>
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
           <div className="flex gap-2">
-            {!novo && <button onClick={resetSenha} className="flex items-center gap-1 text-xs text-gray-600 hover:text-sky-600 px-2 py-1.5 rounded border border-gray-300"><KeyRound className="h-3.5 w-3.5" /> Trocar senha</button>}
+            {!novo && <button onClick={resetSenha} className="flex items-center gap-1 text-xs text-gray-600 hover:text-amber-600 px-2 py-1.5 rounded border border-gray-300"><KeyRound className="h-3.5 w-3.5" /> Trocar senha</button>}
             {!novo && <button onClick={() => setPinAberto(true)} className="flex items-center gap-1 text-xs text-gray-600 hover:text-emerald-600 px-2 py-1.5 rounded border border-gray-300"><Hash className="h-3.5 w-3.5" /> Definir PIN</button>}
             {!novo && u?.ativo && <button onClick={inativar} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Power className="h-3.5 w-3.5" /> Inativar</button>}
           </div>
           <div className="flex gap-2">
             <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
-            <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
+            <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>
       </div>
@@ -337,7 +337,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
           </div>
 
           {ehAdmin ? (
-            <div className="bg-sky-50 border border-sky-200 rounded-lg p-3 text-sm text-sky-700">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-700">
               O perfil <b>ADMIN</b> enxerga <b>todas as telas</b> automaticamente.
             </div>
           ) : (
@@ -360,7 +360,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
                       <div key={grupo}>
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">{grupo}</p>
-                          <button onClick={() => toggleGrupo(keys)} type="button" className="text-[10px] text-sky-600 hover:underline">{todos ? 'desmarcar' : 'marcar todas'}</button>
+                          <button onClick={() => toggleGrupo(keys)} type="button" className="text-[10px] text-amber-600 hover:underline">{todos ? 'desmarcar' : 'marcar todas'}</button>
                         </div>
                         <div className="space-y-0.5">
                           {items.map(t => {
@@ -368,7 +368,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
                             return (
                               <div key={t.key} className="flex items-center justify-between gap-2 rounded px-1 py-0.5 hover:bg-gray-50">
                                 <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer flex-1 min-w-0">
-                                  <input type="checkbox" checked={sel} onChange={() => toggleTela(t.key)} className="accent-sky-600 h-3.5 w-3.5 shrink-0" />
+                                  <input type="checkbox" checked={sel} onChange={() => toggleTela(t.key)} className="accent-amber-600 h-3.5 w-3.5 shrink-0" />
                                   <span className="truncate">{t.label}</span>
                                 </label>
                                 {sel && (
@@ -377,7 +377,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
                                       const on = acoesDe(t.key).includes(acao);
                                       return (
                                         <button key={acao} type="button" onClick={() => toggleAcao(t.key, acao)} title={acao}
-                                          className={`h-5 w-5 rounded text-[10px] font-bold border ${on ? 'bg-sky-600 text-white border-sky-600' : 'bg-gray-100 text-gray-400 border-gray-200'}`}>{ab}</button>
+                                          className={`h-5 w-5 rounded text-[10px] font-bold border ${on ? 'bg-amber-400 text-slate-900 border-amber-400' : 'bg-gray-100 text-gray-400 border-gray-200'}`}>{ab}</button>
                                       );
                                     })}
                                   </div>
@@ -402,7 +402,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
             : <span />}
           <div className="flex gap-2">
             <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
-            <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
+            <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>
       </div>

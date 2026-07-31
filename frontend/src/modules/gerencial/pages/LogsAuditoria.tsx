@@ -19,7 +19,7 @@ interface LogRow {
 
 const ACAO_COR: Record<string, string> = {
   CREATE: 'bg-emerald-500/15 text-emerald-400',
-  UPDATE: 'bg-sky-500/15 text-sky-300',
+  UPDATE: 'bg-cyan-500/15 text-cyan-300',
   DELETE: 'bg-rose-500/15 text-rose-400',
   EMITIR: 'bg-violet-500/15 text-violet-300',
   CANCELAR: 'bg-amber-500/15 text-amber-300',

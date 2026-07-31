@@ -52,7 +52,7 @@ const ORDEM: AddonKey[] = ['pdvs', 'usuarios', 'filiais'];
 
 const STATUS_LABEL: Record<string, { txt: string; cls: string }> = {
   ATIVA: { txt: 'Ativa', cls: 'bg-emerald-500/15 text-emerald-400' },
-  TRIAL: { txt: 'Em teste', cls: 'bg-sky-500/15 text-sky-300' },
+  TRIAL: { txt: 'Em teste', cls: 'bg-slate-500/15 text-slate-300' },
   SUSPENSA: { txt: 'Suspensa', cls: 'bg-amber-500/15 text-amber-400' },
   CANCELADA: { txt: 'Cancelada', cls: 'bg-rose-500/15 text-rose-400' },
 };
@@ -179,7 +179,7 @@ export default function MinhaAssinatura() {
               {/* Ampliar capacidade */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="h-4 w-4 text-sky-300" />
+                  <Sparkles className="h-4 w-4 text-amber-300" />
                   <h3 className="text-sm font-bold text-white">Precisa de mais fôlego?</h3>
                 </div>
 
@@ -191,8 +191,8 @@ export default function MinhaAssinatura() {
                     const n = qtd[k];
                     return (
                       <div key={k} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 flex items-start gap-4">
-                        <div className="h-9 w-9 rounded-lg bg-sky-500/12 flex items-center justify-center shrink-0">
-                          <Icon className="h-4 w-4 text-sky-300" />
+                        <div className="h-9 w-9 rounded-lg bg-amber-500/12 flex items-center justify-center shrink-0">
+                          <Icon className="h-4 w-4 text-amber-300" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-semibold text-slate-100 leading-snug">{meta.nome}</p>
@@ -211,7 +211,7 @@ export default function MinhaAssinatura() {
                           <button
                             onClick={() => alterar(k, +1)}
                             disabled={n >= maxAddon(k)}
-                            className="h-8 w-8 rounded-lg bg-sky-500/90 hover:bg-sky-400 text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
+                            className="h-8 w-8 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
                           >
                             <Plus className="h-4 w-4" />
                           </button>
@@ -231,12 +231,12 @@ export default function MinhaAssinatura() {
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">
                     <p className="text-[11px] text-slate-500">Novo total {anual ? 'anual' : 'mensal'}</p>
-                    <p className="text-base font-bold text-sky-300 tabular-nums">{R$(valorCiclo)}</p>
+                    <p className="text-base font-bold text-amber-300 tabular-nums">{R$(valorCiclo)}</p>
                   </div>
                   <button
                     onClick={confirmar}
                     disabled={!mudou || salvando}
-                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-lg shadow-amber-500/20 transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {salvando ? <><Loader2 className="h-4 w-4 animate-spin" /> Aplicando…</> : <><Check className="h-4 w-4" /> Confirmar capacidade</>}
                   </button>
