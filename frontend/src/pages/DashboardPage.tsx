@@ -373,12 +373,12 @@ export default function DashboardPage() {
           <div className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
             {PERIODOS.map(p => (
               <button key={p.key} onClick={() => setPeriodo(p.key)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${periodo === p.key ? 'bg-sky-500/20 text-sky-200' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${periodo === p.key ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
                 {p.label}
               </button>
             ))}
             <button onClick={() => setPeriodo('custom')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${periodo === 'custom' ? 'bg-sky-500/20 text-sky-200' : 'text-slate-400 hover:text-slate-200'}`}>
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${periodo === 'custom' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
               <CalendarRange className="h-3.5 w-3.5" /> Personalizado
             </button>
           </div>
@@ -392,8 +392,8 @@ export default function DashboardPage() {
                 className="bg-transparent text-xs text-slate-200 outline-none [color-scheme:dark]" />
             </div>
           )}
-          <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm">
-            <RefreshCw className={`h-4 w-4 text-sky-400 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+          <button onClick={carregar} className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] px-3 py-2 rounded-lg text-slate-200 text-sm transition-colors">
+            <RefreshCw className={`h-4 w-4 text-amber-400 ${loading ? 'animate-spin' : ''}`} /> Atualizar
           </button>
         </div>
       </div>
@@ -481,7 +481,7 @@ export default function DashboardPage() {
       </Secao>
 
       {/* ═══ ESTOQUE / WMS ═══ */}
-      <Secao icon={Boxes} titulo="Estoque & WMS" cor="#38bdf8">
+      <Secao icon={Boxes} titulo="Estoque & WMS" cor="#FFC24B">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           <Kpi icon={Package} label="Itens c/ Saldo" value={num(e?.itensComSaldo ?? 0)} tone="sky" sub={`de ${num(e?.produtosAtivos ?? 0)} ativos`} onClick={() => setDetalhe(abrir('itens'))} />
           <Kpi icon={CircleDollarSign} label="Valor do Estoque" value={R$c(e?.valorEstoque ?? 0)} tone="emerald" sub="a custo médio" onClick={() => setDetalhe(abrir('valorEstoque'))} />
@@ -497,7 +497,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Pedidos por status */}
         <div className="card p-5">
-          <h3 className="font-semibold text-slate-100 text-sm mb-4 flex items-center gap-2"><PackageCheck className="h-4 w-4 text-sky-400" /> Pedidos por status</h3>
+          <h3 className="font-semibold text-slate-100 text-sm mb-4 flex items-center gap-2"><PackageCheck className="h-4 w-4 text-amber-400" /> Pedidos por status</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={statusData} layout="vertical" margin={{ left: 8, right: 16, top: 0, bottom: 0 }}>
               <XAxis type="number" hide />
@@ -539,8 +539,8 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-slate-100 text-sm flex items-center gap-2"><Boxes className="h-4 w-4 text-teal-400" /> Top produtos (saída)</h3>
             <div className="flex rounded-md border border-white/[0.08] p-0.5 text-[10px]">
-              <button onClick={() => setOrdProduto('custo')} className={`px-2 py-0.5 rounded ${ordProduto === 'custo' ? 'bg-teal-500/20 text-teal-200' : 'text-slate-500'}`}>R$</button>
-              <button onClick={() => setOrdProduto('qtd')} className={`px-2 py-0.5 rounded ${ordProduto === 'qtd' ? 'bg-teal-500/20 text-teal-200' : 'text-slate-500'}`}>kg</button>
+              <button onClick={() => setOrdProduto('custo')} className={`px-2 py-0.5 rounded ${ordProduto === 'custo' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-500'}`}>R$</button>
+              <button onClick={() => setOrdProduto('qtd')} className={`px-2 py-0.5 rounded ${ordProduto === 'qtd' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-500'}`}>kg</button>
             </div>
           </div>
           <div className="space-y-1.5">
@@ -558,7 +558,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ═══ FLUXO OPERACIONAL ═══ */}
-      <Secao icon={Activity} titulo="Fluxo operacional do dia" cor="#38bdf8">
+      <Secao icon={Activity} titulo="Fluxo operacional do dia" cor="#FFC24B">
         <div className="card p-5">
           <div className="grid grid-cols-4 gap-0">
             {[
