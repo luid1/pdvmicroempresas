@@ -7,7 +7,7 @@ import { CadastroShell, TopBar, TableCard, Th, Modal, Campo, Loader, Vazio, inp 
 
 const num = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
 const dt = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
-const STATUS_COR: Record<string, string> = { EM_CONTAGEM: 'bg-amber-500/15 text-amber-400', FECHADO: 'bg-emerald-500/15 text-emerald-400', ABERTO: 'bg-sky-500/15 text-sky-400' };
+const STATUS_COR: Record<string, string> = { EM_CONTAGEM: 'bg-amber-500/15 text-amber-400', FECHADO: 'bg-emerald-500/15 text-emerald-400', ABERTO: 'bg-white/[0.06] text-slate-300' };
 
 export default function Inventario() {
   const { filialAtiva } = useAuth();
@@ -28,7 +28,7 @@ export default function Inventario() {
     <CadastroShell>
       <TopBar icon={<ClipboardList className="h-5 w-5" />} titulo="Inventário" subtitulo={`${lista.length} contagem(ns)`}
         novoLabel="Novo Inventário" onNovo={() => setNovo(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-sky-400" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>} />
 
       <div className="flex-1 overflow-auto p-4">
         {loading ? <Loader /> : lista.length === 0 ? <Vazio icon={<ClipboardList className="h-10 w-10" />} texto="Nenhum inventário. Clique em Novo Inventário para começar a contagem." /> : (
@@ -36,14 +36,14 @@ export default function Inventario() {
             <thead><tr>{['Descrição', 'Filial', 'Início', 'Fim', 'Itens', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(iv => (
-                <tr key={iv.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={iv.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-2.5 font-semibold text-slate-100">{iv.descricao}</td>
                   <td className="px-3 py-2.5 text-slate-300">{iv.filial?.nome || '—'}</td>
                   <td className="px-3 py-2.5 text-slate-400">{dt(iv.dataInicio)}</td>
                   <td className="px-3 py-2.5 text-slate-400">{dt(iv.dataFim)}</td>
                   <td className="px-3 py-2.5 text-center text-slate-300">{iv._count?.itens ?? '—'}</td>
                   <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COR[iv.status] || 'bg-slate-700'}`}>{iv.status}</span></td>
-                  <td className="px-3 py-2.5"><button onClick={() => setAbertoId(iv.id)} className="text-[11px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-1 rounded font-semibold hover:bg-sky-500/20">{iv.status === 'FECHADO' ? 'Ver' : 'Contar'}</button></td>
+                  <td className="px-3 py-2.5"><button onClick={() => setAbertoId(iv.id)} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20">{iv.status === 'FECHADO' ? 'Ver' : 'Contar'}</button></td>
                 </tr>
               ))}
             </tbody>
@@ -144,7 +144,7 @@ function Contagem({ id, onVoltar }: { id: string; onVoltar: () => void }) {
                     <td className="px-3 py-2 text-right">
                       {fechado ? <span className="font-mono text-slate-200">{num(it.quantidadeContada)}</span> : (
                         <input type="number" value={contagens[it.id] ?? ''} onChange={e => setContagens(p => ({ ...p, [it.id]: e.target.value }))}
-                          onBlur={() => salvarItem(it.id)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-slate-100 w-24 text-right focus:border-sky-500" placeholder="—" />
+                          onBlur={() => salvarItem(it.id)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-slate-100 w-24 text-right focus:border-amber-400" placeholder="—" />
                       )}
                     </td>
                     <td className={`px-3 py-2 text-right font-mono font-bold ${dif == null ? 'text-slate-500' : dif === 0 ? 'text-slate-400' : dif > 0 ? 'text-emerald-400' : 'text-rose-400'}`}>{dif == null ? '—' : (dif > 0 ? '+' : '') + num(dif)}</td>

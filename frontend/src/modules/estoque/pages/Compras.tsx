@@ -9,8 +9,8 @@ import { CadastroShell, TopBar, FilterBar, Chips, TableCard, Th, Modal, Secao, C
 const dt = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 const STATUS: Record<string, { label: string; cor: string }> = {
   PENDENTE: { label: 'Pendente', cor: 'bg-amber-500/15 text-amber-400' },
-  APROVADA: { label: 'Aprovada', cor: 'bg-sky-500/15 text-sky-400' },
-  PARCIAL: { label: 'Parcial', cor: 'bg-violet-500/15 text-violet-400' },
+  APROVADA: { label: 'Aprovada', cor: 'bg-white/[0.06] text-slate-300' },
+  PARCIAL: { label: 'Parcial', cor: 'bg-white/[0.12] text-slate-200' },
   ENTREGUE: { label: 'Entregue', cor: 'bg-emerald-500/15 text-emerald-400' },
   CANCELADA: { label: 'Cancelada', cor: 'bg-rose-500/15 text-rose-400' },
 };
@@ -50,7 +50,7 @@ export default function Compras() {
     <CadastroShell>
       <TopBar icon={<ShoppingCart className="h-5 w-5" />} titulo="Ordens de Compra" subtitulo={`${lista.length} OC(s) — compras e suprimentos`}
         novoLabel="Nova OC" onNovo={() => setCriar(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-sky-400" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>} />
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por nº ou fornecedor...">
         <Chips value={status} onChange={setStatus} options={[{ value: '', label: 'Todas' }, ...Object.keys(STATUS).map(s => ({ value: s, label: STATUS[s].label }))]} />
       </FilterBar>
@@ -61,7 +61,7 @@ export default function Compras() {
             <thead><tr>{['OC', 'Fornecedor', 'Emissão', 'Entrega prev.', 'Pagamento', 'Itens', 'Total', 'Status', 'Ações'].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(oc => (
-                <tr key={oc.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={oc.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-2.5 font-bold text-slate-100">#{oc.numero}</td>
                   <td className="px-3 py-2.5 text-slate-200">{oc.fornecedor?.nomeFantasia || oc.fornecedor?.razaoSocial}</td>
                   <td className="px-3 py-2.5 text-slate-400">{dt(oc.dataEmissao)}</td>
@@ -72,9 +72,9 @@ export default function Compras() {
                   <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS[oc.status]?.cor}`}>{STATUS[oc.status]?.label || oc.status}</span></td>
                   <td className="px-3 py-2.5 whitespace-nowrap">
                     <div className="flex items-center gap-1">
-                      {oc.status === 'PENDENTE' && <button onClick={() => acao(oc, 'APROVADA')} className="text-[11px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-1 rounded font-semibold hover:bg-sky-500/20 flex items-center gap-1"><Check className="h-3 w-3" /> Aprovar</button>}
+                      {oc.status === 'PENDENTE' && <button onClick={() => acao(oc, 'APROVADA')} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Check className="h-3 w-3" /> Aprovar</button>}
                       {(oc.status === 'PENDENTE' || oc.status === 'APROVADA' || oc.status === 'PARCIAL') && <button onClick={() => navigate(`/wms/entradas?oc=${oc.id}`)} className="text-[11px] bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2 py-1 rounded font-semibold hover:bg-emerald-500/20 flex items-center gap-1" title="Receber via Entrada de mercadoria"><PackageCheck className="h-3 w-3" /> Receber</button>}
-                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA') && <button onClick={() => abrirEditar(oc)} className="text-slate-400 hover:text-sky-300 p-1" title="Editar"><Pencil className="h-3.5 w-3.5" /></button>}
+                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA') && <button onClick={() => abrirEditar(oc)} className="text-slate-400 hover:text-amber-300 p-1" title="Editar"><Pencil className="h-3.5 w-3.5" /></button>}
                       {oc.status !== 'ENTREGUE' && oc.status !== 'CANCELADA' && <button onClick={() => acao(oc, 'CANCELADA', `Cancelar a OC #${oc.numero}?`)} className="text-slate-400 hover:text-rose-400 p-1" title="Cancelar"><Ban className="h-3.5 w-3.5" /></button>}
                       {oc.status === 'PENDENTE' && <button onClick={() => excluir(oc)} className="text-slate-400 hover:text-rose-400 p-1" title="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
@@ -142,7 +142,7 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
     finally { setSalvando(false); }
   };
 
-  const fld = 'w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500';
+  const fld = 'w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400';
   const lb = 'block text-[9px] font-bold text-slate-500 uppercase mb-0.5';
 
   return (
@@ -182,7 +182,7 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={addItem} className="flex items-center gap-1 text-xs text-sky-300 hover:text-sky-200 font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
+        <button onClick={addItem} className="flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
         <span className="text-sm text-slate-300">Total da OC: <b className="text-slate-100 text-base">{R$(total)}</b></span>
       </div>
 

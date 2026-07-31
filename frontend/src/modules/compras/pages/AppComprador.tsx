@@ -97,7 +97,7 @@ interface HistoricoCompra {
 const STATUS_CI: Record<StatusOC, { label: string; cls: string }> = {
   PENDENTE: { label: 'Pendente', cls: 'bg-amber-100 text-amber-700' },
   APROVADA: { label: 'Aprovada', cls: 'bg-emerald-100 text-emerald-700' },
-  PARCIAL: { label: 'Parcial', cls: 'bg-sky-100 text-sky-700' },
+  PARCIAL: { label: 'Parcial', cls: 'bg-slate-200 text-slate-700' },
   ENTREGUE: { label: 'Entregue', cls: 'bg-neutral-200 text-neutral-600' },
   CANCELADA: { label: 'Cancelada', cls: 'bg-rose-100 text-rose-700' },
 };

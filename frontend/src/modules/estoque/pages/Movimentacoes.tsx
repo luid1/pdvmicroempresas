@@ -10,7 +10,7 @@ const dt = (v: any) => v ? new Date(v).toLocaleString('pt-BR', { day: '2-digit',
 const TIPOS: Record<string, { label: string; entrada: boolean; cor: string }> = {
   ENTRADA_COMPRA: { label: 'Entrada (compra)', entrada: true, cor: 'text-emerald-400 bg-emerald-500/10' },
   ENTRADA_DEVOLUCAO: { label: 'Entrada (devolução)', entrada: true, cor: 'text-emerald-400 bg-emerald-500/10' },
-  TRANSFERENCIA_ENTRADA: { label: 'Transf. entrada', entrada: true, cor: 'text-sky-400 bg-sky-500/10' },
+  TRANSFERENCIA_ENTRADA: { label: 'Transf. entrada', entrada: true, cor: 'text-cyan-400 bg-cyan-500/10' },
   AJUSTE_POSITIVO: { label: 'Ajuste +', entrada: true, cor: 'text-emerald-400 bg-emerald-500/10' },
   SAIDA_VENDA: { label: 'Saída (venda)', entrada: false, cor: 'text-rose-400 bg-rose-500/10' },
   SAIDA_DEVOLUCAO_FORNECEDOR: { label: 'Saída (devol. forn.)', entrada: false, cor: 'text-rose-400 bg-rose-500/10' },
@@ -53,7 +53,7 @@ export default function Movimentacoes() {
   return (
     <CadastroShell>
       <TopBar icon={<ArrowLeftRight className="h-5 w-5" />} titulo="Movimentações" subtitulo={`${filtradas.length} lançamento(s) — extrato de estoque`}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-sky-400" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>} />
 
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por produto ou código...">
         <select value={tipo} onChange={e => setTipo(e.target.value)} className={`${inp} w-auto`}>
@@ -67,7 +67,7 @@ export default function Movimentacoes() {
       <div className="px-4 pt-4 grid grid-cols-3 gap-3">
         <div className="bg-[#111d33] border border-slate-800 rounded-xl p-3 flex items-center gap-3"><div className="h-9 w-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><ArrowDownCircle className="h-5 w-5" /></div><div><p className="text-[10px] uppercase text-slate-500 font-semibold">Entradas (qtd)</p><p className="text-lg font-bold text-emerald-400">{num(kpis.ent)}</p></div></div>
         <div className="bg-[#111d33] border border-slate-800 rounded-xl p-3 flex items-center gap-3"><div className="h-9 w-9 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center"><ArrowUpCircle className="h-5 w-5" /></div><div><p className="text-[10px] uppercase text-slate-500 font-semibold">Saídas (qtd)</p><p className="text-lg font-bold text-rose-400">{num(kpis.sai)}</p></div></div>
-        <div className="bg-[#111d33] border border-slate-800 rounded-xl p-3 flex items-center gap-3"><div className="h-9 w-9 rounded-lg bg-sky-500/10 text-sky-400 flex items-center justify-center"><ArrowLeftRight className="h-5 w-5" /></div><div><p className="text-[10px] uppercase text-slate-500 font-semibold">Lançamentos</p><p className="text-lg font-bold text-slate-100">{kpis.total}</p></div></div>
+        <div className="bg-[#111d33] border border-slate-800 rounded-xl p-3 flex items-center gap-3"><div className="h-9 w-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"><ArrowLeftRight className="h-5 w-5" /></div><div><p className="text-[10px] uppercase text-slate-500 font-semibold">Lançamentos</p><p className="text-lg font-bold text-slate-100">{kpis.total}</p></div></div>
       </div>
 
       <div className="flex-1 overflow-auto p-4">
@@ -78,7 +78,7 @@ export default function Movimentacoes() {
               {filtradas.map(m => {
                 const t = TIPOS[m.tipo] || { label: m.tipo, entrada: false, cor: 'text-slate-300 bg-slate-500/10' };
                 return (
-                  <tr key={m.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                  <tr key={m.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                     <td className="px-3 py-2 text-slate-400 text-xs whitespace-nowrap">{dt(m.dataMovimento)}</td>
                     <td className="px-3 py-2"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${t.cor}`}>{t.label}</span></td>
                     <td className="px-3 py-2"><p className="font-semibold text-slate-100 truncate max-w-[200px]">{m.produto?.descricao}</p><p className="text-slate-500 text-xs font-mono">{m.produto?.codigo}</p></td>

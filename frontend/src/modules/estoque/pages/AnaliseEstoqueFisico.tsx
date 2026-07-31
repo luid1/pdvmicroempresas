@@ -318,7 +318,7 @@ export default function AnaliseEstoqueFisico() {
       return { ...np, saldoFinal, valorAtualEstoque, diferencaEstoque };
     }));
   };
-  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-white/[0.08] bg-white/[0.04] text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-400/40 focus:border-sky-400/60';
+  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-white/[0.08] bg-white/[0.04] text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400/60';
 
   // Célula editável por clique: mostra o número limpo; vira input só no clique.
   const isEditing = (id: string, campo: string) => editCell?.id === id && editCell?.campo === campo;
@@ -331,7 +331,7 @@ export default function AnaliseEstoqueFisico() {
           placeholder={placeholder}
           onBlur={(e) => { commit(e.target.value); setEditCell(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditCell(null); }}
-          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-sky-400/10 border border-sky-400/60 text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-400/40"
+          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/60 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-400/40"
         />
       );
     }
@@ -339,7 +339,7 @@ export default function AnaliseEstoqueFisico() {
     return (
       <button
         onClick={(e) => { e.stopPropagation(); setEditCell({ id, campo }); }}
-        className={`w-full text-right font-mono px-1.5 py-0.5 rounded hover:bg-sky-400/10 hover:ring-1 hover:ring-sky-400/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? 'text-amber-300 font-semibold' : ''}`}
+        className={`w-full text-right font-mono px-1.5 py-0.5 rounded hover:bg-amber-400/10 hover:ring-1 hover:ring-amber-400/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? 'text-amber-300 font-semibold' : ''}`}
       >
         {vazio ? <span className="text-slate-600">{placeholder || '—'}</span> : fmtN(valor as number)}
       </button>
@@ -479,10 +479,10 @@ export default function AnaliseEstoqueFisico() {
           <div className="relative flex-1 min-w-[220px] max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Filtrar por código ou descrição..."
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-sky-400/60 transition-all duration-300" />
+              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/60 transition-all duration-300" />
           </div>
-          {familia !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-sky-500/15 text-sky-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{familia}<button onClick={() => handleFamiliaChange('<Todas>')}><X className="h-3 w-3" /></button></span>}
-          {grupo !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-violet-500/15 text-violet-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{grupo}<button onClick={() => setGrupo('<Todas>')}><X className="h-3 w-3" /></button></span>}
+          {familia !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{familia}<button onClick={() => handleFamiliaChange('<Todas>')}><X className="h-3 w-3" /></button></span>}
+          {grupo !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-white/[0.06] text-slate-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{grupo}<button onClick={() => setGrupo('<Todas>')}><X className="h-3 w-3" /></button></span>}
           {confFisica && <span className="bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-lg text-xs font-semibold">Conferência física</span>}
           <button onClick={() => setFiltros(true)} className={btnGlass + ' ml-auto'}>
             <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
@@ -534,16 +534,16 @@ export default function AnaliseEstoqueFisico() {
                     key={p.id}
                     onClick={() => setSelId(p.id)}
                     onDoubleClick={() => setDetalheAberto(p)}
-                    className={`group border-b border-white/[0.04] cursor-pointer transition-colors ${sel ? 'bg-sky-500/15 text-sky-100' : 'hover:bg-white/[0.03]'}`}
+                    className={`group border-b border-white/[0.04] cursor-pointer transition-colors ${sel ? 'bg-amber-500/15 text-amber-100' : 'hover:bg-white/[0.03]'}`}
                     title="Duplo clique para ver movimentações"
                   >
-                    <td className={`sticky left-0 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-sky-500/[0.18]' : 'bg-[#0c1119] group-hover:bg-[#131a26]'}`}>
+                    <td className={`sticky left-0 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-amber-500/[0.18]' : 'bg-[#0c1119] group-hover:bg-[#131a26]'}`}>
                       <div className="flex items-center gap-1">
-                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-sky-200/70' : 'text-slate-600'}`} />
-                        <span className={`font-semibold ${sel ? 'text-sky-100' : 'text-sky-300'}`}>{p.codigo}</span>
+                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-amber-200/70' : 'text-slate-600'}`} />
+                        <span className={`font-semibold ${sel ? 'text-amber-100' : 'text-amber-300'}`}>{p.codigo}</span>
                       </div>
                     </td>
-                    <td className={`sticky left-24 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-sky-500/[0.18] text-sky-100' : 'bg-[#0c1119] group-hover:bg-[#131a26] text-slate-200'}`}>{p.descricao}</td>
+                    <td className={`sticky left-24 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-amber-500/[0.18] text-amber-100' : 'bg-[#0c1119] group-hover:bg-[#131a26] text-slate-200'}`}>{p.descricao}</td>
                     <td className="px-2 py-1 border-r border-white/[0.05] text-slate-400">{p.familia}</td>
                     <td className={`px-2 py-1 border-r border-white/[0.05] text-right font-mono ${sel ? '' : p.saldoInicial < 0 ? 'text-rose-400' : 'text-slate-300'}`} title="Calculado pelo sistema (não editável)">{fmtN(p.saldoInicial)}</td>
                     <td className="px-1 py-0.5 border-r border-white/[0.05]" onClick={e => e.stopPropagation()}>
@@ -610,7 +610,7 @@ export default function AnaliseEstoqueFisico() {
             <p className="text-sm text-gray-600 mt-1">Processando...</p>
             <p className="text-xl font-bold text-gray-900 mt-2">Aguarde...</p>
             <p className="text-xs text-gray-500 mt-2">Produto: <strong>{prodProcessando}</strong></p>
-            <div className="animate-spin h-6 w-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mt-3" />
+            <div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto mt-3" />
             <button onClick={() => setProcessando(false)} className="mt-4 px-4 py-1 bg-gray-200 border border-gray-400 rounded text-xs text-gray-700 hover:bg-gray-300">
               Cancelar
             </button>
@@ -645,7 +645,7 @@ export default function AnaliseEstoqueFisico() {
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-gray-600">Saldo Atual</span>
-                <span className="bg-sky-500 text-white px-3 py-1 rounded font-bold font-mono text-sm">
+                <span className="bg-amber-500 text-slate-900 px-3 py-1 rounded font-bold font-mono text-sm">
                   {fmtN(detalheAberto.saldoFinal)}
                 </span>
               </div>
@@ -663,7 +663,7 @@ export default function AnaliseEstoqueFisico() {
                 <tbody>
                   {(MOCK_MOVIMENTACOES[detalheAberto.id] || []).map((m, i) => (
                     <tr key={i} className="border-b border-gray-100 hover:bg-white/[0.03]">
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-sky-300 whitespace-nowrap">{m.idDfe}</td>
+                      <td className="px-2 py-1 border-r border-white/[0.05] text-amber-300 whitespace-nowrap">{m.idDfe}</td>
                       <td className="px-2 py-1 border-r border-white/[0.05] whitespace-nowrap font-medium">{m.nomeCliente}</td>
                       <td className="px-2 py-1 border-r border-white/[0.05]">{m.natureza}</td>
                       <td className="px-2 py-1 border-r border-white/[0.05] text-orange-600 font-bold">{m.observacoes}</td>
@@ -701,7 +701,7 @@ export default function AnaliseEstoqueFisico() {
                 >
                   <Download className="h-3 w-3" /> Exportar
                 </button>
-                <button onClick={() => setDetalheAberto(null)} className="px-4 py-1 bg-sky-500 text-white rounded font-medium hover:bg-sky-400">
+                <button onClick={() => setDetalheAberto(null)} className="px-4 py-1 bg-amber-500 text-slate-900 rounded font-medium hover:bg-amber-400">
                   OK
                 </button>
               </div>
@@ -715,7 +715,7 @@ export default function AnaliseEstoqueFisico() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setFiltros(false)}>
           <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-lg animate-modal" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
-              <h2 className="font-bold text-white text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-sky-300" /> Filtros</h2>
+              <h2 className="font-bold text-white text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-amber-300" /> Filtros</h2>
               <button onClick={() => setFiltros(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.06]"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-5 space-y-4">
@@ -732,18 +732,18 @@ export default function AnaliseEstoqueFisico() {
               <div>
                 <label className={fLbl}>Unidade de Apuração</label>
                 <div className="flex gap-4 mt-1">
-                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-sky-500" /> Estoque</label>
-                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-sky-500" /> Principal</label>
+                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-amber-500" /> Estoque</label>
+                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-amber-500" /> Principal</label>
                 </div>
               </div>
               <div className="flex flex-col gap-2 pt-1 border-t border-white/[0.06]">
-                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-sky-500" /> Conferência Física (mostra colunas de contagem)</label>
-                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-sky-500" /> Não mostrar Ordens de Compra</label>
+                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-amber-500" /> Conferência Física (mostra colunas de contagem)</label>
+                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-amber-500" /> Não mostrar Ordens de Compra</label>
               </div>
             </div>
             <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">
               <button onClick={() => setFiltros(false)} className={btnGlass}>Fechar</button>
-              <button onClick={() => { setFiltros(false); handleExecutar(); }} className={btnPrimary + ' bg-sky-500 hover:bg-sky-400 shadow-sky-500/20'}>Aplicar filtros</button>
+              <button onClick={() => { setFiltros(false); handleExecutar(); }} className={btnPrimary}>Aplicar filtros</button>
             </div>
           </div>
         </div>
@@ -778,11 +778,11 @@ export default function AnaliseEstoqueFisico() {
 
 // Card de KPI — número oversized (padrão do ERP)
 function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; label: string; value: string; accent?: boolean; tone?: 'rose' | 'amber' }) {
-  const cor = tone === 'rose' ? 'text-rose-300' : tone === 'amber' ? 'text-amber-300' : accent ? 'text-sky-200' : 'text-white';
+  const cor = tone === 'rose' ? 'text-rose-300' : tone === 'amber' ? 'text-amber-300' : accent ? 'text-amber-200' : 'text-white';
   return (
     <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] px-4 py-3">
       <div className="flex items-center gap-2 text-slate-500">
-        <span className="text-sky-300/70">{icon}</span>
+        <span className="text-amber-300/70">{icon}</span>
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
       <p className={`mt-1.5 text-2xl font-extrabold tracking-tight tabular-nums ${cor}`}>{value}</p>
@@ -791,4 +791,4 @@ function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; 
 }
 
 const fLbl = 'block text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1';
-const fInp = 'w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-sky-400/60';
+const fInp = 'w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-400/60';

@@ -53,7 +53,7 @@ export default function Pereciveis() {
         extra={
           <div className="flex items-center gap-2">
             <button onClick={() => setAddOpen(true)} className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg text-white text-sm font-semibold"><Plus className="h-4 w-4" /> Adicionar validade</button>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-sky-400" /> Atualizar</button>
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>
           </div>
         } />
 
@@ -84,7 +84,7 @@ export default function Pereciveis() {
               {filtradas.map(x => {
                 const d = diasAte(x.lote?.dataValidade);
                 return (
-                  <tr key={x.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                  <tr key={x.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                     <td className="px-3 py-2.5"><p className="font-semibold text-slate-100">{x.produto?.descricao}</p><p className="text-slate-500 text-xs font-mono">{x.produto?.codigo}</p></td>
                     <td className="px-3 py-2.5 font-mono text-slate-300 text-xs">{x.lote?.numero || '—'}</td>
                     <td className="px-3 py-2.5 text-slate-300">{dt(x.lote?.dataValidade)}</td>
@@ -188,7 +188,7 @@ function ModalValidade({ filialId, onFechar, onSalvou }: { filialId: string; onF
                 {opcoes.length > 0 && (
                   <div className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-lg border border-slate-700 bg-[#0b1526] shadow-xl">
                     {opcoes.map(o => (
-                      <button key={o.id} onClick={() => { setProd(o); setOpcoes([]); }} className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-sky-500/10">
+                      <button key={o.id} onClick={() => { setProd(o); setOpcoes([]); }} className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-amber-500/10">
                         <span className="text-sm text-slate-100">{o.descricao}</span>
                         <span className="text-xs font-mono text-slate-500">{o.codigo}</span>
                       </button>

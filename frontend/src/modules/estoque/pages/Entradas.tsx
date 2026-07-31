@@ -38,7 +38,7 @@ export default function Entradas() {
     <CadastroShell>
       <TopBar icon={<PackagePlus className="h-5 w-5" />} titulo="Entradas (XML NF-e)" subtitulo={`${lista.length} entrada(s) — recebimento de mercadoria`}
         novoLabel="Nova Entrada" onNovo={() => setModal(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-sky-400" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>} />
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por NF, chave ou fornecedor..." />
 
       <div className="flex-1 overflow-auto p-4">
@@ -47,7 +47,7 @@ export default function Entradas() {
             <thead><tr>{['Data', 'Fornecedor', 'NF', 'Chave', 'Itens', 'Valor', 'Status'].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(e => (
-                <tr key={e.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={e.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-2.5 text-slate-300">{dt(e.dataEntrada)}</td>
                   <td className="px-3 py-2.5 font-semibold text-slate-100">{e.fornecedor?.nomeFantasia || e.fornecedor?.razaoSocial}</td>
                   <td className="px-3 py-2.5 text-slate-300">{e.numeroNf ? `${e.numeroNf}/${e.serieNf || '1'}` : '—'}</td>
@@ -177,13 +177,13 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
   return (
     <Modal titulo={ocNumero ? `Receber OC #${ocNumero} — Entrada de Mercadoria` : 'Nova Entrada de Mercadoria'} onClose={onClose} onSalvar={salvar} salvando={salvando} salvarLabel="Dar entrada" wide>
       {/* Upload XML */}
-      <label className="flex items-center gap-3 bg-slate-800/60 border border-dashed border-slate-600 rounded-lg px-4 py-3 cursor-pointer hover:border-sky-500">
-        <Upload className="h-5 w-5 text-sky-400" />
+      <label className="flex items-center gap-3 bg-slate-800/60 border border-dashed border-slate-600 rounded-lg px-4 py-3 cursor-pointer hover:border-amber-500">
+        <Upload className="h-5 w-5 text-amber-400" />
         <div className="flex-1"><p className="text-sm font-semibold text-slate-200">Importar XML da NF-e do fornecedor</p><p className="text-xs text-slate-500">Preenche os itens automaticamente (você confere o vínculo dos produtos).</p></div>
         <FileCode className="h-4 w-4 text-slate-500" />
         <input type="file" accept=".xml,text/xml" className="hidden" onChange={e => e.target.files?.[0] && onXml(e.target.files[0])} />
       </label>
-      {aviso && <p className="text-xs text-sky-300 bg-sky-500/10 px-3 py-2 rounded-lg">{aviso}</p>}
+      {aviso && <p className="text-xs text-amber-300 bg-amber-500/10 px-3 py-2 rounded-lg">{aviso}</p>}
 
       <Secao titulo="Dados da nota" />
       <div className="grid grid-cols-4 gap-3">
@@ -207,7 +207,7 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
       <Secao titulo="Itens" />
       <div className="space-y-2">
         {itens.map((it, i) => {
-          const fld = 'w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-sky-500';
+          const fld = 'w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400';
           const lb = 'block text-[9px] font-bold text-slate-500 uppercase mb-0.5';
           return (
             <div key={i} className="border border-slate-700 rounded-lg p-3 bg-slate-800/30">
@@ -238,13 +238,13 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
         })}
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={addItem} className="flex items-center gap-1 text-xs text-sky-300 hover:text-sky-200 font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
+        <button onClick={addItem} className="flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
         <span className="text-sm text-slate-300">Total da nota: <b className="text-slate-100">{R$(totalNota)}</b></span>
       </div>
 
       <Secao titulo="Financeiro" />
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-sm text-slate-200"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-sky-500 h-4 w-4" /> Gerar Contas a Pagar</label>
+        <label className="flex items-center gap-2 text-sm text-slate-200"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-amber-500 h-4 w-4" /> Gerar Contas a Pagar</label>
         {gerarCP && <Campo label="Vencimento"><input type="date" value={dataVenc} onChange={e => setDataVenc(e.target.value)} className={inp} /></Campo>}
       </div>
       <p className="text-[11px] text-slate-500">Itens vinculados a um produto dão entrada no estoque (com lote/validade se informados). Sem vínculo, entram só como documento.</p>
