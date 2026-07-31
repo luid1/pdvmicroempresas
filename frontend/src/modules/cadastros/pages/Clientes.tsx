@@ -48,7 +48,7 @@ export default function Clientes() {
             </tr></thead>
             <tbody>
               {clientes.map(c => (
-                <tr key={c.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={c.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-1.5">
                     <p className="font-semibold text-slate-100 truncate max-w-[240px]">{c.nomeFantasia || c.razaoSocial}</p>
                     {c.nomeFantasia && <p className="text-slate-500 text-xs truncate max-w-[240px]">{c.razaoSocial}</p>}
@@ -61,7 +61,7 @@ export default function Clientes() {
                   <td className="px-3 py-1.5"><StatusBadge ativo={c.ativo} inativoLabel="BLOQUEADO" /></td>
                   <td className="px-3 py-1.5">
                     <div className="flex gap-1.5">
-                      {pode('/cadastros/clientes', 'EDITAR') && <button onClick={() => setEditando(c)} className="text-[11px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-1 rounded font-semibold hover:bg-sky-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                      {pode('/cadastros/clientes', 'EDITAR') && <button onClick={() => setEditando(c)} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
                       {pode('/cadastros/clientes', 'EXCLUIR') && <button onClick={() => excluir(c)} className="text-slate-500 hover:text-rose-400 px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   </td>

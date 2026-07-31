@@ -6,8 +6,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { CadastroShell, TopBar, FilterBar, Chips, TableCard, Th, StatusBadge, Modal, SteppedForm, Step, Campo, Loader, Vazio, inp, UFS } from '../ui';
 
 const PARCERIA: Record<string, { label: string; cor: string }> = {
-  COMPRA_DIRETA: { label: 'Compra Direta', cor: 'bg-sky-500/15 text-sky-300' },
-  CONSIGNACAO: { label: 'Consignação', cor: 'bg-violet-500/15 text-violet-300' },
+  COMPRA_DIRETA: { label: 'Compra Direta', cor: 'bg-amber-500/15 text-amber-300' },
+  CONSIGNACAO: { label: 'Consignação', cor: 'bg-white/[0.06] text-slate-300' },
 };
 
 export default function Fornecedores() {
@@ -50,7 +50,7 @@ export default function Fornecedores() {
             <thead><tr>{['Produtor / Razão Social', 'CPF/CNPJ', 'Insc. Rural', 'Propriedade', 'Parceria', 'PIX', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(f => (
-                <tr key={f.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={f.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-1.5"><p className="font-semibold text-slate-100 truncate max-w-[220px]">{f.razaoSocial}</p>{f.nomeFantasia && <p className="text-slate-500 text-xs">{f.nomeFantasia}</p>}</td>
                   <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{f.cnpj}</td>
                   <td className="px-3 py-1.5 text-slate-400 text-xs">{f.inscricaoRural || '—'}</td>
@@ -59,7 +59,7 @@ export default function Fornecedores() {
                   <td className="px-3 py-1.5 font-mono text-slate-400 text-xs truncate max-w-[120px]">{f.pix || '—'}</td>
                   <td className="px-3 py-1.5"><StatusBadge ativo={f.ativo} /></td>
                   <td className="px-3 py-1.5"><div className="flex gap-1.5">
-                    {pode('/cadastros/fornecedores', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-1 rounded font-semibold hover:bg-sky-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                    {pode('/cadastros/fornecedores', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
                     {pode('/cadastros/fornecedores', 'EXCLUIR') && <button onClick={() => excluir(f)} className="text-slate-500 hover:text-rose-400 px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
                   </div></td>
                 </tr>

@@ -39,7 +39,7 @@ export default function Filiais() {
                 const ocup = Number(f.ocupacaoPaletes) || 0;
                 const pct = cap > 0 ? (ocup / cap) * 100 : 0;
                 return (
-                  <tr key={f.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                  <tr key={f.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                     <td className="px-3 py-1.5"><p className="font-semibold text-slate-100">{f.nome}</p><p className="text-slate-500 text-xs font-mono">{f.codigo}</p></td>
                     <td className="px-3 py-1.5 text-slate-300 text-xs">{TIPO_LABEL[f.tipo] || f.tipo}</td>
                     <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{f.cnpj || '—'}</td>
@@ -48,7 +48,7 @@ export default function Filiais() {
                     <td className="px-3 py-1.5">{cap > 0 ? <OcupacaoBar pct={pct} /> : <span className="text-slate-600 text-xs">não definida</span>}</td>
                     <td className="px-3 py-1.5"><StatusBadge ativo={f.ativo} /></td>
                     <td className="px-3 py-1.5">
-                      {pode('/cadastros/filiais', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-sky-500/10 text-sky-300 border border-sky-500/30 px-2 py-1 rounded font-semibold hover:bg-sky-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                      {pode('/cadastros/filiais', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
                     </td>
                   </tr>
                 );

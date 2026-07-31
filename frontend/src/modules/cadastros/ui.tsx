@@ -10,7 +10,7 @@ import { useAuth } from '../../contexts/AuthContext';
  */
 
 // Classes reutilizáveis (dark tech / glass)
-export const inp = 'w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-sky-400/60 focus:ring-1 focus:ring-sky-400/30 transition-all duration-300';
+export const inp = 'w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/60 focus:ring-1 focus:ring-amber-400/30 transition-all duration-300';
 export const lbl = 'block text-[10px] font-semibold text-slate-500 uppercase tracking-[0.1em] mb-1';
 
 export const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
@@ -31,7 +31,7 @@ export function TopBar({ icon, titulo, subtitulo, onNovo, novoLabel = 'Novo Cada
     <>
       <div className="border-b border-white/[0.05] px-5 py-2 flex items-center justify-between shrink-0 bg-white/[0.02] backdrop-blur-xl">
         <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-sky-300/90 shrink-0">{icon}</span>
+          <span className="text-amber-300/90 shrink-0">{icon}</span>
           <h1 className="text-sm font-bold text-white leading-tight tracking-tight shrink-0">{titulo}</h1>
           {subtitulo && <p className="text-xs text-slate-500 truncate border-l border-white/10 pl-2.5">{subtitulo}</p>}
         </div>
@@ -46,7 +46,7 @@ export function TopBar({ icon, titulo, subtitulo, onNovo, novoLabel = 'Novo Cada
 export function FAB({ onClick, label }: { onClick: () => void; label: string }) {
   return createPortal(
     <button onClick={onClick} title={label}
-      className="group fixed bottom-6 right-6 z-40 flex items-center gap-0 h-12 rounded-full bg-sky-500/90 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/30 backdrop-blur-xl border border-sky-300/20 transition-all duration-300 hover:-translate-y-[2px] active:scale-95 overflow-hidden pl-3.5 pr-3.5 hover:pr-5">
+      className="group fixed bottom-6 right-6 z-40 flex items-center gap-0 h-12 rounded-full bg-amber-400/95 hover:bg-amber-300 text-slate-900 shadow-lg shadow-amber-500/30 backdrop-blur-xl border border-amber-300/30 transition-all duration-300 hover:-translate-y-[2px] active:scale-95 overflow-hidden pl-3.5 pr-3.5 hover:pr-5">
       <Plus className="h-5 w-5 shrink-0" />
       <span className="max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap font-bold text-sm transition-all duration-300 group-hover:ml-2">{label}</span>
     </button>,
@@ -56,7 +56,7 @@ export function FAB({ onClick, label }: { onClick: () => void; label: string }) 
 
 // Classes de botão padrão (dark tech / glass) — reutilizáveis fora do kit
 export const btnGlass = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed';
-export const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-sky-500 hover:bg-sky-400 text-white shadow-lg shadow-sky-500/20 transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed';
+export const btnPrimary = 'inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-900 shadow-lg shadow-amber-500/20 transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed';
 
 // Header de página padrão — barra de vidro (mesma linguagem do TopBar).
 // Usado para padronizar telas fora do módulo de Cadastros.
@@ -65,7 +65,7 @@ export function PageHeader({ icon, titulo, subtitulo, actions }:
   return (
     <div className="border-b border-white/[0.05] px-5 py-2.5 flex items-center justify-between gap-3 shrink-0 bg-white/[0.02] backdrop-blur-xl">
       <div className="flex items-center gap-2.5 min-w-0">
-        <span className="text-sky-300/90 shrink-0">{icon}</span>
+        <span className="text-amber-300/90 shrink-0">{icon}</span>
         <h1 className="text-sm font-bold text-white leading-tight tracking-tight shrink-0">{titulo}</h1>
         {subtitulo && <p className="text-xs text-slate-500 truncate border-l border-white/10 pl-2.5 hidden sm:block">{subtitulo}</p>}
       </div>
@@ -82,7 +82,7 @@ export function FilterBar({ busca, onBusca, placeholder = 'Buscar...', children 
       <div className="relative flex-1 min-w-[220px] max-w-md">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
         <input value={busca} onChange={e => onBusca(e.target.value)} placeholder={placeholder}
-          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-sky-400/60 transition-all duration-300" />
+          className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/60 transition-all duration-300" />
       </div>
       {children}
     </div>
@@ -96,7 +96,7 @@ export function Chips({ value, onChange, options }:
     <div className="flex items-center gap-1.5">
       {options.map(o => (
         <button key={o.value} onClick={() => onChange(o.value)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-300 active:scale-[0.98] ${value === o.value ? 'bg-sky-400/10 border-sky-400/40 text-sky-300' : 'bg-white/[0.03] border-white/[0.07] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]'}`}>
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-300 active:scale-[0.98] ${value === o.value ? 'bg-amber-400/10 border-amber-400/40 text-amber-300' : 'bg-white/[0.03] border-white/[0.07] text-slate-400 hover:text-slate-200 hover:bg-white/[0.06]'}`}>
           {o.label}
         </button>
       ))}
@@ -144,8 +144,8 @@ export function Modal({ titulo, onClose, onSalvar, salvando, children, salvarLab
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={onClose}>
       <div className={`relative bg-[#0E141F]/85 backdrop-blur-2xl border border-white/[0.09] rounded-2xl shadow-[0_24px_80px_0_rgba(0,0,0,0.6)] w-full ${wide ? 'max-w-3xl' : 'max-w-2xl'} max-h-[92vh] flex flex-col overflow-hidden animate-modal`} onClick={e => e.stopPropagation()}>
         {/* Faixa de brilho tech no topo do pop-up */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/70 to-transparent" aria-hidden />
-        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-40 w-72 rounded-full bg-sky-500/10 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/70 to-transparent" aria-hidden />
+        <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-40 w-72 rounded-full bg-amber-500/10 blur-3xl" aria-hidden />
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] shrink-0 relative">
           <h2 className="font-bold text-white text-sm tracking-tight">{titulo}</h2>
           <button onClick={onClose} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.06] transition-all duration-300"><X className="h-4 w-4" /></button>
@@ -155,7 +155,7 @@ export function Modal({ titulo, onClose, onSalvar, salvando, children, salvarLab
           <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06] shrink-0">
             <button onClick={onClose} className="px-4 py-2 bg-white/[0.04] border border-white/[0.08] rounded-lg text-sm text-slate-300 hover:bg-white/[0.08] transition-all duration-300 active:scale-[0.98]">Cancelar</button>
             <button onClick={onSalvar} disabled={salvando}
-              className="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-white rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5 shadow-lg shadow-sky-500/20 transition-all duration-300 active:scale-[0.98]">
+              className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5 shadow-lg shadow-amber-500/20 transition-all duration-300 active:scale-[0.98]">
               {salvando ? 'Salvando…' : <><Save className="h-4 w-4" /> {salvarLabel}</>}
             </button>
           </div>
@@ -197,7 +197,7 @@ export function SteppedForm({ children }: { children: ReactNode }) {
               const doneVisible = s.props.complete && i < reveal;
               return (
                 <div key={i} className="flex-1 h-1 rounded-full overflow-hidden bg-white/[0.06]">
-                  <div className={`h-full rounded-full transition-all duration-500 ${doneVisible ? 'bg-gradient-to-r from-sky-500 to-sky-300 shadow-[0_0_8px_rgba(56,189,248,0.6)]' : i < reveal ? 'bg-sky-400/30' : ''}`} style={{ width: doneVisible ? '100%' : i < reveal ? '35%' : '0%' }} />
+                  <div className={`h-full rounded-full transition-all duration-500 ${doneVisible ? 'bg-gradient-to-r from-amber-500 to-amber-300 shadow-[0_0_8px_rgba(255,194,75,0.6)]' : i < reveal ? 'bg-amber-400/30' : ''}`} style={{ width: doneVisible ? '100%' : i < reveal ? '35%' : '0%' }} />
                 </div>
               );
             })}
@@ -213,7 +213,7 @@ export function SteppedForm({ children }: { children: ReactNode }) {
         return (
           <div key={i} className="animate-fade-in-up">
             <div className="flex items-center gap-2 pt-1 mb-2">
-              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${done ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300' : 'bg-sky-500/15 border-sky-400/40 text-sky-300'}`}>
+              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all duration-300 ${done ? 'bg-emerald-500/20 border-emerald-400/40 text-emerald-300' : 'bg-amber-500/15 border-amber-400/40 text-amber-300'}`}>
                 {done ? <Check className="h-3 w-3" /> : i + 1}
               </div>
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.1em] flex items-center gap-1.5">{s.props.icon}{s.props.title}</span>
@@ -221,7 +221,7 @@ export function SteppedForm({ children }: { children: ReactNode }) {
             <div className="space-y-3">{s.props.children}</div>
             {canAdvance && (
               <button type="button" onClick={() => setManual(reveal + 1)}
-                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-sky-300 bg-sky-500/[0.07] border border-sky-400/20 hover:bg-sky-500/[0.14] transition-all duration-300 active:scale-[0.98]">
+                className="mt-3 w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-amber-300 bg-amber-500/[0.07] border border-amber-400/20 hover:bg-amber-500/[0.14] transition-all duration-300 active:scale-[0.98]">
                 {s.props.hint || 'Continuar'} <ChevronDown className="h-3.5 w-3.5 animate-bounce" />
               </button>
             )}

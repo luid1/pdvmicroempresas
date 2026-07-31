@@ -64,7 +64,7 @@ export default function Produtos() {
             <thead><tr>{['Produto', 'NCM', 'Categoria', 'Classificação', 'Caixaria', 'Estoque', 'Preço', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {filtrados.map(p => (
-                <tr key={p.id} className="border-t border-slate-800 hover:bg-sky-500/5">
+                <tr key={p.id} className="border-t border-slate-800 hover:bg-amber-500/5">
                   <td className="px-3 py-1.5">
                     <div className="flex items-center gap-2.5">
                       <span className="text-xl w-7 text-center">{emojiDe(p.descricao, p.categoria)}</span>
