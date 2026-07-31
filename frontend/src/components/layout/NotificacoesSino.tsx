@@ -20,7 +20,7 @@ const POLL_MS = 60_000;
 function iconePorSeveridade(sev: Notificacao['severidade']) {
   if (sev === 'CRITICO') return { Icon: AlertOctagon, cor: 'text-rose-400' };
   if (sev === 'AVISO') return { Icon: AlertTriangle, cor: 'text-amber-400' };
-  return { Icon: Info, cor: 'text-sky-400' };
+  return { Icon: Info, cor: 'text-slate-400' };
 }
 
 function tempoRelativo(iso: string) {
@@ -143,7 +143,7 @@ export default function NotificacoesSino() {
                 <button
                   onClick={marcarTodas}
                   disabled={naoLidas === 0}
-                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-sky-300 disabled:opacity-40 disabled:hover:text-slate-400 transition-colors"
+                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-amber-300 disabled:opacity-40 disabled:hover:text-slate-400 transition-colors"
                 >
                   <CheckCheck className="h-3 w-3" /> Marcar todas
                 </button>
@@ -172,7 +172,7 @@ export default function NotificacoesSino() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-[11px] font-semibold text-slate-200 truncate flex-1">{n.titulo}</p>
-                            {!n.lida && <span className="h-1.5 w-1.5 rounded-full bg-sky-400 shrink-0" />}
+                            {!n.lida && <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />}
                           </div>
                           <p className="text-[10px] text-slate-400 leading-snug line-clamp-2">{n.mensagem}</p>
                           <p className="text-[9px] text-slate-600 mt-0.5">{tempoRelativo(n.createdAt)}</p>

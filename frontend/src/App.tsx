@@ -43,7 +43,7 @@ function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   if (isLoading) return (
     <div className="flex h-screen items-center justify-center bg-gray-950">
-      <div className="animate-spin h-8 w-8 border-2 border-sky-500 border-t-transparent rounded-full" />
+      <div className="animate-spin h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full" />
     </div>
   );
   return user ? <>{children}</> : <Navigate to="/login" replace />;

@@ -44,7 +44,7 @@ export function toast(message: string, tone: Tone = 'info') {
 }
 
 const TONE_STYLE: Record<Tone, { border: string; icon: JSX.Element }> = {
-  info: { border: 'border-sky-500', icon: <Info className="h-4 w-4 text-sky-400" /> },
+  info: { border: 'border-amber-500', icon: <Info className="h-4 w-4 text-amber-400" /> },
   success: { border: 'border-emerald-500', icon: <CheckCircle2 className="h-4 w-4 text-emerald-400" /> },
   error: { border: 'border-rose-500', icon: <XCircle className="h-4 w-4 text-rose-400" /> },
 };
@@ -88,7 +88,7 @@ export function FeedbackHost() {
 function DialogView({ req, onClose }: { req: DialogReq; onClose: (v: any) => void }) {
   const [val, setVal] = useState(req.defaultValue || '');
   const danger = req.tone === 'danger';
-  const okBtn = danger ? 'bg-rose-600 hover:bg-rose-500' : 'bg-sky-600 hover:bg-sky-500';
+  const okBtn = danger ? 'bg-rose-600 hover:bg-rose-500 text-white' : 'bg-amber-400 hover:bg-amber-300 text-slate-900';
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -109,13 +109,13 @@ function DialogView({ req, onClose }: { req: DialogReq; onClose: (v: any) => voi
             {req.kind === 'prompt' && (
               <input autoFocus value={val} onChange={(e) => setVal(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') onClose(val); }}
-                className="mt-3 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-sky-500" />
+                className="mt-3 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-500" />
             )}
           </div>
         </div>
         <div className="px-5 py-3 border-t border-white/[0.06] flex justify-end gap-2">
           <button onClick={() => onClose(req.kind === 'prompt' ? null : false)} className="px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-slate-300 hover:bg-white/[0.08] transition-all duration-300 active:scale-[0.98]">Cancelar</button>
-          <button onClick={() => onClose(req.kind === 'prompt' ? val : true)} className={`px-5 py-2 rounded-lg text-white text-sm font-bold transition-all duration-300 active:scale-[0.98] ${okBtn}`}>{req.okLabel || 'Confirmar'}</button>
+          <button onClick={() => onClose(req.kind === 'prompt' ? val : true)} className={`px-5 py-2 rounded-lg text-sm font-bold transition-all duration-300 active:scale-[0.98] ${okBtn}`}>{req.okLabel || 'Confirmar'}</button>
         </div>
       </div>
     </div>

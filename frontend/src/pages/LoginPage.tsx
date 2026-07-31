@@ -22,9 +22,9 @@ const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.net
 /** Aparência de cada perfil na tela de seleção (paleta verde/âmbar da marca). */
 const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string; bg: string; text: string }> = {
   ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-amber-400/40',   bg: 'bg-amber-500/15',   text: 'text-amber-300' },
-  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-sky-400/40',     bg: 'bg-sky-500/15',     text: 'text-sky-300' },
-  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-rose-400/40',    bg: 'bg-rose-500/15',    text: 'text-rose-300' },
-  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-violet-400/40',  bg: 'bg-violet-500/15',  text: 'text-violet-300' },
+  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
+  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
+  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
 };
 const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-slate-400/40', bg: 'bg-slate-500/15', text: 'text-slate-300' };
 
