@@ -83,7 +83,7 @@ export function AbrirCaixa({
           onChange={(e) => setFundo(e.target.value)}
           placeholder="0,00"
           inputMode="decimal"
-          className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-sky-500"
+          className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-amber-400"
         />
 
         <label className="mt-4 block text-sm text-gray-400">Observação (opcional)</label>
@@ -91,7 +91,7 @@ export function AbrirCaixa({
           value={obs}
           onChange={(e) => setObs(e.target.value)}
           placeholder="Ex.: turno da manhã"
-          className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-sky-500"
+          className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-amber-400"
         />
 
         {erro && (
@@ -161,13 +161,13 @@ export function ModalValor({
             onChange={(e) => setValor(e.target.value)}
             placeholder="0,00"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-sky-500"
+            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-amber-400"
           />
           <label className="mt-4 block text-sm text-gray-400">Motivo (opcional)</label>
           <input
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-sky-500"
+            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-amber-400"
           />
           {erro && (
             <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
@@ -237,7 +237,7 @@ export function ModalFechar({
             onChange={(e) => setInformado(e.target.value)}
             placeholder="0,00"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-sky-500"
+            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 text-lg text-gray-100 outline-none focus:border-amber-400"
           />
           {informado !== '' && (
             <div
@@ -245,7 +245,7 @@ export function ModalFechar({
                 Math.abs(diferenca) < 0.005
                   ? 'text-emerald-400'
                   : diferenca > 0
-                  ? 'text-sky-400'
+                  ? 'text-amber-400'
                   : 'text-rose-400'
               }`}
             >
@@ -260,7 +260,7 @@ export function ModalFechar({
           <input
             value={obs}
             onChange={(e) => setObs(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-sky-500"
+            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-4 py-2 text-gray-100 outline-none focus:border-amber-400"
           />
           {erro && (
             <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
@@ -294,7 +294,7 @@ export function RelatorioZ({ z, onNovo }: { z: SessaoRel; onNovo: () => void }) 
     <div className="flex h-full flex-col items-center justify-center bg-gray-950 p-6">
       <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 p-6 shadow-2xl">
         <div className="mb-4 flex items-center gap-2">
-          <Printer className="h-6 w-6 text-sky-400" />
+          <Printer className="h-6 w-6 text-amber-400" />
           <h2 className="text-lg font-semibold text-gray-100">Relatório Z · Caixa fechado</h2>
         </div>
         <div className="text-xs text-gray-500">

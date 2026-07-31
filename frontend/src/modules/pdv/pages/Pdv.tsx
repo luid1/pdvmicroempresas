@@ -491,7 +491,7 @@ export default function Pdv() {
   if (carregandoSessao) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-950">
-        <Loader2 className="h-8 w-8 animate-spin text-sky-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
       </div>
     );
   }
@@ -511,7 +511,7 @@ export default function Pdv() {
       {/* Topo */}
       <header className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-6 py-3">
         <div className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6 text-sky-400" />
+          <ShoppingCart className="h-6 w-6 text-amber-400" />
           <span className="text-lg font-semibold">Frente de Caixa</span>
           <span className="ml-2 rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-300">
             {filialAtiva?.nome || 'Sem filial'}
@@ -541,11 +541,11 @@ export default function Pdv() {
               }}
             >
               <div className="relative">
-                <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 focus-within:border-sky-500">
+                <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 focus-within:border-amber-400">
                   {buscando ? (
-                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-sky-400" />
+                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-amber-400" />
                   ) : (
-                    <ScanLine className="h-6 w-6 shrink-0 text-sky-400" />
+                    <ScanLine className="h-6 w-6 shrink-0 text-amber-400" />
                   )}
                   <input
                     ref={inputRef}
@@ -585,7 +585,7 @@ export default function Pdv() {
                         onMouseDown={(e) => { e.preventDefault(); selecionarSugestao(p); }}
                         onMouseEnter={() => setSugIdx(idx)}
                         className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2 ${
-                          idx === sugIdx ? 'bg-sky-500/15' : 'hover:bg-gray-800'
+                          idx === sugIdx ? 'bg-amber-500/15' : 'hover:bg-gray-800'
                         }`}
                       >
                         <div className="min-w-0">
@@ -621,7 +621,7 @@ export default function Pdv() {
                   onClick={() => aplicarMultiplicador(n)}
                   className={`min-w-[2.75rem] rounded-lg border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
                     mult === n && !selecionadoId
-                      ? 'border-sky-500 bg-sky-500/20 text-sky-200'
+                      ? 'border-amber-500 bg-amber-500/20 text-amber-200'
                       : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600 hover:bg-gray-700'
                   }`}
                   title={selecionadoId ? `Definir ${n} unidades no item selecionado` : `Próximo item entra com ${n} unidades`}
@@ -632,7 +632,7 @@ export default function Pdv() {
               {mult > 1 && !selecionadoId && (
                 <button
                   onClick={() => { setMult(1); focar(); }}
-                  className="ml-1 flex items-center gap-1 rounded-lg bg-sky-500/15 px-3 py-1.5 text-sm font-semibold text-sky-200 ring-1 ring-inset ring-sky-500/40"
+                  className="ml-1 flex items-center gap-1 rounded-lg bg-amber-500/15 px-3 py-1.5 text-sm font-semibold text-amber-200 ring-1 ring-inset ring-amber-500/40"
                   title="Próximo item terá esta quantidade. Clique para limpar."
                 >
                   Próximo item × {mult} <X className="h-3.5 w-3.5" />
@@ -690,7 +690,7 @@ export default function Pdv() {
                       key={i.produtoId}
                       onClick={() => setSelecionadoId(i.produtoId)}
                       className={`cursor-pointer border-b border-gray-800/60 ${
-                        selecionadoId === i.produtoId ? 'bg-sky-500/10 ring-1 ring-inset ring-sky-500/40' : ''
+                        selecionadoId === i.produtoId ? 'bg-amber-500/10 ring-1 ring-inset ring-amber-500/40' : ''
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -763,7 +763,7 @@ export default function Pdv() {
             <div className="mt-1 text-xs uppercase tracking-wide text-gray-500">
               Total a pagar
             </div>
-            <div className="mt-1 text-5xl font-bold tabular-nums text-sky-400">
+            <div className="mt-1 text-5xl font-bold tabular-nums text-amber-400">
               {brl(totalFinal)}
             </div>
           </div>
@@ -825,7 +825,7 @@ export default function Pdv() {
                 onClick={() => setModalVendas(true)}
                 className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
               >
-                <Printer className="h-4 w-4 text-sky-400" /> Vendas / Reimprimir / Estorno
+                <Printer className="h-4 w-4 text-amber-400" /> Vendas / Reimprimir / Estorno
                 <span className="text-[10px] text-gray-500">F10</span>
               </button>
               <button
@@ -1062,7 +1062,7 @@ function ModalPagamento({
             </div>
             <div className="text-right">
               <div className="text-xs uppercase tracking-wide text-gray-500">Restante</div>
-              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-sky-400' : 'text-emerald-400'}`}>
+              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-amber-400' : 'text-emerald-400'}`}>
                 {brl(Math.max(0, restante))}
               </div>
             </div>
@@ -1101,7 +1101,7 @@ function ModalPagamento({
                 onClick={() => setForma(f.id)}
                 className={`flex flex-col items-center gap-1 rounded-lg border py-3 text-sm ${
                   forma === f.id
-                    ? 'border-sky-500 bg-sky-500/10 text-sky-300'
+                    ? 'border-amber-500 bg-amber-500/10 text-amber-300'
                     : 'border-gray-700 text-gray-400 hover:border-gray-600'
                 }`}
               >
@@ -1119,14 +1119,14 @@ function ModalPagamento({
               <button
                 onClick={() => setCanal('TEF')}
                 disabled={!temTef}
-                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-sky-600 text-white' : 'bg-gray-800 text-gray-400'} disabled:opacity-40`}
+                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-amber-500 text-slate-900' : 'bg-gray-800 text-gray-400'} disabled:opacity-40`}
                 title={temTef ? 'Máquina integrada (TEF) — F6' : 'Nenhum TEF configurado'}
               >
                 Integrada (TEF)
               </button>
               <button
                 onClick={() => setCanal('POS')}
-                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-sky-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-amber-500 text-slate-900' : 'bg-gray-800 text-gray-400'}`}
                 title="Maquininha avulsa — operar na mão (F6)"
               >
                 Avulsa (POS)
@@ -1157,7 +1157,7 @@ function ModalPagamento({
                 onChange={(e) => setValorStr(e.target.value)}
                 placeholder={brl(restante).replace('R$', '').trim()}
                 inputMode="decimal"
-                className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-sky-500"
+                className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
               />
             </div>
             {forma === 'DINHEIRO' && (
@@ -1169,7 +1169,7 @@ function ModalPagamento({
                   onChange={(e) => setRecebidoStr(e.target.value)}
                   placeholder="0,00"
                   inputMode="decimal"
-                  className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-sky-500"
+                  className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
                 />
               </div>
             )}
@@ -1187,7 +1187,7 @@ function ModalPagamento({
           )}
 
           {processando && (
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-sky-500/10 px-3 py-2 text-sm text-sky-300">
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
               <Loader2 className="h-4 w-4 animate-spin" /> {processando}
             </div>
           )}
@@ -1397,7 +1397,7 @@ function ModalPeso({
       <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Scale className="h-5 w-5 text-sky-400" /> Pesar produto
+            <Scale className="h-5 w-5 text-amber-400" /> Pesar produto
           </h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1412,7 +1412,7 @@ function ModalPeso({
           <label className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
             <span>Peso ({unidade || 'KG'})</span>
             {multQtd > 1 && (
-              <span className="rounded bg-sky-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-sky-300">
+              <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-amber-300">
                 × {multQtd}
               </span>
             )}
@@ -1423,7 +1423,7 @@ function ModalPeso({
             onChange={(e) => setPesoStr(e.target.value)}
             placeholder="0,000"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-sky-500"
+            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
           />
 
           <div className="mt-4 flex justify-between text-sm">
@@ -1436,7 +1436,7 @@ function ModalPeso({
           <button
             onClick={confirmar}
             disabled={!(kg > 0)}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-sky-600 py-3 font-semibold hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 py-3 font-semibold text-slate-900 hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
           >
             <Check className="h-5 w-5" /> Adicionar (Enter)
           </button>
@@ -1545,7 +1545,7 @@ function ModalVendas({
       <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
         <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Printer className="h-5 w-5 text-sky-400" /> Vendas recentes
+            <Printer className="h-5 w-5 text-amber-400" /> Vendas recentes
           </h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1557,7 +1557,7 @@ function ModalVendas({
           )}
           {carregando ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-sky-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
             </div>
           ) : vendas.length === 0 ? (
             <p className="py-10 text-center text-sm text-gray-500">Nenhuma venda registrada.</p>
