@@ -97,7 +97,7 @@ export default function Faturamento() {
             <input type="date" value={data} onChange={e => setData(e.target.value)}
               className="bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-slate-100 [color-scheme:dark] focus:outline-none focus:border-amber-400/60" />
             <button onClick={carregar} className={btnGlass}>
-              <RefreshCw className="h-3.5 w-3.5 text-emerald-400" /> Atualizar
+              <RefreshCw className="h-3.5 w-3.5 text-amber-400" /> Atualizar
             </button>
           </>
         }
@@ -112,13 +112,13 @@ export default function Faturamento() {
           {sel.size > 0 ? <><b>{sel.size}</b> selecionado(s) · total {R$(totalSel)}</> : 'Selecione pedidos para faturar em lote'}
         </span>
         <button onClick={faturarSelecionados} disabled={sel.size === 0 || processando}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg px-5 py-2 text-sm font-bold disabled:opacity-40">
+          className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg px-5 py-2 text-sm font-bold disabled:opacity-40">
           {processando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
           {processando ? 'Faturando…' : `Faturar selecionados (${sel.size})`}
         </button>
       </div>
 
-      {processando && andamento && <div className="px-5 py-2 text-xs text-emerald-700 bg-emerald-50 border-b border-emerald-200">{andamento}</div>}
+      {processando && andamento && <div className="px-5 py-2 text-xs text-amber-700 bg-amber-50 border-b border-amber-200">{andamento}</div>}
       {resultado && (
         <div className={`px-5 py-2 text-xs border-b ${resultado.erros.length ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
           <b>{resultado.ok}</b> faturado(s) com sucesso{resultado.erros.length > 0 && <> · <b>{resultado.erros.length}</b> com erro: {resultado.erros.join(' · ')}</>}.
@@ -127,7 +127,7 @@ export default function Faturamento() {
 
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
-          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" /></div>
         ) : pedidos.length === 0 ? (
           <div className="text-center text-gray-400 py-16">
             <Receipt className="h-10 w-10 mx-auto mb-2 text-gray-200" />
@@ -138,14 +138,14 @@ export default function Faturamento() {
             <table className="w-full text-sm">
               <thead className="bg-gray-100 text-xs text-gray-600">
                 <tr>
-                  <th className="w-10 px-3 py-2"><input type="checkbox" checked={sel.size === pedidos.length && pedidos.length > 0} onChange={toggleAll} className="accent-emerald-600 h-4 w-4" /></th>
+                  <th className="w-10 px-3 py-2"><input type="checkbox" checked={sel.size === pedidos.length && pedidos.length > 0} onChange={toggleAll} className="accent-amber-500 h-4 w-4" /></th>
                   {['Nº', 'Cliente', 'Itens', 'Peso (kg)', 'Valor', ''].map(h => <th key={h} className="px-3 py-2 text-left font-semibold whitespace-nowrap">{h}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {pedidos.map(p => (
-                  <tr key={p.id} className={`border-t border-gray-100 ${sel.has(p.id) ? 'bg-emerald-50/50' : 'hover:bg-gray-50'}`}>
-                    <td className="px-3 py-2"><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggle(p.id)} className="accent-emerald-600 h-4 w-4" /></td>
+                  <tr key={p.id} className={`border-t border-gray-100 ${sel.has(p.id) ? 'bg-amber-50/50' : 'hover:bg-gray-50'}`}>
+                    <td className="px-3 py-2"><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggle(p.id)} className="accent-amber-500 h-4 w-4" /></td>
                     <td className="px-3 py-2 font-bold text-amber-700">{p.numero}</td>
                     <td className="px-3 py-2 font-semibold text-gray-900">{p.cliente?.nomeFantasia || p.cliente?.razaoSocial}</td>
                     <td className="px-3 py-2 text-center">{p._count?.itens ?? '—'}</td>
@@ -158,7 +158,7 @@ export default function Faturamento() {
                           <ShieldCheck className="h-3.5 w-3.5" /> Conferir
                         </button>
                         <button onClick={() => faturarLinha(p.id)} disabled={processando}
-                          className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded px-3 py-1.5 text-xs font-bold disabled:opacity-40">
+                          className="flex items-center gap-1 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded px-3 py-1.5 text-xs font-bold disabled:opacity-40">
                           <Check className="h-3.5 w-3.5" /> Faturar
                         </button>
                       </div>
@@ -252,7 +252,7 @@ export default function Faturamento() {
               <button
                 disabled={!validacao?.podeFaturar || processando}
                 onClick={async () => { const id = conferindo.id; setConferindo(null); await faturarLinha(id); }}
-                className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm disabled:opacity-40">
+                className="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm disabled:opacity-40">
                 Faturar este pedido
               </button>
             </div>

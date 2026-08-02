@@ -76,7 +76,7 @@ export default function TabelasPreco() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center">
+          <span className="h-11 w-11 rounded-2xl bg-amber-400/10 text-amber-300 flex items-center justify-center">
             <Tags className="h-5 w-5" />
           </span>
           <div>
@@ -85,7 +85,7 @@ export default function TabelasPreco() {
           </div>
         </div>
         {podeEditar && (
-          <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
+          <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
             <Plus className="h-4 w-4" /> Novo preço
           </button>
         )}
@@ -95,10 +95,10 @@ export default function TabelasPreco() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por produto ou código…"
-            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
         </div>
         <select value={filtroTabela} onChange={(e) => setFiltroTabela(e.target.value)}
-          className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400">
+          className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
           <option value="">Todas as tabelas</option>
           {TABELAS.map((t) => <option key={t} value={t}>{rotuloTabela(t)}</option>)}
         </select>
@@ -134,13 +134,13 @@ export default function TabelasPreco() {
                     <div className="text-slate-100 font-medium">{p.produtoDescricao}</div>
                     <div className="text-[11px] text-slate-500 font-mono">{p.produtoCodigo}</div>
                   </td>
-                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 text-xs font-semibold">{rotuloTabela(p.tabela)}</span></td>
+                  <td className="px-4 py-3"><span className="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 text-xs font-semibold">{rotuloTabela(p.tabela)}</span></td>
                   <td className="px-4 py-3 text-right text-slate-100 tabular-nums font-semibold">{brl(p.preco)}</td>
                   <td className="px-4 py-3 text-right text-slate-400 tabular-nums">{brl(p.produtoPrecoCusto)}</td>
                   <td className={`px-4 py-3 text-right tabular-nums font-medium ${m < 0 ? 'text-rose-400' : m < 10 ? 'text-amber-300' : 'text-emerald-300'}`}>{m.toFixed(1)}%</td>
                   <td className="px-4 py-3 text-slate-400 text-xs">
                     {promoVigente ? (
-                      <span className="inline-flex items-center gap-1 text-fuchsia-300"><TrendingDown className="h-3.5 w-3.5" /> {brl(p.promoPreco)}</span>
+                      <span className="inline-flex items-center gap-1 text-amber-300"><TrendingDown className="h-3.5 w-3.5" /> {brl(p.promoPreco)}</span>
                     ) : '—'}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -228,7 +228,7 @@ function ModalPreco({ preco, onClose, onDone }: { preco?: PrecoTabela; onClose: 
             <label className="block relative">
               <span className="text-xs text-slate-400">Produto</span>
               <input value={buscaProd} onChange={e => { setBuscaProd(e.target.value); setProdutoId(''); }} placeholder="Buscar produto…"
-                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
               {!produtoId && produtos.length > 0 && (
                 <div className="absolute z-10 mt-1 w-full max-h-52 overflow-auto bg-[#0e1729] border border-slate-700 rounded-lg shadow-xl">
                   {produtos.map((pr) => (
@@ -247,39 +247,39 @@ function ModalPreco({ preco, onClose, onDone }: { preco?: PrecoTabela; onClose: 
             <label className="block">
               <span className="text-xs text-slate-400">Tabela</span>
               <select value={tabela} onChange={e => setTabela(e.target.value)} disabled={edicao}
-                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400 disabled:opacity-60">
+                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400 disabled:opacity-60">
                 {TABELAS.map((t) => <option key={t} value={t}>{rotuloTabela(t)}</option>)}
               </select>
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Preço (R$)</span>
               <input type="number" step="0.01" min="0" value={valor} onChange={e => setValor(e.target.value)}
-                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-emerald-400" />
+                className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
             </label>
           </div>
 
           <div className="rounded-lg border border-slate-700/60 p-3">
             <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
               <input type="checkbox" checked={promoAtiva} onChange={e => setPromoAtiva(e.target.checked)} />
-              <Percent className="h-3.5 w-3.5 text-fuchsia-300" /> Promoção por período
+              <Percent className="h-3.5 w-3.5 text-amber-300" /> Promoção por período
             </label>
             {promoAtiva && (
               <div className="mt-3 space-y-2">
                 <label className="block">
                   <span className="text-xs text-slate-400">Preço promocional (R$)</span>
                   <input type="number" step="0.01" min="0" value={promoPreco} onChange={e => setPromoPreco(e.target.value)}
-                    className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-fuchsia-400" />
+                    className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <label className="block">
                     <span className="text-xs text-slate-400">Início</span>
                     <input type="date" value={promoInicio} onChange={e => setPromoInicio(e.target.value)}
-                      className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-fuchsia-400" />
+                      className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
                   </label>
                   <label className="block">
                     <span className="text-xs text-slate-400">Fim</span>
                     <input type="date" value={promoFim} onChange={e => setPromoFim(e.target.value)}
-                      className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-fuchsia-400" />
+                      className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-2 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
                   </label>
                 </div>
                 <p className="text-[11px] text-slate-500">Datas em branco = promoção sempre vigente enquanto ativa.</p>
@@ -291,7 +291,7 @@ function ModalPreco({ preco, onClose, onDone }: { preco?: PrecoTabela; onClose: 
             <input type="checkbox" checked={ativo} onChange={e => setAtivo(e.target.checked)} /> Ativo
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> {edicao ? 'Salvar' : 'Cadastrar'}
         </button>
       </div>

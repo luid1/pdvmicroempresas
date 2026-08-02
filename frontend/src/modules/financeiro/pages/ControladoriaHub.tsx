@@ -134,13 +134,14 @@ export default function ControladoriaHub() {
       `}</style>
 
       <div className="max-w-[1400px] mx-auto">
-        {/* ── Header global ── */}
-        <header className="flex flex-wrap items-end justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2 text-neutral-400 text-[11px] uppercase tracking-widest font-semibold">
-              <Landmark className="h-3.5 w-3.5" /> Controladoria
-            </div>
-            <h1 className="text-3xl font-semibold text-neutral-900 tracking-tight mt-1">Financeiro & Controladoria</h1>
+        {/* ── Header global (compacto, linha única) ── */}
+        <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-600 flex items-center justify-center shrink-0">
+              <Landmark className="h-4 w-4" />
+            </span>
+            <h1 className="text-base font-bold text-neutral-900 tracking-tight shrink-0">Financeiro &amp; Controladoria</h1>
+            <span className="text-xs text-neutral-400 border-l border-neutral-200 pl-2.5 hidden sm:block">Controladoria</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -150,16 +151,16 @@ export default function ControladoriaHub() {
                 value={buscaGlobal}
                 onChange={(e) => setBuscaGlobal(e.target.value)}
                 placeholder="Busca global…"
-                className="w-60 rounded-xl border border-neutral-200 bg-white pl-10 pr-16 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
+                className="w-60 rounded-lg border border-neutral-200 bg-white pl-10 pr-16 py-1.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
               />
               <kbd className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-[10px] text-neutral-400 border border-neutral-200 rounded-md px-1.5 py-0.5">
                 <Command className="h-3 w-3" />K
               </kbd>
             </div>
-            <button className="flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+            <button className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
               <Download className="h-4 w-4 text-neutral-400" /> Exportar
             </button>
-            <button className="flex items-center gap-2 rounded-xl bg-amber-400 text-slate-900 px-3.5 py-2.5 text-sm font-semibold hover:bg-amber-300">
+            <button className="flex items-center gap-2 rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-sm font-semibold hover:bg-amber-300">
               <Plus className="h-4 w-4" /> Novo lançamento
             </button>
           </div>

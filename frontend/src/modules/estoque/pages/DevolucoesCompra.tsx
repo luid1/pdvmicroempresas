@@ -42,7 +42,7 @@ export default function DevolucoesCompra() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-rose-400/10 text-rose-300 flex items-center justify-center">
+          <span className="h-11 w-11 rounded-2xl bg-amber-400/10 text-amber-300 flex items-center justify-center">
             <Undo2 className="h-5 w-5" />
           </span>
           <div>
@@ -51,7 +51,7 @@ export default function DevolucoesCompra() {
           </div>
         </div>
         {podeOperar && (
-          <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-rose-500 hover:bg-rose-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
+          <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
             <Plus className="h-4 w-4" /> Nova devolução
           </button>
         )}
@@ -203,7 +203,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop p-4" onClick={onClose}>
       <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white flex items-center gap-2"><PackageMinus className="h-5 w-5 text-rose-300" /> Nova devolução ao fornecedor</h2>
+          <h2 className="font-bold text-white flex items-center gap-2"><PackageMinus className="h-5 w-5 text-amber-300" /> Nova devolução ao fornecedor</h2>
           <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
 
@@ -211,7 +211,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <label className="block">
             <span className="text-xs text-slate-400">Filial</span>
             <select value={filialId} onChange={e => setFilialId(e.target.value)}
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400">
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
               <option value="">Selecione…</option>
               {filiais.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
@@ -219,7 +219,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <label className="block">
             <span className="text-xs text-slate-400">Fornecedor</span>
             <select value={fornecedorId} onChange={e => setFornecedorId(e.target.value)}
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400">
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
               <option value="">Selecione…</option>
               {fornecedores.map((f) => <option key={f.id} value={f.id}>{f.nomeFantasia || f.razaoSocial}</option>)}
             </select>
@@ -230,7 +230,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <label className="block mb-3">
             <span className="text-xs text-slate-400">Entrada de origem (opcional — prefill de itens + estorno do título)</span>
             <select value={entradaId} onChange={e => carregarEntrada(e.target.value)}
-              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400">
+              className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
               <option value="">Sem vínculo</option>
               {entradas.map((e) => <option key={e.id} value={e.id}>NF {e.numeroNf || e.id.slice(0, 8)} — {brl(e.valorTotal)}</option>)}
             </select>
@@ -240,14 +240,14 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
         <label className="block mb-3">
           <span className="text-xs text-slate-400">Motivo</span>
           <input value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Avaria, divergência, validade…"
-            className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400" />
+            className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
         </label>
 
         {/* Adicionar produto */}
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={buscaProd} onChange={e => setBuscaProd(e.target.value)} placeholder="Adicionar produto por nome ou código…"
-            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400" />
+            className="w-full bg-slate-800 border border-slate-600 rounded-lg pl-9 pr-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           {produtos.length > 0 && (
             <div className="absolute z-10 mt-1 w-full max-h-52 overflow-auto bg-[#0e1729] border border-slate-700 rounded-lg shadow-xl">
               {produtos.map((pr) => (
@@ -280,11 +280,11 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
                     <td className="px-3 py-2 text-slate-200">{l.descricao}</td>
                     <td className="px-3 py-2 text-right">
                       <input value={l.quantidade} onChange={e => setLinha(idx, 'quantidade', e.target.value)}
-                        className="w-20 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right text-slate-100 font-mono focus:outline-none focus:border-rose-400" />
+                        className="w-20 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right text-slate-100 font-mono focus:outline-none focus:border-amber-400" />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <input value={l.valorUnitario} onChange={e => setLinha(idx, 'valorUnitario', e.target.value)}
-                        className="w-24 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right text-slate-100 font-mono focus:outline-none focus:border-rose-400" />
+                        className="w-24 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-right text-slate-100 font-mono focus:outline-none focus:border-amber-400" />
                     </td>
                     <td className="px-3 py-2 text-right text-slate-200 tabular-nums">{brl(tot)}</td>
                     <td className="px-2 py-2 text-center">
@@ -302,7 +302,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <span className="text-lg font-bold text-white tabular-nums">{brl(total)}</span>
         </div>
 
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Undo2 className="h-4 w-4" /> Registrar devolução
         </button>
       </div>

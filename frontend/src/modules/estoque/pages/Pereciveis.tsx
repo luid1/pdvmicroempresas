@@ -52,7 +52,7 @@ export default function Pereciveis() {
       <TopBar icon={<AlertTriangle className="h-5 w-5" />} titulo="Perecíveis / FLV" subtitulo="Controle FEFO — cadastre validades e acompanhe o vencimento"
         extra={
           <div className="flex items-center gap-2">
-            <button onClick={() => setAddOpen(true)} className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 px-3 py-2 rounded-lg text-white text-sm font-semibold"><Plus className="h-4 w-4" /> Adicionar validade</button>
+            <button onClick={() => setAddOpen(true)} className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 px-3 py-2 rounded-lg text-slate-900 text-sm font-semibold"><Plus className="h-4 w-4" /> Adicionar validade</button>
             <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>
           </div>
         } />
@@ -165,7 +165,7 @@ function ModalValidade({ filialId, onFechar, onSalvou }: { filialId: string; onF
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div className="w-full max-w-md rounded-xl border border-slate-800 bg-[#0b1526] shadow-2xl">
         <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-100"><CalendarClock className="h-5 w-5 text-emerald-400" /> Adicionar validade</h2>
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-100"><CalendarClock className="h-5 w-5 text-amber-400" /> Adicionar validade</h2>
           <button onClick={onFechar} className="text-slate-500 hover:text-slate-300"><X className="h-5 w-5" /></button>
         </div>
 
@@ -174,7 +174,7 @@ function ModalValidade({ filialId, onFechar, onSalvou }: { filialId: string; onF
           <div>
             <label className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Produto</label>
             {prod ? (
-              <div className="mt-1 flex items-center justify-between rounded-lg border border-emerald-600/40 bg-emerald-500/5 px-3 py-2">
+              <div className="mt-1 flex items-center justify-between rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2">
                 <div><p className="font-semibold text-slate-100 text-sm">{prod.descricao}</p><p className="text-xs font-mono text-slate-500">{prod.codigo} · {prod.unidade}</p></div>
                 <button onClick={() => { setProd(null); setTermo(''); }} className="text-slate-400 hover:text-rose-400 text-xs">trocar</button>
               </div>
@@ -203,11 +203,11 @@ function ModalValidade({ filialId, onFechar, onSalvou }: { filialId: string; onF
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Quantidade</label>
-              <input value={qtd} onChange={e => setQtd(e.target.value)} inputMode="decimal" placeholder="0" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 text-slate-100" />
+              <input value={qtd} onChange={e => setQtd(e.target.value)} inputMode="decimal" placeholder="0" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-amber-500 text-slate-100" />
             </div>
             <div>
               <label className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Validade</label>
-              <input type="date" value={validade} onChange={e => setValidade(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 text-slate-100" />
+              <input type="date" value={validade} onChange={e => setValidade(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-amber-500 text-slate-100" />
             </div>
           </div>
 
@@ -215,15 +215,15 @@ function ModalValidade({ filialId, onFechar, onSalvou }: { filialId: string; onF
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Fabricação <span className="text-slate-600">(opcional)</span></label>
-              <input type="date" value={fabricacao} onChange={e => setFabricacao(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 text-slate-100" />
+              <input type="date" value={fabricacao} onChange={e => setFabricacao(e.target.value)} className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-amber-500 text-slate-100" />
             </div>
             <div>
               <label className="text-xs uppercase tracking-wide text-slate-500 font-semibold">Nº do lote <span className="text-slate-600">(opcional)</span></label>
-              <input value={numeroLote} onChange={e => setNumeroLote(e.target.value)} placeholder="auto pela validade" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 text-slate-100" />
+              <input value={numeroLote} onChange={e => setNumeroLote(e.target.value)} placeholder="auto pela validade" className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-sm outline-none focus:border-amber-500 text-slate-100" />
             </div>
           </div>
 
-          <button onClick={salvar} disabled={!podeSalvar} className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-3 font-semibold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600">
+          <button onClick={salvar} disabled={!podeSalvar} className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-400 py-3 font-semibold text-slate-900 hover:bg-amber-300 disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-600">
             {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
             {salvando ? 'Salvando...' : 'Cadastrar validade'}
           </button>

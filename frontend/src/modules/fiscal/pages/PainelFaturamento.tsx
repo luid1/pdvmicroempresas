@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { BarChart3, RefreshCw, FileText, Landmark, TrendingUp, Users, TrendingDown } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import api from '../../../services/api';
+import { PageHeader } from '../../cadastros/ui';
 
 const R$ = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const nkg = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
@@ -69,30 +70,28 @@ export default function PainelFaturamento() {
 
   return (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100">
-      {/* ── Cabeçalho ── */}
-      <div className="bg-slate-900/80 border-b border-slate-800 px-6 py-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        <div>
-          <h1 className="text-lg font-bold text-white flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-emerald-300" /> Painel de Faturamento
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Visão gerencial do período · vendas × prejuízo de mercadoria</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-            <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-emerald-500 outline-none" />
-          </label>
-          <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-            <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-emerald-500 outline-none" />
-          </label>
-          <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3.5 py-2 rounded-lg text-slate-200 font-medium text-sm">
-            <RefreshCw className={`h-4 w-4 text-emerald-300 ${loading ? 'animate-spin' : ''}`} /> Atualizar
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        icon={<BarChart3 className="h-4 w-4" />}
+        titulo="Painel de Faturamento"
+        subtitulo="Visão gerencial do período · vendas × prejuízo de mercadoria"
+        actions={
+          <>
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-amber-500 outline-none" />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-amber-500 outline-none" />
+            </label>
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3.5 py-2 rounded-lg text-slate-200 font-medium text-sm">
+              <RefreshCw className={`h-4 w-4 text-amber-300 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+            </button>
+          </>
+        }
+      />
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         {loading ? (
-          <div className="flex justify-center py-20"><div className="animate-spin h-7 w-7 border-2 border-emerald-400 border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-20"><div className="animate-spin h-7 w-7 border-2 border-amber-400 border-t-transparent rounded-full" /></div>
         ) : (
           <>
             {/* ── KPIs — número marcante, apoio discreto ── */}
@@ -107,7 +106,7 @@ export default function PainelFaturamento() {
             <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-emerald-300" /> Faturamento por dia
+                  <BarChart3 className="h-4 w-4 text-amber-300" /> Faturamento por dia
                 </h3>
                 {/* Insight gerencial: % de perda sobre o faturamento */}
                 <div className="flex items-center gap-2 bg-slate-900/60 border border-slate-700/60 rounded-full pl-2.5 pr-3 py-1">
@@ -124,7 +123,7 @@ export default function PainelFaturamento() {
                     <div key={d.dia} className="flex flex-col items-center gap-2 w-12" title={`${diaLabel(d.dia)} — ${R$(d.valor)}`}>
                       <span className="text-[10px] text-slate-400 font-mono">{d.valor > 0 ? (d.valor / 1000).toFixed(1) + 'k' : ''}</span>
                       {/* barra fina em pill, verde menta pastel */}
-                      <div className="w-2.5 rounded-full bg-emerald-300/70 hover:bg-emerald-300 transition-all"
+                      <div className="w-2.5 rounded-full bg-amber-300/70 hover:bg-amber-300 transition-all"
                         style={{ height: `${Math.max(6, (d.valor / maxDia) * 150)}px` }} />
                       <span className="text-[10px] text-slate-500">{diaLabel(d.dia)}</span>
                     </div>
@@ -151,7 +150,7 @@ export default function PainelFaturamento() {
                           <span className="font-bold text-white font-mono shrink-0">{R$(c.valor)}</span>
                         </div>
                         <div className="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
-                          <div className="h-full bg-emerald-300/70 rounded-full" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
+                          <div className="h-full bg-amber-300/70 rounded-full" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
                         </div>
                       </div>
                     ))}
