@@ -6,8 +6,9 @@ import DetalheModal, { DetalheCard, DetalheRegistro } from '../components/dashbo
 import {
   Package, AlertTriangle, TrendingUp, TrendingDown, Receipt, Activity, RefreshCw,
   PackageCheck, Wallet, Scale, Users, Boxes, ArrowUpRight, ArrowDownRight, ChevronRight,
-  CircleDollarSign, Landmark, Percent, ShoppingCart, CalendarRange,
+  CircleDollarSign, Landmark, Percent, ShoppingCart, CalendarRange, LayoutDashboard,
 } from 'lucide-react';
+import { PageHeader } from '../modules/cadastros/ui';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, Cell,
@@ -359,26 +360,21 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="p-6 space-y-7">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-white">Dashboard</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            {filialAtiva ? `${filialAtiva.codigo} — ${filialAtiva.nome}` : 'Todas as filiais'} ·{' '}
-            {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col h-full">
+      <PageHeader
+        icon={<LayoutDashboard className="h-4 w-4" />}
+        titulo="Dashboard"
+        subtitulo={`${filialAtiva ? `${filialAtiva.codigo} — ${filialAtiva.nome}` : 'Todas as filiais'} · ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}`}
+        actions={<>
           <div className="flex rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
             {PERIODOS.map(p => (
               <button key={p.key} onClick={() => setPeriodo(p.key)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${periodo === p.key ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${periodo === p.key ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
                 {p.label}
               </button>
             ))}
             <button onClick={() => setPeriodo('custom')}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${periodo === 'custom' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
+              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${periodo === 'custom' ? 'bg-amber-400/20 text-amber-200' : 'text-slate-400 hover:text-slate-200'}`}>
               <CalendarRange className="h-3.5 w-3.5" /> Personalizado
             </button>
           </div>
@@ -392,12 +388,13 @@ export default function DashboardPage() {
                 className="bg-transparent text-xs text-slate-200 outline-none [color-scheme:dark]" />
             </div>
           )}
-          <button onClick={carregar} className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] px-3 py-2 rounded-lg text-slate-200 text-sm transition-colors">
+          <button onClick={carregar} className="flex items-center gap-1.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] px-3 py-1.5 rounded-lg text-slate-200 text-sm transition-colors">
             <RefreshCw className={`h-4 w-4 text-amber-400 ${loading ? 'animate-spin' : ''}`} /> Atualizar
           </button>
-        </div>
-      </div>
+        </>}
+      />
 
+      <div className="flex-1 overflow-y-auto p-6 space-y-7">
       {/* ═══ FINANCEIRO ═══ */}
       <Secao icon={CircleDollarSign} titulo={`Financeiro · ${d?.periodoLabel || ''}`} cor="#34d399">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
@@ -580,7 +577,8 @@ export default function DashboardPage() {
         </div>
       </Secao>
 
-      <DetalheModal detalhe={detalhe} onClose={() => setDetalhe(null)} navigate={navigate} />
+        <DetalheModal detalhe={detalhe} onClose={() => setDetalhe(null)} navigate={navigate} />
+      </div>
     </div>
   );
 }

@@ -101,7 +101,7 @@ export function AbrirCaixa({
         <button
           onClick={abrir}
           disabled={salvando}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-4 text-lg font-semibold text-white hover:bg-emerald-500 disabled:bg-gray-800 disabled:text-gray-600"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 py-4 text-lg font-semibold text-white hover:bg-amber-500 disabled:bg-gray-800 disabled:text-gray-600"
         >
           {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Unlock className="h-5 w-5" />}
           {salvando ? 'Abrindo...' : 'Abrir caixa'}
@@ -323,7 +323,7 @@ export function RelatorioZ({ z, onNovo }: { z: SessaoRel; onNovo: () => void }) 
         </div>
         <button
           onClick={onNovo}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-3 text-lg font-semibold text-white hover:bg-emerald-500"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-600 py-3 text-lg font-semibold text-white hover:bg-amber-500"
         >
           <Unlock className="h-5 w-5" />
           Abrir novo caixa

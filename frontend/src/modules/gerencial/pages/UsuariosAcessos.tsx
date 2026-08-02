@@ -195,7 +195,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
         <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
           <div className="flex gap-2">
             {!novo && <button onClick={resetSenha} className="flex items-center gap-1 text-xs text-gray-600 hover:text-amber-600 px-2 py-1.5 rounded border border-gray-300"><KeyRound className="h-3.5 w-3.5" /> Trocar senha</button>}
-            {!novo && <button onClick={() => setPinAberto(true)} className="flex items-center gap-1 text-xs text-gray-600 hover:text-emerald-600 px-2 py-1.5 rounded border border-gray-300"><Hash className="h-3.5 w-3.5" /> Definir PIN</button>}
+            {!novo && <button onClick={() => setPinAberto(true)} className="flex items-center gap-1 text-xs text-gray-600 hover:text-amber-600 px-2 py-1.5 rounded border border-gray-300"><Hash className="h-3.5 w-3.5" /> Definir PIN</button>}
             {!novo && u?.ativo && <button onClick={inativar} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Power className="h-3.5 w-3.5" /> Inativar</button>}
           </div>
           <div className="flex gap-2">
@@ -234,13 +234,13 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
     } finally { setSalvando(false); }
   };
 
-  const pinInp = 'w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-slate-100 focus:outline-none focus:border-emerald-500';
+  const pinInp = 'w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-slate-100 focus:outline-none focus:border-amber-400';
 
   return createPortal((
     <div className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 animate-backdrop" onClick={onClose}>
       <div onClick={e => e.stopPropagation()} className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <h2 className="font-bold text-slate-100 flex items-center gap-2"><Hash className="h-4 w-4 text-emerald-400" /> Definir PIN</h2>
+          <h2 className="font-bold text-slate-100 flex items-center gap-2"><Hash className="h-4 w-4 text-amber-300" /> Definir PIN</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-100"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-3">
@@ -268,7 +268,7 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
         </div>
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/10">
           <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
-          <button onClick={salvar} disabled={!podeSalvar} className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar PIN</button>
+          <button onClick={salvar} disabled={!podeSalvar} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar PIN</button>
         </div>
       </div>
     </div>

@@ -670,7 +670,7 @@ function OCCard({ oc, onAprovar, onReprovar, onEditar }: { oc: OrdemCompra; onAp
           </button>
           <button
             onClick={onAprovar}
-            className="rounded-2xl bg-neutral-900 text-white py-2.5 text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-black active:scale-[0.98] transition shadow-sm"
+            className="rounded-2xl bg-amber-400 text-neutral-900 py-2.5 text-sm font-semibold flex items-center justify-center gap-1.5 hover:bg-amber-300 active:scale-[0.98] transition shadow-sm"
           >
             <Check className="h-4 w-4" /> Aprovar
           </button>
@@ -934,7 +934,7 @@ function ProdutoSheet({
             <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => sairPara(onNovaCI)}
-                className="h-9 pl-2.5 pr-3 rounded-full bg-neutral-900 text-white flex items-center gap-1 text-[12px] font-semibold hover:bg-black active:scale-95 transition"
+                className="h-9 pl-2.5 pr-3 rounded-full bg-amber-400 text-neutral-900 flex items-center gap-1 text-[12px] font-semibold hover:bg-amber-300 active:scale-95 transition"
               >
                 <Plus className="h-3.5 w-3.5" /> Nova CI
               </button>
@@ -1014,7 +1014,7 @@ function ProdutoSheet({
 
           <button
             onClick={() => sairPara(onComprar)}
-            className="w-full rounded-2xl bg-neutral-900 text-white py-4 text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-black active:scale-[0.99] transition shadow-lg"
+            className="w-full rounded-2xl bg-amber-400 text-neutral-900 py-4 text-[15px] font-semibold flex items-center justify-center gap-2 hover:bg-amber-300 active:scale-[0.99] transition shadow-lg"
           >
             <Plus className="h-5 w-5" /> Criar CI deste produto
           </button>
@@ -1218,7 +1218,7 @@ function NovaOCModal({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[12px] font-semibold text-neutral-500 uppercase tracking-wide">Itens (FLV)</span>
-                <button onClick={addItem} className="flex items-center gap-1 text-[12px] text-neutral-900 font-semibold">
+                <button onClick={addItem} className="flex items-center gap-1 text-[12px] text-amber-600 font-semibold">
                   <Plus className="h-3.5 w-3.5" /> Adicionar
                 </button>
               </div>
@@ -1299,7 +1299,7 @@ function NovaOCModal({
             <button
               disabled={salvando}
               onClick={submeter}
-              className="w-full rounded-2xl bg-neutral-900 text-white py-4 text-[15px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-black active:scale-[0.99] transition shadow-lg"
+              className="w-full rounded-2xl bg-amber-400 text-neutral-900 py-4 text-[15px] font-semibold flex items-center justify-center gap-2 disabled:opacity-50 hover:bg-amber-300 active:scale-[0.99] transition shadow-lg"
             >
               {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : editando ? <Check className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
               {salvando ? 'Salvando…' : editando ? 'Salvar alterações' : 'Criar OC no sistema'}
@@ -1358,7 +1358,7 @@ function TabButton({
         ativo ? 'text-neutral-900' : 'text-neutral-400 hover:text-neutral-600'
       }`}
     >
-      <span className={`relative flex items-center justify-center h-9 w-9 rounded-xl transition ${ativo ? 'bg-neutral-900 text-white' : 'bg-transparent'}`}>
+      <span className={`relative flex items-center justify-center h-9 w-9 rounded-xl transition ${ativo ? 'bg-amber-400 text-neutral-900' : 'bg-transparent'}`}>
         <Icon className="h-[18px] w-[18px]" />
         {badge != null && badge > 0 && (
           <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center">
