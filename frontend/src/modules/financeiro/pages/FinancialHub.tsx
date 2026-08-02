@@ -637,66 +637,66 @@ function RentabilidadeClientes() {
         </div>
       </div>
 
-      {/* Data grid */}
+      {/* Data grid — compacto, cabe em uma tela sem rolagem horizontal */}
       <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
-        <div className="overflow-x-auto max-h-[62vh]">
-          <table className="w-full border-collapse text-[13px]">
+        <div className="overflow-y-auto max-h-[62vh]">
+          <table className="w-full table-fixed border-collapse text-[12px]">
             <thead className="sticky top-0 z-10">
-              <tr className="bg-neutral-50 text-neutral-500 text-[11px] uppercase tracking-wide">
-                <th className="text-left font-semibold px-4 py-3 sticky left-0 bg-neutral-50 min-w-[220px]">Cliente</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Valor Vendido</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Devoluções</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Valor Líquido</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Total CMV</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Frete</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Custos Oper.</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Total Custos</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Resultado Líq.</th>
-                <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">Margem</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Peso Total</th>
+              <tr className="bg-neutral-50 text-neutral-500 text-[10px] uppercase tracking-wide">
+                <th className="text-left font-semibold px-3 py-2 sticky left-0 bg-neutral-50 w-[18%]">Cliente</th>
+                <th className="text-right font-semibold px-2 py-2">Vendido</th>
+                <th className="text-right font-semibold px-2 py-2">Devol.</th>
+                <th className="text-right font-semibold px-2 py-2">Líquido</th>
+                <th className="text-right font-semibold px-2 py-2">CMV</th>
+                <th className="text-right font-semibold px-2 py-2">Frete</th>
+                <th className="text-right font-semibold px-2 py-2">Oper.</th>
+                <th className="text-right font-semibold px-2 py-2">Custos</th>
+                <th className="text-right font-semibold px-2 py-2">Result.</th>
+                <th className="text-center font-semibold px-2 py-2">Margem</th>
+                <th className="text-right font-semibold px-2 py-2">Peso</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {linhas.map((c) => (
                 <tr key={c.id} className="hover:bg-neutral-50/70 transition-colors">
-                  <td className="px-4 py-3 sticky left-0 bg-white hover:bg-neutral-50/70">
-                    <p className="font-medium text-slate-900">{c.nome}</p>
-                    <p className="text-[11px] text-neutral-400">{c.segmento}</p>
+                  <td className="px-3 py-2 sticky left-0 bg-white hover:bg-neutral-50/70">
+                    <p className="font-medium text-slate-900 truncate">{c.nome}</p>
+                    <p className="text-[10px] text-neutral-400 truncate">{c.segmento}</p>
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-700">{brl(c.valorVendido)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-rose-500">-{brl(c.devolucoes)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-medium text-slate-900">{brl(c.valorLiquido)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(c.totalCmv)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(c.valorFrete)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(c.custosOperacionais)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-700">{brl(c.totalCustos)}</td>
-                  <td className={`px-4 py-3 text-right tabular-nums font-semibold ${corResultado(c.resultadoLiquido)}`}>
-                    {brl(c.resultadoLiquido)}
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">{brlCompact(c.valorVendido)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-rose-500">-{brlCompact(c.devolucoes)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums font-medium text-slate-900">{brlCompact(c.valorLiquido)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.totalCmv)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.valorFrete)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.custosOperacionais)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">{brlCompact(c.totalCustos)}</td>
+                  <td className={`px-2 py-2 text-right tabular-nums font-semibold ${corResultado(c.resultadoLiquido)}`}>
+                    {brlCompact(c.resultadoLiquido)}
                   </td>
-                  <td className="px-4 py-3 text-center">
-                    <span className={`inline-block rounded-md px-2 py-1 text-[12px] font-semibold tabular-nums ${corMargem(c.margem)}`}>
+                  <td className="px-2 py-2 text-center">
+                    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${corMargem(c.margem)}`}>
                       {pct(c.margem)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-500">{kg(c.pesoKg)}</td>
+                  <td className="px-2 py-2 text-right tabular-nums text-slate-500">{kg(c.pesoKg)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot className="sticky bottom-0">
-              <tr className="bg-slate-900 text-white font-semibold text-[13px]">
-                <td className="px-4 py-3 sticky left-0 bg-slate-900">Totais ({linhas.length})</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.valorVendido)}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-rose-300">-{brl(tot.devolucoes)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.valorLiquido)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.totalCmv)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.valorFrete)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.custosOperacionais)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.totalCustos)}</td>
-                <td className={`px-4 py-3 text-right tabular-nums ${tot.resultadoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
-                  {brl(tot.resultadoLiquido)}
+              <tr className="bg-slate-900 text-white font-semibold text-[12px]">
+                <td className="px-3 py-2 sticky left-0 bg-slate-900 truncate">Totais ({linhas.length})</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorVendido)}</td>
+                <td className="px-2 py-2 text-right tabular-nums text-rose-300">-{brlCompact(tot.devolucoes)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorLiquido)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.totalCmv)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorFrete)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.custosOperacionais)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.totalCustos)}</td>
+                <td className={`px-2 py-2 text-right tabular-nums ${tot.resultadoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  {brlCompact(tot.resultadoLiquido)}
                 </td>
-                <td className="px-4 py-3 text-center tabular-nums">{pct(margemTotal)}</td>
-                <td className="px-4 py-3 text-right tabular-nums">{kg(tot.pesoKg)}</td>
+                <td className="px-2 py-2 text-center tabular-nums">{pct(margemTotal)}</td>
+                <td className="px-2 py-2 text-right tabular-nums">{kg(tot.pesoKg)}</td>
               </tr>
             </tfoot>
           </table>

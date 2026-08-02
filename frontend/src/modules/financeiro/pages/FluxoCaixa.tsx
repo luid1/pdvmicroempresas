@@ -3,6 +3,7 @@ import {
   Landmark, RefreshCw, TrendingUp, TrendingDown, Scale, CalendarDays,
 } from 'lucide-react';
 import { fluxoCaixaApi } from '../../../services/api';
+import { PageHeader } from '../../cadastros/ui';
 
 const R$ = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const primeiroDiaAno = () => `${new Date().getFullYear()}-01-01`;
@@ -38,14 +39,11 @@ export default function FluxoCaixa() {
 
   return (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100">
-      <div className="bg-slate-900/80 border-b border-slate-800 px-6 pt-4 pb-3 shrink-0">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Landmark className="h-5 w-5 text-amber-300" /> Fluxo de Caixa
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">Caixa realizado · entradas pagas − saídas pagas por competência, com saldo acumulado</p>
-          </div>
+      <PageHeader
+        icon={<Landmark className="h-4 w-4" />}
+        titulo="Fluxo de Caixa"
+        subtitulo="Caixa realizado · entradas pagas − saídas pagas por competência, com saldo acumulado"
+        actions={
           <div className="flex items-center gap-2">
             <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
               {(['mes', 'dia'] as const).map(a => (
@@ -65,8 +63,8 @@ export default function FluxoCaixa() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

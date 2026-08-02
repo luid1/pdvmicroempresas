@@ -26,24 +26,17 @@ import {
   BarChart3,
   History,
 } from 'lucide-react';
+import { PageHeader } from '../../cadastros/ui';
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   MÓDULO FINANCEIRO & CONTROLADORIA — "Estado da Arte"
+   MÓDULO FINANCEIRO & CONTROLADORIA
    SPA de 3 abas (Fluxo de Caixa · Contas a Receber · Contas a Pagar).
-   Estética premium clara: off-white, cards brancos, bordas 1px, tipografia oversized,
-   cores semânticas maduras (esmeralda / coral / âmbar). Escapa do tema dark global
-   do sistema via wrapper .ctrl-light (força bg-white real + inputs claros).
+   Tema dark do sistema · âmbar no chrome, verde/vermelho só nos valores.
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ───────────────────────────── Formatação ────────────────────────────────── */
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
-const brlCompact = (v: number) => {
-  const abs = Math.abs(v);
-  if (abs >= 1_000_000) return `${v < 0 ? '-' : ''}R$ ${(abs / 1_000_000).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} mi`;
-  if (abs >= 1_000) return `${v < 0 ? '-' : ''}R$ ${(abs / 1_000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mil`;
-  return brl(v);
-};
 const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 /* ═══════════════════════════ Tipos & Mocks ═══════════════════════════════════ */
@@ -123,59 +116,48 @@ export default function ControladoriaHub() {
   const [buscaGlobal, setBuscaGlobal] = useState('');
 
   return (
-    <div className="ctrl-light min-h-full bg-neutral-50 -m-4 sm:-m-6 p-4 sm:p-6 lg:p-8">
-      {/* Escapa do tema dark global — este módulo é claro premium */}
-      <style>{`
-        .ctrl-light .bg-white { background-color: #ffffff !important; }
-        .ctrl-light input:not([type="checkbox"]):not([type="radio"]),
-        .ctrl-light select,
-        .ctrl-light textarea { background-color: #ffffff !important; color: #171717 !important; }
-        .ctrl-light input::placeholder, .ctrl-light textarea::placeholder { color: #9ca3af !important; }
-      `}</style>
-
-      <div className="max-w-[1400px] mx-auto">
-        {/* ── Header global (compacto, linha única) ── */}
-        <header className="flex flex-wrap items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-600 flex items-center justify-center shrink-0">
-              <Landmark className="h-4 w-4" />
-            </span>
-            <h1 className="text-base font-bold text-neutral-900 tracking-tight shrink-0">Financeiro &amp; Controladoria</h1>
-            <span className="text-xs text-neutral-400 border-l border-neutral-200 pl-2.5 hidden sm:block">Controladoria</span>
-          </div>
-
+    <div className="flex flex-col h-full bg-slate-900 text-slate-100">
+      <PageHeader
+        icon={<Landmark className="h-4 w-4" />}
+        titulo="Financeiro & Controladoria"
+        subtitulo="Controladoria"
+        actions={
           <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
                 value={buscaGlobal}
                 onChange={(e) => setBuscaGlobal(e.target.value)}
                 placeholder="Busca global…"
-                className="w-60 rounded-lg border border-neutral-200 bg-white pl-10 pr-16 py-1.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
+                className="w-56 rounded-lg border border-slate-700 bg-slate-800 pl-10 pr-16 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-[10px] text-neutral-400 border border-neutral-200 rounded-md px-1.5 py-0.5">
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-[10px] text-slate-500 border border-slate-700 rounded-md px-1.5 py-0.5">
                 <Command className="h-3 w-3" />K
               </kbd>
             </div>
-            <button className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
-              <Download className="h-4 w-4 text-neutral-400" /> Exportar
+            <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-700">
+              <Download className="h-4 w-4 text-slate-500" /> Exportar
             </button>
             <button className="flex items-center gap-2 rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-sm font-semibold hover:bg-amber-300">
               <Plus className="h-4 w-4" /> Novo lançamento
             </button>
           </div>
-        </header>
+        }
+      />
 
-        {/* ── Tabs ── */}
-        <nav className="flex items-center gap-1 border-b border-neutral-200 mb-6">
-          <Tab ativo={aba === 'fluxo'} icon={BarChart3} label="Fluxo de Caixa" onClick={() => setAba('fluxo')} />
-          <Tab ativo={aba === 'receber'} icon={ArrowUpRight} label="Contas a Receber" onClick={() => setAba('receber')} />
-          <Tab ativo={aba === 'pagar'} icon={ArrowDownRight} label="Contas a Pagar" onClick={() => setAba('pagar')} />
-        </nav>
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-[1400px] mx-auto">
+          {/* ── Tabs ── */}
+          <nav className="flex items-center gap-1 border-b border-slate-800 mb-6">
+            <Tab ativo={aba === 'fluxo'} icon={BarChart3} label="Fluxo de Caixa" onClick={() => setAba('fluxo')} />
+            <Tab ativo={aba === 'receber'} icon={ArrowUpRight} label="Contas a Receber" onClick={() => setAba('receber')} />
+            <Tab ativo={aba === 'pagar'} icon={ArrowDownRight} label="Contas a Pagar" onClick={() => setAba('pagar')} />
+          </nav>
 
-        {aba === 'fluxo' && <AbaFluxo />}
-        {aba === 'receber' && <AbaReceber />}
-        {aba === 'pagar' && <AbaPagar />}
+          {aba === 'fluxo' && <AbaFluxo />}
+          {aba === 'receber' && <AbaReceber />}
+          {aba === 'pagar' && <AbaPagar />}
+        </div>
       </div>
     </div>
   );
@@ -206,24 +188,24 @@ function AbaFluxo() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Gráfico (placeholder) */}
-        <section className="xl:col-span-2 rounded-2xl border border-neutral-200 bg-white p-6">
+        <section className="xl:col-span-2 rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="h-8 w-8 rounded-lg bg-neutral-900 text-white flex items-center justify-center">
+              <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center">
                 <Sparkles className="h-4 w-4" />
               </span>
               <div>
-                <h2 className="text-sm font-semibold text-neutral-900">Projeção de Caixa (IA)</h2>
-                <p className="text-[12px] text-neutral-400">Modelo preditivo sobre recebíveis e obrigações</p>
+                <h2 className="text-sm font-semibold text-white">Projeção de Caixa (IA)</h2>
+                <p className="text-[12px] text-slate-500">Modelo preditivo sobre recebíveis e obrigações</p>
               </div>
             </div>
-            <div className="flex items-center gap-1 bg-neutral-100 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-slate-800 rounded-xl p-1">
               {(['7', '15', '30'] as const).map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriodo(p)}
                   className={`px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
-                    periodo === p ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-700'
+                    periodo === p ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {p} dias
@@ -231,7 +213,7 @@ function AbaFluxo() {
               ))}
             </div>
           </div>
-          <div className="h-64 rounded-xl bg-neutral-50 border border-dashed border-neutral-200 flex flex-col items-center justify-center gap-2 text-neutral-400">
+          <div className="h-64 rounded-xl bg-slate-900/40 border border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500">
             <BarChart3 className="h-8 w-8" />
             <p className="text-sm font-medium">Projeção de Caixa — próximos {periodo} dias</p>
             <p className="text-[12px]">Gráfico de movimentação (entradas × saídas)</p>
@@ -239,23 +221,23 @@ function AbaFluxo() {
         </section>
 
         {/* Timeline de ações automatizadas */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-          <h2 className="text-[11px] font-semibold text-neutral-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <History className="h-3.5 w-3.5" /> Ações automatizadas
+        <section className="rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6">
+          <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+            <History className="h-3.5 w-3.5 text-amber-300" /> Ações automatizadas
           </h2>
-          <ol className="relative border-l border-neutral-200 ml-1.5 space-y-5">
+          <ol className="relative border-l border-slate-700 ml-1.5 space-y-5">
             {EVENTOS.map((ev) => {
               const Icon = ev.icon;
               const tom =
-                ev.tom === 'ok' ? 'bg-emerald-50 text-emerald-600' : ev.tom === 'alerta' ? 'bg-rose-50 text-rose-600' : 'bg-neutral-100 text-neutral-500';
+                ev.tom === 'ok' ? 'bg-emerald-500/15 text-emerald-300' : ev.tom === 'alerta' ? 'bg-rose-500/15 text-rose-300' : 'bg-slate-700/60 text-slate-400';
               return (
                 <li key={ev.id} className="ml-5">
-                  <span className={`absolute -left-[13px] h-6 w-6 rounded-full flex items-center justify-center ring-4 ring-white ${tom}`}>
+                  <span className={`absolute -left-[13px] h-6 w-6 rounded-full flex items-center justify-center ring-4 ring-slate-900 ${tom}`}>
                     <Icon className="h-3 w-3" />
                   </span>
-                  <p className="text-[13px] font-medium text-neutral-800 leading-snug">{ev.titulo}</p>
-                  <p className="text-[12px] text-neutral-400">{ev.detalhe}</p>
-                  <p className="text-[11px] text-neutral-300 mt-0.5">{ev.quando}</p>
+                  <p className="text-[13px] font-medium text-slate-200 leading-snug">{ev.titulo}</p>
+                  <p className="text-[12px] text-slate-500">{ev.detalhe}</p>
+                  <p className="text-[11px] text-slate-600 mt-0.5">{ev.quando}</p>
                 </li>
               );
             })}
@@ -307,21 +289,21 @@ function AbaReceber() {
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar cliente, CNPJ ou NF…"
-            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+            className="w-full rounded-xl border border-slate-700 bg-slate-800 pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
           />
         </div>
-        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 focus:outline-none">
+        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
           <option value="TODOS">Todos os status</option>
           <option value="PENDENTE">Pendente</option>
           <option value="VENCIDO">Vencido</option>
           <option value="PAGO">Pago</option>
         </select>
-        <select value={ordem} onChange={(e) => setOrdem(e.target.value as any)} className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 focus:outline-none">
+        <select value={ordem} onChange={(e) => setOrdem(e.target.value as any)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
           <option value="venc">Ordenar: Vencimento</option>
           <option value="valorDesc">Maior valor</option>
           <option value="valorAsc">Menor valor</option>
@@ -329,11 +311,11 @@ function AbaReceber() {
       </div>
 
       {/* Tabela */}
-      <div className="rounded-2xl border border-neutral-200 bg-white overflow-visible">
+      <div className="rounded-2xl border border-slate-700/60 bg-slate-800/50 overflow-visible">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-[11px] uppercase tracking-widest text-neutral-400 border-b border-neutral-200">
+              <tr className="text-[11px] uppercase tracking-widest text-slate-500 border-b border-slate-700/60">
                 <th className="text-left font-semibold px-6 py-3">Cliente</th>
                 <th className="text-left font-semibold px-6 py-3 whitespace-nowrap">Vencimento</th>
                 <th className="text-right font-semibold px-6 py-3">Valor</th>
@@ -343,16 +325,16 @@ function AbaReceber() {
             </thead>
             <tbody>
               {filtrados.length === 0 && (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-neutral-400">Nenhum título encontrado.</td></tr>
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">Nenhum título encontrado.</td></tr>
               )}
               {filtrados.map((t) => (
-                <tr key={t.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-700/20 transition-colors">
                   <td className="px-6 py-4">
-                    <p className="font-medium text-neutral-900">{t.cliente}</p>
-                    <p className="text-[12px] text-neutral-400">{t.cnpj} · {t.descricao}</p>
+                    <p className="font-medium text-white">{t.cliente}</p>
+                    <p className="text-[12px] text-slate-500">{t.cnpj} · {t.descricao}</p>
                   </td>
-                  <td className="px-6 py-4 text-neutral-600 tabular-nums whitespace-nowrap">{t.vencimento}</td>
-                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-neutral-900">{brl(t.valor)}</td>
+                  <td className="px-6 py-4 text-slate-400 tabular-nums whitespace-nowrap">{t.vencimento}</td>
+                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-white">{brl(t.valor)}</td>
                   <td className="px-6 py-4 text-center"><BadgeReceber status={t.status} /></td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1.5">
@@ -361,11 +343,11 @@ function AbaReceber() {
                         target="_blank"
                         rel="noopener noreferrer"
                         title="Cobrar via WhatsApp"
-                        className="h-8 w-8 rounded-lg border border-neutral-200 text-emerald-600 flex items-center justify-center hover:bg-emerald-50"
+                        className="h-8 w-8 rounded-lg border border-slate-700 text-emerald-300 flex items-center justify-center hover:bg-emerald-500/10"
                       >
                         <MessageCircle className="h-4 w-4" />
                       </a>
-                      <button title="Gerar link de pagamento" className="h-8 w-8 rounded-lg border border-neutral-200 text-neutral-600 flex items-center justify-center hover:bg-neutral-50">
+                      <button title="Gerar link de pagamento" className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30">
                         <Link2 className="h-4 w-4" />
                       </button>
                       {t.status !== 'PAGO' && (
@@ -376,14 +358,14 @@ function AbaReceber() {
                       <div className="relative">
                         <button
                           onClick={() => setMenuAberto(menuAberto === t.id ? null : t.id)}
-                          className="h-8 w-8 rounded-lg border border-neutral-200 text-neutral-500 flex items-center justify-center hover:bg-neutral-50"
+                          className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </button>
                         {menuAberto === t.id && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setMenuAberto(null)} />
-                            <div className="absolute right-0 mt-1 z-20 w-48 rounded-xl border border-neutral-200 bg-white py-1 shadow-lg shadow-black/5">
+                            <div className="absolute right-0 mt-1 z-20 w-48 rounded-xl border border-slate-700 bg-slate-800 py-1 shadow-lg shadow-black/40">
                               <MenuItem icon={BarChart3} label="Ver DRE do cliente" onClick={() => setMenuAberto(null)} />
                               <MenuItem icon={History} label="Histórico de títulos" onClick={() => setMenuAberto(null)} />
                               <MenuItem icon={Eye} label="Detalhes" onClick={() => setMenuAberto(null)} />
@@ -441,28 +423,28 @@ function AbaPagar() {
         onDragLeave={() => setArrastando(false)}
         onDrop={(e) => { e.preventDefault(); setArrastando(false); }}
         className={`rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
-          arrastando ? 'border-neutral-900 bg-neutral-50' : 'border-neutral-200 bg-white'
+          arrastando ? 'border-amber-400 bg-slate-800' : 'border-slate-700 bg-slate-800/50'
         }`}
       >
-        <span className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-neutral-100 text-neutral-500 flex items-center justify-center">
+        <span className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-amber-400/15 text-amber-300 flex items-center justify-center">
           <UploadCloud className="h-6 w-6" />
         </span>
-        <p className="text-sm font-semibold text-neutral-800">Arraste o PDF do Boleto ou Nota Fiscal aqui</p>
-        <p className="text-[12px] text-neutral-400 mt-0.5">A IA lê o documento (OCR) e preenche fornecedor, valor e vencimento automaticamente.</p>
+        <p className="text-sm font-semibold text-slate-200">Arraste o PDF do Boleto ou Nota Fiscal aqui</p>
+        <p className="text-[12px] text-slate-500 mt-0.5">A IA lê o documento (OCR) e preenche fornecedor, valor e vencimento automaticamente.</p>
       </div>
 
       {/* Filtros */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar fornecedor…"
-            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
+            className="w-full rounded-xl border border-slate-700 bg-slate-800 pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
           />
         </div>
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-xl border border-neutral-200 bg-white px-3 py-2.5 text-sm text-neutral-700 focus:outline-none">
+        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
           <option value="TODAS">Todas as categorias</option>
           {categorias.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -471,11 +453,11 @@ function AbaPagar() {
       </div>
 
       {/* Tabela */}
-      <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
+      <div className="rounded-2xl border border-slate-700/60 bg-slate-800/50 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-[11px] uppercase tracking-widest text-neutral-400 border-b border-neutral-200">
+              <tr className="text-[11px] uppercase tracking-widest text-slate-500 border-b border-slate-700/60">
                 <th className="text-left font-semibold px-6 py-3">Fornecedor</th>
                 <th className="text-left font-semibold px-6 py-3">Categoria / Centro de Custo</th>
                 <th className="text-left font-semibold px-6 py-3 whitespace-nowrap">Vencimento</th>
@@ -486,21 +468,21 @@ function AbaPagar() {
             </thead>
             <tbody>
               {filtrados.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-neutral-400">Nenhuma conta encontrada.</td></tr>
+                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">Nenhuma conta encontrada.</td></tr>
               )}
               {filtrados.map((t) => (
-                <tr key={t.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-neutral-900">{t.fornecedor}</td>
+                <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-700/20 transition-colors">
+                  <td className="px-6 py-4 font-medium text-white">{t.fornecedor}</td>
                   <td className="px-6 py-4">
-                    <span className="inline-block rounded-md bg-neutral-100 text-neutral-600 px-2 py-0.5 text-[12px] font-medium">{t.categoria}</span>
-                    <p className="text-[12px] text-neutral-400 mt-0.5">{t.centroCusto}</p>
+                    <span className="inline-block rounded-md bg-slate-700/50 text-slate-300 px-2 py-0.5 text-[12px] font-medium">{t.categoria}</span>
+                    <p className="text-[12px] text-slate-500 mt-0.5">{t.centroCusto}</p>
                   </td>
-                  <td className="px-6 py-4 text-neutral-600 tabular-nums whitespace-nowrap">{t.vencimento}</td>
-                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-neutral-900">{brl(t.valor)}</td>
+                  <td className="px-6 py-4 text-slate-400 tabular-nums whitespace-nowrap">{t.vencimento}</td>
+                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-white">{brl(t.valor)}</td>
                   <td className="px-6 py-4 text-center"><BadgePagar status={t.status} /></td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-1.5">
-                      <button title="Ver documento (PDF)" className="h-8 w-8 rounded-lg border border-neutral-200 text-neutral-600 flex items-center justify-center hover:bg-neutral-50">
+                      <button title="Ver documento (PDF)" className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30">
                         <FileText className="h-4 w-4" />
                       </button>
                       {t.status === 'APROVACAO_PENDENTE' ? (
@@ -508,11 +490,11 @@ function AbaPagar() {
                           <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
                         </button>
                       ) : t.status === 'APROVADO' ? (
-                        <button onClick={() => aprovar(t.id)} className="rounded-lg border border-neutral-200 text-neutral-700 px-3 py-1.5 text-[12px] font-semibold hover:bg-neutral-50 flex items-center gap-1.5">
+                        <button onClick={() => aprovar(t.id)} className="rounded-lg border border-slate-700 text-slate-200 px-3 py-1.5 text-[12px] font-semibold hover:bg-slate-700/30 flex items-center gap-1.5">
                           <CreditCard className="h-3.5 w-3.5" /> Realizar Pagamento
                         </button>
                       ) : (
-                        <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-600 font-medium px-3 py-1.5">
+                        <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-300 font-medium px-3 py-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Pago
                         </span>
                       )}
@@ -548,38 +530,38 @@ function Kpi({
 }) {
   const cor =
     tom === 'destaque' || tom === 'processando'
-      ? 'text-amber-600'
+      ? 'text-amber-300'
       : tom === 'positivo'
-        ? 'text-emerald-600'
+        ? 'text-emerald-300'
         : tom === 'negativo'
-          ? 'text-rose-600'
-          : 'text-neutral-900';
+          ? 'text-rose-300'
+          : 'text-white';
   const chip =
     tom === 'destaque' || tom === 'processando'
-      ? 'bg-amber-50 text-amber-600'
+      ? 'bg-amber-400/15 text-amber-300'
       : tom === 'positivo'
-        ? 'bg-emerald-50 text-emerald-600'
+        ? 'bg-emerald-500/10 text-emerald-300'
         : tom === 'negativo'
-          ? 'bg-rose-50 text-rose-600'
-          : 'bg-neutral-100 text-neutral-500';
-  const moldura = tom === 'destaque' ? 'ring-1 ring-amber-200 bg-amber-50/40' : 'border border-neutral-200 bg-white';
+          ? 'bg-rose-500/10 text-rose-300'
+          : 'bg-slate-700/50 text-slate-400';
+  const moldura = tom === 'destaque' ? 'ring-1 ring-amber-400/30 bg-amber-400/[0.06]' : 'border border-slate-700/60 bg-slate-800/50';
 
   return (
     <div className={`rounded-2xl p-5 ${moldura}`}>
       <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-widest font-semibold text-neutral-400">{label}</p>
+        <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-500">{label}</p>
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${chip}`}>
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <p className={`mt-3 text-4xl leading-none font-semibold tracking-tight tabular-nums ${cor}`}>{brl(valor)}</p>
+      <p className={`mt-3 text-3xl leading-none font-semibold tracking-tight tabular-nums ${cor}`}>{brl(valor)}</p>
       <div className="mt-2 flex items-center gap-2">
         {tendencia != null && (
-          <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${tendencia >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+          <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${tendencia >= 0 ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'}`}>
             {pct(tendencia)}
           </span>
         )}
-        <p className="text-[12px] text-neutral-400">{hint}</p>
+        <p className="text-[12px] text-slate-500">{hint}</p>
       </div>
     </div>
   );
@@ -588,10 +570,10 @@ function Kpi({
 function BadgeReceber({ status }: { status: StatusReceber }) {
   const cfg =
     status === 'PAGO'
-      ? { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-100', icon: CheckCircle2, label: 'Pago' }
+      ? { cls: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', icon: CheckCircle2, label: 'Pago' }
       : status === 'VENCIDO'
-        ? { cls: 'bg-rose-50 text-rose-700 ring-rose-100', icon: AlertTriangle, label: 'Vencido' }
-        : { cls: 'bg-amber-50 text-amber-700 ring-amber-100', icon: Clock, label: 'Pendente' };
+        ? { cls: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', icon: AlertTriangle, label: 'Vencido' }
+        : { cls: 'bg-amber-500/10 text-amber-300 ring-amber-500/20', icon: Clock, label: 'Pendente' };
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${cfg.cls}`}>
@@ -603,10 +585,10 @@ function BadgeReceber({ status }: { status: StatusReceber }) {
 function BadgePagar({ status }: { status: StatusPagar }) {
   const cfg =
     status === 'PAGO'
-      ? { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-100', icon: CheckCircle2, label: 'Pago' }
+      ? { cls: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', icon: CheckCircle2, label: 'Pago' }
       : status === 'APROVADO'
-        ? { cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200', icon: CheckCircle2, label: 'Aprovado' }
-        : { cls: 'bg-amber-50 text-amber-700 ring-amber-100', icon: Clock, label: 'Aprovação Pendente' };
+        ? { cls: 'bg-slate-700/50 text-slate-300 ring-slate-600', icon: CheckCircle2, label: 'Aprovado' }
+        : { cls: 'bg-amber-500/10 text-amber-300 ring-amber-500/20', icon: Clock, label: 'Aprovação Pendente' };
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${cfg.cls}`}>
@@ -617,8 +599,8 @@ function BadgePagar({ status }: { status: StatusPagar }) {
 
 function MenuItem({ icon: Icon, label, onClick }: { icon: React.ElementType; label: string; onClick: () => void }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-neutral-700 hover:bg-neutral-50 text-left">
-      <Icon className="h-4 w-4 text-neutral-400" /> {label}
+    <button onClick={onClick} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-slate-300 hover:bg-slate-700/40 text-left">
+      <Icon className="h-4 w-4 text-slate-500" /> {label}
     </button>
   );
 }
@@ -628,12 +610,12 @@ function Tab({ ativo, icon: Icon, label, onClick }: { ativo: boolean; icon: Reac
     <button
       onClick={onClick}
       className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-        ativo ? 'text-amber-600' : 'text-neutral-500 hover:text-neutral-700'
+        ativo ? 'text-amber-300' : 'text-slate-400 hover:text-slate-200'
       }`}
     >
-      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-600' : 'text-neutral-400'}`} />
+      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-300' : 'text-slate-500'}`} />
       {label}
-      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-500 rounded-full" />}
+      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-400 rounded-full" />}
     </button>
   );
 }
