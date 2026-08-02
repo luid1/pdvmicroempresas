@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast, confirmDialog } from '../../../components/ui/feedback';
 import { financeiroApi, tesourariaApi } from '../../../services/api';
+import { PageHeader } from '../../cadastros/ui';
 
 const R$ = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 const primeiroDiaMes = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; };
@@ -80,15 +81,12 @@ export default function ContasPagar() {
 
   return (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100">
-      <div className="bg-slate-900/80 border-b border-slate-800 px-6 pt-4 pb-3 shrink-0">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <ArrowUpCircle className="h-5 w-5 text-rose-300" /> Contas a Pagar
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">Despesas e compras de fornecedores · status, parcelamento e baixa com trilha de auditoria</p>
-          </div>
-          <div className="flex items-center gap-2">
+      <PageHeader
+        icon={<ArrowUpCircle className="h-4 w-4" />}
+        titulo="Contas a Pagar"
+        subtitulo="Despesas e compras de fornecedores · status, parcelamento e baixa com trilha de auditoria"
+        actions={
+          <>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
               <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
             </label>
@@ -99,13 +97,13 @@ export default function ContasPagar() {
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
             {podeOperar && (
-              <button onClick={() => setCriando(true)} className="flex items-center gap-1.5 bg-rose-500 hover:bg-rose-400 text-white text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-rose-500/20">
+              <button onClick={() => setCriando(true)} className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-amber-500/20">
                 <Plus className="h-4 w-4" /> Nova despesa
               </button>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="flex-1 overflow-auto p-6 space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -118,12 +116,12 @@ export default function ContasPagar() {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por fornecedor, descrição ou nº..." className="bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-slate-100 w-80 focus:outline-none focus:border-rose-400" />
+            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por fornecedor, descrição ou nº..." className="bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-slate-100 w-80 focus:outline-none focus:border-amber-400" />
           </div>
           <div className="flex items-center gap-1 ml-auto">
             {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
               <button key={s || 'todos'} onClick={() => setStatus(s)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-rose-500/15 text-rose-300 border-rose-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
                 {s === '' ? 'Todos' : STATUS_META[s].label}
               </button>
             ))}
@@ -169,7 +167,7 @@ export default function ContasPagar() {
                       <td className="px-4 py-2.5 text-center whitespace-nowrap">
                         {podeOperar && quitavel && (
                           <>
-                            <button onClick={() => setBaixando(c)} title="Dar baixa" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-emerald-300 hover:bg-emerald-500/15">
+                            <button onClick={() => setBaixando(c)} title="Dar baixa" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-amber-300 hover:bg-amber-500/15">
                               <CheckCircle2 className="h-4 w-4" />
                             </button>
                             <button onClick={() => cancelar(c)} title="Cancelar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-rose-300 hover:bg-rose-500/15">
@@ -241,16 +239,16 @@ function ModalBaixa({ conta, onClose, onDone }: { conta: Conta; onClose: () => v
         </label>
         <label className="block mb-3">
           <span className="text-xs text-slate-400">Forma de pagamento (opcional)</span>
-          <input value={forma} onChange={e => setForma(e.target.value)} placeholder="PIX, Dinheiro, Boleto..." className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+          <input value={forma} onChange={e => setForma(e.target.value)} placeholder="PIX, Dinheiro, Boleto..." className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
         </label>
         <label className="block mb-4">
           <span className="text-xs text-slate-400">Conta de origem (tesouraria)</span>
-          <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400">
+          <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
             <option value="">Não movimentar caixa</option>
             {contasFin.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
         </label>
-        <button onClick={confirmar} disabled={salvando} className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-slate-900 font-bold py-2.5 rounded-lg">
+        <button onClick={confirmar} disabled={salvando} className="w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-slate-900 font-bold py-2.5 rounded-lg">
           <CheckCircle2 className="h-4 w-4" /> Confirmar baixa
         </button>
       </div>
@@ -303,25 +301,25 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
         <div className="space-y-3">
           <label className="block">
             <span className="text-xs text-slate-400">Descrição</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400" />
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs text-slate-400">Valor total</span>
-              <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-rose-400" />
+              <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Parcelas</span>
-              <input type="number" min="1" value={parcelas} onChange={e => setParcelas(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-rose-400" />
+              <input type="number" min="1" value={parcelas} onChange={e => setParcelas(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
             </label>
           </div>
           <label className="block">
             <span className="text-xs text-slate-400">1º vencimento</span>
-            <input type="date" value={vencimento} onChange={e => setVencimento(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400" />
+            <input type="date" value={vencimento} onChange={e => setVencimento(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Categoria (Plano de Contas)</span>
-            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-rose-400">
+            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
               <option value="">Sem categoria (não classificar no DRE)</option>
               {contas.map((c) => (
                 <option key={c.id} value={c.codigo}>{c.codigo} · {c.descricao}</option>
@@ -329,7 +327,7 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
             </select>
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> Criar
         </button>
       </div>

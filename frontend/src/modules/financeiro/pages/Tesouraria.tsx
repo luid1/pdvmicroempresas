@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast, confirmDialog } from '../../../components/ui/feedback';
 import { tesourariaApi, financeiroApi } from '../../../services/api';
+import { PageHeader } from '../../cadastros/ui';
 
 type TipoConta = 'CAIXA' | 'BANCO' | 'CARTAO' | 'APLICACAO' | 'OUTRO';
 type TipoMov = 'ENTRADA' | 'SAIDA';
@@ -89,39 +90,36 @@ export default function Tesouraria() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-emerald-400/10 text-emerald-300 flex items-center justify-center">
-            <Landmark className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="text-xl font-bold text-white">Tesouraria</h1>
-            <p className="text-[13px] text-slate-400">Contas, saldos de caixa/banco, transferências e conciliação bancária.</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {podeOperar && (
-            <>
-              <button onClick={() => setLancando(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-2 rounded-lg">
-                <ArrowDownCircle className="h-4 w-4" /> Lançar
+    <div className="flex flex-col h-full">
+      <PageHeader
+        icon={<Landmark className="h-4 w-4" />}
+        titulo="Tesouraria"
+        subtitulo="Contas, saldos de caixa/banco, transferências e conciliação bancária."
+        actions={
+          <>
+            {podeOperar && (
+              <>
+                <button onClick={() => setLancando(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                  <ArrowDownCircle className="h-4 w-4" /> Lançar
+                </button>
+                <button onClick={() => setTransferindo(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                  <ArrowLeftRight className="h-4 w-4" /> Transferir
+                </button>
+              </>
+            )}
+            {podeConfigurar && (
+              <button onClick={() => setCriandoConta(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-1.5 rounded-lg">
+                <Plus className="h-4 w-4" /> Nova conta
               </button>
-              <button onClick={() => setTransferindo(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-2 rounded-lg">
-                <ArrowLeftRight className="h-4 w-4" /> Transferir
-              </button>
-            </>
-          )}
-          {podeConfigurar && (
-            <button onClick={() => setCriandoConta(true)} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
-              <Plus className="h-4 w-4" /> Nova conta
+            )}
+            <button onClick={carregar} className="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
-          )}
-          <button onClick={carregar} className="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
-
+          </>
+        }
+      />
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="max-w-6xl mx-auto">
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
@@ -142,7 +140,7 @@ export default function Tesouraria() {
       <div className="flex items-center gap-1 mb-4 border-b border-slate-800">
         {([['contas', 'Contas & Saldos'], ['movimentos', 'Movimentos'], ['conciliacao', 'Conciliação']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setAba(k)}
-            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px ${aba === k ? 'border-emerald-400 text-emerald-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}>
+            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px ${aba === k ? 'border-amber-400 text-amber-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}>
             {l}
           </button>
         ))}
@@ -164,7 +162,7 @@ export default function Tesouraria() {
                     <div>
                       <p className="text-white font-semibold flex items-center gap-2">
                         {c.nome}
-                        {c.padrao && <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">padrão</span>}
+                        {c.padrao && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">padrão</span>}
                       </p>
                       <p className="text-xs text-slate-400">{LABEL_TIPO[c.tipo]}{c.banco ? ` · ${c.banco}` : ''}{c.numero ? ` · ${c.numero}` : ''}</p>
                     </div>
@@ -193,6 +191,8 @@ export default function Tesouraria() {
       {editandoConta && <ModalConta conta={editandoConta} onClose={() => setEditandoConta(null)} onDone={() => { setEditandoConta(null); carregar(); }} />}
       {transferindo && <ModalTransferencia contas={contas} onClose={() => setTransferindo(false)} onDone={() => { setTransferindo(false); carregar(); }} />}
       {lancando && <ModalAvulso contas={contas} onClose={() => setLancando(false)} onDone={() => { setLancando(false); carregar(); }} />}
+        </div>
+      </div>
     </div>
   );
 }
@@ -283,7 +283,7 @@ function AbaConciliacao({ contas, podeOperar, onChange }: { contas: ContaFin[]; 
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-slate-400">Importe o extrato bancário (OFX) e concilie com os movimentos de caixa.</p>
         {podeOperar && (
-          <button onClick={() => setImportando(true)} className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-bold px-3 py-2 rounded-lg">
+          <button onClick={() => setImportando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
             <Upload className="h-4 w-4" /> Importar extrato
           </button>
         )}
@@ -358,12 +358,12 @@ function ModalConta({ conta, onClose, onDone }: { conta?: ContaFin; onClose: () 
         <div className="space-y-3">
           <label className="block">
             <span className="text-xs text-slate-400">Nome</span>
-            <input value={nome} onChange={e => setNome(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+            <input value={nome} onChange={e => setNome(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs text-slate-400">Tipo</span>
-              <select value={tipo} onChange={e => setTipo(e.target.value as TipoConta)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400">
+              <select value={tipo} onChange={e => setTipo(e.target.value as TipoConta)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
                 <option value="CAIXA">Caixa</option>
                 <option value="BANCO">Banco</option>
                 <option value="CARTAO">Cartão</option>
@@ -373,23 +373,23 @@ function ModalConta({ conta, onClose, onDone }: { conta?: ContaFin; onClose: () 
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Banco</span>
-              <input value={banco} onChange={e => setBanco(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+              <input value={banco} onChange={e => setBanco(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
             </label>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs text-slate-400">Agência</span>
-              <input value={agencia} onChange={e => setAgencia(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+              <input value={agencia} onChange={e => setAgencia(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Conta nº</span>
-              <input value={numero} onChange={e => setNumero(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+              <input value={numero} onChange={e => setNumero(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
             </label>
           </div>
           {!edicao && (
             <label className="block">
               <span className="text-xs text-slate-400">Saldo inicial</span>
-              <input type="number" step="0.01" value={saldoInicial} onChange={e => setSaldoInicial(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-emerald-400" />
+              <input type="number" step="0.01" value={saldoInicial} onChange={e => setSaldoInicial(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
             </label>
           )}
           <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
@@ -401,7 +401,7 @@ function ModalConta({ conta, onClose, onDone }: { conta?: ContaFin; onClose: () 
             </label>
           )}
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> {edicao ? 'Salvar' : 'Criar'}
         </button>
       </div>
@@ -455,14 +455,14 @@ function ModalTransferencia({ contas, onClose, onDone }: { contas: ContaFin[]; o
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Valor</span>
-            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-emerald-400" />
+            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Descrição (opcional)</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <ArrowLeftRight className="h-4 w-4" /> Transferir
         </button>
       </div>
@@ -518,11 +518,11 @@ function ModalAvulso({ contas, onClose, onDone }: { contas: ContaFin[]; onClose:
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Valor</span>
-            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-emerald-400" />
+            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Descrição</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-400" />
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Categoria (opcional)</span>
@@ -532,7 +532,7 @@ function ModalAvulso({ contas, onClose, onDone }: { contas: ContaFin[]; onClose:
             </select>
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> Lançar
         </button>
       </div>
@@ -624,7 +624,7 @@ function ModalImportarOFX({ contas, onClose, onDone }: { contas: ContaFin[]; onC
             </div>
           )}
         </div>
-        <button onClick={confirmar} disabled={salvando || itens.length === 0} className="mt-4 w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando || itens.length === 0} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Upload className="h-4 w-4" /> Importar {itens.length > 0 ? `(${itens.length})` : ''}
         </button>
       </div>

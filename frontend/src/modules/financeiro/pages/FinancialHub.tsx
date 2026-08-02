@@ -617,7 +617,7 @@ function RentabilidadeClientes() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar cliente ou segmento…"
-            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
           />
         </div>
         <div className="flex items-center gap-2 text-sm">
@@ -628,7 +628,7 @@ function RentabilidadeClientes() {
               key={o}
               onClick={() => setOrdem(o)}
               className={`rounded-lg px-3 py-1.5 text-[13px] font-medium capitalize ${
-                ordem === o ? 'bg-slate-900 text-white' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
+                ordem === o ? 'bg-amber-400 text-neutral-900' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
               }`}
             >
               {o === 'resultado' ? 'Resultado' : o === 'margem' ? 'Margem' : 'Valor'}
@@ -743,7 +743,7 @@ function RentabilidadeProdutos() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar produto ou código…"
-            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
           />
         </div>
         <div className="flex items-center gap-4 text-[13px]">
@@ -881,7 +881,7 @@ function GestaoTitulos() {
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar fornecedor, cliente ou categoria…"
-            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+            className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
           />
         </div>
         <div className="flex items-center gap-1.5">
@@ -890,7 +890,7 @@ function GestaoTitulos() {
               key={n}
               onClick={() => setFiltroNat(n)}
               className={`rounded-lg px-3 py-1.5 text-[13px] font-medium ${
-                filtroNat === n ? 'bg-slate-900 text-white' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
+                filtroNat === n ? 'bg-amber-400 text-neutral-900' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
               }`}
             >
               {n === 'TODOS' ? 'Todos' : n === 'RECEITA' ? 'Receitas' : 'Despesas'}
@@ -903,7 +903,7 @@ function GestaoTitulos() {
               key={s}
               onClick={() => setFiltroStatus(s)}
               className={`rounded-lg px-3 py-1.5 text-[13px] font-medium ${
-                filtroStatus === s ? 'bg-slate-900 text-white' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
+                filtroStatus === s ? 'bg-amber-400 text-neutral-900' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
               }`}
             >
               {s === 'TODOS' ? 'Todos status' : s.charAt(0) + s.slice(1).toLowerCase()}
@@ -965,7 +965,7 @@ function GestaoTitulos() {
                       {t.status !== 'PAGO' ? (
                         <button
                           onClick={() => baixar(t.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 text-white px-3 py-1.5 text-[12px] font-semibold hover:bg-black"
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 text-neutral-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" /> Baixar Título
                         </button>
@@ -1048,7 +1048,7 @@ function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose:
           {titulo.status !== 'PAGO' && (
             <button
               onClick={onBaixar}
-              className="flex-1 rounded-xl bg-slate-900 text-white py-3 text-sm font-semibold hover:bg-black flex items-center justify-center gap-2"
+              className="flex-1 rounded-xl bg-amber-400 text-neutral-900 py-3 text-sm font-semibold hover:bg-amber-300 flex items-center justify-center gap-2"
             >
               <CheckCircle2 className="h-4 w-4" /> Baixar Título
             </button>
@@ -1087,12 +1087,12 @@ function TabFin({
     <button
       onClick={onClick}
       className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-        ativo ? 'text-slate-900' : 'text-neutral-500 hover:text-slate-700'
+        ativo ? 'text-amber-300' : 'text-neutral-500 hover:text-slate-700'
       }`}
     >
-      <Icon className={`h-4 w-4 ${ativo ? 'text-slate-900' : 'text-neutral-400'}`} />
+      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-300' : 'text-neutral-400'}`} />
       {label}
-      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-slate-900 rounded-full" />}
+      {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-400 rounded-full" />}
     </button>
   );
 }
