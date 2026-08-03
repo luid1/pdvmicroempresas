@@ -11,8 +11,10 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: 'auto',
       includeAssets: ['favicon.png', 'icon.svg'],
-      // Permite testar o PWA em `npm run dev` (porta 3013) sem precisar buildar.
-      devOptions: { enabled: true, type: 'module' },
+      // O service worker (PWA) fica SÓ no build de produção. Em `npm run dev` ele
+      // ficava interceptando as requisições e travava o login ("Entrando..." eterno)
+      // e outras telas em "carregando". Desligado no dev para não atrapalhar os testes.
+      devOptions: { enabled: false },
       manifest: {
         name: 'Lumin PDV — Frente de Caixa',
         short_name: 'Lumin PDV',
