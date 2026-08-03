@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api/v1' });
+// timeout global: nenhuma tela pode ficar presa "carregando" para sempre quando
+// o servidor está lento/fora do ar — o axios estoura em 15s e a tela mostra o erro.
+const api = axios.create({ baseURL: '/api/v1', timeout: 15000 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('wms_token');
@@ -170,6 +172,16 @@ export const financeiroApi = {
 // Fluxo de Caixa (consolidado realizado)
 export const fluxoCaixaApi = {
   consolidado: (params?: object) => api.get('/fluxo-caixa', { params }),
+};
+
+// Custos & Margem (rentabilidade por cliente/produto, composição de custo)
+export const custosApi = {
+  margem: (filialId: string, params?: { dataIni?: string; dataFim?: string }) =>
+    api.get(`/custos/${filialId}/margem`, { params }),
+  rentabilidade: (filialId: string, params?: { dataIni?: string; dataFim?: string }) =>
+    api.get(`/custos/${filialId}/rentabilidade`, { params }),
+  composicao: (filialId: string, q?: string) =>
+    api.get(`/custos/${filialId}/composicao`, { params: q ? { q } : {} }),
 };
 
 // Tesouraria — contas financeiras, caixa e conciliação (Frente G)

@@ -31,6 +31,25 @@ const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon,
 const iniciais = (nome: string) =>
   nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
 
+/**
+ * fetch com timeout — evita que a tela fique presa em "Entrando..." para sempre
+ * quando o servidor está lento ou fora do ar. Estoura em ~12s com erro amigável.
+ */
+async function fetchComTimeout(url: string, init?: RequestInit, ms = 12000): Promise<Response> {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: ctrl.signal });
+  } catch (err: any) {
+    if (err?.name === 'AbortError') {
+      throw new Error('O servidor demorou a responder. Verifique a conexão e tente de novo.');
+    }
+    throw new Error('Não foi possível falar com o servidor. Verifique a conexão e tente de novo.');
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 /** Logotipo da marca — ponto âmbar + nome (igual à landing). */
 function Brand({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return (
@@ -74,7 +93,7 @@ export default function LoginPage() {
     setCarregandoPerfis(true);
     setError('');
     try {
-      const res = await fetch(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`);
+      const res = await fetchComTimeout(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`);
       const data = await res.json();
       if (!res.ok) throw new Error('Não foi possível carregar os perfis.');
       setPerfis(Array.isArray(data) ? data : []);
@@ -199,7 +218,7 @@ export default function LoginPage() {
                 const body = credencial.tipo === 'pin'
                   ? { usuarioId: selecionado.id, pin: credencial.valor }
                   : { usuarioId: selecionado.id, password: credencial.valor };
-                const res = await fetch(url, {
+                const res = await fetchComTimeout(url, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(body),
@@ -244,7 +263,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/v1/auth/login', {
+      const res = await fetchComTimeout('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),

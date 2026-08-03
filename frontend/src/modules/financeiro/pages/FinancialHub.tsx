@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { financeiroApi } from '../../../services/api';
+import { financeiroApi, custosApi } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 import {
   LayoutDashboard,
   Users,
@@ -16,7 +17,6 @@ import {
   CheckCircle2,
   Clock,
   Search,
-  Filter,
   Download,
   Eye,
   Scale,
@@ -46,6 +46,8 @@ const brlCompact = (v: number) => {
 const pct = (v: number) => `${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 const kg = (v: number) => `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kg`;
 const num = (v: number) => v.toLocaleString('pt-BR');
+const hojeISO = () => new Date().toISOString().slice(0, 10);
+const primeiroDiaMesISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; };
 
 /* Classe semântica sutil para margem. */
 function corMargem(margem: number): string {
@@ -107,66 +109,36 @@ const CONTAS_PAGAR: ContaResumo[] = [
   { id: 'p5', parte: 'Embalagens Vitória Ltda', categoria: 'Fornecedor Insumos', valor: 21_360, venc: '06/07' },
 ];
 
-/* ── Rentabilidade por Cliente ── */
-interface Cliente {
-  id: string;
-  nome: string;
-  segmento: string;
-  valorVendido: number;
-  devolucoes: number;
-  totalCmv: number;
-  valorFrete: number;
-  custosOperacionais: number;
-  pesoKg: number;
+/* ── Rentabilidade por Cliente/Produto — dados reais (custosApi) ── */
+interface RentClienteReal {
+  clienteId: string; nome: string;
+  receita: number; custos: number; resultado: number; margemPct: number; peso: number;
 }
-function derivarCliente(c: Cliente) {
-  const valorLiquido = c.valorVendido - c.devolucoes;
-  const totalCustos = c.totalCmv + c.valorFrete + c.custosOperacionais;
-  const resultadoLiquido = valorLiquido - totalCustos;
-  const margem = valorLiquido > 0 ? (resultadoLiquido / valorLiquido) * 100 : 0;
-  return { ...c, valorLiquido, totalCustos, resultadoLiquido, margem };
-}
+interface RentClienteResp { clientes: RentClienteReal[]; totais: { receita: number; custos: number; resultado: number; peso: number; clientes: number; produtos: number; margemPct: number } }
 
-const CLIENTES_RAW: Cliente[] = [
-  { id: 'c1', nome: 'Hotel Fasano Group', segmento: 'Hotelaria', valorVendido: 214_800, devolucoes: 3_120, totalCmv: 121_400, valorFrete: 9_800, custosOperacionais: 12_300, pesoKg: 38_420 },
-  { id: 'c2', nome: 'Rede Sabor & Cia Restaurantes', segmento: 'Food Service', valorVendido: 186_300, devolucoes: 8_940, totalCmv: 118_200, valorFrete: 11_200, custosOperacionais: 14_600, pesoKg: 51_180 },
-  { id: 'c3', nome: 'Cozinha Industrial GRSA', segmento: 'Refeição Coletiva', valorVendido: 342_150, devolucoes: 5_600, totalCmv: 246_300, valorFrete: 18_900, custosOperacionais: 21_400, pesoKg: 128_640 },
-  { id: 'c4', nome: 'Buffet Villa Gourmet', segmento: 'Eventos', valorVendido: 74_500, devolucoes: 12_300, totalCmv: 52_100, valorFrete: 6_400, custosOperacionais: 5_900, pesoKg: 14_260 },
-  { id: 'c5', nome: 'Rede Hoteleira Accor SP', segmento: 'Hotelaria', valorVendido: 268_900, devolucoes: 4_200, totalCmv: 158_400, valorFrete: 13_100, custosOperacionais: 17_800, pesoKg: 62_940 },
-  { id: 'c6', nome: 'Restaurante Mocotó', segmento: 'Food Service', valorVendido: 58_700, devolucoes: 1_100, totalCmv: 34_900, valorFrete: 3_800, custosOperacionais: 4_100, pesoKg: 11_820 },
-  { id: 'c7', nome: 'Mercado do Zé — Pinheiros', segmento: 'Varejo', valorVendido: 41_200, devolucoes: 6_800, totalCmv: 33_400, valorFrete: 2_900, custosOperacionais: 3_200, pesoKg: 9_540 },
-  { id: 'c8', nome: 'Grupo Coco Bambu', segmento: 'Food Service', valorVendido: 197_600, devolucoes: 2_400, totalCmv: 128_700, valorFrete: 10_600, custosOperacionais: 13_900, pesoKg: 46_310 },
-];
-
-/* ── Rentabilidade por Produto ── */
-interface Produto {
-  codigo: string;
-  nome: string;
-  qtdVendida: number;
-  unidade: 'KG' | 'CX';
-  precoMedioVenda: number;
-  custoMedio: number;
+interface MargemProdutoReal {
+  produtoId: string; codigo: string; descricao: string; unidade: string;
+  qtdVendida: number; precoMedioVenda: number; custoComposto: number;
+  receita: number; custoTotal: number; lucroBruto: number; margemPct: number;
 }
-function derivarProduto(p: Produto) {
-  const vlrTotalVenda = p.qtdVendida * p.precoMedioVenda;
-  const vlrTotalCmv = p.qtdVendida * p.custoMedio;
-  const vlrLucroBruto = vlrTotalVenda - vlrTotalCmv;
-  const margem = vlrTotalVenda > 0 ? (vlrLucroBruto / vlrTotalVenda) * 100 : 0;
-  return { ...p, vlrTotalVenda, vlrTotalCmv, vlrLucroBruto, margem };
-}
+interface MargemResp { kpis: { cmv: number; receitaTotal: number; perdas: number; lucroBruto: number; margemMediaPct: number }; produtos: MargemProdutoReal[] }
 
-const PRODUTOS_RAW: Produto[] = [
-  { codigo: 'FLV-0142', nome: 'Laranja Lima', qtdVendida: 42_800, unidade: 'KG', precoMedioVenda: 4.9, custoMedio: 3.1 },
-  { codigo: 'FLV-0088', nome: 'Tomate Italiano', qtdVendida: 31_450, unidade: 'KG', precoMedioVenda: 6.8, custoMedio: 4.2 },
-  { codigo: 'FLV-0311', nome: 'Cogumelo Enoke', qtdVendida: 2_180, unidade: 'CX', precoMedioVenda: 38.5, custoMedio: 22.4 },
-  { codigo: 'FLV-0205', nome: 'Alface Americana', qtdVendida: 18_900, unidade: 'CX', precoMedioVenda: 24.9, custoMedio: 19.8 },
-  { codigo: 'FLV-0017', nome: 'Banana Nanica', qtdVendida: 54_600, unidade: 'KG', precoMedioVenda: 3.9, custoMedio: 2.4 },
-  { codigo: 'FLV-0423', nome: 'Cogumelo Shitake', qtdVendida: 1_640, unidade: 'CX', precoMedioVenda: 46.0, custoMedio: 31.5 },
-  { codigo: 'FLV-0099', nome: 'Batata Lavada', qtdVendida: 61_200, unidade: 'KG', precoMedioVenda: 3.4, custoMedio: 2.6 },
-  { codigo: 'FLV-0256', nome: 'Rúcula Hidropônica', qtdVendida: 8_740, unidade: 'CX', precoMedioVenda: 18.9, custoMedio: 15.9 },
-  { codigo: 'FLV-0180', nome: 'Manga Palmer', qtdVendida: 22_300, unidade: 'KG', precoMedioVenda: 7.2, custoMedio: 4.1 },
-  { codigo: 'FLV-0367', nome: 'Pimentão Amarelo', qtdVendida: 14_500, unidade: 'KG', precoMedioVenda: 9.8, custoMedio: 7.9 },
-];
+/* Barra de período compartilhada (De/Até) para as abas de rentabilidade. */
+function PeriodoBar({ ini, fim, onIni, onFim }: { ini: string; fim: string; onIni: (v: string) => void; onFim: (v: string) => void }) {
+  return (
+    <div className="flex items-center gap-2 text-[13px]">
+      <CalendarClock className="h-4 w-4 text-neutral-400" />
+      <label className="flex items-center gap-1.5 text-neutral-500">De
+        <input type="date" value={ini} onChange={(e) => onIni(e.target.value)}
+          className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[13px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30" />
+      </label>
+      <label className="flex items-center gap-1.5 text-neutral-500">Até
+        <input type="date" value={fim} onChange={(e) => onFim(e.target.value)}
+          className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-[13px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400/30" />
+      </label>
+    </div>
+  );
+}
 
 /* ── Títulos (Contas a Pagar/Receber mescladas) ── */
 type StatusTitulo = 'PAGO' | 'PENDENTE' | 'ATRASADO';
@@ -256,10 +228,10 @@ export default function FinancialHub() {
       <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800">
         <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
         <div className="text-[13px] leading-snug">
-          <b>DRE & KPIs já são reais</b> (Dashboard DRE, calculado das NF-e emitidas e movimentações
-          de estoque do período). As abas <b>Rentabilidade por Cliente/Produto</b> e os painéis de
-          <b> Contas a Pagar/Receber</b> desta tela ainda são ilustrativos — não use esses para decisão
-          até a integração completa dos lançamentos.
+          <b>DRE e Rentabilidade por Cliente/Produto já são reais</b> — calculados das NF-e emitidas,
+          movimentações de estoque e custo composto do período (filtre por data em cada aba). Apenas a
+          aba <b>Contas a Pagar/Receber</b> desta tela ainda é ilustrativa; para gestão real de títulos,
+          use as telas dedicadas <b>Contas a Pagar</b> e <b>Contas a Receber</b> do menu.
         </div>
       </div>
       {/* Tabs */}
@@ -568,44 +540,32 @@ function KpiGigante({
    ABA 2 — RENTABILIDADE POR CLIENTE
    ════════════════════════════════════════════════════════════════════════════ */
 function RentabilidadeClientes() {
+  const { filialAtiva } = useAuth();
   const [busca, setBusca] = useState('');
-  const [ordem, setOrdem] = useState<'resultado' | 'margem' | 'valor'>('resultado');
+  const [ini, setIni] = useState(primeiroDiaMesISO());
+  const [fim, setFim] = useState(hojeISO());
+  const [dados, setDados] = useState<RentClienteResp | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!filialAtiva?.id) { setCarregando(false); setErro('Selecione uma filial para ver a rentabilidade.'); return; }
+    let vivo = true;
+    setCarregando(true);
+    custosApi
+      .rentabilidade(filialAtiva.id, { dataIni: ini, dataFim: fim })
+      .then((r) => { if (vivo) { setDados(r.data); setErro(null); } })
+      .catch((e) => { if (vivo) setErro(e?.response?.data?.message || 'Falha ao carregar a rentabilidade por cliente.'); })
+      .finally(() => { if (vivo) setCarregando(false); });
+    return () => { vivo = false; };
+  }, [filialAtiva?.id, ini, fim]);
 
   const linhas = useMemo(() => {
-    const derivadas = CLIENTES_RAW.map(derivarCliente);
+    const arr = dados?.clientes || [];
     const q = busca.trim().toLowerCase();
-    const filtradas = q
-      ? derivadas.filter((c) => c.nome.toLowerCase().includes(q) || c.segmento.toLowerCase().includes(q))
-      : derivadas;
-    return [...filtradas].sort((a, b) => {
-      if (ordem === 'margem') return b.margem - a.margem;
-      if (ordem === 'valor') return b.valorLiquido - a.valorLiquido;
-      return b.resultadoLiquido - a.resultadoLiquido;
-    });
-  }, [busca, ordem]);
-
-  const tot = useMemo(
-    () =>
-      linhas.reduce(
-        (acc, c) => ({
-          valorVendido: acc.valorVendido + c.valorVendido,
-          devolucoes: acc.devolucoes + c.devolucoes,
-          valorLiquido: acc.valorLiquido + c.valorLiquido,
-          totalCmv: acc.totalCmv + c.totalCmv,
-          valorFrete: acc.valorFrete + c.valorFrete,
-          custosOperacionais: acc.custosOperacionais + c.custosOperacionais,
-          totalCustos: acc.totalCustos + c.totalCustos,
-          resultadoLiquido: acc.resultadoLiquido + c.resultadoLiquido,
-          pesoKg: acc.pesoKg + c.pesoKg,
-        }),
-        {
-          valorVendido: 0, devolucoes: 0, valorLiquido: 0, totalCmv: 0, valorFrete: 0,
-          custosOperacionais: 0, totalCustos: 0, resultadoLiquido: 0, pesoKg: 0,
-        },
-      ),
-    [linhas],
-  );
-  const margemTotal = tot.valorLiquido > 0 ? (tot.resultadoLiquido / tot.valorLiquido) * 100 : 0;
+    return q ? arr.filter((c) => (c.nome || '').toLowerCase().includes(q)) : arr;
+  }, [dados, busca]);
+  const tot = dados?.totais;
 
   return (
     <div className="space-y-4">
@@ -616,92 +576,71 @@ function RentabilidadeClientes() {
           <input
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar cliente ou segmento…"
+            placeholder="Buscar cliente…"
             className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
           />
         </div>
-        <div className="flex items-center gap-2 text-sm">
-          <Filter className="h-4 w-4 text-neutral-400" />
-          <span className="text-neutral-500">Ordenar:</span>
-          {(['resultado', 'margem', 'valor'] as const).map((o) => (
-            <button
-              key={o}
-              onClick={() => setOrdem(o)}
-              className={`rounded-lg px-3 py-1.5 text-[13px] font-medium capitalize ${
-                ordem === o ? 'bg-amber-400 text-neutral-900' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
-              }`}
-            >
-              {o === 'resultado' ? 'Resultado' : o === 'margem' ? 'Margem' : 'Valor'}
-            </button>
-          ))}
-        </div>
+        <PeriodoBar ini={ini} fim={fim} onIni={setIni} onFim={setFim} />
       </div>
 
-      {/* Data grid — compacto, cabe em uma tela sem rolagem horizontal */}
+      {carregando ? (
+        <div className="py-16 text-center text-[13px] text-neutral-400">Carregando rentabilidade por cliente…</div>
+      ) : erro ? (
+        <div className="py-16 text-center text-[13px] text-rose-400">{erro}</div>
+      ) : linhas.length === 0 ? (
+        <div className="py-16 text-center text-[13px] text-neutral-400">Nenhuma venda a cliente identificado no período (rentabilidade usa NF-e emitidas com cliente).</div>
+      ) : (
       <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
         <div className="overflow-y-auto max-h-[62vh]">
           <table className="w-full table-fixed border-collapse text-[12px]">
             <thead className="sticky top-0 z-10">
               <tr className="bg-neutral-50 text-neutral-500 text-[10px] uppercase tracking-wide">
-                <th className="text-left font-semibold px-3 py-2 sticky left-0 bg-neutral-50 w-[18%]">Cliente</th>
-                <th className="text-right font-semibold px-2 py-2">Vendido</th>
-                <th className="text-right font-semibold px-2 py-2">Devol.</th>
-                <th className="text-right font-semibold px-2 py-2">Líquido</th>
-                <th className="text-right font-semibold px-2 py-2">CMV</th>
-                <th className="text-right font-semibold px-2 py-2">Frete</th>
-                <th className="text-right font-semibold px-2 py-2">Oper.</th>
-                <th className="text-right font-semibold px-2 py-2">Custos</th>
-                <th className="text-right font-semibold px-2 py-2">Result.</th>
-                <th className="text-center font-semibold px-2 py-2">Margem</th>
-                <th className="text-right font-semibold px-2 py-2">Peso</th>
+                <th className="text-left font-semibold px-3 py-2 sticky left-0 bg-neutral-50 w-[34%]">Cliente</th>
+                <th className="text-right font-semibold px-3 py-2">Receita</th>
+                <th className="text-right font-semibold px-3 py-2">Custos (CMV)</th>
+                <th className="text-right font-semibold px-3 py-2">Resultado</th>
+                <th className="text-center font-semibold px-3 py-2">Margem</th>
+                <th className="text-right font-semibold px-3 py-2">Peso</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {linhas.map((c) => (
-                <tr key={c.id} className="hover:bg-neutral-50/70 transition-colors">
+                <tr key={c.clienteId} className="hover:bg-neutral-50/70 transition-colors">
                   <td className="px-3 py-2 sticky left-0 bg-white hover:bg-neutral-50/70">
                     <p className="font-medium text-slate-900 truncate">{c.nome}</p>
-                    <p className="text-[10px] text-neutral-400 truncate">{c.segmento}</p>
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">{brlCompact(c.valorVendido)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-rose-500">-{brlCompact(c.devolucoes)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums font-medium text-slate-900">{brlCompact(c.valorLiquido)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.totalCmv)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.valorFrete)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.custosOperacionais)}</td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-700">{brlCompact(c.totalCustos)}</td>
-                  <td className={`px-2 py-2 text-right tabular-nums font-semibold ${corResultado(c.resultadoLiquido)}`}>
-                    {brlCompact(c.resultadoLiquido)}
+                  <td className="px-3 py-2 text-right tabular-nums font-medium text-slate-900">{brlCompact(c.receita)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-slate-600">{brlCompact(c.custos)}</td>
+                  <td className={`px-3 py-2 text-right tabular-nums font-semibold ${corResultado(c.resultado)}`}>
+                    {brlCompact(c.resultado)}
                   </td>
-                  <td className="px-2 py-2 text-center">
-                    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${corMargem(c.margem)}`}>
-                      {pct(c.margem)}
+                  <td className="px-3 py-2 text-center">
+                    <span className={`inline-block rounded-md px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${corMargem(c.margemPct)}`}>
+                      {pct(c.margemPct)}
                     </span>
                   </td>
-                  <td className="px-2 py-2 text-right tabular-nums text-slate-500">{kg(c.pesoKg)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums text-slate-500">{kg(c.peso)}</td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="sticky bottom-0">
-              <tr className="bg-slate-900 text-white font-semibold text-[12px]">
-                <td className="px-3 py-2 sticky left-0 bg-slate-900 truncate">Totais ({linhas.length})</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorVendido)}</td>
-                <td className="px-2 py-2 text-right tabular-nums text-rose-300">-{brlCompact(tot.devolucoes)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorLiquido)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.totalCmv)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.valorFrete)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.custosOperacionais)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{brlCompact(tot.totalCustos)}</td>
-                <td className={`px-2 py-2 text-right tabular-nums ${tot.resultadoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
-                  {brlCompact(tot.resultadoLiquido)}
-                </td>
-                <td className="px-2 py-2 text-center tabular-nums">{pct(margemTotal)}</td>
-                <td className="px-2 py-2 text-right tabular-nums">{kg(tot.pesoKg)}</td>
-              </tr>
-            </tfoot>
+            {tot && (
+              <tfoot className="sticky bottom-0">
+                <tr className="bg-slate-900 text-white font-semibold text-[12px]">
+                  <td className="px-3 py-2 sticky left-0 bg-slate-900 truncate">Totais ({linhas.length})</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{brlCompact(tot.receita)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{brlCompact(tot.custos)}</td>
+                  <td className={`px-3 py-2 text-right tabular-nums ${tot.resultado >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                    {brlCompact(tot.resultado)}
+                  </td>
+                  <td className="px-3 py-2 text-center tabular-nums">{pct(tot.margemPct)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{kg(tot.peso)}</td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -710,29 +649,32 @@ function RentabilidadeClientes() {
    ABA 3 — RENTABILIDADE POR PRODUTO
    ════════════════════════════════════════════════════════════════════════════ */
 function RentabilidadeProdutos() {
+  const { filialAtiva } = useAuth();
   const [busca, setBusca] = useState('');
-  const linhas = useMemo(() => {
-    const derivadas = PRODUTOS_RAW.map(derivarProduto);
-    const q = busca.trim().toLowerCase();
-    const filtradas = q
-      ? derivadas.filter((p) => p.nome.toLowerCase().includes(q) || p.codigo.toLowerCase().includes(q))
-      : derivadas;
-    return [...filtradas].sort((a, b) => b.vlrLucroBruto - a.vlrLucroBruto);
-  }, [busca]);
+  const [ini, setIni] = useState(primeiroDiaMesISO());
+  const [fim, setFim] = useState(hojeISO());
+  const [dados, setDados] = useState<MargemResp | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
 
-  const tot = useMemo(
-    () =>
-      linhas.reduce(
-        (acc, p) => ({
-          vlrTotalVenda: acc.vlrTotalVenda + p.vlrTotalVenda,
-          vlrTotalCmv: acc.vlrTotalCmv + p.vlrTotalCmv,
-          vlrLucroBruto: acc.vlrLucroBruto + p.vlrLucroBruto,
-        }),
-        { vlrTotalVenda: 0, vlrTotalCmv: 0, vlrLucroBruto: 0 },
-      ),
-    [linhas],
-  );
-  const margemTotal = tot.vlrTotalVenda > 0 ? (tot.vlrLucroBruto / tot.vlrTotalVenda) * 100 : 0;
+  useEffect(() => {
+    if (!filialAtiva?.id) { setCarregando(false); setErro('Selecione uma filial para ver a margem por produto.'); return; }
+    let vivo = true;
+    setCarregando(true);
+    custosApi
+      .margem(filialAtiva.id, { dataIni: ini, dataFim: fim })
+      .then((r) => { if (vivo) { setDados(r.data); setErro(null); } })
+      .catch((e) => { if (vivo) setErro(e?.response?.data?.message || 'Falha ao carregar a margem por produto.'); })
+      .finally(() => { if (vivo) setCarregando(false); });
+    return () => { vivo = false; };
+  }, [filialAtiva?.id, ini, fim]);
+
+  const linhas = useMemo(() => {
+    const arr = dados?.produtos || [];
+    const q = busca.trim().toLowerCase();
+    return q ? arr.filter((p) => (p.descricao || '').toLowerCase().includes(q) || (p.codigo || '').toLowerCase().includes(q)) : arr;
+  }, [dados, busca]);
+  const k = dados?.kpis;
 
   return (
     <div className="space-y-4">
@@ -746,18 +688,28 @@ function RentabilidadeProdutos() {
             className="w-full rounded-xl border border-neutral-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-amber-400/30"
           />
         </div>
-        <div className="flex items-center gap-4 text-[13px]">
-          <span className="flex items-center gap-1.5 text-neutral-500">
-            <DollarSign className="h-4 w-4 text-emerald-500" /> Venda total{' '}
-            <strong className="text-slate-900">{brlCompact(tot.vlrTotalVenda)}</strong>
-          </span>
-          <span className="flex items-center gap-1.5 text-neutral-500">
-            <Percent className="h-4 w-4 text-neutral-400" /> Margem média{' '}
-            <strong className="text-slate-900">{pct(margemTotal)}</strong>
-          </span>
-        </div>
+        <PeriodoBar ini={ini} fim={fim} onIni={setIni} onFim={setFim} />
+        {k && (
+          <div className="flex items-center gap-4 text-[13px]">
+            <span className="flex items-center gap-1.5 text-neutral-500">
+              <DollarSign className="h-4 w-4 text-emerald-500" /> Receita{' '}
+              <strong className="text-slate-900">{brlCompact(k.receitaTotal)}</strong>
+            </span>
+            <span className="flex items-center gap-1.5 text-neutral-500">
+              <Percent className="h-4 w-4 text-neutral-400" /> Margem média{' '}
+              <strong className="text-slate-900">{pct(k.margemMediaPct)}</strong>
+            </span>
+          </div>
+        )}
       </div>
 
+      {carregando ? (
+        <div className="py-16 text-center text-[13px] text-neutral-400">Carregando margem por produto…</div>
+      ) : erro ? (
+        <div className="py-16 text-center text-[13px] text-rose-400">{erro}</div>
+      ) : linhas.length === 0 ? (
+        <div className="py-16 text-center text-[13px] text-neutral-400">Nenhuma venda registrada no período (margem usa movimentações de venda + NF-e emitidas).</div>
+      ) : (
       <div className="rounded-2xl border border-neutral-200 bg-white overflow-hidden">
         <div className="overflow-x-auto max-h-[62vh]">
           <table className="w-full border-collapse text-[13px]">
@@ -768,56 +720,58 @@ function RentabilidadeProdutos() {
                 <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Qtd Vendida</th>
                 <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">Un.</th>
                 <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Preço Médio</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Vlr Total Venda</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Custo Médio</th>
-                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Vlr Total CMV</th>
+                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Custo Comp.</th>
+                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Receita</th>
+                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">CMV</th>
                 <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Lucro Bruto</th>
                 <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">% Margem</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {linhas.map((p) => (
-                <tr key={p.codigo} className="hover:bg-neutral-50/70 transition-colors">
+                <tr key={p.produtoId} className="hover:bg-neutral-50/70 transition-colors">
                   <td className="px-4 py-3 sticky left-0 bg-white hover:bg-neutral-50/70 font-mono text-[12px] text-neutral-500">
                     {p.codigo}
                   </td>
-                  <td className="px-4 py-3 font-medium text-slate-900">{p.nome}</td>
+                  <td className="px-4 py-3 font-medium text-slate-900">{p.descricao}</td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-700">{num(p.qtdVendida)}</td>
                   <td className="px-4 py-3 text-center">
                     <span className="inline-block rounded-md bg-neutral-100 text-neutral-600 px-2 py-0.5 text-[11px] font-semibold">
-                      {p.unidade}
+                      {p.unidade || '—'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(p.precoMedioVenda)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums font-medium text-slate-900">{brl(p.vlrTotalVenda)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(p.custoMedio)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(p.vlrTotalCmv)}</td>
-                  <td className={`px-4 py-3 text-right tabular-nums font-semibold ${corResultado(p.vlrLucroBruto)}`}>
-                    {brl(p.vlrLucroBruto)}
+                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(p.custoComposto)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums font-medium text-slate-900">{brl(p.receita)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(p.custoTotal)}</td>
+                  <td className={`px-4 py-3 text-right tabular-nums font-semibold ${corResultado(p.lucroBruto)}`}>
+                    {brl(p.lucroBruto)}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span className={`inline-block rounded-md px-2 py-1 text-[12px] font-semibold tabular-nums ${corMargem(p.margem)}`}>
-                      {pct(p.margem)}
+                    <span className={`inline-block rounded-md px-2 py-1 text-[12px] font-semibold tabular-nums ${corMargem(p.margemPct)}`}>
+                      {pct(p.margemPct)}
                     </span>
                   </td>
                 </tr>
               ))}
             </tbody>
-            <tfoot className="sticky bottom-0">
-              <tr className="bg-slate-900 text-white font-semibold text-[13px]">
-                <td className="px-4 py-3 sticky left-0 bg-slate-900" colSpan={5}>
-                  Totalizador ({linhas.length} itens)
-                </td>
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.vlrTotalVenda)}</td>
-                <td className="px-4 py-3" />
-                <td className="px-4 py-3 text-right tabular-nums">{brl(tot.vlrTotalCmv)}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-emerald-300">{brl(tot.vlrLucroBruto)}</td>
-                <td className="px-4 py-3 text-center tabular-nums">{pct(margemTotal)}</td>
-              </tr>
-            </tfoot>
+            {k && (
+              <tfoot className="sticky bottom-0">
+                <tr className="bg-slate-900 text-white font-semibold text-[13px]">
+                  <td className="px-4 py-3 sticky left-0 bg-slate-900" colSpan={6}>
+                    Totalizador ({linhas.length} itens)
+                  </td>
+                  <td className="px-4 py-3 text-right tabular-nums">{brl(k.receitaTotal)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums">{brl(k.cmv)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-emerald-300">{brl(k.lucroBruto)}</td>
+                  <td className="px-4 py-3 text-center tabular-nums">{pct(k.margemMediaPct)}</td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }
