@@ -104,7 +104,7 @@ export const TELAS: TelaDef[] = [
     { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras de tributação' },
     { key: '/fiscal/gestao', label: 'Gestão Fiscal', icon: Receipt, hint: 'NF-e + painel de vendas' },
     { key: '/financeiro/dre', label: 'DRE & Relatórios', icon: BarChart3, hint: 'Resultado do período' },
-    { key: '/financeiro/controladoria', label: 'Controladoria', icon: Landmark, hint: 'Visão consolidada (demo)' },
+    { key: '/financeiro/controladoria', label: 'Controladoria', icon: Landmark, hint: 'Visão consolidada' },
     { key: '/financeiro/tesouraria', label: 'Tesouraria', icon: Landmark, hint: 'Contas, caixa e conciliação' },
     { key: '/financeiro/plano-contas', label: 'Plano de Contas', icon: Landmark, hint: 'Categorias do DRE' },
     { key: '/financeiro/custos', label: 'Custos & Margem', icon: Coins, hint: 'Simulador de margem (demo)' },

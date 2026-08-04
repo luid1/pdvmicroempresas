@@ -1,145 +1,103 @@
-import { useMemo, useState } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
-  Command,
-  Plus,
-  Download,
+  RefreshCw,
+  ArrowUpRight,
+  ArrowDownRight,
+  ExternalLink,
+  UploadCloud,
+  Sparkles,
+  Landmark,
+  BarChart3,
   Wallet,
   TrendingUp,
   TrendingDown,
-  ArrowUpRight,
-  ArrowDownRight,
-  MessageCircle,
-  Link2,
-  MoreHorizontal,
-  FileText,
+  Scale,
+  CircleDollarSign,
   CheckCircle2,
   Clock,
   AlertTriangle,
-  UploadCloud,
-  Sparkles,
-  Zap,
-  Landmark,
-  Receipt,
-  CreditCard,
-  Eye,
-  BarChart3,
-  History,
+  CalendarDays,
 } from 'lucide-react';
+import { financeiroApi, fluxoCaixaApi } from '../../../services/api';
 import { PageHeader } from '../../cadastros/ui';
 
 /* ══════════════════════════════════════════════════════════════════════════════
-   MÓDULO FINANCEIRO & CONTROLADORIA
+   MÓDULO FINANCEIRO & CONTROLADORIA — Visão consolidada
    SPA de 3 abas (Fluxo de Caixa · Contas a Receber · Contas a Pagar).
+   Leitura consolidada dos dados reais; as ações completas (baixa, cancelamento,
+   novo título) ficam nas telas dedicadas — os botões "Abrir" levam até lá.
    Tema dark do sistema · âmbar no chrome, verde/vermelho só nos valores.
    ════════════════════════════════════════════════════════════════════════════ */
 
 /* ───────────────────────────── Formatação ────────────────────────────────── */
-const brl = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
-const pct = (v: number) => `${v >= 0 ? '+' : ''}${v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+const R$ = (v: any) => (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const primeiroDiaMes = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; };
+const hojeISO = () => new Date().toISOString().slice(0, 10);
+const dataBR = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 
-/* ═══════════════════════════ Tipos & Mocks ═══════════════════════════════════ */
+const MESES = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const rotularPeriodo = (p: string, ag: 'dia' | 'mes') => {
+  if (ag === 'mes') { const [a, m] = p.split('-'); return `${MESES[Number(m) - 1]}/${a}`; }
+  const [a, m, d] = p.split('-'); return `${d}/${m}/${a}`;
+};
+
+/* Status compartilhado com as telas dedicadas de Contas a Receber/Pagar. */
+const STATUS_META: Record<string, { label: string; cls: string }> = {
+  ABERTO: { label: 'Pendente', cls: 'bg-slate-400/10 text-slate-300 border-slate-400/20' },
+  PARCIAL: { label: 'Parcial', cls: 'bg-amber-400/10 text-amber-300 border-amber-400/20' },
+  PAGO: { label: 'Pago', cls: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' },
+  VENCIDO: { label: 'Atrasado', cls: 'bg-rose-400/10 text-rose-300 border-rose-400/20' },
+  CANCELADO: { label: 'Cancelado', cls: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
+};
+
 type Aba = 'fluxo' | 'receber' | 'pagar';
 
-type StatusReceber = 'PENDENTE' | 'VENCIDO' | 'PAGO';
-interface TituloReceber {
-  id: string;
-  cliente: string;
-  cnpj: string;
-  descricao: string;
-  vencimento: string;
-  valor: number;
-  status: StatusReceber;
-  telefone: string;
+interface Conta {
+  id: string; descricao: string; numero?: string; status: string;
+  valorOriginal: number; valorPago: number; valorAberto: number;
+  dataEmissao: string; dataVencimento: string; dataPagamento?: string;
+  cliente?: { razaoSocial?: string; nomeFantasia?: string };
+  fornecedor?: { razaoSocial?: string; nomeFantasia?: string };
 }
-
-const RECEBER_MOCK: TituloReceber[] = [
-  { id: 'r1', cliente: 'Rede Sabor & Cia Restaurantes', cnpj: '12.345.678/0001-90', descricao: 'NF-e 120.482 · Venda Atacado', vencimento: '08/07/2026', valor: 84_320, status: 'PENDENTE', telefone: '5511990001111' },
-  { id: 'r2', cliente: 'Hotel Fasano Group', cnpj: '08.223.114/0001-55', descricao: 'NF-e 120.517 · Venda Atacado', vencimento: '10/07/2026', valor: 61_180, status: 'PENDENTE', telefone: '5511990002222' },
-  { id: 'r3', cliente: 'Buffet Villa Gourmet', cnpj: '21.998.740/0001-12', descricao: 'NF-e 120.310 · Venda Atacado', vencimento: '02/07/2026', valor: 27_540, status: 'VENCIDO', telefone: '5511990003333' },
-  { id: 'r4', cliente: 'Mercado do Zé — Pinheiros', cnpj: '33.104.552/0001-08', descricao: 'NF-e 120.288 · Venda Varejo', vencimento: '29/06/2026', valor: 18_970, status: 'VENCIDO', telefone: '5511990004444' },
-  { id: 'r5', cliente: 'Cozinha Industrial GRSA', cnpj: '45.667.881/0001-31', descricao: 'NF-e 120.540 · Refeição Coletiva', vencimento: '14/07/2026', valor: 112_400, status: 'PENDENTE', telefone: '5511990005555' },
-  { id: 'r6', cliente: 'Grupo Coco Bambu', cnpj: '19.884.220/0001-77', descricao: 'NF-e 120.201 · Venda Atacado', vencimento: '25/06/2026', valor: 61_180, status: 'PAGO', telefone: '5511990006666' },
-];
-
-type StatusPagar = 'APROVACAO_PENDENTE' | 'APROVADO' | 'PAGO';
-interface TituloPagar {
-  id: string;
-  fornecedor: string;
-  categoria: string;
-  centroCusto: string;
-  vencimento: string;
-  valor: number;
-  status: StatusPagar;
-}
-
-const PAGAR_MOCK: TituloPagar[] = [
-  { id: 'p1', fornecedor: 'Cooperativa Agrícola do Vale', categoria: 'Fornecedor FLV', centroCusto: 'Suprimentos', vencimento: '07/07/2026', valor: 96_720, status: 'APROVACAO_PENDENTE' },
-  { id: 'p2', fornecedor: 'Folha de Pagamento — Julho', categoria: 'Folha', centroCusto: 'RH', vencimento: '05/07/2026', valor: 148_500, status: 'APROVADO' },
-  { id: 'p3', fornecedor: 'Transportadora RápidoLog', categoria: 'Frete', centroCusto: 'Logística', vencimento: '09/07/2026', valor: 34_180, status: 'APROVACAO_PENDENTE' },
-  { id: 'p4', fornecedor: 'Energia Elétrica — CD Matriz', categoria: 'Utilidades', centroCusto: 'Operação', vencimento: '11/07/2026', valor: 12_940, status: 'PAGO' },
-  { id: 'p5', fornecedor: 'Embalagens Vitória Ltda', categoria: 'Insumos', centroCusto: 'Suprimentos', vencimento: '06/07/2026', valor: 21_360, status: 'APROVADO' },
-  { id: 'p6', fornecedor: 'DAS — Simples Nacional', categoria: 'Impostos', centroCusto: 'Fiscal', vencimento: '20/07/2026', valor: 45_980, status: 'APROVACAO_PENDENTE' },
-];
-
-interface EventoAuto {
-  id: string;
-  titulo: string;
-  detalhe: string;
-  quando: string;
-  tom: 'ok' | 'info' | 'alerta';
-  icon: React.ElementType;
-}
-const EVENTOS: EventoAuto[] = [
-  { id: 'e1', titulo: 'Pix de R$ 5.000 reconhecido', detalhe: 'Conciliado ao título #120.288', quando: 'há 8 min', tom: 'ok', icon: Zap },
-  { id: 'e2', titulo: 'Nota Fiscal #120.540 emitida', detalhe: 'Cozinha Industrial GRSA', quando: 'há 22 min', tom: 'info', icon: Receipt },
-  { id: 'e3', titulo: 'Boleto lido por OCR', detalhe: 'Cooperativa Agrícola do Vale · R$ 96.720', quando: 'há 1 h', tom: 'info', icon: FileText },
-  { id: 'e4', titulo: 'Conciliação bancária automática', detalhe: '12 lançamentos batidos', quando: 'há 2 h', tom: 'ok', icon: CheckCircle2 },
-  { id: 'e5', titulo: 'Cobrança enviada via WhatsApp', detalhe: '3 clientes vencidos notificados', quando: 'há 3 h', tom: 'alerta', icon: MessageCircle },
-];
-
-/* KPIs do Fluxo de Caixa */
-const KPI_FLUXO = {
-  saldoAtual: 342_180,
-  receitaProjetada: 1_482_350,
-  receitaTendencia: 12.4,
-  saidaProjetada: 1_066_490,
-  lucroPrevisto: 102_720,
-};
 
 /* ══════════════════════════════════════════════════════════════════════════════
    COMPONENTE RAIZ
    ════════════════════════════════════════════════════════════════════════════ */
 export default function ControladoriaHub() {
+  const navigate = useNavigate();
   const [aba, setAba] = useState<Aba>('fluxo');
-  const [buscaGlobal, setBuscaGlobal] = useState('');
+  const [busca, setBusca] = useState('');
+  const [ini, setIni] = useState(primeiroDiaMes());
+  const [fim, setFim] = useState(hojeISO());
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <div className="flex flex-col h-full bg-slate-900 text-slate-100">
       <PageHeader
         icon={<Landmark className="h-4 w-4" />}
         titulo="Financeiro & Controladoria"
-        subtitulo="Controladoria"
+        subtitulo="Visão consolidada · fluxo de caixa, contas a receber e a pagar"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <div className="relative hidden md:block">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
               <input
-                value={buscaGlobal}
-                onChange={(e) => setBuscaGlobal(e.target.value)}
-                placeholder="Busca global…"
-                className="w-56 rounded-lg border border-slate-700 bg-slate-800 pl-10 pr-16 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar nesta aba…"
+                className="w-52 rounded-lg border border-slate-700 bg-slate-800 pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 text-[10px] text-slate-500 border border-slate-700 rounded-md px-1.5 py-0.5">
-                <Command className="h-3 w-3" />K
-              </kbd>
             </div>
-            <button className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm font-medium text-slate-200 hover:bg-slate-700">
-              <Download className="h-4 w-4 text-slate-500" /> Exportar
-            </button>
-            <button className="flex items-center gap-2 rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-sm font-semibold hover:bg-amber-300">
-              <Plus className="h-4 w-4" /> Novo lançamento
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+            </label>
+            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+            </label>
+            <button onClick={() => setRefreshKey(k => k + 1)} className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-700">
+              <RefreshCw className="h-4 w-4" /> Atualizar
             </button>
           </div>
         }
@@ -154,94 +112,114 @@ export default function ControladoriaHub() {
             <Tab ativo={aba === 'pagar'} icon={ArrowDownRight} label="Contas a Pagar" onClick={() => setAba('pagar')} />
           </nav>
 
-          {aba === 'fluxo' && <AbaFluxo />}
-          {aba === 'receber' && <AbaReceber />}
-          {aba === 'pagar' && <AbaPagar />}
+          {aba === 'fluxo' && <AbaFluxo ini={ini} fim={fim} refreshKey={refreshKey} navigate={navigate} />}
+          {aba === 'receber' && <AbaReceber ini={ini} fim={fim} busca={busca} refreshKey={refreshKey} navigate={navigate} />}
+          {aba === 'pagar' && <AbaPagar ini={ini} fim={fim} busca={busca} refreshKey={refreshKey} navigate={navigate} />}
         </div>
       </div>
     </div>
   );
 }
 
+type AbaProps = {
+  ini: string;
+  fim: string;
+  busca?: string;
+  refreshKey: number;
+  navigate: (to: string) => void;
+};
+
 /* ══════════════════════════════════════════════════════════════════════════════
    ABA 1 — FLUXO DE CAIXA
    ════════════════════════════════════════════════════════════════════════════ */
-function AbaFluxo() {
-  const [periodo, setPeriodo] = useState<'7' | '15' | '30'>('30');
+function AbaFluxo({ ini, fim, refreshKey, navigate }: AbaProps) {
+  const [dados, setDados] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const carregar = useCallback(() => {
+    setLoading(true);
+    fluxoCaixaApi.consolidado({ dataIni: ini, dataFim: fim, agrupamento: 'mes' })
+      .then(r => setDados(r.data)).catch(() => setDados(null)).finally(() => setLoading(false));
+  }, [ini, fim]);
+  useEffect(() => { carregar(); }, [carregar, refreshKey]);
+
+  const k = dados?.kpis;
+  const periodos: any[] = dados?.periodos || [];
+  const maxBar = Math.max(1, ...periodos.map(p => Math.max(p.entradas, p.saidas)));
 
   return (
     <div className="space-y-6">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <Kpi label="Saldo Atual" valor={KPI_FLUXO.saldoAtual} hint="Posição consolidada em caixa/bancos" icon={Wallet} tom="neutro" />
-        <Kpi
-          label="Receita Projetada"
-          valor={KPI_FLUXO.receitaProjetada}
-          hint={`${pct(KPI_FLUXO.receitaTendencia)} vs. mês anterior`}
-          icon={TrendingUp}
-          tom="positivo"
-          tendencia={KPI_FLUXO.receitaTendencia}
-        />
-        <Kpi label="Saída Projetada" valor={-KPI_FLUXO.saidaProjetada} hint="Despesas + compras previstas" icon={TrendingDown} tom="negativo" />
-        <Kpi label="Lucro Líquido Previsto" valor={KPI_FLUXO.lucroPrevisto} hint="Após todas as saídas do período" icon={Sparkles} tom="destaque" />
+      {/* KPIs reais (caixa realizado) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Kpi icon={<TrendingUp className="h-4 w-4" />} cor="emerald" label="Entradas (recebidas)" valor={loading ? null : R$(k?.totalEntradas)} />
+        <Kpi icon={<TrendingDown className="h-4 w-4" />} cor="rose" label="Saídas (pagas)" valor={loading ? null : R$(k?.totalSaidas)} />
+        <Kpi icon={<Scale className="h-4 w-4" />} cor={Number(k?.saldoLiquido) < 0 ? 'rose' : 'sky'} label="Saldo líquido" valor={loading ? null : R$(k?.saldoLiquido)} destaque />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-        {/* Gráfico (placeholder) */}
-        <section className="xl:col-span-2 rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center">
-                <Sparkles className="h-4 w-4" />
-              </span>
-              <div>
-                <h2 className="text-sm font-semibold text-white">Projeção de Caixa (IA)</h2>
-                <p className="text-[12px] text-slate-500">Modelo preditivo sobre recebíveis e obrigações</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1 bg-slate-800 rounded-xl p-1">
-              {(['7', '15', '30'] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPeriodo(p)}
-                  className={`px-3 py-1.5 rounded-lg text-[13px] font-semibold transition ${
-                    periodo === p ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {p} dias
-                </button>
-              ))}
-            </div>
+        {/* Movimento por mês (dados reais) */}
+        <section className="xl:col-span-2 bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60">
+            <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-amber-300" /> Movimento por mês
+            </h3>
+            <button onClick={() => navigate('/financeiro/fluxo-caixa')} className="flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+              Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
+            </button>
           </div>
-          <div className="h-64 rounded-xl bg-slate-900/40 border border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500">
-            <BarChart3 className="h-8 w-8" />
-            <p className="text-sm font-medium">Projeção de Caixa — próximos {periodo} dias</p>
-            <p className="text-[12px]">Gráfico de movimentação (entradas × saídas)</p>
-          </div>
+          {loading ? (
+            <div className="p-5 space-y-3">
+              {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-slate-700/30 rounded animate-pulse" />)}
+            </div>
+          ) : periodos.length === 0 ? (
+            <p className="text-sm text-slate-500 py-16 text-center">Sem movimentação de caixa no período.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="bg-slate-900/40 text-xs text-slate-400">
+                <tr>
+                  <th className="px-4 py-2.5 text-left font-semibold">Competência</th>
+                  <th className="px-4 py-2.5 text-left font-semibold w-1/3">Fluxo</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">Entradas</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">Saídas</th>
+                  <th className="px-4 py-2.5 text-right font-semibold">Acumulado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {periodos.map(p => (
+                  <tr key={p.periodo} className="border-t border-slate-800 hover:bg-slate-700/20">
+                    <td className="px-4 py-2.5 font-semibold text-slate-100">{rotularPeriodo(p.periodo, dados.agrupamento || 'mes')}</td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex flex-col gap-1">
+                        <div className="h-1.5 rounded-full bg-emerald-400/70" style={{ width: `${(p.entradas / maxBar) * 100}%`, minWidth: p.entradas > 0 ? '4px' : '0' }} />
+                        <div className="h-1.5 rounded-full bg-rose-400/70" style={{ width: `${(p.saidas / maxBar) * 100}%`, minWidth: p.saidas > 0 ? '4px' : '0' }} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono text-emerald-300">{R$(p.entradas)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-rose-300">{R$(p.saidas)}</td>
+                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-rose-400' : 'text-emerald-300'}`}>{R$(p.saldoAcumulado)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </section>
 
-        {/* Timeline de ações automatizadas */}
-        <section className="rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6">
-          <h2 className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-            <History className="h-3.5 w-3.5 text-amber-300" /> Ações automatizadas
-          </h2>
-          <ol className="relative border-l border-slate-700 ml-1.5 space-y-5">
-            {EVENTOS.map((ev) => {
-              const Icon = ev.icon;
-              const tom =
-                ev.tom === 'ok' ? 'bg-emerald-500/15 text-emerald-300' : ev.tom === 'alerta' ? 'bg-rose-500/15 text-rose-300' : 'bg-slate-700/60 text-slate-400';
-              return (
-                <li key={ev.id} className="ml-5">
-                  <span className={`absolute -left-[13px] h-6 w-6 rounded-full flex items-center justify-center ring-4 ring-slate-900 ${tom}`}>
-                    <Icon className="h-3 w-3" />
-                  </span>
-                  <p className="text-[13px] font-medium text-slate-200 leading-snug">{ev.titulo}</p>
-                  <p className="text-[12px] text-slate-500">{ev.detalhe}</p>
-                  <p className="text-[11px] text-slate-600 mt-0.5">{ev.quando}</p>
-                </li>
-              );
-            })}
-          </ol>
+        {/* Projeção por IA — placeholder honesto (recurso futuro) */}
+        <section className="rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-sm font-semibold text-white">Projeção de Caixa (IA)</h2>
+              <p className="text-[12px] text-slate-500">Modelo preditivo sobre recebíveis e obrigações</p>
+            </div>
+          </div>
+          <div className="flex-1 min-h-[220px] rounded-xl bg-slate-900/40 border border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500 text-center px-4">
+            <BarChart3 className="h-8 w-8" />
+            <p className="text-sm font-medium text-slate-400">Em breve</p>
+            <p className="text-[12px]">A projeção preditiva de caixa (entradas × saídas futuras) será liberada em uma próxima atualização.</p>
+          </div>
         </section>
       </div>
     </div>
@@ -251,135 +229,102 @@ function AbaFluxo() {
 /* ══════════════════════════════════════════════════════════════════════════════
    ABA 2 — CONTAS A RECEBER
    ════════════════════════════════════════════════════════════════════════════ */
-function AbaReceber() {
-  const [titulos, setTitulos] = useState<TituloReceber[]>(RECEBER_MOCK);
-  const [busca, setBusca] = useState('');
-  const [status, setStatus] = useState<'TODOS' | StatusReceber>('TODOS');
-  const [ordem, setOrdem] = useState<'venc' | 'valorDesc' | 'valorAsc'>('venc');
-  const [menuAberto, setMenuAberto] = useState<string | null>(null);
+function AbaReceber({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
+  const [contas, setContas] = useState<Conta[]>([]);
+  const [resumo, setResumo] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('');
 
-  const filtrados = useMemo(() => {
-    const q = busca.trim().toLowerCase();
-    const base = titulos.filter(
-      (t) =>
-        (status === 'TODOS' || t.status === status) &&
-        (!q || t.cliente.toLowerCase().includes(q) || t.cnpj.includes(q) || t.descricao.toLowerCase().includes(q)),
+  const carregar = useCallback(() => {
+    setLoading(true);
+    const params = { dataIni: ini, dataFim: fim, ...(status && { status }) };
+    Promise.all([
+      financeiroApi.receber(params),
+      financeiroApi.receberResumo(params),
+    ])
+      .then(([r, res]) => { setContas(r.data || []); setResumo(res.data || null); })
+      .catch(() => { setContas([]); setResumo(null); })
+      .finally(() => setLoading(false));
+  }, [ini, fim, status]);
+  useEffect(() => { carregar(); }, [carregar, refreshKey]);
+
+  const filtradas = useMemo(() => {
+    const q = (busca || '').trim().toLowerCase();
+    if (!q) return contas;
+    return contas.filter(c =>
+      c.descricao?.toLowerCase().includes(q) ||
+      c.numero?.toLowerCase().includes(q) ||
+      c.cliente?.razaoSocial?.toLowerCase().includes(q) ||
+      c.cliente?.nomeFantasia?.toLowerCase().includes(q),
     );
-    return [...base].sort((a, b) => {
-      if (ordem === 'valorDesc') return b.valor - a.valor;
-      if (ordem === 'valorAsc') return a.valor - b.valor;
-      return a.vencimento.split('/').reverse().join('').localeCompare(b.vencimento.split('/').reverse().join(''));
-    });
-  }, [titulos, busca, status, ordem]);
-
-  const totalAberto = titulos.filter((t) => t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const vencendoHoje = titulos.filter((t) => t.vencimento === '06/07/2026' && t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const inadimplencia = titulos.filter((t) => t.status === 'VENCIDO').reduce((s, t) => s + t.valor, 0);
-
-  const receber = (id: string) => setTitulos((prev) => prev.map((t) => (t.id === id ? { ...t, status: 'PAGO' } : t)));
+  }, [contas, busca]);
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Kpi label="Total em Aberto" valor={totalAberto} hint={`${titulos.filter((t) => t.status !== 'PAGO').length} títulos`} icon={ArrowUpRight} tom="neutro" />
-        <Kpi label="Vencendo Hoje" valor={vencendoHoje} hint="Requer atenção" icon={Clock} tom="processando" />
-        <Kpi label="Inadimplência Crítica" valor={inadimplencia} hint={`${titulos.filter((t) => t.status === 'VENCIDO').length} clientes vencidos`} icon={AlertTriangle} tom="negativo" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Kpi icon={<CircleDollarSign className="h-4 w-4" />} cor="sky" label="Total no período" valor={loading ? null : R$(resumo?.valorOriginalTotal)} />
+        <Kpi icon={<Wallet className="h-4 w-4" />} cor="emerald" label="Recebido" valor={loading ? null : R$(resumo?.valorRecebido)} />
+        <Kpi icon={<Clock className="h-4 w-4" />} cor="amber" label="Em aberto" valor={loading ? null : R$(resumo?.valorEmAberto)} />
+        <Kpi icon={<AlertTriangle className="h-4 w-4" />} cor="rose" label="Atrasado" valor={loading ? null : R$(resumo?.valorVencido)} />
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-          <input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar cliente, CNPJ ou NF…"
-            className="w-full rounded-xl border border-slate-700 bg-slate-800 pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
-          />
-        </div>
-        <select value={status} onChange={(e) => setStatus(e.target.value as any)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-          <option value="TODOS">Todos os status</option>
-          <option value="PENDENTE">Pendente</option>
-          <option value="VENCIDO">Vencido</option>
-          <option value="PAGO">Pago</option>
-        </select>
-        <select value={ordem} onChange={(e) => setOrdem(e.target.value as any)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-          <option value="venc">Ordenar: Vencimento</option>
-          <option value="valorDesc">Maior valor</option>
-          <option value="valorAsc">Menor valor</option>
-        </select>
+      {/* Filtro por status */}
+      <div className="flex items-center gap-1 flex-wrap">
+        {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
+          <button key={s || 'todos'} onClick={() => setStatus(s)}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
+            {s === '' ? 'Todos' : STATUS_META[s].label}
+          </button>
+        ))}
+        <button onClick={() => navigate('/financeiro/receber')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+          Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {/* Tabela */}
-      <div className="rounded-2xl border border-slate-700/60 bg-slate-800/50 overflow-visible">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-widest text-slate-500 border-b border-slate-700/60">
-                <th className="text-left font-semibold px-6 py-3">Cliente</th>
-                <th className="text-left font-semibold px-6 py-3 whitespace-nowrap">Vencimento</th>
-                <th className="text-right font-semibold px-6 py-3">Valor</th>
-                <th className="text-center font-semibold px-6 py-3">Status</th>
-                <th className="text-right font-semibold px-6 py-3">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.length === 0 && (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500">Nenhum título encontrado.</td></tr>
-              )}
-              {filtrados.map((t) => (
-                <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-white">{t.cliente}</p>
-                    <p className="text-[12px] text-slate-500">{t.cnpj} · {t.descricao}</p>
-                  </td>
-                  <td className="px-6 py-4 text-slate-400 tabular-nums whitespace-nowrap">{t.vencimento}</td>
-                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-white">{brl(t.valor)}</td>
-                  <td className="px-6 py-4 text-center"><BadgeReceber status={t.status} /></td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <a
-                        href={`https://wa.me/${t.telefone}?text=${encodeURIComponent(`Olá! Consta em aberto o título de ${brl(t.valor)} com vencimento em ${t.vencimento}.`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        title="Cobrar via WhatsApp"
-                        className="h-8 w-8 rounded-lg border border-slate-700 text-emerald-300 flex items-center justify-center hover:bg-emerald-500/10"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </a>
-                      <button title="Gerar link de pagamento" className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30">
-                        <Link2 className="h-4 w-4" />
-                      </button>
-                      {t.status !== 'PAGO' && (
-                        <button onClick={() => receber(t.id)} className="rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300">
-                          Receber
-                        </button>
-                      )}
-                      <div className="relative">
-                        <button
-                          onClick={() => setMenuAberto(menuAberto === t.id ? null : t.id)}
-                          className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30"
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </button>
-                        {menuAberto === t.id && (
-                          <>
-                            <div className="fixed inset-0 z-10" onClick={() => setMenuAberto(null)} />
-                            <div className="absolute right-0 mt-1 z-20 w-48 rounded-xl border border-slate-700 bg-slate-800 py-1 shadow-lg shadow-black/40">
-                              <MenuItem icon={BarChart3} label="Ver DRE do cliente" onClick={() => setMenuAberto(null)} />
-                              <MenuItem icon={History} label="Histórico de títulos" onClick={() => setMenuAberto(null)} />
-                              <MenuItem icon={Eye} label="Detalhes" onClick={() => setMenuAberto(null)} />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
+      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-900/40 text-xs text-slate-400">
+            <tr>
+              {['Cliente / Descrição', 'Nº', 'Vencimento', 'Valor', 'Em aberto', 'Status', ''].map((h, i) => (
+                <th key={h || i} className={`px-4 py-2.5 font-semibold ${i >= 3 && i <= 4 ? 'text-right' : i === 5 || i === 6 ? 'text-center' : 'text-left'}`}>{h}</th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              [...Array(6)].map((_, i) => (
+                <tr key={i} className="border-t border-slate-800"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-slate-700/40 rounded animate-pulse" /></td></tr>
+              ))
+            ) : filtradas.length === 0 ? (
+              <tr><td colSpan={7} className="text-center text-slate-500 py-16">Nenhum título no período.</td></tr>
+            ) : (
+              filtradas.map(c => {
+                const meta = STATUS_META[c.status] || STATUS_META.ABERTO;
+                return (
+                  <tr key={c.id} className="border-t border-slate-800 hover:bg-slate-700/20">
+                    <td className="px-4 py-2.5">
+                      <div className="font-semibold text-slate-100">{c.cliente?.nomeFantasia || c.cliente?.razaoSocial || c.descricao}</div>
+                      {(c.cliente?.nomeFantasia || c.cliente?.razaoSocial) && <div className="text-xs text-slate-500">{c.descricao}</div>}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.numero || '—'}</td>
+                    <td className="px-4 py-2.5 text-slate-300">{dataBR(c.dataVencimento)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-slate-200">{R$(c.valorOriginal)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-100">{R$(c.valorAberto)}</td>
+                    <td className="px-4 py-2.5 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${meta.cls}`}>{meta.label}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <button onClick={() => navigate('/financeiro/receber')} title="Abrir na tela de Contas a Receber" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-amber-300 hover:bg-amber-500/15">
+                        <ExternalLink className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -388,123 +333,111 @@ function AbaReceber() {
 /* ══════════════════════════════════════════════════════════════════════════════
    ABA 3 — CONTAS A PAGAR
    ════════════════════════════════════════════════════════════════════════════ */
-function AbaPagar() {
-  const [titulos, setTitulos] = useState<TituloPagar[]>(PAGAR_MOCK);
-  const [busca, setBusca] = useState('');
-  const [categoria, setCategoria] = useState<'TODAS' | string>('TODAS');
-  const [arrastando, setArrastando] = useState(false);
+function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
+  const [contas, setContas] = useState<Conta[]>([]);
+  const [resumo, setResumo] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState('');
 
-  const categorias = useMemo(() => Array.from(new Set(PAGAR_MOCK.map((t) => t.categoria))), []);
+  const carregar = useCallback(() => {
+    setLoading(true);
+    const params = { dataIni: ini, dataFim: fim, ...(status && { status }) };
+    Promise.all([
+      financeiroApi.pagar(params),
+      financeiroApi.pagarResumo(params),
+    ])
+      .then(([r, res]) => { setContas(r.data || []); setResumo(res.data || null); })
+      .catch(() => { setContas([]); setResumo(null); })
+      .finally(() => setLoading(false));
+  }, [ini, fim, status]);
+  useEffect(() => { carregar(); }, [carregar, refreshKey]);
 
-  const filtrados = useMemo(() => {
-    const q = busca.trim().toLowerCase();
-    return titulos.filter(
-      (t) => (categoria === 'TODAS' || t.categoria === categoria) && (!q || t.fornecedor.toLowerCase().includes(q)),
+  const filtradas = useMemo(() => {
+    const q = (busca || '').trim().toLowerCase();
+    if (!q) return contas;
+    return contas.filter(c =>
+      c.descricao?.toLowerCase().includes(q) ||
+      c.numero?.toLowerCase().includes(q) ||
+      c.fornecedor?.razaoSocial?.toLowerCase().includes(q) ||
+      c.fornecedor?.nomeFantasia?.toLowerCase().includes(q),
     );
-  }, [titulos, busca, categoria]);
-
-  const totalMes = titulos.filter((t) => t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const pagamentosHoje = titulos.filter((t) => t.vencimento === '06/07/2026' && t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const economia = 8_940; // negociações/descontos por antecipação
-
-  const aprovar = (id: string) => setTitulos((prev) => prev.map((t) => (t.id === id ? { ...t, status: t.status === 'APROVACAO_PENDENTE' ? 'APROVADO' : 'PAGO' } : t)));
+  }, [contas, busca]);
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Kpi label="Total a Pagar no Mês" valor={-totalMes} hint={`${titulos.filter((t) => t.status !== 'PAGO').length} obrigações`} icon={ArrowDownRight} tom="negativo" />
-        <Kpi label="Pagamentos de Hoje" valor={-pagamentosHoje} hint="Prioridade máxima" icon={Clock} tom="processando" />
-        <Kpi label="Economia Gerada" valor={economia} hint="Descontos por antecipação (IA)" icon={Sparkles} tom="positivo" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Kpi icon={<CircleDollarSign className="h-4 w-4" />} cor="sky" label="Total no período" valor={loading ? null : R$(resumo?.valorOriginalTotal)} />
+        <Kpi icon={<Wallet className="h-4 w-4" />} cor="emerald" label="Pago" valor={loading ? null : R$(resumo?.valorPago)} />
+        <Kpi icon={<Clock className="h-4 w-4" />} cor="amber" label="Em aberto" valor={loading ? null : R$(resumo?.valorEmAberto)} />
+        <Kpi icon={<AlertTriangle className="h-4 w-4" />} cor="rose" label="Atrasado" valor={loading ? null : R$(resumo?.valorVencido)} />
       </div>
 
-      {/* Área de OCR */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setArrastando(true); }}
-        onDragLeave={() => setArrastando(false)}
-        onDrop={(e) => { e.preventDefault(); setArrastando(false); }}
-        className={`rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
-          arrastando ? 'border-amber-400 bg-slate-800' : 'border-slate-700 bg-slate-800/50'
-        }`}
-      >
-        <span className="mx-auto mb-3 h-12 w-12 rounded-2xl bg-amber-400/15 text-amber-300 flex items-center justify-center">
-          <UploadCloud className="h-6 w-6" />
+      {/* Leitura de boleto/NF por OCR — placeholder honesto (recurso futuro) */}
+      <div className="rounded-2xl border-2 border-dashed border-slate-700 bg-slate-800/50 px-6 py-6 text-center">
+        <span className="mx-auto mb-3 h-11 w-11 rounded-2xl bg-amber-400/15 text-amber-300 flex items-center justify-center">
+          <UploadCloud className="h-5 w-5" />
         </span>
-        <p className="text-sm font-semibold text-slate-200">Arraste o PDF do Boleto ou Nota Fiscal aqui</p>
-        <p className="text-[12px] text-slate-500 mt-0.5">A IA lê o documento (OCR) e preenche fornecedor, valor e vencimento automaticamente.</p>
+        <p className="text-sm font-semibold text-slate-300">Leitura automática de Boleto/NF por OCR — em breve</p>
+        <p className="text-[12px] text-slate-500 mt-0.5">Em breve será possível arrastar o PDF e a IA preencher fornecedor, valor e vencimento. Por ora, cadastre pela tela de Contas a Pagar.</p>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-          <input
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar fornecedor…"
-            className="w-full rounded-xl border border-slate-700 bg-slate-800 pl-10 pr-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
-          />
-        </div>
-        <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-          <option value="TODAS">Todas as categorias</option>
-          {categorias.map((c) => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
+      {/* Filtro por status */}
+      <div className="flex items-center gap-1 flex-wrap">
+        {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
+          <button key={s || 'todos'} onClick={() => setStatus(s)}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
+            {s === '' ? 'Todos' : STATUS_META[s].label}
+          </button>
+        ))}
+        <button onClick={() => navigate('/financeiro/pagar')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+          Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
+        </button>
       </div>
 
       {/* Tabela */}
-      <div className="rounded-2xl border border-slate-700/60 bg-slate-800/50 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-[11px] uppercase tracking-widest text-slate-500 border-b border-slate-700/60">
-                <th className="text-left font-semibold px-6 py-3">Fornecedor</th>
-                <th className="text-left font-semibold px-6 py-3">Categoria / Centro de Custo</th>
-                <th className="text-left font-semibold px-6 py-3 whitespace-nowrap">Vencimento</th>
-                <th className="text-right font-semibold px-6 py-3">Valor</th>
-                <th className="text-center font-semibold px-6 py-3">Status</th>
-                <th className="text-right font-semibold px-6 py-3">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.length === 0 && (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500">Nenhuma conta encontrada.</td></tr>
-              )}
-              {filtrados.map((t) => (
-                <tr key={t.id} className="border-b border-slate-800 hover:bg-slate-700/20 transition-colors">
-                  <td className="px-6 py-4 font-medium text-white">{t.fornecedor}</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-block rounded-md bg-slate-700/50 text-slate-300 px-2 py-0.5 text-[12px] font-medium">{t.categoria}</span>
-                    <p className="text-[12px] text-slate-500 mt-0.5">{t.centroCusto}</p>
-                  </td>
-                  <td className="px-6 py-4 text-slate-400 tabular-nums whitespace-nowrap">{t.vencimento}</td>
-                  <td className="px-6 py-4 text-right tabular-nums font-semibold text-white">{brl(t.valor)}</td>
-                  <td className="px-6 py-4 text-center"><BadgePagar status={t.status} /></td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <button title="Ver documento (PDF)" className="h-8 w-8 rounded-lg border border-slate-700 text-slate-400 flex items-center justify-center hover:bg-slate-700/30">
-                        <FileText className="h-4 w-4" />
-                      </button>
-                      {t.status === 'APROVACAO_PENDENTE' ? (
-                        <button onClick={() => aprovar(t.id)} className="rounded-lg bg-amber-400 text-slate-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300 flex items-center gap-1.5">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
-                        </button>
-                      ) : t.status === 'APROVADO' ? (
-                        <button onClick={() => aprovar(t.id)} className="rounded-lg border border-slate-700 text-slate-200 px-3 py-1.5 text-[12px] font-semibold hover:bg-slate-700/30 flex items-center gap-1.5">
-                          <CreditCard className="h-3.5 w-3.5" /> Realizar Pagamento
-                        </button>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-300 font-medium px-3 py-1.5">
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Pago
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-900/40 text-xs text-slate-400">
+            <tr>
+              {['Fornecedor / Descrição', 'Nº', 'Vencimento', 'Valor', 'Em aberto', 'Status', ''].map((h, i) => (
+                <th key={h || i} className={`px-4 py-2.5 font-semibold ${i >= 3 && i <= 4 ? 'text-right' : i === 5 || i === 6 ? 'text-center' : 'text-left'}`}>{h}</th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              [...Array(6)].map((_, i) => (
+                <tr key={i} className="border-t border-slate-800"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-slate-700/40 rounded animate-pulse" /></td></tr>
+              ))
+            ) : filtradas.length === 0 ? (
+              <tr><td colSpan={7} className="text-center text-slate-500 py-16">Nenhuma conta no período.</td></tr>
+            ) : (
+              filtradas.map(c => {
+                const meta = STATUS_META[c.status] || STATUS_META.ABERTO;
+                return (
+                  <tr key={c.id} className="border-t border-slate-800 hover:bg-slate-700/20">
+                    <td className="px-4 py-2.5">
+                      <div className="font-semibold text-slate-100">{c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial || c.descricao}</div>
+                      {(c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial) && <div className="text-xs text-slate-500">{c.descricao}</div>}
+                    </td>
+                    <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.numero || '—'}</td>
+                    <td className="px-4 py-2.5 text-slate-300">{dataBR(c.dataVencimento)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-slate-200">{R$(c.valorOriginal)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-100">{R$(c.valorAberto)}</td>
+                    <td className="px-4 py-2.5 text-center">
+                      <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${meta.cls}`}>{meta.label}</span>
+                    </td>
+                    <td className="px-4 py-2.5 text-center">
+                      <button onClick={() => navigate('/financeiro/pagar')} title="Abrir na tela de Contas a Pagar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-amber-300 hover:bg-amber-500/15">
+                        <ExternalLink className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -513,95 +446,23 @@ function AbaPagar() {
 /* ══════════════════════════════════════════════════════════════════════════════
    COMPONENTES AUXILIARES
    ════════════════════════════════════════════════════════════════════════════ */
-function Kpi({
-  label,
-  valor,
-  hint,
-  icon: Icon,
-  tom,
-  tendencia,
-}: {
-  label: string;
-  valor: number;
-  hint: string;
-  icon: React.ElementType;
-  tom: 'neutro' | 'positivo' | 'negativo' | 'processando' | 'destaque';
-  tendencia?: number;
-}) {
-  const cor =
-    tom === 'destaque' || tom === 'processando'
-      ? 'text-amber-300'
-      : tom === 'positivo'
-        ? 'text-emerald-300'
-        : tom === 'negativo'
-          ? 'text-rose-300'
-          : 'text-white';
-  const chip =
-    tom === 'destaque' || tom === 'processando'
-      ? 'bg-amber-400/15 text-amber-300'
-      : tom === 'positivo'
-        ? 'bg-emerald-500/10 text-emerald-300'
-        : tom === 'negativo'
-          ? 'bg-rose-500/10 text-rose-300'
-          : 'bg-slate-700/50 text-slate-400';
-  const moldura = tom === 'destaque' ? 'ring-1 ring-amber-400/30 bg-amber-400/[0.06]' : 'border border-slate-700/60 bg-slate-800/50';
-
+const CORES: Record<string, string> = {
+  amber: 'bg-amber-400/10 text-amber-300',
+  sky: 'bg-amber-400/10 text-amber-300',
+  rose: 'bg-rose-400/10 text-rose-300',
+  emerald: 'bg-emerald-400/10 text-emerald-300',
+};
+function Kpi({ icon, label, valor, cor, destaque }: { icon: any; label: string; valor: string | null; cor: string; destaque?: boolean }) {
   return (
-    <div className={`rounded-2xl p-5 ${moldura}`}>
-      <div className="flex items-center justify-between">
-        <p className="text-[11px] uppercase tracking-widest font-semibold text-slate-500">{label}</p>
-        <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${chip}`}>
-          <Icon className="h-4 w-4" />
-        </span>
+    <div className={`bg-slate-800/50 rounded-2xl border p-5 ${destaque ? 'border-amber-500/30' : 'border-slate-700/60'}`}>
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
+        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
-      <p className={`mt-3 text-3xl leading-none font-semibold tracking-tight tabular-nums ${cor}`}>{brl(valor)}</p>
-      <div className="mt-2 flex items-center gap-2">
-        {tendencia != null && (
-          <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-md ${tendencia >= 0 ? 'bg-emerald-500/10 text-emerald-300' : 'bg-rose-500/10 text-rose-300'}`}>
-            {pct(tendencia)}
-          </span>
-        )}
-        <p className="text-[12px] text-slate-500">{hint}</p>
-      </div>
+      {valor === null
+        ? <div className="h-7 w-28 bg-slate-700/40 rounded animate-pulse" />
+        : <p className="text-2xl font-extrabold text-white tracking-tight truncate">{valor}</p>}
     </div>
-  );
-}
-
-function BadgeReceber({ status }: { status: StatusReceber }) {
-  const cfg =
-    status === 'PAGO'
-      ? { cls: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', icon: CheckCircle2, label: 'Pago' }
-      : status === 'VENCIDO'
-        ? { cls: 'bg-rose-500/10 text-rose-300 ring-rose-500/20', icon: AlertTriangle, label: 'Vencido' }
-        : { cls: 'bg-amber-500/10 text-amber-300 ring-amber-500/20', icon: Clock, label: 'Pendente' };
-  const Icon = cfg.icon;
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${cfg.cls}`}>
-      <Icon className="h-3.5 w-3.5" /> {cfg.label}
-    </span>
-  );
-}
-
-function BadgePagar({ status }: { status: StatusPagar }) {
-  const cfg =
-    status === 'PAGO'
-      ? { cls: 'bg-emerald-500/10 text-emerald-300 ring-emerald-500/20', icon: CheckCircle2, label: 'Pago' }
-      : status === 'APROVADO'
-        ? { cls: 'bg-slate-700/50 text-slate-300 ring-slate-600', icon: CheckCircle2, label: 'Aprovado' }
-        : { cls: 'bg-amber-500/10 text-amber-300 ring-amber-500/20', icon: Clock, label: 'Aprovação Pendente' };
-  const Icon = cfg.icon;
-  return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${cfg.cls}`}>
-      <Icon className="h-3.5 w-3.5" /> {cfg.label}
-    </span>
-  );
-}
-
-function MenuItem({ icon: Icon, label, onClick }: { icon: React.ElementType; label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-slate-300 hover:bg-slate-700/40 text-left">
-      <Icon className="h-4 w-4 text-slate-500" /> {label}
-    </button>
   );
 }
 
