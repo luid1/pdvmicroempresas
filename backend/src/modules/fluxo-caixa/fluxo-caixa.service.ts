@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { StatusFinanceiro } from '@prisma/client';
+import { TipoMovimento, OrigemMovimento } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { money, sumMoney, subMoney } from '../../common/utils/money.util';
 
 /** Filtros do consolidado de fluxo de caixa. */
 export interface FluxoCaixaDto {
   filialId?: string;
-  dataIni?: string; // competência: dataPagamento >= dataIni
-  dataFim?: string; // competência: dataPagamento <= dataFim
+  dataIni?: string; // competência: data do movimento >= dataIni
+  dataFim?: string; // competência: data do movimento <= dataFim
   agrupamento?: 'dia' | 'mes';
 }
 
@@ -24,8 +24,11 @@ export class FluxoCaixaService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * Visão de Caixa REALIZADO: considera apenas o que efetivamente entrou/saiu do
-   * caixa — títulos com status PAGO ou PARCIAL, pela data de pagamento. Agrupa por
+   * Visão de Caixa REALIZADO: considera tudo que efetivamente entrou/saiu das
+   * contas financeiras — o razão `movimentoCaixa`. Isso cobre vendas do PDV,
+   * sangrias/suprimentos, baixas de contas a receber/pagar e lançamentos avulsos,
+   * pela data do movimento. Transferências entre contas próprias são excluídas
+   * (movimento interno, não é entrada/saída de caixa do negócio). Agrupa por
    * competência (dia ou mês) e calcula o saldo líquido corrente (saldo acumulado).
    */
   async consolidado(tenantId: string, filtros: FluxoCaixaDto = {}) {
@@ -33,27 +36,20 @@ export class FluxoCaixaService {
     const inicio = filtros.dataIni ? this.inicioDoDia(new Date(filtros.dataIni)) : undefined;
     const fim = filtros.dataFim ? this.fimDoDia(new Date(filtros.dataFim)) : undefined;
 
-    const whereBase = {
-      tenantId,
-      ...(filtros.filialId && { filialId: filtros.filialId }),
-      status: { in: [StatusFinanceiro.PAGO, StatusFinanceiro.PARCIAL] },
-      dataPagamento: {
-        not: null,
-        ...(inicio && { gte: inicio }),
-        ...(fim && { lte: fim }),
+    const movimentos = await this.prisma.movimentoCaixa.findMany({
+      where: {
+        tenantId,
+        ...(filtros.filialId && { filialId: filtros.filialId }),
+        // Transferência = dinheiro trocando de conta própria; não é fluxo de caixa
+        // do negócio (os dois lados se anulam), então fica de fora do consolidado.
+        origem: { not: OrigemMovimento.TRANSFERENCIA },
+        data: {
+          ...(inicio && { gte: inicio }),
+          ...(fim && { lte: fim }),
+        },
       },
-    };
-
-    const [recebidos, pagos] = await Promise.all([
-      this.prisma.contaReceber.findMany({
-        where: whereBase,
-        select: { valorPago: true, dataPagamento: true },
-      }),
-      this.prisma.contaPagar.findMany({
-        where: whereBase,
-        select: { valorPago: true, dataPagamento: true },
-      }),
-    ]);
+      select: { valor: true, tipo: true, data: true },
+    });
 
     // Agrega por período (chave de competência).
     const mapa = new Map<string, { entradas: number[]; saidas: number[] }>();
@@ -67,13 +63,10 @@ export class FluxoCaixaService {
       return mapa.get(k)!;
     };
 
-    for (const r of recebidos) {
-      if (!r.dataPagamento) continue;
-      bucket(chave(r.dataPagamento)).entradas.push(money(r.valorPago));
-    }
-    for (const p of pagos) {
-      if (!p.dataPagamento) continue;
-      bucket(chave(p.dataPagamento)).saidas.push(money(p.valorPago));
+    for (const m of movimentos) {
+      const b = bucket(chave(m.data));
+      if (m.tipo === TipoMovimento.ENTRADA) b.entradas.push(money(m.valor));
+      else b.saidas.push(money(m.valor));
     }
 
     // Ordena cronologicamente e calcula o saldo acumulado corrente.
