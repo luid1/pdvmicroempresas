@@ -169,14 +169,17 @@ export class DreService {
     };
   }
 
-  /** Período: usa dataInicio/dataFim se informados; senão o mês corrente. */
+  /** Período: usa dataInicio/dataFim se informados; senão o mês corrente.
+   * A data final é estendida ao FIM DO DIA (23:59:59.999) — senão um filtro
+   * de dia único ou que termina "hoje" perderia todas as vendas do último dia
+   * (a NF-e é emitida com hora, e `new Date('YYYY-MM-DD')` cai à meia-noite). */
   private resolverPeriodo(filtros?: { dataInicio?: string; dataFim?: string }) {
     const agora = new Date();
     const inicio = filtros?.dataInicio
-      ? new Date(filtros.dataInicio)
+      ? new Date(`${filtros.dataInicio}T00:00:00.000`)
       : new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
     const fim = filtros?.dataFim
-      ? new Date(filtros.dataFim)
+      ? new Date(`${filtros.dataFim}T23:59:59.999`)
       : new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59, 999);
     const label = inicio.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     return { inicio, fim, label };
