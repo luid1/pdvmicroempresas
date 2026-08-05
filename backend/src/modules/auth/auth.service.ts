@@ -151,6 +151,7 @@ export class AuthService {
         telas: usuario.role.telas || [],
         telaInicial: usuario.role.telaInicial || null,
         acoes: usuario.role.acoes || {},
+        preferencias: usuario.preferencias || {},
         filiais: usuario.filiais.map((uf: any) => ({
           id: uf.filial.id,
           codigo: uf.filial.codigo,
@@ -215,5 +216,26 @@ export class AuthService {
     const pinHash = await bcrypt.hash(pin, 10);
     await this.prisma.usuario.update({ where: { id: alvo.id }, data: { pinHash } });
     return { ok: true };
+  }
+
+  /**
+   * Salva/mescla as preferências de UI do próprio usuário autenticado.
+   * Faz merge raso com as preferências existentes para não perder chaves
+   * de outras telas ao salvar apenas uma preferência.
+   */
+  async salvarPreferencias(usuarioId: string, patch: Record<string, any>) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      select: { preferencias: true },
+    });
+    if (!usuario) throw new UnauthorizedException('Usuário não encontrado.');
+
+    const atuais = (usuario.preferencias as Record<string, any> | null) || {};
+    const preferencias = { ...atuais, ...(patch || {}) };
+    await this.prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { preferencias },
+    });
+    return { ok: true, preferencias };
   }
 }

@@ -320,6 +320,7 @@ model Usuario {
   cpf          String?
   ativo        Boolean   @default(true)
   ultimoAcesso DateTime?
+  preferencias Json? // Preferências de UI que seguem a conta (ex.: período padrão do dashboard)
   createdAt    DateTime  @default(now())
 
   filiais        UsuarioFilial[]

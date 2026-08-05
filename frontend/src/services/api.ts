@@ -25,6 +25,13 @@ api.interceptors.response.use(
 
 export default api;
 
+// Auth / perfil do usuário
+export const authApi = {
+  // Preferências de UI que seguem a conta (merge raso no backend).
+  salvarPreferencias: (preferencias: Record<string, unknown>) =>
+    api.put('/auth/me/preferencias', { preferencias }),
+};
+
 // Estoque / WMS
 export const estoqueApi = {
   posicao: (filialId: string, alertaValidade?: boolean) =>

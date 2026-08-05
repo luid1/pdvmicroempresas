@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api, { nfeApi, financeiroApi, comprasApi, estoqueApi, pedidosApi } from '../services/api';
@@ -50,6 +50,29 @@ const PERIODOS: { key: PeriodoKey; label: string }[] = [
   { key: 'hoje', label: 'Hoje' }, { key: 'semana', label: '7 dias' },
   { key: 'mes', label: 'Mês' }, { key: 'ano', label: 'Ano' },
 ];
+
+/* Lembra a última escolha do usuário (período e datas do modo personalizado).
+ * A preferência SEGUE A CONTA (persistida no perfil do usuário no backend);
+ * o localStorage serve só de cache p/ restaurar na hora, sem "piscar" ao abrir. */
+const PERIODOS_VALIDOS: PeriodoKey[] = ['hoje', 'semana', 'mes', 'ano', 'custom'];
+// Chaves das preferências que seguem a conta (namespace do dashboard).
+const PREF = {
+  periodo: 'dashboard.periodo',
+  dataInicio: 'dashboard.dataInicio',
+  dataFim: 'dashboard.dataFim',
+};
+// Cache local (evita flash antes de o perfil da conta ser lido).
+const LS = {
+  periodo: 'lumin.dashboard.periodo',
+  dataInicio: 'lumin.dashboard.dataInicio',
+  dataFim: 'lumin.dashboard.dataFim',
+};
+const lsGet = (k: string): string | null => {
+  try { return localStorage.getItem(k); } catch { return null; }
+};
+const lsSet = (k: string, v: string) => {
+  try { localStorage.setItem(k, v); } catch { /* storage indisponível: ignora */ }
+};
 
 const STATUS_INFO: Record<string, { label: string; cor: string; rota: string }> = {
   RASCUNHO: { label: 'Rascunho', cor: '#64748b', rota: '/logistica/pedidos' },
@@ -120,17 +143,43 @@ const tipStyle = { background: '#0d1420', border: '1px solid rgba(255,255,255,0.
 
 /* ─────────────── Página ─────────────── */
 export default function DashboardPage() {
-  const { filialAtiva } = useAuth();
+  const { filialAtiva, preferencias, savePreferencias } = useAuth();
   const navigate = useNavigate();
   const [d, setD] = useState<Dash | null>(null);
   const [loading, setLoading] = useState(true);
-  const [periodo, setPeriodo] = useState<PeriodoKey>('hoje');
-  const [ordProduto, setOrdProduto] = useState<'custo' | 'qtd'>('custo');
   const hojeISO = new Date().toISOString().slice(0, 10);
-  const [dataInicio, setDataInicio] = useState(hojeISO);
-  const [dataFim, setDataFim] = useState(hojeISO);
+  // Preferência da conta tem prioridade; depois o cache local; por fim o default.
+  const [periodo, setPeriodo] = useState<PeriodoKey>(() => {
+    const v = (preferencias[PREF.periodo] as PeriodoKey | undefined)
+      ?? (lsGet(LS.periodo) as PeriodoKey | null) ?? 'hoje';
+    return PERIODOS_VALIDOS.includes(v as PeriodoKey) ? (v as PeriodoKey) : 'hoje';
+  });
+  const [ordProduto, setOrdProduto] = useState<'custo' | 'qtd'>('custo');
+  const [dataInicio, setDataInicio] = useState(
+    () => (preferencias[PREF.dataInicio] as string) || lsGet(LS.dataInicio) || hojeISO,
+  );
+  const [dataFim, setDataFim] = useState(
+    () => (preferencias[PREF.dataFim] as string) || lsGet(LS.dataFim) || hojeISO,
+  );
   const [detalhe, setDetalhe] = useState<DetalheCard | null>(null);
   const fid = filialAtiva?.id;
+
+  // Persiste a escolha: cache local na hora + perfil da conta (segue o usuário
+  // em qualquer máquina). Pula a 1ª render p/ não regravar o valor recém-lido.
+  const primeiraRender = useRef(true);
+  useEffect(() => {
+    lsSet(LS.periodo, periodo);
+    lsSet(LS.dataInicio, dataInicio);
+    lsSet(LS.dataFim, dataFim);
+    if (primeiraRender.current) { primeiraRender.current = false; return; }
+    savePreferencias({
+      [PREF.periodo]: periodo,
+      [PREF.dataInicio]: dataInicio,
+      [PREF.dataFim]: dataFim,
+    });
+    // savePreferencias é estável para o efeito (best-effort); não incluir nas deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodo, dataInicio, dataFim]);
 
   const carregar = useCallback(() => {
     setLoading(true);

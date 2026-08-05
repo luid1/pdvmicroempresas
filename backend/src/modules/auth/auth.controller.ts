@@ -1,9 +1,9 @@
-import { Controller, Post, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, Put, Get, Body, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { Public, CurrentTenant } from '../../common/decorators/context.decorator';
+import { Public, CurrentTenant, CurrentUser } from '../../common/decorators/context.decorator';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto } from './dto/auth.dto';
+import { LoginDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto, SalvarPreferenciasDto } from './dto/auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -58,5 +58,12 @@ export class AuthController {
   @ApiOperation({ summary: 'Cadastra novo tenant + admin master' })
   register(@Body() body: RegisterTenantDto) {
     return this.auth.registerTenant(body);
+  }
+
+  @ApiBearerAuth()
+  @Put('me/preferencias')
+  @ApiOperation({ summary: 'Salva preferências de UI do usuário logado (segue a conta)' })
+  salvarPreferencias(@CurrentUser() user: { id: string }, @Body() body: SalvarPreferenciasDto) {
+    return this.auth.salvarPreferencias(user.id, body.preferencias);
   }
 }

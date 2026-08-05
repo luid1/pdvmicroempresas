@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { podeAcao, AcaoTela } from '../config/telas';
+import { authApi } from '../services/api';
 
 interface Filial { id: string; codigo: string; nome: string }
-interface AuthUser { id: string; nome: string; email: string; role: string; tenantId: string; telas?: string[]; telaInicial?: string | null; acoes?: Record<string, string[]> }
+type Preferencias = Record<string, unknown>;
+interface AuthUser { id: string; nome: string; email: string; role: string; tenantId: string; telas?: string[]; telaInicial?: string | null; acoes?: Record<string, string[]>; preferencias?: Preferencias }
 
 interface AuthCtx {
   user: AuthUser | null;
@@ -13,6 +15,8 @@ interface AuthCtx {
   logout: () => void;
   isLoading: boolean;
   pode: (rota: string, acao: AcaoTela) => boolean;
+  preferencias: Preferencias;
+  savePreferencias: (patch: Preferencias) => void;
 }
 
 const Ctx = createContext<AuthCtx>(null!);
@@ -71,8 +75,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Pode executar uma ação (CRIAR/EDITAR/EXCLUIR) na rota informada?
   const pode = (rota: string, acao: AcaoTela) => podeAcao(user?.role, user?.acoes, rota, acao);
 
+  const preferencias: Preferencias = user?.preferencias || {};
+
+  // Salva preferências que seguem a conta: atualiza o estado/localStorage na hora
+  // (UI responsiva) e persiste no backend em segundo plano (best-effort).
+  const savePreferencias = (patch: Preferencias) => {
+    setUser((atual) => {
+      if (!atual) return atual;
+      const merged = { ...(atual.preferencias || {}), ...patch };
+      const novo = { ...atual, preferencias: merged };
+      localStorage.setItem('wms_user', JSON.stringify(novo));
+      return novo;
+    });
+    // Persiste no perfil do usuário; se falhar (offline), a versão local já valeu.
+    authApi.salvarPreferencias(patch).catch(() => { /* best-effort: mantém local */ });
+  };
+
   return (
-    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, login, logout, isLoading, pode }}>
+    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, login, logout, isLoading, pode, preferencias, savePreferencias }}>
       {children}
     </Ctx.Provider>
   );

@@ -4,6 +4,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
+  IsObject,
   IsNumberString,
   Length,
   MinLength,
@@ -107,4 +108,13 @@ export class RegisterTenantDto {
   @IsNotEmpty()
   @MaxLength(20)
   filialCodigo: string;
+}
+
+export class SalvarPreferenciasDto {
+  @ApiProperty({
+    description: 'Objeto de preferências de UI a mesclar (merge raso) no perfil do usuário',
+    example: { 'dashboard.periodo': 'semana' },
+  })
+  @IsObject({ message: 'preferencias deve ser um objeto.' })
+  preferencias: Record<string, any>;
 }
