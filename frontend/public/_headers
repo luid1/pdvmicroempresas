@@ -1,0 +1,6 @@
+# MIME correto do manifesto PWA. Sem isto a Netlify serve .webmanifest como
+# application/octet-stream, o que alguns navegadores recusam ao instalar o app.
+# Este arquivo é copiado para dist/ pelo Vite e lido pela Netlify inclusive em
+# deploy manual (arrastar a pasta dist), onde o netlify.toml não é consultado.
+/manifest.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
