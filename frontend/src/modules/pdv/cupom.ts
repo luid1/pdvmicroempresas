@@ -112,6 +112,34 @@ function montarHtml(c: CupomImpressao): string {
 </body></html>`;
 }
 
+/**
+ * Preferência POR TERMINAL de impressão automática do cupom após cada venda.
+ *
+ * Fica DESLIGADA por padrão: num navegador comum, imprimir dispara o diálogo
+ * do Chrome a cada venda (chatice). A loja que tem impressora térmica + modo
+ * silencioso do Chrome (--kiosk-printing) liga aqui e o cupom sai direto.
+ * O botão "Reimprimir cupom" continua disponível independente disto.
+ *
+ * Guardado em localStorage porque é config da máquina do caixa, não da conta.
+ */
+const CUPOM_AUTO_KEY = 'pdv.cupomAuto';
+
+export function getCupomAuto(): boolean {
+  try {
+    return localStorage.getItem(CUPOM_AUTO_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function setCupomAuto(ligado: boolean): void {
+  try {
+    localStorage.setItem(CUPOM_AUTO_KEY, ligado ? '1' : '0');
+  } catch {
+    /* localStorage indisponível — segue sem persistir */
+  }
+}
+
 /** Imprime o cupom num iframe oculto, sem sair da tela do PDV. */
 export function imprimirCupom(c: CupomImpressao) {
   try {

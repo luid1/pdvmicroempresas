@@ -11,7 +11,7 @@ import {
 } from '../components/CaixaSessao';
 import { getTefProvider, type CanalPagamento } from '../tef/tef';
 import { beepOk, beepErro } from '../som';
-import { imprimirCupom, type CupomImpressao } from '../cupom';
+import { imprimirCupom, getCupomAuto, setCupomAuto, type CupomImpressao } from '../cupom';
 import { abrirGavetaAuto, abrirGavetaManual } from '../gaveta';
 
 /**
@@ -61,6 +61,8 @@ export default function Pdv() {
   const [buscando, setBuscando] = useState(false);
   const [pagando, setPagando] = useState(false);
   const [ultimoCupom, setUltimoCupom] = useState<CupomImpressao | null>(null);
+  // Impressão automática do cupom após a venda — opt-in por terminal (padrão OFF).
+  const [cupomAuto, setCupomAutoState] = useState<boolean>(() => getCupomAuto());
   const [selecionadoId, setSelecionadoId] = useState<string | null>(null);
   // Multiplicador de quantidade: o próximo item bipado entra com esta qtd.
   // Ex.: digita "5*" no campo, ou clica no chip ×5, e bipa o produto → 5 un.
@@ -369,7 +371,10 @@ export default function Pdv() {
         troco: Number(data.troco || 0),
       };
       setUltimoCupom(cupom);
-      imprimirCupom(cupom);
+      // Só imprime sozinho se o terminal ativou o automático; senão o operador
+      // usa o botão "Reimprimir cupom" quando quiser (evita o diálogo do Chrome
+      // a cada venda em quem não tem impressora térmica configurada).
+      if (cupomAuto) imprimirCupom(cupom);
       // Gaveta abre automaticamente quando há dinheiro na venda (não em cartão/PIX puro).
       if (pagamentos.some((p) => (p.forma || '').toUpperCase().startsWith('DINHEIRO'))) {
         void abrirGavetaAuto();
@@ -664,6 +669,21 @@ export default function Pdv() {
                     >
                       <Printer className="h-4 w-4" /> Reimprimir cupom
                     </button>
+                    <label
+                      className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-400 select-none"
+                      title="Ligue apenas se este caixa tem impressora térmica. Sem térmica, isto abre o diálogo de impressão do Chrome a cada venda."
+                    >
+                      <input
+                        type="checkbox"
+                        checked={cupomAuto}
+                        onChange={(e) => {
+                          setCupomAuto(e.target.checked);
+                          setCupomAutoState(e.target.checked);
+                        }}
+                        className="h-4 w-4 accent-emerald-500"
+                      />
+                      Imprimir cupom automaticamente
+                    </label>
                     <p className="mt-3 text-sm text-gray-600">Bipe uma mercadoria para a próxima venda.</p>
                   </div>
                 ) : (
