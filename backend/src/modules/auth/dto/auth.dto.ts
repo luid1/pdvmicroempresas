@@ -10,6 +10,7 @@ import {
   MinLength,
   MaxLength,
 } from 'class-validator';
+import { TenantAwareDto } from '../../../common/dto/tenant-aware.dto';
 
 export class LoginDto {
   @ApiProperty({ example: 'luid@hetros.com.br' })
@@ -110,7 +111,7 @@ export class RegisterTenantDto {
   filialCodigo: string;
 }
 
-export class SalvarPreferenciasDto {
+export class SalvarPreferenciasDto extends TenantAwareDto {
   @ApiProperty({
     description: 'Objeto de preferências de UI a mesclar (merge raso) no perfil do usuário',
     example: { 'dashboard.periodo': 'semana' },
