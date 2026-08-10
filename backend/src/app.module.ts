@@ -35,6 +35,7 @@ import { AuditoriaModule } from './modules/auditoria/auditoria.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AssinaturasModule } from './modules/assinaturas/assinaturas.module';
+import { IaModule } from './modules/ia/ia.module';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -83,6 +84,7 @@ import { HealthController } from './health.controller';
     DashboardModule,
     UsuariosModule,
     AssinaturasModule,
+    IaModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -153,9 +153,68 @@
           mask-image: radial-gradient(circle at 30% 38%, #000 0%, transparent 72%);
 }
 
+/* ============================================================
+   LU COMMAND — spotlight da assistente. Núcleo de IA: um anel de
+   gradiente (âmbar → violeta) que orbita a barra, um glow que respira
+   atrás e uma varredura quando a Lu está pensando. A borda é "viva".
+   ============================================================ */
+
+/* Anel de gradiente giratório — a borda que respira. Reusado na barra
+   e no orbe: o filho fica sobre o ::before, deixando à mostra só ~1.5px
+   de gradiente como moldura luminosa. */
+@keyframes luSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.lu-ring { position: relative; overflow: hidden; }
+.lu-ring::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 210%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg,
+    #FFC24B, #C98A22 22%, #7C6BF0 46%, #C98A22 70%, #FFC24B);
+  animation: luSpin 7s linear infinite;
+}
+.lu-ring > * { position: relative; z-index: 1; }
+.lu-ring.is-thinking::before { animation-duration: 2.1s; }
+
+/* Glow iridescente que respira atrás da barra (mesma paleta, desfocado). */
+@keyframes luAuraBreathe {
+  0%, 100% { opacity: 0.4;  transform: translate(-50%, -50%) rotate(0deg)   scale(1); }
+  50%      { opacity: 0.78; transform: translate(-50%, -50%) rotate(180deg) scale(1.06); }
+}
+.lu-aura {
+  position: absolute; top: 50%; left: 50%;
+  width: 118%; aspect-ratio: 3 / 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 90deg,
+    rgba(255,194,75,0.6), rgba(124,107,240,0.42), rgba(255,194,75,0.6));
+  filter: blur(48px);
+  border-radius: 999px;
+  animation: luAuraBreathe 7.5s ease-in-out infinite;
+}
+.lu-aura.is-thinking { animation-duration: 3s; }
+
+/* Varredura glossy quando a Lu está pensando. */
+@keyframes luSweep { 0% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
+.lu-sweep {
+  background: linear-gradient(100deg, transparent 20%, rgba(255,214,140,0.14) 50%, transparent 80%);
+  animation: luSweep 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Núcleo do orbe pulsando. */
+@keyframes luOrbGlow {
+  0%, 100% { box-shadow: 0 0 12px rgba(255,194,75,0.4); }
+  50%      { box-shadow: 0 0 22px rgba(255,194,75,0.75); }
+}
+.lu-orb { animation: luOrbGlow 3s ease-in-out infinite; }
+
+@keyframes luRise { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+.lu-rise { animation: luRise 0.36s cubic-bezier(0.16, 1, 0.3, 1); }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-aurora, .animate-aurora-slow, .animate-pulse-glow, .skeleton::after,
-  .login-canvas, .login-orb-1, .login-orb-2, .login-orb-3, .login-grid { animation: none !important; }
+  .login-canvas, .login-orb-1, .login-orb-2, .login-orb-3, .login-grid,
+  .lu-ring::before, .lu-aura, .lu-sweep, .lu-orb, .lu-rise { animation: none !important; }
 }
 
 /* ============================================================

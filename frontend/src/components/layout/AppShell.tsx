@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, rotaInicial, TELAS_MENU_POR_GRUPO, type SubTela } from '../../config/telas';
 import { FeedbackHost } from '../ui/feedback';
 import NotificacoesSino from './NotificacoesSino';
+import LuCommand from './LuCommand';
 import {
   ChevronLeft, ChevronRight, LogOut, Building2, Menu, X, Circle,
 } from 'lucide-react';
@@ -304,6 +305,7 @@ export default function AppShell() {
         document.body
       )}
       <FeedbackHost />
+      <LuCommand />
     </div>
   );
 }

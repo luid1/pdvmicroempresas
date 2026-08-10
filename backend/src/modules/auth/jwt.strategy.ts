@@ -27,6 +27,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       tenantId: user.tenantId,
       roleId: user.roleId,
       role: user.role.nome,
+      // Telas que o perfil pode ver (['*'] = todas). Usado pelo escopo da IA
+      // para revelar só os indicadores que o papel já enxerga no menu.
+      telas: user.role.telas || [],
       permissoes: user.role.permissoes.map((p) => `${p.permissao.modulo}:${p.permissao.acao}`),
       // Filiais que o usuário pode operar — usado pelo FilialGuard p/ impedir
       // acesso cruzado entre boxes/filiais da mesma empresa.

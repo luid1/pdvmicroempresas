@@ -291,6 +291,40 @@ export const devolucoesCompraApi = {
   }) => api.post('/devolucoes-compra', dto),
 };
 
+// Assistente IA "Lu"
+export type PerguntaLu = 'mais-vendido' | 'acabando' | 'mais-lucrativo';
+export type TurnoLu = { autor: 'user' | 'lu'; texto: string };
+export const iaApi = {
+  // "Oi Lu, como está minha loja hoje?" — resumo do dia da loja logada.
+  resumoDia: (filialId?: string) => api.get('/ia/resumo-dia', { params: { filialId } }),
+  // Perguntas fixas (mais vendido / o que está acabando / mais lucrativo).
+  perguntar: (tipo: PerguntaLu, filialId?: string) => api.get('/ia/perguntar', { params: { tipo, filialId } }),
+  // Chat aberto (v0.3): pergunta livre sobre a loja, com memória curta.
+  chat: (pergunta: string, historico?: TurnoLu[], filialId?: string) =>
+    api.post('/ia/chat', { pergunta, historico, filialId }),
+  // Barra de comando (v0.4): interpreta uma frase e devolve ação/resposta/esclarecimento.
+  comando: (texto: string, historico?: TurnoLu[], filialId?: string) =>
+    api.post('/ia/comando', { texto, historico, filialId }),
+};
+
+// Resultado do POST /ia/comando (barra de comando da Lu).
+export type ComandoLuResp =
+  | { tipo: 'resposta'; texto: string; via?: string }
+  | { tipo: 'esclarecer'; texto: string }
+  | {
+      tipo: 'acao';
+      acao: 'lancar-gasto' | 'lancar-entrada';
+      resumo: string;
+      rascunho: {
+        acao: string;
+        tipoMovimento: 'ENTRADA' | 'SAIDA';
+        valor: number;
+        descricao: string;
+        categoriaTexto: string | null;
+        data: string;
+      };
+    };
+
 // Assinatura / capacidade (add-ons contratáveis no painel)
 export const assinaturaApi = {
   me: () => api.get('/assinaturas/me'),

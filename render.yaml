@@ -49,6 +49,16 @@ services:
         value: ./uploads
       - key: MAX_FILE_SIZE_MB
         value: "10"
+      # ── IA "Lu" (Google Gemini) ─────────────────────────────────────────────
+      # "gemini" usa o Google Gemini Flash (exige GEMINI_API_KEY). "simulado"
+      # responde localmente sem rede/custo. Cole a GEMINI_API_KEY no painel do
+      # Render (NUNCA no repositório) — gere em https://aistudio.google.com/apikey.
+      - key: IA_MODO
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-flash-lite-latest
+      - key: GEMINI_API_KEY
+        sync: false
       # ── NFC-e (nota fiscal do consumidor) ───────────────────────────────────
       # "simulado" = gera chave/QR fake em cada venda, sem transmitir ao SEFAZ.
       # Em produção real: "focus" + FOCUS_NFE_TOKEN + certificado A1 + dados fiscais.
