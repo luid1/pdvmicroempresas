@@ -50,6 +50,33 @@ async function fetchComTimeout(url: string, init?: RequestInit, ms = 12000): Pro
   }
 }
 
+/**
+ * Lê o corpo como JSON de forma segura. Se o servidor devolver algo que NÃO é
+ * JSON (página de erro HTML, corpo vazio, proxy fora do ar enquanto o backend
+ * sobe), nunca vaza o "Unexpected token < in JSON" para o caixa — lança uma
+ * mensagem amigável. Em erro, extrai a mensagem do backend, que o Nest aninha
+ * em `error.message` (ex.: "Senha incorreta.").
+ */
+async function lerJson(res: Response): Promise<any> {
+  const texto = await res.text();
+  let data: any = null;
+  if (texto) {
+    try { data = JSON.parse(texto); } catch { data = null; }
+  }
+  if (!res.ok) {
+    const msg =
+      data?.error?.message || data?.message ||
+      (res.status >= 500
+        ? 'O servidor teve um problema. Tente de novo em instantes.'
+        : 'Não foi possível concluir. Verifique os dados e tente de novo.');
+    throw new Error(msg);
+  }
+  if (data === null) {
+    throw new Error('O servidor demorou a responder direito. Tente de novo em instantes.');
+  }
+  return data;
+}
+
 /** Logotipo da marca — ponto âmbar + nome (igual à landing). */
 function Brand({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return (
@@ -89,13 +116,16 @@ export default function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modo, paired?.id]);
 
+  // Nunca deixa um "Entrando..." travado ao trocar de tela/perfil: cada vez que
+  // o passo ou o perfil muda, zera o loading. Evita abrir o perfil já "entrando".
+  useEffect(() => { setLoading(false); }, [modo, selecionado?.id]);
+
   async function carregarPerfis(tenantId: string) {
     setCarregandoPerfis(true);
     setError('');
     try {
       const res = await fetchComTimeout(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error('Não foi possível carregar os perfis.');
+      const data = await lerJson(res);
       setPerfis(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message || 'Falha ao carregar os perfis.');
@@ -211,6 +241,7 @@ export default function LoginPage() {
             setError={setError}
             onVoltar={() => { setSelecionado(null); setError(''); setModo('PICKER'); }}
             onEntrar={async (credencial) => {
+              if (loading) return; // evita envio duplicado (duplo clique / Enter repetido)
               setLoading(true);
               setError('');
               try {
@@ -223,8 +254,7 @@ export default function LoginPage() {
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(body),
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.message || 'Credencial incorreta.');
+                const data = await lerJson(res);
                 entrar(data);
               } catch (err: any) {
                 setError(err.message || 'Não foi possível entrar.');
@@ -268,8 +298,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'E-mail ou senha incorretos.');
+      const data = await lerJson(res);
       onPaired(data.tenant);
     } catch (err: any) {
       setError(err.message);

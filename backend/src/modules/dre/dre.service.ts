@@ -43,7 +43,7 @@ export class DreService {
     return linhas;
   }
 
-  async gerar(tenantId: string, filtros?: { filialId?: string; dataInicio?: string; dataFim?: string }) {
+  async gerar(tenantId: string, filtros?: { filialId?: string; dataInicio?: string | Date; dataFim?: string | Date }) {
     const { inicio, fim, label } = this.resolverPeriodo(filtros);
     const filialId = filtros?.filialId || undefined;
 
@@ -173,13 +173,19 @@ export class DreService {
    * A data final é estendida ao FIM DO DIA (23:59:59.999) — senão um filtro
    * de dia único ou que termina "hoje" perderia todas as vendas do último dia
    * (a NF-e é emitida com hora, e `new Date('YYYY-MM-DD')` cai à meia-noite). */
-  private resolverPeriodo(filtros?: { dataInicio?: string; dataFim?: string }) {
+  private resolverPeriodo(filtros?: { dataInicio?: string | Date; dataFim?: string | Date }) {
     const agora = new Date();
+    // Aceita Date pronto, 'YYYY-MM-DD' ou ISO completo — sempre resulta em data válida.
+    const parse = (v: string | Date, fimDoDia: boolean) => {
+      if (v instanceof Date) return v;
+      const dia = String(v).slice(0, 10); // descarta qualquer parte de hora/fuso
+      return new Date(`${dia}T${fimDoDia ? '23:59:59.999' : '00:00:00.000'}`);
+    };
     const inicio = filtros?.dataInicio
-      ? new Date(`${filtros.dataInicio}T00:00:00.000`)
+      ? parse(filtros.dataInicio, false)
       : new Date(agora.getFullYear(), agora.getMonth(), 1, 0, 0, 0, 0);
     const fim = filtros?.dataFim
-      ? new Date(`${filtros.dataFim}T23:59:59.999`)
+      ? parse(filtros.dataFim, true)
       : new Date(agora.getFullYear(), agora.getMonth() + 1, 0, 23, 59, 59, 999);
     const label = inicio.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
     return { inicio, fim, label };

@@ -43,8 +43,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    if (!res.ok) throw new Error((await res.json()).message || 'Credenciais inválidas');
-    const data = await res.json();
+    const texto = await res.text();
+    let data: any = null;
+    if (texto) { try { data = JSON.parse(texto); } catch { data = null; } }
+    if (!res.ok) {
+      throw new Error(data?.error?.message || data?.message || 'Não foi possível entrar. Tente de novo em instantes.');
+    }
+    if (!data) throw new Error('O servidor demorou a responder direito. Tente de novo em instantes.');
 
     const authUser: AuthUser = { ...data.usuario, tenantId: data.tenant.id };
     const userFiliais: Filial[] = data.usuario.filiais || [];

@@ -101,7 +101,7 @@ export class DashboardService {
       this.prisma.entradaMercadoria.count({ where: { tenantId, dataEntrada: { gte: inicio, lte: fim } } }),
       this.prisma.produto.count({ where: { tenantId, ativo: true } }),
       this.prisma.estoqueSaldo.groupBy({ by: ['produtoId'], where: { tenantId, ...filF, quantidade: { gt: 0 } } }),
-      this.dre.gerar(tenantId, { filialId, dataInicio: inicio.toISOString(), dataFim: fim.toISOString() }),
+      this.dre.gerar(tenantId, { filialId, dataInicio: inicio, dataFim: fim }),
     ]);
 
     const statusMap: Record<string, number> = {};

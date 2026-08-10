@@ -104,8 +104,10 @@ export default function Pdv() {
     () => itens.reduce((s, i) => s + i.precoUnit * i.quantidade, 0),
     [itens],
   );
+  // Contador de itens: produto por peso conta como 1 linha (6 kg ≠ 6 itens);
+  // produto por unidade soma a quantidade (3 refris = 3 itens).
   const totalItens = useMemo(
-    () => itens.reduce((s, i) => s + i.quantidade, 0),
+    () => itens.reduce((s, i) => s + (i.unidade === 'KG' ? 1 : i.quantidade), 0),
     [itens],
   );
 
