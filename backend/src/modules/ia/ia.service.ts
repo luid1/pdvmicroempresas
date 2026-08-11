@@ -487,6 +487,41 @@ export class IaService {
       } else {
         linhas.push('- Ainda não há vendas registradas no período.');
       }
+
+      // Últimas vendas (detalhe recente) — permite responder "qual foi meu
+      // último produto vendido?", "o que vendi por último?" etc. Mesmo filtro
+      // de venda realizada do dashboard. Só produto + horário, sem PII.
+      try {
+        const ultimas = await this.prisma.pedido.findMany({
+          where: {
+            tenantId,
+            ...(filialId ? { filialOrigemId: filialId } : {}),
+            tipo: 'VENDA',
+            status: { notIn: ['CANCELADO', 'DEVOLVIDO', 'RASCUNHO'] },
+          },
+          orderBy: { dataEmissao: 'desc' },
+          take: 8,
+          select: {
+            numero: true,
+            dataEmissao: true,
+            valorTotal: true,
+            itens: { select: { descricao: true, quantidade: true, unidade: true }, take: 6 },
+          },
+        });
+        if (ultimas.length) {
+          linhas.push('- Últimas vendas (da mais recente para a mais antiga; o 1º item da 1ª venda é o ÚLTIMO produto vendido):');
+          ultimas.forEach((v) => {
+            const quando = new Date(v.dataEmissao).toLocaleString('pt-BR', {
+              day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+            });
+            const prods = v.itens.map((it) => it.descricao).join(', ') || 'sem itens';
+            linhas.push(`  • ${quando} — venda #${v.numero}: ${prods} (${brl(Number(v.valorTotal) || 0)})`);
+          });
+        }
+      } catch (e) {
+        this.log.warn(`Últimas vendas indisponíveis ao montar contexto do chat: ${e}`);
+      }
+
       secoes.push(linhas.join('\n'));
     }
 
