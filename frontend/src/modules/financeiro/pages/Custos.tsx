@@ -24,8 +24,8 @@ const numBR = (v: string) => (v === '' ? 0 : parseFloat(String(v).replace(',', '
 const hojeISO = () => new Date().toISOString().slice(0, 10);
 const primeiroDiaMes = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; };
 
-const corMargem = (m: number) => (m < 12 ? 'text-rose-400' : m < 22 ? 'text-amber-400' : 'text-emerald-300');
-const corResultado = (v: number) => (v < 0 ? 'text-rose-400' : v === 0 ? 'text-slate-300' : 'text-emerald-300');
+const corMargem = (m: number) => (m < 12 ? 'text-[#c3352b]' : m < 22 ? 'text-[#a9760a]' : 'text-[#0b7d4e]');
+const corResultado = (v: number) => (v < 0 ? 'text-[#c3352b]' : v === 0 ? 'text-[#8B8D98]' : 'text-[#0b7d4e]');
 
 /* ══════════════════════════════════════════════════════════════════════════════
    REQUISITO 1 — MOTOR DE CONVERSÃO DE UNIDADES (THE KG RULE)
@@ -275,7 +275,7 @@ function EditableCell({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const toneBg = tone === 'sky' ? 'bg-amber-500/[0.06]' : tone === 'violet' ? 'bg-violet-500/[0.06]' : 'bg-amber-500/[0.06]';
-  const toneText = tone === 'sky' ? 'text-amber-200' : tone === 'violet' ? 'text-violet-200' : 'text-amber-200';
+  const toneText = tone === 'sky' ? 'text-[#a9760a]' : tone === 'violet' ? 'text-violet-200' : 'text-[#a9760a]';
 
   const iniciar = () => {
     setDraft(String(value));
@@ -291,7 +291,7 @@ function EditableCell({
   if (editing) {
     return (
       <td className={`px-2 py-1.5 ${toneBg} ${className}`}>
-        <div className="flex items-center bg-slate-900 border-2 border-amber-500 rounded-md overflow-hidden ring-2 ring-amber-500/30 w-32 ml-auto">
+        <div className="flex items-center bg-white border-2 border-[#E8A317] rounded-md overflow-hidden ring-2 ring-[#E8A317]/30 w-32 ml-auto">
           {prefix && <span className="pl-2 text-slate-500 text-xs">{prefix}</span>}
           <input
             ref={inputRef}
@@ -377,13 +377,13 @@ export default function Custos() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-100">
+    <div className="flex flex-col h-full bg-white text-[#16171D]">
       {/* ── Toolbar ── */}
-      <div className="bg-slate-900/80 border-b border-slate-800 px-6 pt-4 shrink-0 print:hidden">
+      <div className="bg-white border-b border-[#E7E5DF] px-6 pt-4 shrink-0 print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Coins className="h-5 w-5 text-amber-300" /> Custos & Margem
+            <h1 className="text-lg font-bold text-[#16171D] flex items-center gap-2">
+              <Coins className="h-5 w-5 text-[#a9760a]" /> Custos & Margem
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">
               Conversão automática para KG · edição inline · média ponderada · relatório do cliente
@@ -392,16 +392,16 @@ export default function Custos() {
 
           <div className="flex flex-wrap items-center gap-2">
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={(e) => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={ini} onChange={(e) => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
 
-            <div className="flex items-center rounded-lg border border-slate-700 bg-slate-800 overflow-hidden">
+            <div className="flex items-center rounded-lg border border-[#E7E5DF] bg-white overflow-hidden">
               {(['diaria', 'semanal'] as const).map((p) => (
                 <button key={p} onClick={() => setPeriodo(p)}
-                  className={`px-3 py-1.5 text-xs font-bold transition-colors ${periodo === p ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:text-slate-200'}`}>
+                  className={`px-3 py-1.5 text-xs font-bold transition-colors ${periodo === p ? 'bg-amber-500 text-slate-900' : 'text-slate-400 hover:text-[#5B5D69]'}`}>
                   {p === 'diaria' ? 'Diária' : 'Semanal'}
                 </button>
               ))}
@@ -412,8 +412,8 @@ export default function Custos() {
                 <FileSpreadsheet className="h-4 w-4" /> Exportar CSV
               </button>
             )}
-            <button onClick={() => window.print()} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-slate-200 font-semibold text-sm px-3 py-1.5 rounded-lg transition-colors">
-              <Printer className="h-4 w-4 text-amber-400" /> Imprimir
+            <button onClick={() => window.print()} className="flex items-center gap-1.5 bg-white border border-[#E7E5DF] hover:bg-[#EFEDE7] text-[#5B5D69] font-semibold text-sm px-3 py-1.5 rounded-lg transition-colors">
+              <Printer className="h-4 w-4 text-[#a9760a]" /> Imprimir
             </button>
           </div>
         </div>
@@ -428,7 +428,7 @@ export default function Custos() {
           ] as const).map(([key, label, Icon]) => (
             <button key={key} onClick={() => setAba(key)}
               className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                aba === key ? 'border-amber-400 text-amber-300' : 'border-transparent text-slate-400 hover:text-slate-200'
+                aba === key ? 'border-amber-400 text-[#a9760a]' : 'border-transparent text-slate-400 hover:text-[#5B5D69]'
               }`}>
               <Icon className="h-4 w-4" /> {label}
             </button>
@@ -482,27 +482,27 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
       <div className="flex items-center gap-3 print:hidden">
         <div className="relative w-72">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar produto ou código..." className="bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-2 text-sm text-slate-100 w-full focus:outline-none focus:border-amber-400" />
+          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar produto ou código..." className="bg-white border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-2 text-sm text-[#16171D] w-full focus:outline-none focus:border-[#E8A317]" />
         </div>
         <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
-          <Pencil className="h-3 w-3 text-amber-400" /> Clique nas células âmbar/azul para editar · Enter ou sair do campo recalcula tudo
+          <Pencil className="h-3 w-3 text-[#a9760a]" /> Clique nas células âmbar/azul para editar · Enter ou sair do campo recalcula tudo
         </span>
       </div>
 
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse">
-            <thead className="sticky top-0 z-10 bg-slate-900 text-[11px] text-slate-400 uppercase tracking-wide">
+            <thead className="sticky top-0 z-10 bg-white text-[11px] text-slate-400 uppercase tracking-wide">
               <tr>
-                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-slate-900 z-20">Código</th>
-                <th className="px-3 py-3 text-left font-semibold sticky left-[92px] bg-slate-900 z-20">Produto</th>
-                <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Quantidade</Ed></th>
+                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-white z-20">Código</th>
+                <th className="px-3 py-3 text-left font-semibold sticky left-[92px] bg-white z-20">Produto</th>
+                <th className="px-3 py-3 text-right font-semibold bg-[#E8A317]/12 text-[#a9760a]"><Ed>Quantidade</Ed></th>
                 <th className="px-3 py-3 text-center font-semibold">Un</th>
-                <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Peso/Un</Ed></th>
+                <th className="px-3 py-3 text-right font-semibold bg-[#E8A317]/12 text-[#a9760a]"><Ed>Peso/Un</Ed></th>
                 <th className="px-3 py-3 text-right font-semibold bg-violet-500/10 text-violet-200">Peso Total KG</th>
-                <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Custo/Un</Ed></th>
+                <th className="px-3 py-3 text-right font-semibold bg-[#E8A317]/12 text-[#a9760a]"><Ed>Custo/Un</Ed></th>
                 <th className="px-3 py-3 text-right font-semibold">Custo Médio/kg</th>
-                <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Venda/Un</Ed></th>
+                <th className="px-3 py-3 text-right font-semibold bg-[#E8A317]/12 text-[#a9760a]"><Ed>Venda/Un</Ed></th>
                 <th className="px-3 py-3 text-right font-semibold">Venda Média/kg</th>
                 <th className="px-3 py-3 text-right font-semibold">Lucro Bruto</th>
                 <th className="px-3 py-3 text-right font-semibold">% Margem</th>
@@ -513,17 +513,17 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                 const c = calcularProduto(p);
                 const abaixoCusto = c.vendaMedioKg < c.custoMedioKg;
                 return (
-                  <tr key={p.codigo} className="border-t border-slate-800 hover:bg-slate-800/40">
-                    <td className="px-3 py-2 font-mono text-xs font-bold text-amber-300 sticky left-0 bg-slate-900/95">{p.codigo}</td>
-                    <td className="px-3 py-2 sticky left-[92px] bg-slate-900/95">
-                      <span className="font-semibold text-slate-100">{p.nome}</span>
+                  <tr key={p.codigo} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
+                    <td className="px-3 py-2 font-mono text-xs font-bold text-[#a9760a] sticky left-0 bg-white">{p.codigo}</td>
+                    <td className="px-3 py-2 sticky left-[92px] bg-white">
+                      <span className="font-semibold text-[#16171D]">{p.nome}</span>
                     </td>
                     <EditableCell value={p.quantidade} step={1} tone="amber" onCommit={(v) => dispProd({ tipo: 'setNum', codigo: p.codigo, campo: 'quantidade', valor: v })} format={(v) => nkg(v)} />
                     <td className="px-2 py-1.5 text-center">
                       <select
                         value={p.unidade}
                         onChange={(e) => dispProd({ tipo: 'setUnidade', codigo: p.codigo, valor: e.target.value as Unidade })}
-                        className="bg-slate-900 border border-slate-600 rounded-md px-1.5 py-1 text-xs font-mono text-slate-200 focus:outline-none focus:border-amber-500"
+                        className="bg-white border border-[#E7E5DF] rounded-md px-1.5 py-1 text-xs font-mono text-[#5B5D69] focus:outline-none focus:border-[#E8A317]"
                       >
                         {UNIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
                       </select>
@@ -533,23 +533,23 @@ function AbaProdutos({ prod, dispProd }: { prod: ProdState; dispProd: React.Disp
                     <EditableCell value={p.custoUnit} step={0.01} tone="amber" prefix="R$" onCommit={(v) => dispProd({ tipo: 'setNum', codigo: p.codigo, campo: 'custoUnit', valor: v })} format={(v) => R$(v)} />
                     <td className="px-3 py-2 text-right font-mono text-slate-400">{R$(c.custoMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
                     <EditableCell value={p.vendaUnit} step={0.01} tone="sky" prefix="R$" onCommit={(v) => dispProd({ tipo: 'setNum', codigo: p.codigo, campo: 'vendaUnit', valor: v })} format={(v) => R$(v)} />
-                    <td className="px-3 py-2 text-right font-mono font-bold text-amber-300 bg-amber-500/[0.06]">{R$(c.vendaMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
-                    <td className={`px-3 py-2 text-right font-mono font-bold ${abaixoCusto ? 'text-rose-400' : 'text-slate-100'}`}>{R$(c.lucroBruto)}</td>
+                    <td className="px-3 py-2 text-right font-mono font-bold text-[#a9760a] bg-amber-500/[0.06]">{R$(c.vendaMedioKg)}<span className="text-slate-600 text-[10px]">/kg</span></td>
+                    <td className={`px-3 py-2 text-right font-mono font-bold ${abaixoCusto ? 'text-[#c3352b]' : 'text-[#16171D]'}`}>{R$(c.lucroBruto)}</td>
                     <td className={`px-3 py-2 text-right font-mono font-extrabold ${corMargem(c.margem)}`}>{pct(c.margem)}</td>
                   </tr>
                 );
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-slate-900 border-t-2 border-amber-400/40 font-bold sticky bottom-0">
-                <td className="px-3 py-2.5 text-slate-200 sticky left-0 bg-slate-900" colSpan={2}>TOTAL · {PRODUTOS_MOCK.length} produtos</td>
+              <tr className="bg-white border-t-2 border-[#E8A317]/40 font-bold sticky bottom-0">
+                <td className="px-3 py-2.5 text-[#5B5D69] sticky left-0 bg-white" colSpan={2}>TOTAL · {PRODUTOS_MOCK.length} produtos</td>
                 <td colSpan={3} />
                 <td className="px-3 py-2.5 text-right font-mono text-violet-200">{nkg(totais.pesoKg)} kg</td>
-                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.custo)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]">{R$(totais.custo)}</td>
                 <td />
-                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.receita)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]">{R$(totais.receita)}</td>
                 <td />
-                <td className="px-3 py-2.5 text-right font-mono text-emerald-300">{R$(totais.lucro)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#0b7d4e]">{R$(totais.lucro)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corMargem(totais.margem)}`}>{pct(totais.margem)}</td>
               </tr>
             </tfoot>
@@ -581,14 +581,14 @@ function AbaPrecosCliente({
 
   return (
     <div className="flex h-full min-h-0">
-      <aside className="w-64 shrink-0 border-r border-slate-800 bg-slate-900/60 overflow-y-auto print:hidden">
-        <div className="px-4 py-3 border-b border-slate-800">
+      <aside className="w-64 shrink-0 border-r border-[#E7E5DF] bg-white overflow-y-auto print:hidden">
+        <div className="px-4 py-3 border-b border-[#E7E5DF]">
           <p className="text-[11px] uppercase tracking-wide text-slate-500 font-bold flex items-center gap-1.5"><Users className="h-3.5 w-3.5" /> Clientes</p>
         </div>
         {CLIENTES_MOCK.map((c) => (
           <button key={c.id} onClick={() => setClienteId(c.id)}
-            className={`w-full text-left px-4 py-3 border-b border-slate-800/70 transition-colors ${clienteId === c.id ? 'bg-amber-500/10 border-l-2 border-l-amber-400' : 'hover:bg-slate-800/50 border-l-2 border-l-transparent'}`}>
-            <p className={`text-sm font-semibold truncate ${clienteId === c.id ? 'text-amber-200' : 'text-slate-200'}`}>{c.fantasia}</p>
+            className={`w-full text-left px-4 py-3 border-b border-[#E7E5DF] transition-colors ${clienteId === c.id ? 'bg-[#E8A317]/12 border-l-2 border-l-[#E8A317]' : 'hover:bg-[#F6F5F2] border-l-2 border-l-transparent'}`}>
+            <p className={`text-sm font-semibold truncate ${clienteId === c.id ? 'text-[#a9760a]' : 'text-[#5B5D69]'}`}>{c.fantasia}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">{c.tipo} · {c.cidade}</p>
           </button>
         ))}
@@ -596,22 +596,22 @@ function AbaPrecosCliente({
 
       <div className="flex-1 min-w-0 overflow-auto p-4">
         <div className="flex items-center gap-2 mb-3">
-          <Building2 className="h-5 w-5 text-amber-300" />
+          <Building2 className="h-5 w-5 text-[#a9760a]" />
           <div>
-            <h2 className="text-base font-bold text-white">{cliente.fantasia}</h2>
+            <h2 className="text-base font-bold text-[#16171D]">{cliente.fantasia}</h2>
             <p className="text-xs text-slate-500">Preços fixos negociados e margem mínima aceitável por produto (base KG)</p>
           </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 bg-slate-900 text-[11px] text-slate-400 uppercase tracking-wide">
+              <thead className="sticky top-0 z-10 bg-white text-[11px] text-slate-400 uppercase tracking-wide">
                 <tr>
                   <th className="px-3 py-3 text-left font-semibold">Produto</th>
                   <th className="px-3 py-3 text-right font-semibold">Custo Médio/kg</th>
                   <th className="px-3 py-3 text-right font-semibold">Venda Média/kg</th>
-                  <th className="px-3 py-3 text-right font-semibold bg-amber-500/10 text-amber-200"><Ed>Preço Fixo Negociado</Ed></th>
+                  <th className="px-3 py-3 text-right font-semibold bg-[#E8A317]/12 text-[#a9760a]"><Ed>Preço Fixo Negociado</Ed></th>
                   <th className="px-3 py-3 text-right font-semibold bg-violet-500/10 text-violet-200"><Ed>Margem Mín. %</Ed></th>
                   <th className="px-3 py-3 text-right font-semibold">Margem no Preço Fixo</th>
                   <th className="px-3 py-3 text-center font-semibold">Status</th>
@@ -625,20 +625,20 @@ function AbaPrecosCliente({
                   const margemFixo = neg.precoFixo > 0 ? ((neg.precoFixo - c.custoMedioKg) / neg.precoFixo) * 100 : 0;
                   const violado = margemFixo < neg.margemMinima;
                   return (
-                    <tr key={p.codigo} className="border-t border-slate-800 hover:bg-slate-800/40">
+                    <tr key={p.codigo} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
                       <td className="px-3 py-2">
-                        <span className="font-semibold text-slate-100">{p.nome}</span>
+                        <span className="font-semibold text-[#16171D]">{p.nome}</span>
                         <span className="block text-[10px] text-slate-500 font-mono">{p.codigo}</span>
                       </td>
-                      <td className="px-3 py-2 text-right font-mono text-amber-300/90">{R$(c.custoMedioKg)}</td>
+                      <td className="px-3 py-2 text-right font-mono text-[#a9760a]/90">{R$(c.custoMedioKg)}</td>
                       <td className="px-3 py-2 text-right font-mono text-slate-400">{R$(c.vendaMedioKg)}</td>
                       <EditableCell value={neg.precoFixo} step={0.01} tone="amber" prefix="R$" onCommit={(v) => dispPreco({ tipo: 'setPrecoFixo', clienteId, codigo: p.codigo, valor: v })} format={(v) => R$(v)} />
                       <EditableCell value={neg.margemMinima} step={0.5} tone="violet" suffix="%" onCommit={(v) => dispPreco({ tipo: 'setMargemMinima', clienteId, codigo: p.codigo, valor: v })} format={(v) => pct(v)} />
                       <td className={`px-3 py-2 text-right font-mono font-bold ${corMargem(margemFixo)}`}>{pct(margemFixo)}</td>
                       <td className="px-3 py-2 text-center">
                         {violado
-                          ? <span className="inline-block bg-rose-500/15 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full">Abaixo do mínimo</span>
-                          : <span className="inline-block bg-emerald-500/15 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">OK</span>}
+                          ? <span className="inline-block bg-rose-500/15 text-[#c3352b] text-[10px] font-bold px-2 py-0.5 rounded-full">Abaixo do mínimo</span>
+                          : <span className="inline-block bg-emerald-500/15 text-[#0b7d4e] text-[10px] font-bold px-2 py-0.5 rounded-full">OK</span>}
                       </td>
                     </tr>
                   );
@@ -672,12 +672,12 @@ function AbaRentabilidade() {
 
   return (
     <div className="p-4">
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-slate-900 text-[11px] text-slate-400 uppercase tracking-wide">
+            <thead className="sticky top-0 z-10 bg-white text-[11px] text-slate-400 uppercase tracking-wide">
               <tr>
-                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-slate-900 z-20">Nome Fantasia</th>
+                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-white z-20">Nome Fantasia</th>
                 <th className="px-3 py-3 text-right font-semibold">Vlr Bruto Vendido</th>
                 <th className="px-3 py-3 text-right font-semibold">Vlr Líquido</th>
                 <th className="px-3 py-3 text-right font-semibold">Total CMV</th>
@@ -692,31 +692,31 @@ function AbaRentabilidade() {
               {linhas.map((c) => {
                 const r = calcularRent(c);
                 return (
-                  <tr key={c.id} className="border-t border-slate-800 hover:bg-slate-800/40">
-                    <td className="px-3 py-2.5 font-bold text-slate-100 sticky left-0 bg-slate-900/95">{c.fantasia}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(c.bruto)}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(r.liquido)}</td>
+                  <tr key={c.id} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
+                    <td className="px-3 py-2.5 font-bold text-[#16171D] sticky left-0 bg-white">{c.fantasia}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(c.bruto)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(r.liquido)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(c.cmv)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(c.frete)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(r.totalCustos)}</td>
                     <td className={`px-3 py-2.5 text-right font-mono font-extrabold bg-emerald-500/[0.05] ${corResultado(r.resultado)}`}>{R$(r.resultado)}</td>
                     <td className={`px-3 py-2.5 text-right font-mono font-bold ${corMargem(r.margem)}`}>{pct(r.margem)}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-slate-300">{nkg(c.peso)} kg</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{nkg(c.peso)} kg</td>
                   </tr>
                 );
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-slate-900 border-t-2 border-amber-400/40 font-bold sticky bottom-0">
-                <td className="px-3 py-2.5 text-slate-200 sticky left-0 bg-slate-900">TOTAL GERAL · {RENT_CLIENTES.length} clientes</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-200">{R$(totais.bruto)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-200">{R$(totais.liquido)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(totais.cmv)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(totais.frete)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(totais.custos)}</td>
+              <tr className="bg-white border-t-2 border-[#E8A317]/40 font-bold sticky bottom-0">
+                <td className="px-3 py-2.5 text-[#5B5D69] sticky left-0 bg-white">TOTAL GERAL · {RENT_CLIENTES.length} clientes</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#5B5D69]">{R$(totais.bruto)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#5B5D69]">{R$(totais.liquido)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(totais.cmv)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(totais.frete)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(totais.custos)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corResultado(totais.resultado)}`}>{R$(totais.resultado)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corMargem(totais.margem)}`}>{pct(totais.margem)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{nkg(totais.peso)} kg</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{nkg(totais.peso)} kg</td>
               </tr>
             </tfoot>
           </table>
@@ -755,15 +755,15 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
         <Kpi icon={<Percent className="h-4 w-4" />} cor="violet" label="Margem consolidada" valor={pct(totais.margem)} />
       </div>
 
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
-        <h3 className="font-semibold text-sm text-slate-200 px-5 py-3 border-b border-slate-700/60 flex items-center gap-2">
-          <CalendarRange className="h-4 w-4 text-amber-300" /> Fechamento {periodo === 'semanal' ? 'Semanal' : 'Diário'} · Custos × Vendas
+      <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
+        <h3 className="font-semibold text-sm text-[#5B5D69] px-5 py-3 border-b border-[#E7E5DF] flex items-center gap-2">
+          <CalendarRange className="h-4 w-4 text-[#a9760a]" /> Fechamento {periodo === 'semanal' ? 'Semanal' : 'Diário'} · Custos × Vendas
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="sticky top-0 z-10 bg-slate-900 text-[11px] text-slate-400 uppercase tracking-wide">
+            <thead className="sticky top-0 z-10 bg-white text-[11px] text-slate-400 uppercase tracking-wide">
               <tr>
-                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-slate-900 z-20">Período</th>
+                <th className="px-3 py-3 text-left font-semibold sticky left-0 bg-white z-20">Período</th>
                 <th className="px-3 py-3 text-right font-semibold">Vendas</th>
                 <th className="px-3 py-3 text-right font-semibold">Devoluções</th>
                 <th className="px-3 py-3 text-right font-semibold">Custos</th>
@@ -778,17 +778,17 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
               {fonte.map((f) => {
                 const r = calcularFechamento(f);
                 return (
-                  <tr key={f.rotulo} className="border-t border-slate-800 hover:bg-slate-800/40">
-                    <td className="px-3 py-2.5 font-semibold text-slate-100 sticky left-0 bg-slate-900/95">{f.rotulo}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(f.vendas)}</td>
+                  <tr key={f.rotulo} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
+                    <td className="px-3 py-2.5 font-semibold text-[#16171D] sticky left-0 bg-white">{f.rotulo}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]">{R$(f.vendas)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-500">{R$(f.devolucoes)}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-amber-300/90">{R$(f.custos)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]/90">{R$(f.custos)}</td>
                     <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(f.frete)}</td>
                     <td className={`px-3 py-2.5 text-right font-mono font-extrabold bg-emerald-500/[0.05] ${corResultado(r.resultado)}`}>{R$(r.resultado)}</td>
                     <td className={`px-3 py-2.5 text-right font-mono font-bold ${corMargem(r.margem)}`}>{pct(r.margem)}</td>
-                    <td className="px-3 py-2.5 text-right font-mono text-slate-300">{nkg(f.peso)}</td>
+                    <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{nkg(f.peso)}</td>
                     <td className="px-3 py-2.5">
-                      <div className="h-2 rounded-full bg-slate-700/50 overflow-hidden">
+                      <div className="h-2 rounded-full bg-[#F0EEE9] overflow-hidden">
                         <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-400" style={{ width: `${(f.vendas / maxVendas) * 100}%` }} />
                       </div>
                     </td>
@@ -797,15 +797,15 @@ function AbaFechamento({ periodo }: { periodo: 'diaria' | 'semanal' }) {
               })}
             </tbody>
             <tfoot>
-              <tr className="bg-slate-900 border-t-2 border-amber-400/40 font-bold sticky bottom-0">
-                <td className="px-3 py-2.5 text-slate-200 sticky left-0 bg-slate-900">CONSOLIDADO · {fonte.length} períodos</td>
-                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.vendas)}</td>
+              <tr className="bg-white border-t-2 border-[#E8A317]/40 font-bold sticky bottom-0">
+                <td className="px-3 py-2.5 text-[#5B5D69] sticky left-0 bg-white">CONSOLIDADO · {fonte.length} períodos</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]">{R$(totais.vendas)}</td>
                 <td className="px-3 py-2.5 text-right font-mono text-slate-400">{R$(totais.devolucoes)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-amber-300">{R$(totais.custos)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{R$(totais.frete)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#a9760a]">{R$(totais.custos)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{R$(totais.frete)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corResultado(totais.resultado)}`}>{R$(totais.resultado)}</td>
                 <td className={`px-3 py-2.5 text-right font-mono ${corMargem(totais.margem)}`}>{pct(totais.margem)}</td>
-                <td className="px-3 py-2.5 text-right font-mono text-slate-300">{nkg(totais.peso)}</td>
+                <td className="px-3 py-2.5 text-right font-mono text-[#8B8D98]">{nkg(totais.peso)}</td>
                 <td className="px-3 py-2.5" />
               </tr>
             </tfoot>
@@ -851,28 +851,28 @@ function AbaRelatorioCliente() {
       `}</style>
 
       {/* Filtros (não imprime) */}
-      <div className="no-print bg-slate-800/50 rounded-2xl border border-slate-700/60 p-4 mb-5 flex flex-wrap items-end gap-4">
+      <div className="no-print bg-white rounded-2xl border border-[#E7E5DF] p-4 mb-5 flex flex-wrap items-end gap-4">
         <label className="flex flex-col gap-1 text-xs font-semibold text-slate-400">
           Cliente
           <select value={clienteId} onChange={(e) => setClienteId(e.target.value)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400 min-w-[220px]">
+            className="bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317] min-w-[220px]">
             {CLIENTES_MOCK.map((c) => <option key={c.id} value={c.id}>{c.fantasia}</option>)}
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold text-slate-400">
           Tipo de Visão
           <select value={visao} onChange={(e) => setVisao(e.target.value as 'diaria' | 'semanal' | 'mensal')}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
+            className="bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
             <option value="diaria">Diária</option>
             <option value="semanal">Semanal</option>
             <option value="mensal">Mensal</option>
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold text-slate-400">De
-          <input type="date" value={ini} onChange={(e) => setIni(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100" />
+          <input type="date" value={ini} onChange={(e) => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]" />
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold text-slate-400">Até
-          <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100" />
+          <input type="date" value={fim} onChange={(e) => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]" />
         </label>
         <button onClick={() => window.print()}
           className="ml-auto flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-sm px-5 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 transition-all active:scale-[0.98]">
@@ -960,7 +960,7 @@ function AbaRelatorioCliente() {
         </div>
 
         {/* Rodapé documento */}
-        <div className="px-10 py-4 bg-slate-900 text-slate-300 text-[11px] flex items-center justify-between">
+        <div className="px-10 py-4 bg-white text-[#8B8D98] text-[11px] flex items-center justify-between">
           <span>Mercado Central · CNPJ 00.000.000/0001-00 · São Paulo/SP</span>
           <span className="flex items-center gap-1"><FileText className="h-3 w-3" /> Documento gerado eletronicamente</span>
         </div>
@@ -976,20 +976,20 @@ export const _X = X;
    KPI card
    ════════════════════════════════════════════════════════════════════════════ */
 const CORES: Record<string, string> = {
-  amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-amber-400/10 text-amber-300',
-  rose: 'bg-rose-400/10 text-rose-300',
-  emerald: 'bg-emerald-400/10 text-emerald-300',
-  violet: 'bg-violet-400/10 text-violet-300',
+  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
+  sky: 'bg-[#E8A317]/12 text-[#a9760a]',
+  rose: 'bg-rose-400/10 text-[#c3352b]',
+  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
+  violet: 'bg-violet-400/10 text-[#5a4fd0]',
 };
 function Kpi({ icon, label, valor, cor }: { icon: React.ReactNode; label: string; valor: string; cor: string }) {
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-4">
+    <div className="bg-white rounded-2xl border border-[#E7E5DF] p-4">
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
         <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
-      <p className="text-2xl font-extrabold text-white tracking-tight truncate">{valor}</p>
+      <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>
     </div>
   );
 }

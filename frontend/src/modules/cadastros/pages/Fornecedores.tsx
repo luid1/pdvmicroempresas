@@ -6,8 +6,8 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { CadastroShell, TopBar, FilterBar, Chips, TableCard, Th, StatusBadge, Modal, SteppedForm, Step, Campo, Loader, Vazio, inp, UFS } from '../ui';
 
 const PARCERIA: Record<string, { label: string; cor: string }> = {
-  COMPRA_DIRETA: { label: 'Compra Direta', cor: 'bg-amber-500/15 text-amber-300' },
-  CONSIGNACAO: { label: 'Consignação', cor: 'bg-white/[0.06] text-slate-300' },
+  COMPRA_DIRETA: { label: 'Compra Direta', cor: 'bg-amber-500/15 text-[#a9760a]' },
+  CONSIGNACAO: { label: 'Consignação', cor: 'bg-[#F6F5F2] text-[#8B8D98]' },
 };
 
 export default function Fornecedores() {
@@ -50,17 +50,17 @@ export default function Fornecedores() {
             <thead><tr>{['Produtor / Razão Social', 'CPF/CNPJ', 'Insc. Rural', 'Propriedade', 'Parceria', 'PIX', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(f => (
-                <tr key={f.id} className="border-t border-slate-800 hover:bg-amber-500/5">
-                  <td className="px-3 py-1.5"><p className="font-semibold text-slate-100 truncate max-w-[220px]">{f.razaoSocial}</p>{f.nomeFantasia && <p className="text-slate-500 text-xs">{f.nomeFantasia}</p>}</td>
+                <tr key={f.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
+                  <td className="px-3 py-1.5"><p className="font-semibold text-[#16171D] truncate max-w-[220px]">{f.razaoSocial}</p>{f.nomeFantasia && <p className="text-slate-500 text-xs">{f.nomeFantasia}</p>}</td>
                   <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{f.cnpj}</td>
                   <td className="px-3 py-1.5 text-slate-400 text-xs">{f.inscricaoRural || '—'}</td>
-                  <td className="px-3 py-1.5 text-slate-300">{f.localizacaoPropriedade || '—'}</td>
-                  <td className="px-3 py-1.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${PARCERIA[f.tipoParceria]?.cor || 'bg-slate-700 text-slate-300'}`}>{PARCERIA[f.tipoParceria]?.label || f.tipoParceria}</span></td>
+                  <td className="px-3 py-1.5 text-[#8B8D98]">{f.localizacaoPropriedade || '—'}</td>
+                  <td className="px-3 py-1.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${PARCERIA[f.tipoParceria]?.cor || 'bg-[#F0EEE9] text-[#8B8D98]'}`}>{PARCERIA[f.tipoParceria]?.label || f.tipoParceria}</span></td>
                   <td className="px-3 py-1.5 font-mono text-slate-400 text-xs truncate max-w-[120px]">{f.pix || '—'}</td>
                   <td className="px-3 py-1.5"><StatusBadge ativo={f.ativo} /></td>
                   <td className="px-3 py-1.5"><div className="flex gap-1.5">
-                    {pode('/cadastros/fornecedores', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
-                    {pode('/cadastros/fornecedores', 'EXCLUIR') && <button onClick={() => excluir(f)} className="text-slate-500 hover:text-rose-400 px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
+                    {pode('/cadastros/fornecedores', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-[#E8A317]/12 text-[#a9760a] border border-[#E8A317]/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                    {pode('/cadastros/fornecedores', 'EXCLUIR') && <button onClick={() => excluir(f)} className="text-slate-500 hover:text-[#c3352b] px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
                   </div></td>
                 </tr>
               ))}
@@ -153,13 +153,13 @@ function ModalFornecedor({ item, onClose, onSalvo }: { item: any | null; onClose
             <Campo label="Agência"><input value={f.agencia} onChange={e => set('agencia', e.target.value)} className={inp} /></Campo>
             <Campo label="Conta"><input value={f.conta} onChange={e => set('conta', e.target.value)} className={inp} /></Campo>
             <Campo label="Situação">
-              <button type="button" onClick={() => set('ativo', !f.ativo)} className={`w-full rounded-lg px-3 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' : 'bg-rose-500/15 text-rose-300 border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'INATIVO'}</button>
+              <button type="button" onClick={() => set('ativo', !f.ativo)} className={`w-full rounded-lg px-3 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-[#0b7d4e] border-emerald-500/40' : 'bg-rose-500/15 text-[#c3352b] border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'INATIVO'}</button>
             </Campo>
           </div>
         </Step>
       </SteppedForm>
 
-      {erro && <p className="text-xs text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }

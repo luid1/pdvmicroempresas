@@ -45,10 +45,10 @@ const rotularPeriodo = (p: string, ag: 'dia' | 'mes') => {
 
 /* Status compartilhado com as telas dedicadas de Contas a Receber/Pagar. */
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  ABERTO: { label: 'Pendente', cls: 'bg-slate-400/10 text-slate-300 border-slate-400/20' },
-  PARCIAL: { label: 'Parcial', cls: 'bg-amber-400/10 text-amber-300 border-amber-400/20' },
-  PAGO: { label: 'Pago', cls: 'bg-emerald-400/10 text-emerald-300 border-emerald-400/20' },
-  VENCIDO: { label: 'Atrasado', cls: 'bg-rose-400/10 text-rose-300 border-rose-400/20' },
+  ABERTO: { label: 'Pendente', cls: 'bg-slate-400/10 text-[#8B8D98] border-slate-400/20' },
+  PARCIAL: { label: 'Parcial', cls: 'bg-[#E8A317]/12 text-[#a9760a] border-[#E8A317]/40' },
+  PAGO: { label: 'Pago', cls: 'bg-emerald-400/10 text-[#0b7d4e] border-emerald-400/20' },
+  VENCIDO: { label: 'Atrasado', cls: 'bg-rose-400/10 text-[#c3352b] border-rose-400/20' },
   CANCELADO: { label: 'Cancelado', cls: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
 };
 
@@ -74,7 +74,7 @@ export default function ControladoriaHub() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-100">
+    <div className="flex flex-col h-full bg-white text-[#16171D]">
       <PageHeader
         icon={<Landmark className="h-4 w-4" />}
         titulo="Financeiro & Controladoria"
@@ -87,16 +87,16 @@ export default function ControladoriaHub() {
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder="Buscar nesta aba…"
-                className="w-52 rounded-lg border border-slate-700 bg-slate-800 pl-9 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400"
+                className="w-52 rounded-lg border border-[#E7E5DF] bg-white pl-9 pr-3 py-1.5 text-sm text-[#16171D] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400/30 focus:border-[#E8A317]"
               />
             </div>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
-            <button onClick={() => setRefreshKey(k => k + 1)} className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-700">
+            <button onClick={() => setRefreshKey(k => k + 1)} className="flex items-center gap-1.5 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#E7E5DF]">
               <RefreshCw className="h-4 w-4" /> Atualizar
             </button>
           </div>
@@ -106,7 +106,7 @@ export default function ControladoriaHub() {
       <div className="flex-1 overflow-y-auto p-6">
         <div className="max-w-[1400px] mx-auto">
           {/* ── Tabs ── */}
-          <nav className="flex items-center gap-1 border-b border-slate-800 mb-6">
+          <nav className="flex items-center gap-1 border-b border-[#E7E5DF] mb-6">
             <Tab ativo={aba === 'fluxo'} icon={BarChart3} label="Fluxo de Caixa" onClick={() => setAba('fluxo')} />
             <Tab ativo={aba === 'receber'} icon={ArrowUpRight} label="Contas a Receber" onClick={() => setAba('receber')} />
             <Tab ativo={aba === 'pagar'} icon={ArrowDownRight} label="Contas a Pagar" onClick={() => setAba('pagar')} />
@@ -158,24 +158,24 @@ function AbaFluxo({ ini, fim, refreshKey, navigate }: AbaProps) {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Movimento por mês (dados reais) */}
-        <section className="xl:col-span-2 bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-3 border-b border-slate-700/60">
-            <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-amber-300" /> Movimento por mês
+        <section className="xl:col-span-2 bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
+            <h3 className="font-semibold text-sm text-[#5B5D69] flex items-center gap-2">
+              <CalendarDays className="h-4 w-4 text-[#a9760a]" /> Movimento por mês
             </h3>
-            <button onClick={() => navigate('/financeiro/fluxo-caixa')} className="flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+            <button onClick={() => navigate('/financeiro/fluxo-caixa')} className="flex items-center gap-1.5 text-xs font-semibold text-[#a9760a] hover:text-[#a9760a]">
               Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
             </button>
           </div>
           {loading ? (
             <div className="p-5 space-y-3">
-              {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-slate-700/30 rounded animate-pulse" />)}
+              {[...Array(5)].map((_, i) => <div key={i} className="h-8 bg-[#F0EEE9] rounded animate-pulse" />)}
             </div>
           ) : periodos.length === 0 ? (
             <p className="text-sm text-slate-500 py-16 text-center">Sem movimentação de caixa no período.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-slate-900/40 text-xs text-slate-400">
+              <thead className="bg-white text-xs text-slate-400">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-semibold">Competência</th>
                   <th className="px-4 py-2.5 text-left font-semibold w-1/3">Fluxo</th>
@@ -186,17 +186,17 @@ function AbaFluxo({ ini, fim, refreshKey, navigate }: AbaProps) {
               </thead>
               <tbody>
                 {periodos.map(p => (
-                  <tr key={p.periodo} className="border-t border-slate-800 hover:bg-slate-700/20">
-                    <td className="px-4 py-2.5 font-semibold text-slate-100">{rotularPeriodo(p.periodo, dados.agrupamento || 'mes')}</td>
+                  <tr key={p.periodo} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7]">
+                    <td className="px-4 py-2.5 font-semibold text-[#16171D]">{rotularPeriodo(p.periodo, dados.agrupamento || 'mes')}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-col gap-1">
                         <div className="h-1.5 rounded-full bg-emerald-400/70" style={{ width: `${(p.entradas / maxBar) * 100}%`, minWidth: p.entradas > 0 ? '4px' : '0' }} />
                         <div className="h-1.5 rounded-full bg-rose-400/70" style={{ width: `${(p.saidas / maxBar) * 100}%`, minWidth: p.saidas > 0 ? '4px' : '0' }} />
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-emerald-300">{R$(p.entradas)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-rose-300">{R$(p.saidas)}</td>
-                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-rose-400' : 'text-emerald-300'}`}>{R$(p.saldoAcumulado)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#0b7d4e]">{R$(p.entradas)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#c3352b]">{R$(p.saidas)}</td>
+                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-[#c3352b]' : 'text-[#0b7d4e]'}`}>{R$(p.saldoAcumulado)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -205,17 +205,17 @@ function AbaFluxo({ ini, fim, refreshKey, navigate }: AbaProps) {
         </section>
 
         {/* Projeção por IA — placeholder honesto (recurso futuro) */}
-        <section className="rounded-2xl border border-slate-700/60 bg-slate-800/50 p-6 flex flex-col">
+        <section className="rounded-2xl border border-[#E7E5DF] bg-white p-6 flex flex-col">
           <div className="flex items-center gap-2 mb-4">
-            <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-amber-300 flex items-center justify-center">
+            <span className="h-8 w-8 rounded-lg bg-amber-400/15 text-[#a9760a] flex items-center justify-center">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-white">Projeção de Caixa (IA)</h2>
+              <h2 className="text-sm font-semibold text-[#16171D]">Projeção de Caixa (IA)</h2>
               <p className="text-[12px] text-slate-500">Modelo preditivo sobre recebíveis e obrigações</p>
             </div>
           </div>
-          <div className="flex-1 min-h-[220px] rounded-xl bg-slate-900/40 border border-dashed border-slate-700 flex flex-col items-center justify-center gap-2 text-slate-500 text-center px-4">
+          <div className="flex-1 min-h-[220px] rounded-xl bg-white border border-dashed border-[#E7E5DF] flex flex-col items-center justify-center gap-2 text-slate-500 text-center px-4">
             <BarChart3 className="h-8 w-8" />
             <p className="text-sm font-medium text-slate-400">Em breve</p>
             <p className="text-[12px]">A projeção preditiva de caixa (entradas × saídas futuras) será liberada em uma próxima atualização.</p>
@@ -272,19 +272,19 @@ function AbaReceber({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
       <div className="flex items-center gap-1 flex-wrap">
         {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
           <button key={s || 'todos'} onClick={() => setStatus(s)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/40' : 'bg-white text-slate-400 border-[#E7E5DF] hover:text-[#5B5D69]'}`}>
             {s === '' ? 'Todos' : STATUS_META[s].label}
           </button>
         ))}
-        <button onClick={() => navigate('/financeiro/receber')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+        <button onClick={() => navigate('/financeiro/receber')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-[#a9760a] hover:text-[#a9760a]">
           Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
         </button>
       </div>
 
       {/* Tabela */}
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-900/40 text-xs text-slate-400">
+          <thead className="bg-white text-xs text-slate-400">
             <tr>
               {['Cliente / Descrição', 'Nº', 'Vencimento', 'Valor', 'Em aberto', 'Status', ''].map((h, i) => (
                 <th key={h || i} className={`px-4 py-2.5 font-semibold ${i >= 3 && i <= 4 ? 'text-right' : i === 5 || i === 6 ? 'text-center' : 'text-left'}`}>{h}</th>
@@ -294,7 +294,7 @@ function AbaReceber({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
           <tbody>
             {loading ? (
               [...Array(6)].map((_, i) => (
-                <tr key={i} className="border-t border-slate-800"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-slate-700/40 rounded animate-pulse" /></td></tr>
+                <tr key={i} className="border-t border-[#E7E5DF]"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-[#F0EEE9] rounded animate-pulse" /></td></tr>
               ))
             ) : filtradas.length === 0 ? (
               <tr><td colSpan={7} className="text-center text-slate-500 py-16">Nenhum título no período.</td></tr>
@@ -302,20 +302,20 @@ function AbaReceber({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
               filtradas.map(c => {
                 const meta = STATUS_META[c.status] || STATUS_META.ABERTO;
                 return (
-                  <tr key={c.id} className="border-t border-slate-800 hover:bg-slate-700/20">
+                  <tr key={c.id} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7]">
                     <td className="px-4 py-2.5">
-                      <div className="font-semibold text-slate-100">{c.cliente?.nomeFantasia || c.cliente?.razaoSocial || c.descricao}</div>
+                      <div className="font-semibold text-[#16171D]">{c.cliente?.nomeFantasia || c.cliente?.razaoSocial || c.descricao}</div>
                       {(c.cliente?.nomeFantasia || c.cliente?.razaoSocial) && <div className="text-xs text-slate-500">{c.descricao}</div>}
                     </td>
                     <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.numero || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-300">{dataBR(c.dataVencimento)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-slate-200">{R$(c.valorOriginal)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-100">{R$(c.valorAberto)}</td>
+                    <td className="px-4 py-2.5 text-[#8B8D98]">{dataBR(c.dataVencimento)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#5B5D69]">{R$(c.valorOriginal)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-[#16171D]">{R$(c.valorAberto)}</td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${meta.cls}`}>{meta.label}</span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
-                      <button onClick={() => navigate('/financeiro/receber')} title="Abrir na tela de Contas a Receber" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-amber-300 hover:bg-amber-500/15">
+                      <button onClick={() => navigate('/financeiro/receber')} title="Abrir na tela de Contas a Receber" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#a9760a] hover:bg-amber-500/15">
                         <ExternalLink className="h-4 w-4" />
                       </button>
                     </td>
@@ -373,11 +373,11 @@ function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
       </div>
 
       {/* Leitura de boleto/NF por OCR — placeholder honesto (recurso futuro) */}
-      <div className="rounded-2xl border-2 border-dashed border-slate-700 bg-slate-800/50 px-6 py-6 text-center">
-        <span className="mx-auto mb-3 h-11 w-11 rounded-2xl bg-amber-400/15 text-amber-300 flex items-center justify-center">
+      <div className="rounded-2xl border-2 border-dashed border-[#E7E5DF] bg-white px-6 py-6 text-center">
+        <span className="mx-auto mb-3 h-11 w-11 rounded-2xl bg-amber-400/15 text-[#a9760a] flex items-center justify-center">
           <UploadCloud className="h-5 w-5" />
         </span>
-        <p className="text-sm font-semibold text-slate-300">Leitura automática de Boleto/NF por OCR — em breve</p>
+        <p className="text-sm font-semibold text-[#8B8D98]">Leitura automática de Boleto/NF por OCR — em breve</p>
         <p className="text-[12px] text-slate-500 mt-0.5">Em breve será possível arrastar o PDF e a IA preencher fornecedor, valor e vencimento. Por ora, cadastre pela tela de Contas a Pagar.</p>
       </div>
 
@@ -385,19 +385,19 @@ function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
       <div className="flex items-center gap-1 flex-wrap">
         {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
           <button key={s || 'todos'} onClick={() => setStatus(s)}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-amber-300 border-amber-400/30' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'}`}>
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/40' : 'bg-white text-slate-400 border-[#E7E5DF] hover:text-[#5B5D69]'}`}>
             {s === '' ? 'Todos' : STATUS_META[s].label}
           </button>
         ))}
-        <button onClick={() => navigate('/financeiro/pagar')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-amber-300 hover:text-amber-200">
+        <button onClick={() => navigate('/financeiro/pagar')} className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-[#a9760a] hover:text-[#a9760a]">
           Abrir tela completa <ExternalLink className="h-3.5 w-3.5" />
         </button>
       </div>
 
       {/* Tabela */}
-      <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-900/40 text-xs text-slate-400">
+          <thead className="bg-white text-xs text-slate-400">
             <tr>
               {['Fornecedor / Descrição', 'Nº', 'Vencimento', 'Valor', 'Em aberto', 'Status', ''].map((h, i) => (
                 <th key={h || i} className={`px-4 py-2.5 font-semibold ${i >= 3 && i <= 4 ? 'text-right' : i === 5 || i === 6 ? 'text-center' : 'text-left'}`}>{h}</th>
@@ -407,7 +407,7 @@ function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
           <tbody>
             {loading ? (
               [...Array(6)].map((_, i) => (
-                <tr key={i} className="border-t border-slate-800"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-slate-700/40 rounded animate-pulse" /></td></tr>
+                <tr key={i} className="border-t border-[#E7E5DF]"><td colSpan={7} className="px-4 py-3"><div className="h-5 bg-[#F0EEE9] rounded animate-pulse" /></td></tr>
               ))
             ) : filtradas.length === 0 ? (
               <tr><td colSpan={7} className="text-center text-slate-500 py-16">Nenhuma conta no período.</td></tr>
@@ -415,20 +415,20 @@ function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
               filtradas.map(c => {
                 const meta = STATUS_META[c.status] || STATUS_META.ABERTO;
                 return (
-                  <tr key={c.id} className="border-t border-slate-800 hover:bg-slate-700/20">
+                  <tr key={c.id} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7]">
                     <td className="px-4 py-2.5">
-                      <div className="font-semibold text-slate-100">{c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial || c.descricao}</div>
+                      <div className="font-semibold text-[#16171D]">{c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial || c.descricao}</div>
                       {(c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial) && <div className="text-xs text-slate-500">{c.descricao}</div>}
                     </td>
                     <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.numero || '—'}</td>
-                    <td className="px-4 py-2.5 text-slate-300">{dataBR(c.dataVencimento)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-slate-200">{R$(c.valorOriginal)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-100">{R$(c.valorAberto)}</td>
+                    <td className="px-4 py-2.5 text-[#8B8D98]">{dataBR(c.dataVencimento)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#5B5D69]">{R$(c.valorOriginal)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-[#16171D]">{R$(c.valorAberto)}</td>
                     <td className="px-4 py-2.5 text-center">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${meta.cls}`}>{meta.label}</span>
                     </td>
                     <td className="px-4 py-2.5 text-center">
-                      <button onClick={() => navigate('/financeiro/pagar')} title="Abrir na tela de Contas a Pagar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-amber-300 hover:bg-amber-500/15">
+                      <button onClick={() => navigate('/financeiro/pagar')} title="Abrir na tela de Contas a Pagar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#a9760a] hover:bg-amber-500/15">
                         <ExternalLink className="h-4 w-4" />
                       </button>
                     </td>
@@ -447,21 +447,21 @@ function AbaPagar({ ini, fim, busca, refreshKey, navigate }: AbaProps) {
    COMPONENTES AUXILIARES
    ════════════════════════════════════════════════════════════════════════════ */
 const CORES: Record<string, string> = {
-  amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-amber-400/10 text-amber-300',
-  rose: 'bg-rose-400/10 text-rose-300',
-  emerald: 'bg-emerald-400/10 text-emerald-300',
+  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
+  sky: 'bg-[#E8A317]/12 text-[#a9760a]',
+  rose: 'bg-rose-400/10 text-[#c3352b]',
+  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
 };
 function Kpi({ icon, label, valor, cor, destaque }: { icon: any; label: string; valor: string | null; cor: string; destaque?: boolean }) {
   return (
-    <div className={`bg-slate-800/50 rounded-2xl border p-5 ${destaque ? 'border-amber-500/30' : 'border-slate-700/60'}`}>
+    <div className={`bg-white rounded-2xl border p-5 ${destaque ? 'border-[#E8A317]/30' : 'border-[#E7E5DF]'}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
         <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
       {valor === null
-        ? <div className="h-7 w-28 bg-slate-700/40 rounded animate-pulse" />
-        : <p className="text-2xl font-extrabold text-white tracking-tight truncate">{valor}</p>}
+        ? <div className="h-7 w-28 bg-[#F0EEE9] rounded animate-pulse" />
+        : <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>}
     </div>
   );
 }
@@ -471,10 +471,10 @@ function Tab({ ativo, icon: Icon, label, onClick }: { ativo: boolean; icon: Reac
     <button
       onClick={onClick}
       className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-        ativo ? 'text-amber-300' : 'text-slate-400 hover:text-slate-200'
+        ativo ? 'text-[#a9760a]' : 'text-slate-400 hover:text-[#5B5D69]'
       }`}
     >
-      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-300' : 'text-slate-500'}`} />
+      <Icon className={`h-4 w-4 ${ativo ? 'text-[#a9760a]' : 'text-slate-500'}`} />
       {label}
       {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-400 rounded-full" />}
     </button>

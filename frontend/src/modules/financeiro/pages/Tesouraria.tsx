@@ -99,10 +99,10 @@ export default function Tesouraria() {
           <>
             {podeOperar && (
               <>
-                <button onClick={() => setLancando(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                <button onClick={() => setLancando(true)} className="flex items-center gap-2 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg">
                   <ArrowDownCircle className="h-4 w-4" /> Lançar
                 </button>
-                <button onClick={() => setTransferindo(true)} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                <button onClick={() => setTransferindo(true)} className="flex items-center gap-2 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg">
                   <ArrowLeftRight className="h-4 w-4" /> Transferir
                 </button>
               </>
@@ -112,7 +112,7 @@ export default function Tesouraria() {
                 <Plus className="h-4 w-4" /> Nova conta
               </button>
             )}
-            <button onClick={carregar} className="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center">
+            <button onClick={carregar} className="h-9 w-9 rounded-lg bg-white hover:bg-[#EFEDE7] text-[#8B8D98] flex items-center justify-center">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
           </>
@@ -123,24 +123,24 @@ export default function Tesouraria() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-          <p className="text-[11px] uppercase tracking-wider text-emerald-300/80">Saldo consolidado</p>
+          <p className="text-[11px] uppercase tracking-wider text-[#0b7d4e]/80">Saldo consolidado</p>
           <p className="text-2xl font-bold text-emerald-200 mt-1 tabular-nums">{brl(resumo?.saldoTotal)}</p>
         </div>
-        <div className="rounded-2xl border border-slate-700/60 bg-slate-800/40 p-4">
+        <div className="rounded-2xl border border-[#E7E5DF] bg-[#F6F5F2] p-4">
           <p className="text-[11px] uppercase tracking-wider text-slate-500">Contas ativas</p>
-          <p className="text-2xl font-bold text-white mt-1 tabular-nums">{resumo?.qtdContas ?? 0}</p>
+          <p className="text-2xl font-bold text-[#16171D] mt-1 tabular-nums">{resumo?.qtdContas ?? 0}</p>
         </div>
-        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4">
-          <p className="text-[11px] uppercase tracking-wider text-amber-300/80">Não conciliados</p>
-          <p className="text-2xl font-bold text-amber-200 mt-1 tabular-nums">{resumo?.movimentosNaoConciliados ?? 0}</p>
+        <div className="rounded-2xl border border-[#E8A317]/20 bg-amber-500/5 p-4">
+          <p className="text-[11px] uppercase tracking-wider text-[#a9760a]/80">Não conciliados</p>
+          <p className="text-2xl font-bold text-[#a9760a] mt-1 tabular-nums">{resumo?.movimentosNaoConciliados ?? 0}</p>
         </div>
       </div>
 
       {/* Abas */}
-      <div className="flex items-center gap-1 mb-4 border-b border-slate-800">
+      <div className="flex items-center gap-1 mb-4 border-b border-[#E7E5DF]">
         {([['contas', 'Contas & Saldos'], ['movimentos', 'Movimentos'], ['conciliacao', 'Conciliação']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setAba(k)}
-            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px ${aba === k ? 'border-amber-400 text-amber-300' : 'border-transparent text-slate-400 hover:text-slate-200'}`}>
+            className={`px-4 py-2 text-sm font-semibold border-b-2 -mb-px ${aba === k ? 'border-amber-400 text-[#a9760a]' : 'border-transparent text-slate-400 hover:text-[#5B5D69]'}`}>
             {l}
           </button>
         ))}
@@ -155,28 +155,28 @@ export default function Tesouraria() {
           ) : contas.map((c) => {
             const Icon = ICONE_TIPO[c.tipo] || Landmark;
             return (
-              <div key={c.id} className={`rounded-2xl border border-slate-700/60 bg-slate-800/30 p-4 ${c.ativo ? '' : 'opacity-50'}`}>
+              <div key={c.id} className={`rounded-2xl border border-[#E7E5DF] bg-[#F6F5F2] p-4 ${c.ativo ? '' : 'opacity-50'}`}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="h-10 w-10 rounded-xl bg-slate-700/50 text-slate-300 flex items-center justify-center"><Icon className="h-5 w-5" /></span>
+                    <span className="h-10 w-10 rounded-xl bg-[#F0EEE9] text-[#8B8D98] flex items-center justify-center"><Icon className="h-5 w-5" /></span>
                     <div>
-                      <p className="text-white font-semibold flex items-center gap-2">
+                      <p className="text-[#16171D] font-semibold flex items-center gap-2">
                         {c.nome}
-                        {c.padrao && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">padrão</span>}
+                        {c.padrao && <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-[#a9760a]">padrão</span>}
                       </p>
                       <p className="text-xs text-slate-400">{LABEL_TIPO[c.tipo]}{c.banco ? ` · ${c.banco}` : ''}{c.numero ? ` · ${c.numero}` : ''}</p>
                     </div>
                   </div>
                   {podeConfigurar && (
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setEditandoConta(c)} className="h-8 w-8 rounded-lg hover:bg-slate-700 text-slate-400 flex items-center justify-center"><Pencil className="h-3.5 w-3.5" /></button>
-                      {c.ativo && <button onClick={() => removerConta(c)} className="h-8 w-8 rounded-lg hover:bg-rose-500/10 text-rose-400 flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>}
+                      <button onClick={() => setEditandoConta(c)} className="h-8 w-8 rounded-lg hover:bg-[#EFEDE7] text-slate-400 flex items-center justify-center"><Pencil className="h-3.5 w-3.5" /></button>
+                      {c.ativo && <button onClick={() => removerConta(c)} className="h-8 w-8 rounded-lg hover:bg-rose-500/10 text-[#c3352b] flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   )}
                 </div>
                 <div className="mt-3 flex items-end justify-between">
                   <span className="text-[11px] uppercase tracking-wider text-slate-500">Saldo atual</span>
-                  <span className={`text-xl font-bold tabular-nums ${Number(c.saldoAtual) < 0 ? 'text-rose-300' : 'text-emerald-200'}`}>{brl(c.saldoAtual)}</span>
+                  <span className={`text-xl font-bold tabular-nums ${Number(c.saldoAtual) < 0 ? 'text-[#c3352b]' : 'text-emerald-200'}`}>{brl(c.saldoAtual)}</span>
                 </div>
               </div>
             );
@@ -218,14 +218,14 @@ function AbaMovimentos({ contas }: { contas: ContaFin[] }) {
     <div>
       <div className="flex items-center gap-3 mb-4">
         <select value={contaId} onChange={(e) => setContaId(e.target.value)}
-          className="bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+          className="bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
           <option value="">Todas as contas</option>
           {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
         </select>
       </div>
-      <div className="rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-800/60 text-[11px] uppercase tracking-wider text-slate-500">
+          <thead className="bg-[#FBFAF7] text-[11px] uppercase tracking-wider text-slate-500">
             <tr>
               <th className="text-left px-4 py-3">Data</th>
               <th className="text-left px-4 py-3">Descrição</th>
@@ -242,16 +242,16 @@ function AbaMovimentos({ contas }: { contas: ContaFin[] }) {
             ) : movs.length === 0 ? (
               <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">Nenhum movimento.</td></tr>
             ) : movs.map((m) => (
-              <tr key={m.id} className="border-t border-slate-800">
+              <tr key={m.id} className="border-t border-[#E7E5DF]">
                 <td className="px-4 py-3 text-slate-400">{dataBR(m.data)}</td>
-                <td className="px-4 py-3 text-slate-100">{m.descricao}</td>
+                <td className="px-4 py-3 text-[#16171D]">{m.descricao}</td>
                 <td className="px-4 py-3 text-slate-400">{nomeConta(m.contaId)}</td>
                 <td className="px-4 py-3 text-[11px] text-slate-500">{m.origem}</td>
-                <td className={`px-4 py-3 text-right tabular-nums font-medium ${m.tipo === 'ENTRADA' ? 'text-emerald-300' : 'text-rose-300'}`}>
+                <td className={`px-4 py-3 text-right tabular-nums font-medium ${m.tipo === 'ENTRADA' ? 'text-[#0b7d4e]' : 'text-[#c3352b]'}`}>
                   {m.tipo === 'ENTRADA' ? '+' : '−'}{brl(m.valor)}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-300">{brl(m.saldoApos)}</td>
-                <td className="px-4 py-3 text-center">{m.conciliado ? <span className="text-emerald-400">✓</span> : <span className="text-slate-600">—</span>}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-[#8B8D98]">{brl(m.saldoApos)}</td>
+                <td className="px-4 py-3 text-center">{m.conciliado ? <span className="text-[#0b7d4e]">✓</span> : <span className="text-slate-600">—</span>}</td>
               </tr>
             ))}
           </tbody>
@@ -288,9 +288,9 @@ function AbaConciliacao({ contas, podeOperar, onChange }: { contas: ContaFin[]; 
           </button>
         )}
       </div>
-      <div className="rounded-2xl border border-slate-700/60 overflow-hidden">
+      <div className="rounded-2xl border border-[#E7E5DF] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-slate-800/60 text-[11px] uppercase tracking-wider text-slate-500">
+          <thead className="bg-[#FBFAF7] text-[11px] uppercase tracking-wider text-slate-500">
             <tr>
               <th className="text-left px-4 py-3">Importado em</th>
               <th className="text-left px-4 py-3">Conta</th>
@@ -304,11 +304,11 @@ function AbaConciliacao({ contas, podeOperar, onChange }: { contas: ContaFin[]; 
             ) : extratos.length === 0 ? (
               <tr><td colSpan={4} className="px-4 py-10 text-center text-slate-500">Nenhum extrato importado.</td></tr>
             ) : extratos.map((e) => (
-              <tr key={e.id} className="border-t border-slate-800">
+              <tr key={e.id} className="border-t border-[#E7E5DF]">
                 <td className="px-4 py-3 text-slate-400">{dataBR(e.importadoEm)}</td>
-                <td className="px-4 py-3 text-slate-100">{nomeConta(e.contaId)}</td>
+                <td className="px-4 py-3 text-[#16171D]">{nomeConta(e.contaId)}</td>
                 <td className="px-4 py-3 text-slate-400">{e.arquivo || '—'}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-300">{e._count?.itens ?? 0}</td>
+                <td className="px-4 py-3 text-right tabular-nums text-[#8B8D98]">{e._count?.itens ?? 0}</td>
               </tr>
             ))}
           </tbody>
@@ -349,21 +349,21 @@ function ModalConta({ conta, onClose, onDone }: { conta?: ContaFin; onClose: () 
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white">{edicao ? 'Editar conta' : 'Nova conta financeira'}</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#16171D]">{edicao ? 'Editar conta' : 'Nova conta financeira'}</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
             <span className="text-xs text-slate-400">Nome</span>
-            <input value={nome} onChange={e => setNome(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+            <input value={nome} onChange={e => setNome(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs text-slate-400">Tipo</span>
-              <select value={tipo} onChange={e => setTipo(e.target.value as TipoConta)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400">
+              <select value={tipo} onChange={e => setTipo(e.target.value as TipoConta)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
                 <option value="CAIXA">Caixa</option>
                 <option value="BANCO">Banco</option>
                 <option value="CARTAO">Cartão</option>
@@ -373,30 +373,30 @@ function ModalConta({ conta, onClose, onDone }: { conta?: ContaFin; onClose: () 
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Banco</span>
-              <input value={banco} onChange={e => setBanco(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+              <input value={banco} onChange={e => setBanco(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
             </label>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
               <span className="text-xs text-slate-400">Agência</span>
-              <input value={agencia} onChange={e => setAgencia(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+              <input value={agencia} onChange={e => setAgencia(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
             </label>
             <label className="block">
               <span className="text-xs text-slate-400">Conta nº</span>
-              <input value={numero} onChange={e => setNumero(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+              <input value={numero} onChange={e => setNumero(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
             </label>
           </div>
           {!edicao && (
             <label className="block">
               <span className="text-xs text-slate-400">Saldo inicial</span>
-              <input type="number" step="0.01" value={saldoInicial} onChange={e => setSaldoInicial(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
+              <input type="number" step="0.01" value={saldoInicial} onChange={e => setSaldoInicial(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] text-right font-mono focus:outline-none focus:border-[#E8A317]" />
             </label>
           )}
-          <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-[#8B8D98] cursor-pointer">
             <input type="checkbox" checked={padrao} onChange={e => setPadrao(e.target.checked)} /> Conta padrão (pré-selecionada nas baixas)
           </label>
           {edicao && (
-            <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-[#8B8D98] cursor-pointer">
               <input type="checkbox" checked={ativo} onChange={e => setAtivo(e.target.checked)} /> Ativa
             </label>
           )}
@@ -432,34 +432,34 @@ function ModalTransferencia({ contas, onClose, onDone }: { contas: ContaFin[]; o
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white flex items-center gap-2"><ArrowLeftRight className="h-4 w-4" /> Transferência</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#16171D] flex items-center gap-2"><ArrowLeftRight className="h-4 w-4" /> Transferência</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
             <span className="text-xs text-slate-400">De</span>
-            <select value={origem} onChange={e => setOrigem(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+            <select value={origem} onChange={e => setOrigem(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
               <option value="">Selecione…</option>
               {contas.map((c) => <option key={c.id} value={c.id}>{c.nome} — {brl(c.saldoAtual)}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Para</span>
-            <select value={destino} onChange={e => setDestino(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+            <select value={destino} onChange={e => setDestino(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
               <option value="">Selecione…</option>
               {contas.map((c) => <option key={c.id} value={c.id}>{c.nome} — {brl(c.saldoAtual)}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Valor</span>
-            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
+            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] text-right font-mono focus:outline-none focus:border-[#E8A317]" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Descrição (opcional)</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
           </label>
         </div>
         <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
@@ -499,34 +499,34 @@ function ModalAvulso({ contas, onClose, onDone }: { contas: ContaFin[]; onClose:
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white">Lançamento avulso</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#16171D]">Lançamento avulso</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={() => setTipo('ENTRADA')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold ${tipo === 'ENTRADA' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}><ArrowDownCircle className="h-4 w-4" /> Entrada</button>
-            <button onClick={() => setTipo('SAIDA')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold ${tipo === 'SAIDA' ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}><ArrowUpCircle className="h-4 w-4" /> Saída</button>
+            <button onClick={() => setTipo('ENTRADA')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold ${tipo === 'ENTRADA' ? 'bg-emerald-500/20 text-[#0b7d4e] border border-emerald-500/40' : 'bg-white text-slate-400 border border-[#E7E5DF]'}`}><ArrowDownCircle className="h-4 w-4" /> Entrada</button>
+            <button onClick={() => setTipo('SAIDA')} className={`flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold ${tipo === 'SAIDA' ? 'bg-rose-500/20 text-[#c3352b] border border-rose-500/40' : 'bg-white text-slate-400 border border-[#E7E5DF]'}`}><ArrowUpCircle className="h-4 w-4" /> Saída</button>
           </div>
           <label className="block">
             <span className="text-xs text-slate-400">Conta</span>
-            <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+            <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
               {contas.map((c) => <option key={c.id} value={c.id}>{c.nome} — {brl(c.saldoAtual)}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Valor</span>
-            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 text-right font-mono focus:outline-none focus:border-amber-400" />
+            <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] text-right font-mono focus:outline-none focus:border-[#E8A317]" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Descrição</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400" />
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Categoria (opcional)</span>
-            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
               <option value="">Sem categoria</option>
               {contasPlano.map((c) => <option key={c.id} value={c.codigo}>{c.codigo} — {c.descricao}</option>)}
             </select>
@@ -591,32 +591,32 @@ function ModalImportarOFX({ contas, onClose, onDone }: { contas: ContaFin[]; onC
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-md bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-md bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white flex items-center gap-2"><Link2 className="h-4 w-4" /> Importar extrato OFX</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#16171D] flex items-center gap-2"><Link2 className="h-4 w-4" /> Importar extrato OFX</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
             <span className="text-xs text-slate-400">Conta</span>
-            <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100">
+            <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D]">
               {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Arquivo OFX</span>
-            <input type="file" accept=".ofx,.qfx,text/*" onChange={onFile} className="mt-1 w-full text-sm text-slate-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-slate-700 file:text-slate-200" />
+            <input type="file" accept=".ofx,.qfx,text/*" onChange={onFile} className="mt-1 w-full text-sm text-[#8B8D98] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#F0EEE9] file:text-[#5B5D69]" />
           </label>
           {itens.length > 0 && (
-            <div className="rounded-lg border border-slate-700 max-h-48 overflow-y-auto">
+            <div className="rounded-lg border border-[#E7E5DF] max-h-48 overflow-y-auto">
               <table className="w-full text-xs">
                 <tbody>
                   {itens.map((i, idx) => (
-                    <tr key={idx} className="border-t border-slate-800 first:border-0">
+                    <tr key={idx} className="border-t border-[#E7E5DF] first:border-0">
                       <td className="px-2 py-1.5 text-slate-400">{i.data}</td>
-                      <td className="px-2 py-1.5 text-slate-200 truncate max-w-[180px]">{i.descricao}</td>
-                      <td className={`px-2 py-1.5 text-right tabular-nums ${i.valor >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>{brl(i.valor)}</td>
+                      <td className="px-2 py-1.5 text-[#5B5D69] truncate max-w-[180px]">{i.descricao}</td>
+                      <td className={`px-2 py-1.5 text-right tabular-nums ${i.valor >= 0 ? 'text-[#0b7d4e]' : 'text-[#c3352b]'}`}>{brl(i.valor)}</td>
                     </tr>
                   ))}
                 </tbody>

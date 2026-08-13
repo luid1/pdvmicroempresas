@@ -58,7 +58,7 @@ export default function PosicaoEstoque() {
   }), [saldos]);
 
   const Sort = ({ field }: { field: typeof sortField }) => (
-    <button onClick={() => setSortField(field)} className={`inline-flex items-center gap-1 hover:text-amber-400 ${sortField === field ? 'text-amber-400' : ''}`}>
+    <button onClick={() => setSortField(field)} className={`inline-flex items-center gap-1 hover:text-[#a9760a] ${sortField === field ? 'text-[#a9760a]' : ''}`}>
       <ArrowUpDown className="h-3 w-3" />
     </button>
   );
@@ -137,7 +137,7 @@ export default function PosicaoEstoque() {
       <div className="card overflow-hidden">
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full" />
+            <div className="animate-spin h-8 w-8 border-2 border-[#E8A317] border-t-transparent rounded-full" />
           </div>
         ) : (
           <div className="overflow-x-auto">

@@ -318,7 +318,7 @@ export default function AnaliseEstoqueFisico() {
       return { ...np, saldoFinal, valorAtualEstoque, diferencaEstoque };
     }));
   };
-  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-white/[0.08] bg-white/[0.04] text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-amber-400/60';
+  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-[#E7E5DF] bg-[#F6F5F2] text-[#16171D] focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-[#E8A317]/40';
 
   // Célula editável por clique: mostra o número limpo; vira input só no clique.
   const isEditing = (id: string, campo: string) => editCell?.id === id && editCell?.campo === campo;
@@ -331,7 +331,7 @@ export default function AnaliseEstoqueFisico() {
           placeholder={placeholder}
           onBlur={(e) => { commit(e.target.value); setEditCell(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditCell(null); }}
-          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/60 text-slate-100 focus:outline-none focus:ring-1 focus:ring-amber-400/40"
+          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-[#E8A317]/12 border border-[#E8A317]/40 text-[#16171D] focus:outline-none focus:ring-1 focus:ring-amber-400/40"
         />
       );
     }
@@ -339,7 +339,7 @@ export default function AnaliseEstoqueFisico() {
     return (
       <button
         onClick={(e) => { e.stopPropagation(); setEditCell({ id, campo }); }}
-        className={`w-full text-right font-mono px-1.5 py-0.5 rounded hover:bg-amber-400/10 hover:ring-1 hover:ring-amber-400/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? 'text-amber-300 font-semibold' : ''}`}
+        className={`w-full text-right font-mono px-1.5 py-0.5 rounded hover:bg-[#E8A317]/12 hover:ring-1 hover:ring-amber-400/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? 'text-[#a9760a] font-semibold' : ''}`}
       >
         {vazio ? <span className="text-slate-600">{placeholder || '—'}</span> : fmtN(valor as number)}
       </button>
@@ -439,7 +439,7 @@ export default function AnaliseEstoqueFisico() {
               onClick={handleFaturarQuebra}
               disabled={!executado || faturando || pendentes.length === 0}
               title={pendentes.length === 0 ? 'Digite valores em Quebra para faturar' : `Baixar ${pendentes.length} item(ns) — R$ ${fmtR(valorPendente)} perdido`}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white shadow-lg shadow-rose-500/20 transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:bg-white/[0.04] disabled:text-slate-500 disabled:shadow-none"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white shadow-lg shadow-rose-500/20 transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:bg-[#F6F5F2] disabled:text-slate-500 disabled:shadow-none"
             >
               <TrendingDown className="h-3.5 w-3.5" />
               {faturando ? 'Faturando…' : 'Faturar Quebra'}
@@ -451,13 +451,13 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Alerta colapsado: produtos a repor / em falta ── */}
       {aRepor.length > 0 && (
-        <div className="bg-amber-500/[0.06] border-b border-amber-400/15 px-5 py-1.5 shrink-0 flex items-center gap-2 text-[11px]">
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-          <span className="text-amber-300 font-semibold">
-            {emFalta > 0 && <><span className="text-rose-300">{emFalta} em falta</span> · </>}
+        <div className="bg-amber-500/[0.06] border-b border-[#E8A317]/40 px-5 py-1.5 shrink-0 flex items-center gap-2 text-[11px]">
+          <AlertTriangle className="h-3.5 w-3.5 text-[#a9760a] shrink-0" />
+          <span className="text-[#a9760a] font-semibold">
+            {emFalta > 0 && <><span className="text-[#c3352b]">{emFalta} em falta</span> · </>}
             {aRepor.length} produto(s) a repor
           </span>
-          <button onClick={() => setDrawerRepor(true)} className="ml-auto text-amber-300 hover:text-amber-200 font-semibold underline underline-offset-2 decoration-amber-400/40">
+          <button onClick={() => setDrawerRepor(true)} className="ml-auto text-[#a9760a] hover:text-[#a9760a] font-semibold underline underline-offset-2 decoration-amber-400/40">
             Ver lista
           </button>
         </div>
@@ -479,50 +479,50 @@ export default function AnaliseEstoqueFisico() {
           <div className="relative flex-1 min-w-[220px] max-w-md">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
             <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Filtrar por código ou descrição..."
-              className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-amber-400/60 transition-all duration-300" />
+              className="w-full bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#16171D] placeholder:text-slate-500 focus:outline-none focus:border-[#E8A317]/40 transition-all duration-300" />
           </div>
-          {familia !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{familia}<button onClick={() => handleFamiliaChange('<Todas>')}><X className="h-3 w-3" /></button></span>}
-          {grupo !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-white/[0.06] text-slate-300 px-2.5 py-1 rounded-lg text-xs font-semibold">{grupo}<button onClick={() => setGrupo('<Todas>')}><X className="h-3 w-3" /></button></span>}
-          {confFisica && <span className="bg-amber-500/15 text-amber-300 px-2.5 py-1 rounded-lg text-xs font-semibold">Conferência física</span>}
+          {familia !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-amber-500/15 text-[#a9760a] px-2.5 py-1 rounded-lg text-xs font-semibold">{familia}<button onClick={() => handleFamiliaChange('<Todas>')}><X className="h-3 w-3" /></button></span>}
+          {grupo !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-[#F6F5F2] text-[#8B8D98] px-2.5 py-1 rounded-lg text-xs font-semibold">{grupo}<button onClick={() => setGrupo('<Todas>')}><X className="h-3 w-3" /></button></span>}
+          {confFisica && <span className="bg-amber-500/15 text-[#a9760a] px-2.5 py-1 rounded-lg text-xs font-semibold">Conferência física</span>}
           <button onClick={() => setFiltros(true)} className={btnGlass + ' ml-auto'}>
             <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
           </button>
         </div>
 
         {/* ── Grade em card de vidro ── */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#F6F5F2] backdrop-blur-xl rounded-2xl border border-[#E7E5DF] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
         <div className="flex-1 overflow-auto">
         {!executado && !processando ? (
           <div className="flex items-center justify-center h-full text-slate-500">
             <div className="text-center">
               <CheckCircle className="h-12 w-12 mx-auto mb-3 text-slate-700" />
-              <p className="text-sm font-medium">Clique em <strong className="text-emerald-400">Executar</strong> para carregar a análise de estoque</p>
+              <p className="text-sm font-medium">Clique em <strong className="text-[#0b7d4e]">Executar</strong> para carregar a análise de estoque</p>
               <p className="text-xs text-slate-600 mt-1">Selecione os filtros desejados e clique no botão verde</p>
             </div>
           </div>
         ) : (
           <table className="w-full border-collapse text-[11px]" style={{ minWidth: 1300 }}>
             <thead className="sticky top-0 z-10">
-              <tr className="bg-[#11161f] border-b border-white/[0.08]">
-                <th className="sticky left-0 z-20 bg-[#11161f] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Código</th>
-                <th className="sticky left-24 z-20 bg-[#11161f] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap min-w-[180px]">Descrição</th>
-                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-16">Família</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Saldo Inicial</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Entrada</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Chão</th>
+              <tr className="bg-[#FBFAF7] border-b border-[#E7E5DF]">
+                <th className="sticky left-0 z-20 bg-[#FBFAF7] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Código</th>
+                <th className="sticky left-24 z-20 bg-[#FBFAF7] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap min-w-[180px]">Descrição</th>
+                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-16">Família</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Saldo Inicial</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Entrada</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Chão</th>
                 {!semOrdCompra && (
-                  <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Ordem de Compra</th>
+                  <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Ordem de Compra</th>
                 )}
-                <th className="px-2 py-1.5 text-right font-semibold text-amber-300/80 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-20">Quebra</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-emerald-300/80 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Saldo Final</th>
-                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-12">Und</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-[#a9760a]/80 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-20">Quebra</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-[#0b7d4e]/80 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Saldo Final</th>
+                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-12">Und</th>
                 {confFisica && (
                   <>
-                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-24">Contagem Física</th>
-                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-28">Diferença</th>
+                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Contagem Física</th>
+                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-28">Diferença</th>
                   </>
                 )}
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-white/[0.06] whitespace-nowrap w-20">Preço Custo</th>
+                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-20">Preço Custo</th>
                 <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap w-28">Valor Estoque</th>
               </tr>
             </thead>
@@ -534,43 +534,43 @@ export default function AnaliseEstoqueFisico() {
                     key={p.id}
                     onClick={() => setSelId(p.id)}
                     onDoubleClick={() => setDetalheAberto(p)}
-                    className={`group border-b border-white/[0.04] cursor-pointer transition-colors ${sel ? 'bg-amber-500/15 text-amber-100' : 'hover:bg-white/[0.03]'}`}
+                    className={`group border-b border-[#E7E5DF] cursor-pointer transition-colors ${sel ? 'bg-[#E8A317]/15 text-[#a9760a]' : 'hover:bg-[#F6F5F2]'}`}
                     title="Duplo clique para ver movimentações"
                   >
-                    <td className={`sticky left-0 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-amber-500/[0.18]' : 'bg-[#0c1119] group-hover:bg-[#131a26]'}`}>
+                    <td className={`sticky left-0 z-10 px-2 py-1 border-r border-[#E7E5DF] ${sel ? 'bg-[#E8A317]/[0.18]' : 'bg-white group-hover:bg-[#F6F5F2]'}`}>
                       <div className="flex items-center gap-1">
-                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-amber-200/70' : 'text-slate-600'}`} />
-                        <span className={`font-semibold ${sel ? 'text-amber-100' : 'text-amber-300'}`}>{p.codigo}</span>
+                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-[#a9760a]/70' : 'text-slate-600'}`} />
+                        <span className={`font-semibold ${sel ? 'text-[#a9760a]' : 'text-[#a9760a]'}`}>{p.codigo}</span>
                       </div>
                     </td>
-                    <td className={`sticky left-24 z-10 px-2 py-1 border-r border-white/[0.05] ${sel ? 'bg-amber-500/[0.18] text-amber-100' : 'bg-[#0c1119] group-hover:bg-[#131a26] text-slate-200'}`}>{p.descricao}</td>
-                    <td className="px-2 py-1 border-r border-white/[0.05] text-slate-400">{p.familia}</td>
-                    <td className={`px-2 py-1 border-r border-white/[0.05] text-right font-mono ${sel ? '' : p.saldoInicial < 0 ? 'text-rose-400' : 'text-slate-300'}`} title="Calculado pelo sistema (não editável)">{fmtN(p.saldoInicial)}</td>
-                    <td className="px-1 py-0.5 border-r border-white/[0.05]" onClick={e => e.stopPropagation()}>
+                    <td className={`sticky left-24 z-10 px-2 py-1 border-r border-[#E7E5DF] ${sel ? 'bg-[#E8A317]/[0.18] text-[#a9760a]' : 'bg-white group-hover:bg-[#F6F5F2] text-[#5B5D69]'}`}>{p.descricao}</td>
+                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-slate-400">{p.familia}</td>
+                    <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono ${sel ? '' : p.saldoInicial < 0 ? 'text-[#c3352b]' : 'text-[#8B8D98]'}`} title="Calculado pelo sistema (não editável)">{fmtN(p.saldoInicial)}</td>
+                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="entradas" valor={p.entradas ?? 0} commit={(v) => setCampo(p.id, 'entradas', v)} />
                     </td>
-                    <td className="px-1 py-0.5 border-r border-white/[0.05]" onClick={e => e.stopPropagation()}>
+                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="chao" valor={p.chao ?? 0} commit={(v) => setCampo(p.id, 'chao', v)} />
                     </td>
                     {!semOrdCompra && (
-                      <td className={`px-2 py-1 border-r border-white/[0.05] text-right font-mono ${sel ? '' : 'text-slate-500'}`} title="Já incluído na Entrada (informativo)">{p.ordensCompra ? fmtN(p.ordensCompra) : '—'}</td>
+                      <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono ${sel ? '' : 'text-slate-500'}`} title="Já incluído na Entrada (informativo)">{p.ordensCompra ? fmtN(p.ordensCompra) : '—'}</td>
                     )}
-                    <td className="px-1 py-0.5 border-r border-white/[0.05]" onClick={e => e.stopPropagation()}>
+                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="quebra" valor={p.quebra ?? 0} commit={(v) => setCampo(p.id, 'quebra', v)} alerta />
                     </td>
-                    <td className={`px-2 py-1 border-r border-white/[0.05] text-right font-mono font-bold ${sel ? 'text-white' : p.saldoFinal < 0 ? 'text-rose-400' : 'text-emerald-300'}`}>{fmtN(p.saldoFinal)}</td>
-                    <td className="px-2 py-1 border-r border-white/[0.05] text-slate-400">{p.undEstoque}</td>
+                    <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold ${sel ? 'text-[#16171D]' : p.saldoFinal < 0 ? 'text-[#c3352b]' : 'text-[#0b7d4e]'}`}>{fmtN(p.saldoFinal)}</td>
+                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-slate-400">{p.undEstoque}</td>
                     {confFisica && (
                       <>
-                        <td className="px-1 py-0.5 border-r border-white/[0.05]" onClick={e => e.stopPropagation()}>
+                        <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
                           <EditNum id={p.id} campo="contagemFisica" valor={p.contagemFisica} commit={(v) => handleContagemChange(p.id, v)} placeholder="0,000" />
                         </td>
-                        <td className={`px-2 py-1 border-r border-white/[0.05] text-right font-mono font-bold ${sel ? '' : p.diferencaEstoque < 0 ? 'text-rose-400' : p.diferencaEstoque > 0 ? 'text-emerald-300' : 'text-slate-500'}`}>
+                        <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold ${sel ? '' : p.diferencaEstoque < 0 ? 'text-[#c3352b]' : p.diferencaEstoque > 0 ? 'text-[#0b7d4e]' : 'text-slate-500'}`}>
                           {p.contagemFisica !== null ? fmtN(p.diferencaEstoque) : '—'}
                         </td>
                       </>
                     )}
-                    <td className="px-2 py-1 border-r border-white/[0.05] text-right font-mono text-slate-400">{fmtR(p.precoCusto)}</td>
+                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono text-slate-400">{fmtR(p.precoCusto)}</td>
                     <td className={`px-2 py-1 text-right font-mono font-semibold ${sel ? '' : negClass(p.valorAtualEstoque)}`}>{fmtR(p.valorAtualEstoque)}</td>
                   </tr>
                 );
@@ -584,11 +584,11 @@ export default function AnaliseEstoqueFisico() {
       </div>
 
       {/* ── Rodapé com totais ── */}
-      <div className="shrink-0 bg-white/[0.02] backdrop-blur-xl border-t border-white/[0.06] px-4 py-2 flex items-center justify-between text-slate-300">
+      <div className="shrink-0 bg-[#F6F5F2] backdrop-blur-xl border-t border-[#E7E5DF] px-4 py-2 flex items-center justify-between text-[#8B8D98]">
         <span className="flex items-center gap-3">
           Registros encontrados: <strong>{totais.count}</strong>
           {totais.valorPerdido > 0 && (
-            <span className="inline-flex items-center gap-1 bg-rose-600/20 text-rose-300 border border-rose-500/40 px-2 py-0.5 rounded text-[11px] font-semibold">
+            <span className="inline-flex items-center gap-1 bg-rose-600/20 text-[#c3352b] border border-rose-500/40 px-2 py-0.5 rounded text-[11px] font-semibold">
               <TrendingDown className="h-3 w-3" /> Valor perdido: R$ {fmtR(totais.valorPerdido)}
             </span>
           )}
@@ -604,13 +604,13 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal "Processando..." ── */}
       {processando && createPortal((
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] animate-backdrop">
-          <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-6 w-80 text-center animate-modal">
+        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] animate-backdrop">
+          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-6 w-80 text-center animate-modal">
             <p className="text-xs text-gray-500">Análise de Estoque</p>
             <p className="text-sm text-gray-600 mt-1">Processando...</p>
             <p className="text-xl font-bold text-gray-900 mt-2">Aguarde...</p>
             <p className="text-xs text-gray-500 mt-2">Produto: <strong>{prodProcessando}</strong></p>
-            <div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full mx-auto mt-3" />
+            <div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full mx-auto mt-3" />
             <button onClick={() => setProcessando(false)} className="mt-4 px-4 py-1 bg-gray-200 border border-gray-400 rounded text-xs text-gray-700 hover:bg-gray-300">
               Cancelar
             </button>
@@ -620,9 +620,9 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal Detalhamento do Registro ── */}
       {detalheAberto && createPortal((
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop">
-          <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden animate-modal">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/[0.02] shrink-0">
+        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop">
+          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden animate-modal">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#E7E5DF] bg-[#F6F5F2] shrink-0">
               <span className="text-xs font-semibold text-gray-700">⊞ Detalhamento do Registro</span>
               <button onClick={() => setDetalheAberto(null)} className="text-gray-500 hover:text-gray-800">
                 <X className="h-4 w-4" />
@@ -632,15 +632,15 @@ export default function AnaliseEstoqueFisico() {
             <div className="px-4 py-2 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center gap-4 shrink-0 text-xs">
               <div className="flex items-center gap-1.5">
                 <span className="text-gray-600">Código do Produto</span>
-                <span className="border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 rounded font-mono font-bold">{detalheAberto.codigo}</span>
+                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-mono font-bold">{detalheAberto.codigo}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-gray-600">Descrição do Produto</span>
-                <span className="border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 rounded font-semibold">{detalheAberto.descricao}</span>
+                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-semibold">{detalheAberto.descricao}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-gray-600">Quantidade Total</span>
-                <span className="border border-white/[0.08] bg-white/[0.04] px-2 py-0.5 rounded font-mono">{fmtN(Math.abs(detalheAberto.saidas))}</span>
+                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-mono">{fmtN(Math.abs(detalheAberto.saidas))}</span>
                 <span className="font-bold">{detalheAberto.undEstoque}</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -662,19 +662,19 @@ export default function AnaliseEstoqueFisico() {
                 </thead>
                 <tbody>
                   {(MOCK_MOVIMENTACOES[detalheAberto.id] || []).map((m, i) => (
-                    <tr key={i} className="border-b border-gray-100 hover:bg-white/[0.03]">
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-amber-300 whitespace-nowrap">{m.idDfe}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] whitespace-nowrap font-medium">{m.nomeCliente}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05]">{m.natureza}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-orange-600 font-bold">{m.observacoes}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] font-mono whitespace-nowrap">{m.dataHoraVenda}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] font-mono">{m.dataEntrega}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-right font-mono font-bold">{fmtN(m.qtdeApuracao)}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05]">{m.unidadeApuracao}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-right font-mono">{fmtR(m.vlrTotalVenda)}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-right font-mono">{m.qtdeConvertida.toFixed(3)}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05]">{m.unidadeConvertida}</td>
-                      <td className="px-2 py-1 border-r border-white/[0.05] text-right font-mono">{fmtR(m.precoMedio)}</td>
+                    <tr key={i} className="border-b border-gray-100 hover:bg-[#F6F5F2]">
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-[#a9760a] whitespace-nowrap">{m.idDfe}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] whitespace-nowrap font-medium">{m.nomeCliente}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.natureza}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-orange-600 font-bold">{m.observacoes}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono whitespace-nowrap">{m.dataHoraVenda}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono">{m.dataEntrega}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold">{fmtN(m.qtdeApuracao)}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.unidadeApuracao}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtR(m.vlrTotalVenda)}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{m.qtdeConvertida.toFixed(3)}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.unidadeConvertida}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtR(m.precoMedio)}</td>
                       <td className="px-2 py-1 text-center">{m.status}</td>
                     </tr>
                   ))}
@@ -712,11 +712,11 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal Filtros ── */}
       {filtrosAberto && createPortal((
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setFiltros(false)}>
-          <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-lg animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
-              <h2 className="font-bold text-white text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-amber-300" /> Filtros</h2>
-              <button onClick={() => setFiltros(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.06]"><X className="h-4 w-4" /></button>
+        <div className="fixed inset-0 bg-[#16171D]/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setFiltros(false)}>
+          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-lg animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF]">
+              <h2 className="font-bold text-[#16171D] text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-[#a9760a]" /> Filtros</h2>
+              <button onClick={() => setFiltros(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#5B5D69] hover:bg-[#F6F5F2]"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -732,16 +732,16 @@ export default function AnaliseEstoqueFisico() {
               <div>
                 <label className={fLbl}>Unidade de Apuração</label>
                 <div className="flex gap-4 mt-1">
-                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-amber-500" /> Estoque</label>
-                  <label className="flex items-center gap-1.5 text-slate-300 text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-amber-500" /> Principal</label>
+                  <label className="flex items-center gap-1.5 text-[#8B8D98] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-amber-500" /> Estoque</label>
+                  <label className="flex items-center gap-1.5 text-[#8B8D98] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-amber-500" /> Principal</label>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 pt-1 border-t border-white/[0.06]">
-                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-amber-500" /> Conferência Física (mostra colunas de contagem)</label>
-                <label className="flex items-center gap-2 text-slate-300 text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-amber-500" /> Não mostrar Ordens de Compra</label>
+              <div className="flex flex-col gap-2 pt-1 border-t border-[#E7E5DF]">
+                <label className="flex items-center gap-2 text-[#8B8D98] text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-amber-500" /> Conferência Física (mostra colunas de contagem)</label>
+                <label className="flex items-center gap-2 text-[#8B8D98] text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-amber-500" /> Não mostrar Ordens de Compra</label>
               </div>
             </div>
-            <div className="flex justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">
+            <div className="flex justify-end gap-2 px-5 py-3 border-t border-[#E7E5DF]">
               <button onClick={() => setFiltros(false)} className={btnGlass}>Fechar</button>
               <button onClick={() => { setFiltros(false); handleExecutar(); }} className={btnPrimary}>Aplicar filtros</button>
             </div>
@@ -751,20 +751,20 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Drawer Reposição ── */}
       {drawerRepor && createPortal((
-        <div className="fixed inset-0 z-[70] flex justify-end bg-black/50 animate-fade-in" onClick={() => setDrawerRepor(false)}>
-          <div className="w-full max-w-md h-full bg-[#0E141F]/95 backdrop-blur-2xl border-l border-white/[0.08] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06] sticky top-0 bg-[#0E141F]/95 backdrop-blur-xl">
-              <h2 className="font-bold text-white text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-amber-400" /> Produtos a repor <span className="text-slate-500 font-normal">({aRepor.length})</span></h2>
-              <button onClick={() => setDrawerRepor(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-200 hover:bg-white/[0.06]"><X className="h-4 w-4" /></button>
+        <div className="fixed inset-0 z-[70] flex justify-end bg-[#16171D]/40 animate-fade-in" onClick={() => setDrawerRepor(false)}>
+          <div className="w-full max-w-md h-full bg-white backdrop-blur-2xl border-l border-[#E7E5DF] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl">
+              <h2 className="font-bold text-[#16171D] text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[#a9760a]" /> Produtos a repor <span className="text-slate-500 font-normal">({aRepor.length})</span></h2>
+              <button onClick={() => setDrawerRepor(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#5B5D69] hover:bg-[#F6F5F2]"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-4 space-y-1.5">
               {aRepor.map((p: any) => (
-                <div key={p.produtoId} className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${p.negativo ? 'bg-rose-500/[0.08] border-rose-500/20' : 'bg-white/[0.02] border-white/[0.06]'}`}>
+                <div key={p.produtoId} className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${p.negativo ? 'bg-rose-500/[0.08] border-rose-500/20' : 'bg-[#F6F5F2] border-[#E7E5DF]'}`}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-slate-200 text-sm font-medium truncate">{p.descricao}</p>
+                    <p className="text-[#5B5D69] text-sm font-medium truncate">{p.descricao}</p>
                     <p className="text-[11px] text-slate-500">disp. {p.disponivel}{p.negativo && ` · comprar ${p.sugestaoCompra}`}</p>
                   </div>
-                  {p.negativo && <span className="text-[10px] font-bold text-rose-300 bg-rose-500/15 px-2 py-0.5 rounded-full shrink-0">FALTA</span>}
+                  {p.negativo && <span className="text-[10px] font-bold text-[#c3352b] bg-rose-500/15 px-2 py-0.5 rounded-full shrink-0">FALTA</span>}
                 </div>
               ))}
               {aRepor.length === 0 && <p className="text-slate-500 text-sm text-center py-8">Nada a repor.</p>}
@@ -778,11 +778,11 @@ export default function AnaliseEstoqueFisico() {
 
 // Card de KPI — número oversized (padrão do ERP)
 function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; label: string; value: string; accent?: boolean; tone?: 'rose' | 'amber' }) {
-  const cor = tone === 'rose' ? 'text-rose-300' : tone === 'amber' ? 'text-amber-300' : accent ? 'text-amber-200' : 'text-white';
+  const cor = tone === 'rose' ? 'text-[#c3352b]' : tone === 'amber' ? 'text-[#a9760a]' : accent ? 'text-[#a9760a]' : 'text-[#16171D]';
   return (
-    <div className="bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.06] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] px-4 py-3">
+    <div className="bg-[#F6F5F2] backdrop-blur-xl rounded-2xl border border-[#E7E5DF] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] px-4 py-3">
       <div className="flex items-center gap-2 text-slate-500">
-        <span className="text-amber-300/70">{icon}</span>
+        <span className="text-[#a9760a]/70">{icon}</span>
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
       <p className={`mt-1.5 text-2xl font-extrabold tracking-tight tabular-nums ${cor}`}>{value}</p>
@@ -791,4 +791,4 @@ function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; 
 }
 
 const fLbl = 'block text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1';
-const fInp = 'w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-amber-400/60';
+const fInp = 'w-full border border-[#E7E5DF] bg-[#F6F5F2] text-[#16171D] text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-[#E8A317]/40';

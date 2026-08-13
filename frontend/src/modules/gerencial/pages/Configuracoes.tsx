@@ -77,11 +77,11 @@ export default function Configuracoes() {
 
       <div className="flex-1 overflow-hidden flex">
         {/* Sub-navegação de seções */}
-        <nav className="w-56 shrink-0 border-r border-white/[0.05] p-3 space-y-1 overflow-y-auto">
+        <nav className="w-56 shrink-0 border-r border-[#E7E5DF] p-3 space-y-1 overflow-y-auto">
           {SECOES.map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setSecao(key)}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-300 active:scale-[0.98] ${
-                secao === key ? 'bg-amber-400/[0.12] text-amber-200 border border-amber-400/20' : 'text-slate-400 hover:bg-white/[0.05] hover:text-slate-100 border border-transparent'
+                secao === key ? 'bg-amber-400/[0.12] text-[#a9760a] border border-[#E8A317]/40' : 'text-slate-400 hover:bg-[#F6F5F2] hover:text-[#16171D] border border-transparent'
               }`}>
               <Icon className="h-4 w-4 shrink-0" /> {label}
             </button>
@@ -100,13 +100,13 @@ export default function Configuracoes() {
               <div className="space-y-2">
                 {filiais.map((f) => (
                   <div key={f.id} className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all ${
-                    f.id === filialAtiva?.id ? 'bg-amber-400/[0.08] border-amber-400/25' : 'bg-white/[0.02] border-white/[0.06]'
+                    f.id === filialAtiva?.id ? 'bg-amber-400/[0.08] border-[#E8A317]/40' : 'bg-[#F6F5F2] border-[#E7E5DF]'
                   }`}>
                     <Warehouse className="h-4 w-4 text-slate-500 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-slate-200 text-sm font-medium truncate">{f.codigo} — {f.nome}</p>
+                      <p className="text-[#5B5D69] text-sm font-medium truncate">{f.codigo} — {f.nome}</p>
                     </div>
-                    {f.id === filialAtiva?.id && <span className="ml-auto text-[10px] font-bold text-amber-300 uppercase tracking-wide">Ativa</span>}
+                    {f.id === filialAtiva?.id && <span className="ml-auto text-[10px] font-bold text-[#a9760a] uppercase tracking-wide">Ativa</span>}
                   </div>
                 ))}
                 {filiais.length === 0 && <p className="text-slate-500 text-sm">Nenhuma filial vinculada.</p>}
@@ -134,7 +134,7 @@ export default function Configuracoes() {
                 <Campo label="Próximo número"><input className={inp} value={cfg.proximoNumero} onChange={(e) => set('proximoNumero', e.target.value)} /></Campo>
               </div>
               {cfg.ambienteNFe === 'producao' && (
-                <div className="mt-4 flex items-start gap-2 text-amber-300 bg-amber-500/[0.08] border border-amber-400/20 rounded-xl px-4 py-3 text-xs">
+                <div className="mt-4 flex items-start gap-2 text-[#a9760a] bg-amber-500/[0.08] border border-[#E8A317]/40 rounded-xl px-4 py-3 text-xs">
                   <Info className="h-4 w-4 shrink-0 mt-0.5" />
                   Ambiente de <b>produção</b>: as NF-e emitidas têm valor fiscal e são transmitidas à SEFAZ.
                 </div>
@@ -153,9 +153,9 @@ export default function Configuracoes() {
                   </select>
                 </Campo>
               </div>
-              <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#F6F5F2] border border-[#E7E5DF]">
                 <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-                <p className="text-slate-300 text-sm">Tema <b>Dark Tech</b> — padrão do sistema.</p>
+                <p className="text-[#8B8D98] text-sm">Tema <b>Dark Tech</b> — padrão do sistema.</p>
               </div>
             </Bloco>
           )}
@@ -168,9 +168,9 @@ export default function Configuracoes() {
               <Campo label="Anthropic — API Key (interpretador de pedidos)" className="mt-4">
                 <input type="password" className={inp} value={cfg.anthropicKey} onChange={(e) => set('anthropicKey', e.target.value)} placeholder="sk-ant-..." />
               </Campo>
-              <div className="mt-4 flex items-start gap-2 text-slate-400 bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-3 text-xs">
+              <div className="mt-4 flex items-start gap-2 text-slate-400 bg-[#F6F5F2] border border-[#E7E5DF] rounded-xl px-4 py-3 text-xs">
                 <Info className="h-4 w-4 shrink-0 mt-0.5" />
-                Para produção, os tokens sensíveis devem ficar no <code className="text-slate-300">.env</code> do backend. Estes campos são um atalho de teste no cliente.
+                Para produção, os tokens sensíveis devem ficar no <code className="text-[#8B8D98]">.env</code> do backend. Estes campos são um atalho de teste no cliente.
               </div>
             </Bloco>
           )}
@@ -194,7 +194,7 @@ export default function Configuracoes() {
 function Bloco({ titulo, desc, children }: { titulo: string; desc: string; children: React.ReactNode }) {
   return (
     <div className="animate-fade-in-up">
-      <h2 className="text-lg font-bold text-white tracking-tight">{titulo}</h2>
+      <h2 className="text-lg font-bold text-[#16171D] tracking-tight">{titulo}</h2>
       <p className="text-slate-500 text-sm mt-0.5 mb-5">{desc}</p>
       {children}
     </div>
@@ -209,7 +209,7 @@ function Leitura({ icon, label, valor, mono }: { icon?: React.ReactNode; label: 
   return (
     <div>
       <label className={`${lbl} flex items-center gap-1.5`}>{icon}{label}</label>
-      <div className={`w-full bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2 text-sm text-slate-300 ${mono ? 'font-mono text-[12px]' : ''} truncate`}>{valor}</div>
+      <div className={`w-full bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#8B8D98] ${mono ? 'font-mono text-[12px]' : ''} truncate`}>{valor}</div>
     </div>
   );
 }

@@ -23,13 +23,13 @@ const dataBR = (v: any) => (v ? new Date(v).toLocaleDateString('pt-BR') : '—')
 
 type StatusDFe = 'RASCUNHO' | 'PENDENTE_EMISSAO' | 'EMITIDO' | 'CANCELADO' | 'DENEGADO' | 'INUTILIZADO' | 'CONTINGENCIA';
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  RASCUNHO: { label: 'Rascunho', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
-  PENDENTE_EMISSAO: { label: 'Pendente', cls: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
-  EMITIDO: { label: 'Emitida', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
-  CANCELADO: { label: 'Cancelada', cls: 'bg-rose-500/15 text-rose-300 border-rose-500/30' },
-  DENEGADO: { label: 'Denegada', cls: 'bg-amber-500/15 text-amber-300 border-amber-500/30' },
+  RASCUNHO: { label: 'Rascunho', cls: 'bg-slate-500/15 text-[#8B8D98] border-slate-500/30' },
+  PENDENTE_EMISSAO: { label: 'Pendente', cls: 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/30' },
+  EMITIDO: { label: 'Emitida', cls: 'bg-emerald-500/15 text-[#0b7d4e] border-emerald-500/30' },
+  CANCELADO: { label: 'Cancelada', cls: 'bg-rose-500/15 text-[#c3352b] border-rose-500/30' },
+  DENEGADO: { label: 'Denegada', cls: 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/30' },
   INUTILIZADO: { label: 'Inutilizada', cls: 'bg-slate-500/15 text-slate-400 border-slate-500/30' },
-  CONTINGENCIA: { label: 'Contingência', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
+  CONTINGENCIA: { label: 'Contingência', cls: 'bg-slate-500/15 text-[#8B8D98] border-slate-500/30' },
 };
 
 interface Nota {
@@ -155,23 +155,23 @@ export default function GestaoFiscal() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-100">
-      <div className="bg-slate-900/80 border-b border-slate-800 px-6 pt-4 pb-3 shrink-0">
+    <div className="flex flex-col h-full bg-white text-[#16171D]">
+      <div className="bg-white border-b border-[#E7E5DF] px-6 pt-4 pb-3 shrink-0">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-lg font-bold text-white flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-amber-300" /> Gestão Fiscal
+            <h1 className="text-lg font-bold text-[#16171D] flex items-center gap-2">
+              <Receipt className="h-5 w-5 text-[#a9760a]" /> Gestão Fiscal
             </h1>
             <p className="text-xs text-slate-500 mt-0.5">Notas fiscais eletrônicas (NF-e) emitidas no faturamento</p>
           </div>
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100" />
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
             </label>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-1.5 rounded-lg border border-slate-700">
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#E7E5DF]">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
             <a href="/fiscal/emitir" className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-3 py-1.5 rounded-lg">
@@ -190,10 +190,10 @@ export default function GestaoFiscal() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
+          <div className="flex items-center bg-white border border-[#E7E5DF] rounded-lg overflow-hidden">
             {(['', 'RASCUNHO', 'EMITIDO', 'CANCELADO', 'DENEGADO'] as const).map(s => (
               <button key={s || 'all'} onClick={() => setStatus(s)}
-                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-amber-500/20 text-amber-300' : 'text-slate-400 hover:text-slate-200'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-amber-500/20 text-[#a9760a]' : 'text-slate-400 hover:text-[#5B5D69]'}`}>
                 {s === '' ? 'Todas' : STATUS_META[s].label}
               </button>
             ))}
@@ -201,20 +201,20 @@ export default function GestaoFiscal() {
           <div className="relative">
             <Search className="h-4 w-4 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nº da nota…"
-              className="bg-slate-800 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-sm text-slate-100 w-48" />
+              className="bg-white border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#16171D] w-48" />
           </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
           {loading ? (
-            <div className="p-5 space-y-3">{[...Array(6)].map((_, i) => <div key={i} className="h-9 bg-slate-700/30 rounded animate-pulse" />)}</div>
+            <div className="p-5 space-y-3">{[...Array(6)].map((_, i) => <div key={i} className="h-9 bg-[#F0EEE9] rounded animate-pulse" />)}</div>
           ) : filtradas.length === 0 ? (
             <p className="text-sm text-slate-500 py-16 text-center">
               {notas.length === 0 ? 'Nenhuma NF-e no período. Fature um pedido em "Faturamento" para gerar notas.' : 'Nenhuma nota encontrada para a busca.'}
             </p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-slate-900/40 text-xs text-slate-400">
+              <thead className="bg-white text-xs text-slate-400">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-semibold">Número / Série</th>
                   <th className="px-4 py-2.5 text-left font-semibold">Status</th>
@@ -228,30 +228,30 @@ export default function GestaoFiscal() {
               </thead>
               <tbody>
                 {filtradas.map(n => (
-                  <tr key={n.id} onClick={() => abrirDetalhe(n.id)} className="border-t border-slate-800 hover:bg-slate-700/20 cursor-pointer">
-                    <td className="px-4 py-2.5 font-semibold text-slate-100">{n.numero}<span className="text-slate-500 font-normal"> · {n.serie}</span></td>
+                  <tr key={n.id} onClick={() => abrirDetalhe(n.id)} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7] cursor-pointer">
+                    <td className="px-4 py-2.5 font-semibold text-[#16171D]">{n.numero}<span className="text-slate-500 font-normal"> · {n.serie}</span></td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${(STATUS_META[n.status] || STATUS_META.RASCUNHO).cls}`}>{(STATUS_META[n.status] || { label: n.status }).label}</span>
                     </td>
                     <td className="px-4 py-2.5">
-                      <p className="text-slate-200 truncate max-w-[200px]">{n.cliente}</p>
+                      <p className="text-[#5B5D69] truncate max-w-[200px]">{n.cliente}</p>
                       {n.pedidoNumero != null && <p className="text-[11px] text-slate-500">Pedido #{n.pedidoNumero}</p>}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-slate-300">{R$(n.liquido)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-amber-300">{R$(n.impostos)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono font-bold text-slate-100">{R$(n.bruto)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#8B8D98]">{R$(n.liquido)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#a9760a]">{R$(n.impostos)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-[#16171D]">{R$(n.bruto)}</td>
                     <td className="px-4 py-2.5 text-slate-400 text-xs">{dataBR(n.emissao)}</td>
                     <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => abrirDanfe(n.id)} title="Imprimir DANFE" className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-600/40"><Printer className="h-4 w-4" /></button>
+                        <button onClick={() => abrirDanfe(n.id)} title="Imprimir DANFE" className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-[#F6F5F2]"><Printer className="h-4 w-4" /></button>
                         {podeOperar && (n.status === 'RASCUNHO' || n.status === 'PENDENTE_EMISSAO') && (
-                          <button onClick={() => emitir(n.id)} title="Emitir na SEFAZ" className="p-1.5 rounded-lg text-emerald-300 hover:bg-emerald-500/15"><Send className="h-4 w-4" /></button>
+                          <button onClick={() => emitir(n.id)} title="Emitir na SEFAZ" className="p-1.5 rounded-lg text-[#0b7d4e] hover:bg-emerald-500/15"><Send className="h-4 w-4" /></button>
                         )}
                         {podeOperar && n.status === 'EMITIDO' && (
                           <>
-                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-slate-300 hover:bg-slate-600/40"><FileText className="h-4 w-4" /></button>
-                            <button onClick={() => devolver(n.id)} title="Devolução" className="p-1.5 rounded-lg text-amber-300 hover:bg-amber-500/15"><Undo2 className="h-4 w-4" /></button>
-                            <button onClick={() => cancelar(n.id)} title="Cancelar nota" className="p-1.5 rounded-lg text-rose-300 hover:bg-rose-500/15"><Ban className="h-4 w-4" /></button>
+                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-[#F6F5F2]"><FileText className="h-4 w-4" /></button>
+                            <button onClick={() => devolver(n.id)} title="Devolução" className="p-1.5 rounded-lg text-[#a9760a] hover:bg-amber-500/15"><Undo2 className="h-4 w-4" /></button>
+                            <button onClick={() => cancelar(n.id)} title="Cancelar nota" className="p-1.5 rounded-lg text-[#c3352b] hover:bg-rose-500/15"><Ban className="h-4 w-4" /></button>
                           </>
                         )}
                       </div>
@@ -266,13 +266,13 @@ export default function GestaoFiscal() {
 
       {/* Detalhe da nota — DANFE / CC-e / Devolução / duplicatas */}
       {detalhe && createPortal((
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
-          <div className="bg-slate-800/90 backdrop-blur-2xl border border-white/10 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-700 sticky top-0 bg-slate-800/95 backdrop-blur-xl z-10">
-              <h2 className="font-bold text-white">NF-e {String(detalhe.numero).padStart(6, '0')}/{detalhe.serie} · {detalhe.cliente?.razaoSocial || detalhe.destRazaoSocial || '—'}</h2>
-              <button onClick={() => setDetalhe(null)} className="text-slate-400 hover:text-white"><X className="h-5 w-5" /></button>
+        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
+          <div className="bg-[#F6F5F2] backdrop-blur-2xl border border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-[#F6F5F2] backdrop-blur-xl z-10">
+              <h2 className="font-bold text-[#16171D]">NF-e {String(detalhe.numero).padStart(6, '0')}/{detalhe.serie} · {detalhe.cliente?.razaoSocial || detalhe.destRazaoSocial || '—'}</h2>
+              <button onClick={() => setDetalhe(null)} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
             </div>
-            <div className="p-5 space-y-4 text-sm text-slate-200">
+            <div className="p-5 space-y-4 text-sm text-[#5B5D69]">
               <div className="grid grid-cols-3 gap-3 text-xs">
                 <Info label="Status" value={(STATUS_META[detalhe.status] || { label: detalhe.status }).label} />
                 <Info label="CFOP" value={detalhe.cfop} />
@@ -285,14 +285,14 @@ export default function GestaoFiscal() {
               </div>
 
               <div>
-                <h3 className="font-bold text-xs text-slate-300 mb-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> Duplicatas</h3>
+                <h3 className="font-bold text-xs text-[#8B8D98] mb-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> Duplicatas</h3>
                 {detalhe.duplicatas?.length ? (
-                  <div className="border border-slate-700 rounded-lg overflow-hidden">
+                  <div className="border border-[#E7E5DF] rounded-lg overflow-hidden">
                     <table className="w-full text-xs">
-                      <thead className="bg-slate-900/50 text-slate-400"><tr>{['Parcela', 'Vencimento', 'Valor'].map(h => <th key={h} className="px-2 py-1 text-left font-semibold">{h}</th>)}</tr></thead>
+                      <thead className="bg-white text-slate-400"><tr>{['Parcela', 'Vencimento', 'Valor'].map(h => <th key={h} className="px-2 py-1 text-left font-semibold">{h}</th>)}</tr></thead>
                       <tbody>
                         {detalhe.duplicatas.map((d: any) => (
-                          <tr key={d.id} className="border-t border-slate-800">
+                          <tr key={d.id} className="border-t border-[#E7E5DF]">
                             <td className="px-2 py-1 font-mono">{d.numero}</td>
                             <td className="px-2 py-1">{dataBR(d.dataVenc)}</td>
                             <td className="px-2 py-1 text-right font-mono">{R$(d.valor)}</td>
@@ -306,10 +306,10 @@ export default function GestaoFiscal() {
 
               {detalhe.cartasCorrecao?.length > 0 && (
                 <div>
-                  <h3 className="font-bold text-xs text-slate-300 mb-1">Cartas de Correção (CC-e)</h3>
+                  <h3 className="font-bold text-xs text-[#8B8D98] mb-1">Cartas de Correção (CC-e)</h3>
                   <div className="space-y-1">
                     {detalhe.cartasCorrecao.map((c: any) => (
-                      <div key={c.id} className="text-xs bg-white/[0.06] text-slate-300 rounded px-2 py-1">
+                      <div key={c.id} className="text-xs bg-[#F6F5F2] text-[#8B8D98] rounded px-2 py-1">
                         <b>#{c.sequencia}</b> · {dataBR(c.dataEvento)} — {c.correcao}
                       </div>
                     ))}
@@ -317,12 +317,12 @@ export default function GestaoFiscal() {
                 </div>
               )}
             </div>
-            <div className="px-5 py-3.5 border-t border-slate-700 flex flex-wrap justify-end gap-2 sticky bottom-0 bg-slate-800">
-              <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm flex items-center gap-1 hover:bg-slate-700"><Printer className="h-4 w-4" /> DANFE</button>
+            <div className="px-5 py-3.5 border-t border-[#E7E5DF] flex flex-wrap justify-end gap-2 sticky bottom-0 bg-white">
+              <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E7E5DF] text-[#5B5D69] text-sm flex items-center gap-1 hover:bg-[#EFEDE7]"><Printer className="h-4 w-4" /> DANFE</button>
               {podeOperar && detalhe.status === 'EMITIDO' && detalhe.finalidade !== '4' && (
                 <>
-                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-slate-600 text-slate-200 text-sm flex items-center gap-1 hover:bg-slate-700"><FileText className="h-4 w-4" /> CC-e</button>
-                  <button disabled={busy} onClick={() => devolver(detalhe.id)} className="px-3 py-2 rounded-lg border border-amber-500/40 text-amber-300 text-sm flex items-center gap-1 disabled:opacity-40 hover:bg-amber-500/10"><Undo2 className="h-4 w-4" /> Devolução</button>
+                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E7E5DF] text-[#5B5D69] text-sm flex items-center gap-1 hover:bg-[#EFEDE7]"><FileText className="h-4 w-4" /> CC-e</button>
+                  <button disabled={busy} onClick={() => devolver(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E8A317]/40 text-[#a9760a] text-sm flex items-center gap-1 disabled:opacity-40 hover:bg-[#E8A317]/12"><Undo2 className="h-4 w-4" /> Devolução</button>
                   <button onClick={() => cancelar(detalhe.id)} className="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm flex items-center gap-1"><Ban className="h-4 w-4" /> Cancelar</button>
                 </>
               )}
@@ -335,23 +335,23 @@ export default function GestaoFiscal() {
 }
 
 function Info({ label, value, className = '' }: { label: string; value: any; className?: string }) {
-  return <div className={className}><div className="text-[10px] uppercase text-slate-500 font-semibold">{label}</div><div className="font-mono text-slate-200 break-all">{value}</div></div>;
+  return <div className={className}><div className="text-[10px] uppercase text-slate-500 font-semibold">{label}</div><div className="font-mono text-[#5B5D69] break-all">{value}</div></div>;
 }
 
 const CORES: Record<string, string> = {
-  amber: 'bg-amber-400/10 text-amber-300',
-  neutral: 'bg-white/[0.06] text-slate-300',
-  rose: 'bg-rose-400/10 text-rose-300',
-  emerald: 'bg-emerald-400/10 text-emerald-300',
+  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
+  neutral: 'bg-[#F6F5F2] text-[#8B8D98]',
+  rose: 'bg-rose-400/10 text-[#c3352b]',
+  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
 };
 function Kpi({ icon, label, valor, cor }: { icon: any; label: string; valor: string | null; cor: string }) {
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5">
+    <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
         <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
-      {valor === null ? <div className="h-7 w-24 bg-slate-700/40 rounded animate-pulse" /> : <p className="text-2xl font-extrabold text-white tracking-tight truncate">{valor}</p>}
+      {valor === null ? <div className="h-7 w-24 bg-[#F0EEE9] rounded animate-pulse" /> : <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>}
     </div>
   );
 }

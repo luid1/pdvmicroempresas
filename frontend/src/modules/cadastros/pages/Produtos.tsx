@@ -64,22 +64,22 @@ export default function Produtos() {
             <thead><tr>{['Produto', 'NCM', 'Categoria', 'Classificação', 'Caixaria', 'Estoque', 'Preço', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {filtrados.map(p => (
-                <tr key={p.id} className="border-t border-slate-800 hover:bg-amber-500/5">
+                <tr key={p.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
                   <td className="px-3 py-1.5">
                     <div className="flex items-center gap-2.5">
                       <span className="text-xl w-7 text-center">{emojiDe(p.descricao, p.categoria)}</span>
-                      <div><p className="font-semibold text-slate-100 truncate max-w-[200px]">{p.descricao}</p><p className="text-slate-500 text-xs font-mono">{p.codigo}</p></div>
+                      <div><p className="font-semibold text-[#16171D] truncate max-w-[200px]">{p.descricao}</p><p className="text-slate-500 text-xs font-mono">{p.codigo}</p></div>
                     </div>
                   </td>
                   <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{p.ncm}</td>
-                  <td className="px-3 py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700/60 text-slate-300">{p.categoria || '—'}</span></td>
-                  <td className="px-3 py-1.5 text-slate-300 text-xs">{p.classificacao || '—'}</td>
+                  <td className="px-3 py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0EEE9] text-[#8B8D98]">{p.categoria || '—'}</span></td>
+                  <td className="px-3 py-1.5 text-[#8B8D98] text-xs">{p.classificacao || '—'}</td>
                   <td className="px-3 py-1.5 text-slate-400 text-xs truncate max-w-[140px]">{p.tipoCaixaria || '—'}</td>
                   <td className="px-3 py-1.5 text-xs">
-                    <span className="font-mono text-slate-200">{(Number(p.estoqueKg) || 0).toLocaleString('pt-BR')} kg</span>
+                    <span className="font-mono text-[#5B5D69]">{(Number(p.estoqueKg) || 0).toLocaleString('pt-BR')} kg</span>
                     {p.estoqueCaixas != null && <span className="text-slate-500 ml-1">· {Math.floor(p.estoqueCaixas)} cx</span>}
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono text-slate-300">{R$(p.precoVenda)}</td>
+                  <td className="px-3 py-1.5 text-right font-mono text-[#8B8D98]">{R$(p.precoVenda)}</td>
                   <td className="px-3 py-1.5"><StatusBadge ativo={p.ativo} /></td>
                   <td className="px-3 py-1.5 text-right"><div className="flex justify-end">
                     <Menu items={[
@@ -171,7 +171,7 @@ function ModalProduto({ item, onClose, onSalvo }: { item: any | null; onClose: (
         </Step>
       </SteppedForm>
 
-      {erro && <p className="text-xs text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }

@@ -175,37 +175,7 @@ export default function FinancialHub() {
   const [aba, setAba] = useState<AbaFin>('dashboard');
 
   return (
-    <div className="fin-dark flex flex-col h-full">
-      {/* Tema dark alinhado ao site — paleta espacial com contraste reforçado */}
-      <style>{`
-        .fin-dark { color: #e2e8f0; }
-        /* Superfícies (card mais claro que o canvas p/ separar por contraste, não por sombra) */
-        .fin-dark .bg-white { background-color: #141b27 !important; }
-        .fin-dark .bg-slate-50 { background-color: #0d1420 !important; }
-        .fin-dark .bg-neutral-50 { background-color: #1a2333 !important; }
-        .fin-dark .bg-neutral-100 { background-color: #1e2838 !important; }
-        .fin-dark .bg-neutral-200 { background-color: #273246 !important; }
-        .fin-dark .hover\\:bg-neutral-50:hover { background-color: #1e2838 !important; }
-        .fin-dark .hover\\:bg-neutral-50\\/70:hover { background-color: #1a2333 !important; }
-        /* Bordas de cristal */
-        .fin-dark .border-neutral-200 { border-color: rgba(255,255,255,0.09) !important; }
-        .fin-dark .border-neutral-100 { border-color: rgba(255,255,255,0.05) !important; }
-        .fin-dark .divide-neutral-100 > * + * { border-color: rgba(255,255,255,0.05) !important; }
-        /* Textos com contraste reforçado */
-        .fin-dark .text-slate-900 { color: #f8fafc !important; }
-        .fin-dark .text-slate-800 { color: #e8eef6 !important; }
-        .fin-dark .text-slate-700 { color: #cbd5e1 !important; }
-        .fin-dark .text-slate-600 { color: #aeb9c9 !important; }
-        .fin-dark .text-neutral-500 { color: #94a3b8 !important; }
-        .fin-dark .text-neutral-400 { color: #8290a3 !important; }
-        /* Inputs */
-        .fin-dark input:not([type="checkbox"]):not([type="radio"]),
-        .fin-dark select,
-        .fin-dark textarea { background-color: #1a2333 !important; color: #e8eef6 !important; border-color: rgba(255,255,255,0.1) !important; }
-        .fin-dark input::placeholder,
-        .fin-dark textarea::placeholder { color: #64748b !important; }
-      `}</style>
-
+    <div className="flex flex-col h-full">
       <PageHeader
         icon={<Scale className="h-4 w-4" />}
         titulo="Financeiro & DRE"
@@ -276,7 +246,7 @@ function DashboardDRE() {
   }
   if (erro || !dre) {
     return (
-      <div className="py-16 text-center text-[13px] text-rose-400">
+      <div className="py-16 text-center text-[13px] text-[#c3352b]">
         {erro || 'Sem dados de DRE.'}
       </div>
     );
@@ -586,7 +556,7 @@ function RentabilidadeClientes() {
       {carregando ? (
         <div className="py-16 text-center text-[13px] text-neutral-400">Carregando rentabilidade por cliente…</div>
       ) : erro ? (
-        <div className="py-16 text-center text-[13px] text-rose-400">{erro}</div>
+        <div className="py-16 text-center text-[13px] text-[#c3352b]">{erro}</div>
       ) : linhas.length === 0 ? (
         <div className="py-16 text-center text-[13px] text-neutral-400">Nenhuma venda a cliente identificado no período (rentabilidade usa NF-e emitidas com cliente).</div>
       ) : (
@@ -625,11 +595,11 @@ function RentabilidadeClientes() {
             </tbody>
             {tot && (
               <tfoot className="sticky bottom-0">
-                <tr className="bg-slate-900 text-white font-semibold text-[12px]">
-                  <td className="px-3 py-2 sticky left-0 bg-slate-900 truncate">Totais ({linhas.length})</td>
+                <tr className="bg-[#FBFAF7] text-[#16171D] font-semibold text-[12px]">
+                  <td className="px-3 py-2 sticky left-0 bg-white truncate">Totais ({linhas.length})</td>
                   <td className="px-3 py-2 text-right tabular-nums">{brlCompact(tot.receita)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">{brlCompact(tot.custos)}</td>
-                  <td className={`px-3 py-2 text-right tabular-nums ${tot.resultado >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                  <td className={`px-3 py-2 text-right tabular-nums ${tot.resultado >= 0 ? 'text-[#0b7d4e]' : 'text-[#c3352b]'}`}>
                     {brlCompact(tot.resultado)}
                   </td>
                   <td className="px-3 py-2 text-center tabular-nums">{pct(tot.margemPct)}</td>
@@ -706,7 +676,7 @@ function RentabilidadeProdutos() {
       {carregando ? (
         <div className="py-16 text-center text-[13px] text-neutral-400">Carregando margem por produto…</div>
       ) : erro ? (
-        <div className="py-16 text-center text-[13px] text-rose-400">{erro}</div>
+        <div className="py-16 text-center text-[13px] text-[#c3352b]">{erro}</div>
       ) : linhas.length === 0 ? (
         <div className="py-16 text-center text-[13px] text-neutral-400">Nenhuma venda registrada no período (margem usa movimentações de venda + NF-e emitidas).</div>
       ) : (
@@ -757,13 +727,13 @@ function RentabilidadeProdutos() {
             </tbody>
             {k && (
               <tfoot className="sticky bottom-0">
-                <tr className="bg-slate-900 text-white font-semibold text-[13px]">
-                  <td className="px-4 py-3 sticky left-0 bg-slate-900" colSpan={6}>
+                <tr className="bg-[#FBFAF7] text-[#16171D] font-semibold text-[13px]">
+                  <td className="px-4 py-3 sticky left-0 bg-white" colSpan={6}>
                     Totalizador ({linhas.length} itens)
                   </td>
                   <td className="px-4 py-3 text-right tabular-nums">{brl(k.receitaTotal)}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{brl(k.cmv)}</td>
-                  <td className="px-4 py-3 text-right tabular-nums text-emerald-300">{brl(k.lucroBruto)}</td>
+                  <td className="px-4 py-3 text-right tabular-nums text-[#0b7d4e]">{brl(k.lucroBruto)}</td>
                   <td className="px-4 py-3 text-center tabular-nums">{pct(k.margemMediaPct)}</td>
                 </tr>
               </tfoot>
@@ -967,8 +937,8 @@ function TagStatus({ status }: { status: StatusTitulo }) {
 function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose: () => void; onBaixar: () => void }) {
   return createPortal((
     <div className="fixed inset-0 z-[70]">
-      <div className="absolute inset-0 bg-slate-950/60 animate-backdrop" onClick={onClose} />
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-[#0E141F]/90 backdrop-blur-2xl border-l border-white/10 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] flex flex-col animate-[slideL_.2s_ease-out]">
+      <div className="absolute inset-0 bg-white/60 animate-backdrop" onClick={onClose} />
+      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white backdrop-blur-2xl border-l border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] flex flex-col animate-[slideL_.2s_ease-out]">
         <div className="border-b border-neutral-200 px-6 py-4 flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-widest text-neutral-400 font-semibold">Detalhes do título</p>
@@ -977,7 +947,7 @@ function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose:
           <TagStatus status={titulo.status} />
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          <div className="rounded-2xl bg-white/[0.04] border border-neutral-200 p-5">
+          <div className="rounded-2xl bg-[#F6F5F2] border border-neutral-200 p-5">
             <p className="text-[12px] uppercase tracking-wider font-semibold text-neutral-500">Valor do título</p>
             <p className={`text-4xl font-semibold tabular-nums mt-1 ${titulo.natureza === 'RECEITA' ? 'text-emerald-700' : 'text-slate-900'}`}>
               {brl(titulo.valor)}
@@ -1041,10 +1011,10 @@ function TabFin({
     <button
       onClick={onClick}
       className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-        ativo ? 'text-amber-300' : 'text-neutral-500 hover:text-slate-700'
+        ativo ? 'text-[#a9760a]' : 'text-neutral-500 hover:text-slate-700'
       }`}
     >
-      <Icon className={`h-4 w-4 ${ativo ? 'text-amber-300' : 'text-neutral-400'}`} />
+      <Icon className={`h-4 w-4 ${ativo ? 'text-[#a9760a]' : 'text-neutral-400'}`} />
       {label}
       {ativo && <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-amber-400 rounded-full" />}
     </button>

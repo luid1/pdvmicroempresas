@@ -69,7 +69,7 @@ export default function PainelFaturamento() {
   const topProdutosPerda: any[] = perdas?.porProduto?.slice(0, 6) || [];
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-100">
+    <div className="flex flex-col h-full bg-white text-[#16171D]">
       <PageHeader
         icon={<BarChart3 className="h-4 w-4" />}
         titulo="Painel de Faturamento"
@@ -77,13 +77,13 @@ export default function PainelFaturamento() {
         actions={
           <>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-amber-500 outline-none" />
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D] focus:border-[#E8A317] outline-none" />
             </label>
             <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm text-slate-100 focus:border-amber-500 outline-none" />
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D] focus:border-[#E8A317] outline-none" />
             </label>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3.5 py-2 rounded-lg text-slate-200 font-medium text-sm">
-              <RefreshCw className={`h-4 w-4 text-amber-300 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-white border border-[#E7E5DF] hover:bg-[#EFEDE7] px-3.5 py-2 rounded-lg text-[#5B5D69] font-medium text-sm">
+              <RefreshCw className={`h-4 w-4 text-[#a9760a] ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
           </>
         }
@@ -103,16 +103,16 @@ export default function PainelFaturamento() {
             </div>
 
             {/* ── Gráfico de faturamento — barras finas centralizadas + insight de % perda ── */}
-            <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-6">
+            <div className="bg-white rounded-2xl border border-[#E7E5DF] p-6">
               <div className="flex items-center justify-between mb-5">
-                <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-amber-300" /> Faturamento por dia
+                <h3 className="font-semibold text-sm text-[#5B5D69] flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-[#a9760a]" /> Faturamento por dia
                 </h3>
                 {/* Insight gerencial: % de perda sobre o faturamento */}
-                <div className="flex items-center gap-2 bg-slate-900/60 border border-slate-700/60 rounded-full pl-2.5 pr-3 py-1">
-                  <TrendingDown className={`h-3.5 w-3.5 ${perdaPct > 0 ? 'text-rose-400' : 'text-slate-500'}`} />
+                <div className="flex items-center gap-2 bg-white border border-[#E7E5DF] rounded-full pl-2.5 pr-3 py-1">
+                  <TrendingDown className={`h-3.5 w-3.5 ${perdaPct > 0 ? 'text-[#c3352b]' : 'text-slate-500'}`} />
                   <span className="text-[11px] text-slate-400">Perda s/ faturamento</span>
-                  <span className={`text-sm font-bold ${perdaPct > 0 ? 'text-rose-400' : 'text-slate-300'}`}>{perdaPct.toFixed(1)}%</span>
+                  <span className={`text-sm font-bold ${perdaPct > 0 ? 'text-[#c3352b]' : 'text-[#8B8D98]'}`}>{perdaPct.toFixed(1)}%</span>
                 </div>
               </div>
               {porDia.length === 0 ? (
@@ -135,8 +135,8 @@ export default function PainelFaturamento() {
             {/* ── Linha 50/50: Maiores clientes  ×  Perdas por produto ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Esquerda: maiores clientes faturados */}
-              <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5">
-                <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2 mb-4">
+              <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
+                <h3 className="font-semibold text-sm text-[#5B5D69] flex items-center gap-2 mb-4">
                   <Users className="h-4 w-4 text-slate-400" /> Maiores clientes faturados
                 </h3>
                 {porCliente.length === 0 ? (
@@ -146,10 +146,10 @@ export default function PainelFaturamento() {
                     {porCliente.slice(0, 5).map(c => (
                       <div key={c.nome}>
                         <div className="flex items-center justify-between text-xs mb-1">
-                          <span className="text-slate-300 font-medium truncate pr-2">{c.nome}</span>
-                          <span className="font-bold text-white font-mono shrink-0">{R$(c.valor)}</span>
+                          <span className="text-[#8B8D98] font-medium truncate pr-2">{c.nome}</span>
+                          <span className="font-bold text-[#16171D] font-mono shrink-0">{R$(c.valor)}</span>
                         </div>
-                        <div className="h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
+                        <div className="h-1.5 rounded-full bg-[#F0EEE9] overflow-hidden">
                           <div className="h-full bg-amber-300/70 rounded-full" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
                         </div>
                       </div>
@@ -159,20 +159,20 @@ export default function PainelFaturamento() {
               </div>
 
               {/* Direita: perdas por produto — fundo azul-escuro, vermelho só nos números */}
-              <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5">
+              <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-sm text-slate-200 flex items-center gap-2">
-                    <TrendingDown className="h-4 w-4 text-rose-400" /> Perdas &amp; quebras por produto
+                  <h3 className="font-semibold text-sm text-[#5B5D69] flex items-center gap-2">
+                    <TrendingDown className="h-4 w-4 text-[#c3352b]" /> Perdas &amp; quebras por produto
                   </h3>
                   <div className="text-right">
                     <p className="text-[10px] text-slate-500 uppercase tracking-wide">Total perdido</p>
-                    <p className="text-base font-bold text-rose-400 font-mono leading-tight">{R$(perdaValor)}</p>
+                    <p className="text-base font-bold text-[#c3352b] font-mono leading-tight">{R$(perdaValor)}</p>
                   </div>
                 </div>
                 {/* resumo compacto perda × quebra */}
                 <div className="flex gap-4 mb-3 text-xs">
-                  <span className="text-slate-400">Perdas <b className="text-rose-400 font-mono">{R$(perdas?.perda?.valor || 0)}</b></span>
-                  <span className="text-slate-400">Quebras <b className="text-rose-400 font-mono">{R$(perdas?.quebra?.valor || 0)}</b></span>
+                  <span className="text-slate-400">Perdas <b className="text-[#c3352b] font-mono">{R$(perdas?.perda?.valor || 0)}</b></span>
+                  <span className="text-slate-400">Quebras <b className="text-[#c3352b] font-mono">{R$(perdas?.quebra?.valor || 0)}</b></span>
                 </div>
                 {topProdutosPerda.length === 0 ? (
                   <p className="text-sm text-slate-500 py-6 text-center">Sem perdas no período. 🎉</p>
@@ -180,10 +180,10 @@ export default function PainelFaturamento() {
                   <table className="w-full text-xs">
                     <tbody>
                       {topProdutosPerda.map((p) => (
-                        <tr key={p.codigo + p.descricao} className="border-t border-slate-700/40">
-                          <td className="py-1.5 text-slate-300 font-medium truncate max-w-0">{p.descricao}</td>
+                        <tr key={p.codigo + p.descricao} className="border-t border-[#E7E5DF]">
+                          <td className="py-1.5 text-[#8B8D98] font-medium truncate max-w-0">{p.descricao}</td>
                           <td className="py-1.5 text-right text-slate-500 font-mono px-2">{nkg(p.qtd)}</td>
-                          <td className="py-1.5 text-right font-mono font-bold text-rose-400">{R$(p.valor)}</td>
+                          <td className="py-1.5 text-right font-mono font-bold text-[#c3352b]">{R$(p.valor)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -199,19 +199,19 @@ export default function PainelFaturamento() {
 }
 
 const CORES: Record<string, string> = {
-  emerald: 'bg-emerald-400/10 text-emerald-300',
-  amber: 'bg-amber-400/10 text-amber-300',
-  sky: 'bg-white/[0.06] text-slate-300',
-  violet: 'bg-white/[0.06] text-slate-300',
+  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
+  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
+  sky: 'bg-[#F6F5F2] text-[#8B8D98]',
+  violet: 'bg-[#F6F5F2] text-[#8B8D98]',
 };
 function Kpi({ icon, label, valor, cor }: { icon: any; label: string; valor: string; cor: string }) {
   return (
-    <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5">
+    <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
         <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
-      <p className="text-2xl font-extrabold text-white tracking-tight truncate">{valor}</p>
+      <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>
     </div>
   );
 }

@@ -3,13 +3,14 @@
 @tailwind utilities;
 
 /* ============================================================
-   HETROS DESIGN SYSTEM — "Dark Tech / Glass"
-   Canvas espacial #0B0F17 · vidro cirúrgico (blur + borda de
-   cristal 1px) · microinterações táteis · tipografia oversized.
+   LUMIN DESIGN SYSTEM — "Luz"
+   Área de trabalho clara (porcelana #F6F5F2) · tinta #16171D ·
+   ouro/âmbar como a "luz" da marca · painéis brancos com borda
+   de 1px · a Lu com halo cônico como assinatura do sistema.
    ============================================================ */
 
 @layer base {
-  html { font-family: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  html { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
   body { @apply antialiased text-sm; }
 
   /* Microinteração tátil global: todo botão responde ao toque */
@@ -18,48 +19,45 @@
 }
 
 @layer components {
-  /* Placa de vidro — superfícies flutuantes (cards, painéis) */
+  /* Placa — superfícies flutuantes (cards, painéis) sobre a porcelana */
   .glass {
-    @apply backdrop-blur-xl border border-white/[0.06] rounded-2xl;
-    background-image: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    @apply rounded-2xl border border-[#E7E5DF];
+    background: #FFFFFF;
+    box-shadow: 0 1px 2px rgba(22,23,29,0.04), 0 8px 24px rgba(22,23,29,0.05);
   }
-  .glass-hover {
-    @apply transition-all duration-300 ease-in-out;
-  }
+  .glass-hover { @apply transition-all duration-300 ease-in-out; }
   .glass-hover:hover {
-    @apply border-white/[0.12];
-    box-shadow: 0 14px 40px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    @apply border-[#DDD9CF];
+    box-shadow: 0 2px 4px rgba(22,23,29,0.05), 0 14px 34px rgba(22,23,29,0.09);
     transform: translateY(-2px);
   }
 
-  /* Card legado (Dashboard e telas antigas) → vira vidro automaticamente */
+  /* Card legado (Dashboard e telas antigas) → placa branca automática */
   .card {
     @apply rounded-2xl transition-all duration-300 ease-in-out;
-    background-image: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    background: #FFFFFF !important;
+    border: 1px solid #E7E5DF !important;
+    box-shadow: 0 1px 2px rgba(22,23,29,0.04), 0 8px 24px rgba(22,23,29,0.05);
   }
   .card:hover {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.44), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+    border-color: #DDD9CF !important;
+    box-shadow: 0 2px 4px rgba(22,23,29,0.05), 0 14px 34px rgba(22,23,29,0.08);
   }
 
-  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-amber-400 text-slate-900 rounded-lg text-xs font-semibold hover:bg-amber-300 active:bg-amber-500 transition-all duration-300 disabled:opacity-50 shadow-lg shadow-amber-900/30 active:scale-[0.98]; }
-  .btn-secondary { @apply inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-all duration-300 active:scale-[0.98]; }
-  .btn-danger { @apply inline-flex items-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg text-xs font-semibold hover:bg-red-500 transition-all duration-300 active:scale-[0.98]; }
-  .input { @apply w-full px-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400/25 focus:border-amber-400 placeholder:text-gray-400; }
-  .label { @apply block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5; }
-  .th { @apply text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider; }
+  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-[#16171D] text-white rounded-xl text-xs font-semibold hover:bg-[#000] active:bg-[#000] transition-all duration-300 disabled:opacity-50 active:scale-[0.98]; }
+  .btn-secondary { @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-300 active:scale-[0.98]; }
+  .btn-danger { @apply inline-flex items-center gap-2 px-3 py-2 bg-[#E0483D] text-white rounded-xl text-xs font-semibold hover:bg-[#c93a30] transition-all duration-300 active:scale-[0.98]; }
+  .input { @apply w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#E8A317]/25 focus:border-[#E8A317] placeholder:text-[#8B8D98]; }
+  .label { @apply block text-xs font-semibold text-[#5B5D69] uppercase tracking-wide mb-1.5; }
+  .th { @apply text-left px-4 py-3 text-xs font-semibold text-[#8B8D98] uppercase tracking-wider; }
   .td { @apply px-4 py-3; }
 }
 
 /* Scrollbar minimalista */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.45); }
+::-webkit-scrollbar-thumb { background: rgba(22,23,29,0.16); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(22,23,29,0.30); }
 
 /* Animações — modais e conteúdo entram com fade + slide sutil */
 @keyframes fadeInUp {
@@ -70,7 +68,7 @@
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .animate-fade-in { animation: fadeIn 0.25s ease-out; }
 
-/* Pop-up com física: entra com escala + leve rotação de perspectiva + blur */
+/* Pop-up com física: entra com escala + leve blur */
 @keyframes modalPop {
   from { opacity: 0; transform: translateY(24px) scale(0.92); filter: blur(8px); }
   60%  { filter: blur(0); }
@@ -79,10 +77,10 @@
 .animate-modal { animation: modalPop 0.42s cubic-bezier(0.16, 1, 0.3, 1); }
 
 /* Backdrop desfoca o mundo ao redor de forma progressiva */
-@keyframes backdropIn { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(14px); } }
+@keyframes backdropIn { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(6px); } }
 .animate-backdrop { animation: backdropIn 0.3s ease-out forwards; }
 
-/* Aurora — blobs de fundo derivam lentamente, dando vida ao canvas */
+/* Aurora — blobs de fundo derivam lentamente (usados no dark do login) */
 @keyframes auroraDrift {
   0%   { transform: translate(0, 0) scale(1); }
   33%  { transform: translate(6%, 4%) scale(1.08); }
@@ -92,28 +90,28 @@
 .animate-aurora { animation: auroraDrift 22s ease-in-out infinite; }
 .animate-aurora-slow { animation: auroraDrift 30s ease-in-out infinite reverse; }
 
-/* Shimmer — skeleton de carregamento em vez de tela vazia */
+/* Shimmer — skeleton de carregamento */
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 .skeleton {
   position: relative; overflow: hidden;
-  background: rgba(255,255,255,0.04); border-radius: 0.5rem;
+  background: rgba(22,23,29,0.05); border-radius: 0.5rem;
 }
 .skeleton::after {
   content: ''; position: absolute; inset: 0; transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  background: linear-gradient(90deg, transparent, rgba(22,23,29,0.06), transparent);
   animation: shimmer 1.6s infinite;
 }
 
 /* Glow pulsante para indicadores "ao vivo" */
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 6px rgba(52,211,153,0.6); }
-  50%      { box-shadow: 0 0 14px rgba(52,211,153,0.95); }
+  0%, 100% { box-shadow: 0 0 6px rgba(15,169,104,0.5); }
+  50%      { box-shadow: 0 0 14px rgba(15,169,104,0.85); }
 }
 .animate-pulse-glow { animation: pulseGlow 2.4s ease-in-out infinite; }
 
 /* ============================================================
-   LOGIN — fundo animado (gradiente que respira + orbs flutuantes
-   + grade tech que deriva). Movimento contínuo e vivo.
+   LOGIN — fundo animado (mantido escuro: a tela de entrada é o
+   único palco noturno, para o wordmark "Lumin" brilhar).
    ============================================================ */
 @keyframes loginPan {
   0%   { background-position: 0% 50%, 100% 50%, 0% 50%; }
@@ -122,17 +120,19 @@
 }
 .login-canvas {
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(255,194,75,0.14), transparent 55%),
-    radial-gradient(120% 120% at 100% 100%, rgba(201,138,34,0.16), transparent 55%),
-    linear-gradient(125deg, #080B22 0%, #0B0F2B 40%, #0E1234 65%, #080B22 100%);
+    radial-gradient(120% 120% at 0% 0%, rgba(245,184,65,0.16), transparent 55%),
+    radial-gradient(120% 120% at 100% 100%, rgba(232,163,23,0.16), transparent 55%),
+    linear-gradient(125deg, #14151E 0%, #171A26 40%, #1B1E2C 65%, #14151E 100%);
   background-size: 160% 160%, 160% 160%, 320% 320%;
   animation: loginPan 24s ease-in-out infinite;
 }
 
-/* Fontes de destaque (mesmas da landing Lumin PDV) */
-.font-display { font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif; letter-spacing: -0.02em; }
-.font-plex-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-/* Logo — usada só no wordmark "Lumin" / "L" */
+/* Fontes de destaque */
+.font-display { font-family: 'Bricolage Grotesque', 'Inter', sans-serif; letter-spacing: -0.02em; }
+.font-plex-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum" 1, "zero" 1; }
+/* Números tabulares (KPIs, tabelas de valores) */
+.font-num { font-family: 'JetBrains Mono', ui-monospace, monospace; font-feature-settings: "tnum" 1, "zero" 1; letter-spacing: -0.01em; }
+/* Logo — wordmark "Lumin" / "L" */
 .font-logo { font-family: 'Comfortaa', 'Bricolage Grotesque', sans-serif; font-weight: 700; letter-spacing: 0.01em; }
 
 @keyframes orbFloat1 { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(14%,10%) scale(1.18); } 66% { transform: translate(-10%,16%) scale(0.9); } }
@@ -154,14 +154,10 @@
 }
 
 /* ============================================================
-   LU COMMAND — spotlight da assistente. Núcleo de IA: um anel de
-   gradiente (âmbar → violeta) que orbita a barra, um glow que respira
-   atrás e uma varredura quando a Lu está pensando. A borda é "viva".
+   LU COMMAND — a assinatura do sistema. Um anel de gradiente
+   (âmbar → violeta) que orbita a barra, um glow que respira atrás
+   e uma varredura quando a Lu está pensando. A borda é "viva".
    ============================================================ */
-
-/* Anel de gradiente giratório — a borda que respira. Reusado na barra
-   e no orbe: o filho fica sobre o ::before, deixando à mostra só ~1.5px
-   de gradiente como moldura luminosa. */
 @keyframes luSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .lu-ring { position: relative; overflow: hidden; }
 .lu-ring::before {
@@ -171,24 +167,24 @@
   width: 210%; aspect-ratio: 1;
   transform: translate(-50%, -50%);
   background: conic-gradient(from 0deg,
-    #FFC24B, #C98A22 22%, #7C6BF0 46%, #C98A22 70%, #FFC24B);
+    #F5B841, #E8A317 22%, #7C6BF0 46%, #E8A317 70%, #F5B841);
   animation: luSpin 7s linear infinite;
 }
 .lu-ring > * { position: relative; z-index: 1; }
 .lu-ring.is-thinking::before { animation-duration: 2.1s; }
 
-/* Glow iridescente que respira atrás da barra (mesma paleta, desfocado). */
+/* Glow iridescente que respira atrás da barra (tunado p/ fundo claro). */
 @keyframes luAuraBreathe {
-  0%, 100% { opacity: 0.4;  transform: translate(-50%, -50%) rotate(0deg)   scale(1); }
-  50%      { opacity: 0.78; transform: translate(-50%, -50%) rotate(180deg) scale(1.06); }
+  0%, 100% { opacity: 0.30; transform: translate(-50%, -50%) rotate(0deg)   scale(1); }
+  50%      { opacity: 0.55; transform: translate(-50%, -50%) rotate(180deg) scale(1.06); }
 }
 .lu-aura {
   position: absolute; top: 50%; left: 50%;
-  width: 118%; aspect-ratio: 3 / 1;
+  width: 116%; aspect-ratio: 3 / 1;
   transform: translate(-50%, -50%);
   background: conic-gradient(from 90deg,
-    rgba(255,194,75,0.6), rgba(124,107,240,0.42), rgba(255,194,75,0.6));
-  filter: blur(48px);
+    rgba(245,184,65,0.7), rgba(124,107,240,0.4), rgba(245,184,65,0.7));
+  filter: blur(44px);
   border-radius: 999px;
   animation: luAuraBreathe 7.5s ease-in-out infinite;
 }
@@ -197,14 +193,14 @@
 /* Varredura glossy quando a Lu está pensando. */
 @keyframes luSweep { 0% { transform: translateX(-130%); } 100% { transform: translateX(130%); } }
 .lu-sweep {
-  background: linear-gradient(100deg, transparent 20%, rgba(255,214,140,0.14) 50%, transparent 80%);
+  background: linear-gradient(100deg, transparent 20%, rgba(232,163,23,0.14) 50%, transparent 80%);
   animation: luSweep 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* Núcleo do orbe pulsando. */
 @keyframes luOrbGlow {
-  0%, 100% { box-shadow: 0 0 12px rgba(255,194,75,0.4); }
-  50%      { box-shadow: 0 0 22px rgba(255,194,75,0.75); }
+  0%, 100% { box-shadow: 0 0 12px rgba(232,163,23,0.4); }
+  50%      { box-shadow: 0 0 22px rgba(232,163,23,0.7); }
 }
 .lu-orb { animation: luOrbGlow 3s ease-in-out infinite; }
 
@@ -218,141 +214,146 @@
 }
 
 /* ============================================================
-   TEMA DARK GLOBAL — remapeia as telas legadas (claras) para o
-   canvas espacial. Telas já dark (slate/hex) não são afetadas.
-   A DANFE/impressos abrem em janela própria (ficam brancos).
+   TEMA CLARO GLOBAL — "Luz". As telas legadas foram escritas com
+   classes Tailwind claras (bg-white, text-gray-900…). Aqui elas são
+   remapeadas para a paleta Luz (porcelana + tinta) e recebem polimento.
+   Ilhas escuras remanescentes (hex/utilitárias) são neutralizadas p/
+   claro enquanto cada tela não é migrada à mão.
    ============================================================ */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* ── Tokens de marca (navy + âmbar) — alinhados ao site Lumin ────────── */
-  --ink: #0B0F2B;        /* canvas/fundo */
-  --panel: #151A3D;      /* cards/painéis */
-  --panel-2: #1C2250;    /* elevado */
-  --line: #2A3068;       /* bordas/linhas */
-  --lumin: #FFC24B;      /* acento (marca) */
-  --lumin-deep: #C98A22; /* acento hover/gradiente */
-  --text: #E9EAF5;       /* texto principal */
-  --muted: #8E93BC;      /* texto secundário */
+  /* ── Superfícies ─────────────────────────────────────────────────────── */
+  --paper: #F6F5F2;      /* canvas / área de trabalho */
+  --panel: #FFFFFF;      /* cards / painéis */
+  --panel-2: #FBFAF7;    /* sub-superfície / zebra */
+  --line: #E7E5DF;       /* bordas / linhas */
+  --night: #171A26;      /* sidebar / superfícies escuras */
 
-  /* ── Cores semânticas (papéis fixos) ────────────────────────────────── */
-  --ok: #34D399;         /* sucesso (verde) */
-  --err: #F43F5E;        /* erro (vermelho) */
-  --warn: #FFC24B;       /* atenção (âmbar) */
+  /* ── Tinta (texto) ───────────────────────────────────────────────────── */
+  --ink: #16171D;        /* texto principal */
+  --ink-2: #5B5D69;      /* texto secundário */
+  --ink-3: #8B8D98;      /* texto terciário / placeholder */
 
-  /* ── Forma e sombra ─────────────────────────────────────────────────── */
-  --radius-card: 18px;
+  /* ── Marca ───────────────────────────────────────────────────────────── */
+  --gold: #E8A317;       /* âmbar (a "luz") */
+  --gold-bright: #F5B841;/* âmbar claro / gradiente */
+  --lumin: #E8A317;      /* alias legado */
+
+  /* ── Semânticas (papéis fixos) ───────────────────────────────────────── */
+  --up: #0FA968;         /* alta / entrada / sucesso */
+  --down: #E0483D;       /* baixa / saída / erro */
+  --ok: #0FA968;
+  --err: #E0483D;
+  --warn: #E8A317;
+  --text: var(--ink);
+  --muted: var(--ink-2);
+
+  /* ── Forma e sombra ──────────────────────────────────────────────────── */
+  --radius-card: 14px;
   --radius-control: 12px;
-  --shadow-card: 0 8px 32px rgba(0,0,0,0.37), inset 0 1px 0 rgba(255,255,255,0.06);
-  --shadow-elevated: 0 14px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.1);
+  --shadow-card: 0 1px 2px rgba(22,23,29,0.04), 0 8px 24px rgba(22,23,29,0.05);
+  --shadow-elevated: 0 2px 4px rgba(22,23,29,0.05), 0 14px 34px rgba(22,23,29,0.09);
 
-  /* ── Paleta de gráficos (âmbar principal + apoio; verde/vermelho só semânticos) */
-  --chart-1: #FFC24B;
-  --chart-2: #C98A22;
-  --chart-3: #8E93BC;
-  --chart-4: #6366F1;
-  --chart-5: #34D399;
-  --chart-6: #F43F5E;
+  /* ── Paleta de gráficos ──────────────────────────────────────────────── */
+  --chart-1: #E8A317;
+  --chart-2: #F5B841;
+  --chart-3: #8B8D98;
+  --chart-4: #7C6BF0;
+  --chart-5: #0FA968;
+  --chart-6: #E0483D;
 }
-body { background-color: var(--ink) !important; color: var(--text) !important; }
+body { background-color: var(--paper) !important; color: var(--ink) !important; }
 
-/* Superfícies (paleta navy do site) */
+/* Superfícies claras → paleta Luz */
 .bg-white { background-color: var(--panel) !important; }
-.bg-gray-50, .bg-slate-50 { background-color: var(--ink) !important; }
-.bg-gray-100, .bg-slate-100 { background-color: var(--panel) !important; }
-.bg-gray-200 { background-color: var(--panel-2) !important; }
+.bg-gray-50, .bg-slate-50 { background-color: var(--paper) !important; }
+.bg-gray-100, .bg-slate-100 { background-color: var(--panel-2) !important; }
+.bg-gray-200 { background-color: #EFEDE7 !important; }
 
-/* Hovers claros → escuros */
-.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover { background-color: var(--panel) !important; }
-.hover\:bg-gray-100:hover, .hover\:bg-slate-100:hover { background-color: var(--panel-2) !important; }
+/* Hovers claros */
+.hover\:bg-gray-50:hover, .hover\:bg-slate-50:hover { background-color: var(--panel-2) !important; }
+.hover\:bg-gray-100:hover, .hover\:bg-slate-100:hover { background-color: #EFEDE7 !important; }
 
 /* Textos */
-.text-gray-900, .text-slate-900, .text-gray-800, .text-slate-800 { color: var(--text) !important; }
-.text-gray-700, .text-slate-700, .text-gray-600, .text-slate-600 { color: #cbd5e1 !important; }
-.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 { color: var(--muted) !important; }
+.text-gray-900, .text-slate-900, .text-gray-800, .text-slate-800 { color: var(--ink) !important; }
+.text-gray-700, .text-slate-700, .text-gray-600, .text-slate-600 { color: var(--ink-2) !important; }
+.text-gray-500, .text-slate-500, .text-gray-400, .text-slate-400 { color: var(--ink-3) !important; }
 
-/* Bordas de cristal */
-.border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200 { border-color: rgba(255, 255, 255, 0.06) !important; }
-.border-gray-300, .border-slate-300 { border-color: rgba(255, 255, 255, 0.12) !important; }
+/* Bordas */
+.border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200 { border-color: var(--line) !important; }
+.border-gray-300, .border-slate-300 { border-color: #D8D4CA !important; }
 
 /* Inputs / selects / textarea */
-input, select, textarea { color-scheme: dark; }
-input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: var(--panel); color: var(--text); }
-input::placeholder, textarea::placeholder { color: #64748b; }
+input, select, textarea { color-scheme: light; }
+input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: var(--panel); color: var(--ink); }
+input::placeholder, textarea::placeholder { color: var(--ink-3); }
 
 /* Componentes utilitários legados */
-.btn-secondary { background-color: rgba(255, 255, 255, 0.04) !important; color: #cbd5e1 !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
-.btn-secondary:hover { background-color: rgba(255, 255, 255, 0.08) !important; }
-.input { background-color: var(--panel) !important; color: var(--text) !important; border: 1px solid var(--line) !important; }
-.th { color: var(--muted) !important; }
+.btn-secondary { background-color: var(--panel) !important; color: var(--ink) !important; border: 1px solid var(--line) !important; }
+.btn-secondary:hover { background-color: var(--panel-2) !important; border-color: #D8D4CA !important; }
+.input { background-color: var(--panel) !important; color: var(--ink) !important; border: 1px solid var(--line) !important; }
+.th { color: var(--ink-3) !important; }
 
-/* Tabelas legadas: linhas respiram com hover de vidro */
+/* Tabelas legadas: linhas respiram com hover sutil */
 tbody tr { transition: background-color 0.2s ease-out; }
-tbody tr:hover { background-color: rgba(255, 255, 255, 0.025) !important; }
+tbody tr:hover { background-color: rgba(22,23,29,0.025) !important; }
 
-/* Foco de input mais presente — anel âmbar sutil ao redor do vidro */
+/* Foco de input — anel âmbar sutil */
 .input:focus, input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
   outline: none;
-  border-color: rgba(255, 194, 75, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(255, 194, 75, 0.16) !important;
+  border-color: rgba(232,163,23,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(232,163,23,0.16) !important;
 }
 
-/* ============================================================
-   DROPDOWNS NATIVOS — a lista aberta do <select> herdava o branco
-   do SO. Força o popup e as opções para o canvas escuro.
-   ============================================================ */
-select { color-scheme: dark; }
-option, optgroup {
-  background-color: var(--panel) !important;
-  color: var(--text) !important;
-}
-optgroup { color: var(--muted) !important; }
+/* Dropdowns nativos */
+select { color-scheme: light; }
+option, optgroup { background-color: var(--panel) !important; color: var(--ink) !important; }
+optgroup { color: var(--ink-3) !important; }
 
 /* ============================================================
-   TINTS CLARAS LEGADAS → versões escuras. Garante que nenhuma tela
-   (mesmo não redesenhada) mostre caixas claras fora do padrão.
-   As telas novas usam classes de opacidade (bg-sky-500/15) e não
-   são afetadas por estas regras.
+   TINTS SUAVES — mantidas claras, ajustadas à porcelana para não
+   "estourar" branco puro. As telas usam essas tints como pílulas
+   de status (âmbar/verde/vermelho/violeta).
    ============================================================ */
-.bg-amber-50  { background-color: rgba(245,158,11,0.08) !important; }
-.bg-amber-100 { background-color: rgba(245,158,11,0.15) !important; }
-.bg-yellow-50  { background-color: rgba(234,179,8,0.08) !important; }
-.bg-yellow-100 { background-color: rgba(234,179,8,0.12) !important; }
-.bg-yellow-200 { background-color: rgba(234,179,8,0.16) !important; }
-.bg-blue-50   { background-color: rgba(255,194,75,0.08) !important; }
-.bg-blue-100  { background-color: rgba(255,194,75,0.15) !important; }
-.bg-sky-50    { background-color: rgba(255,194,75,0.08) !important; }
-.bg-sky-100   { background-color: rgba(255,194,75,0.15) !important; }
-.bg-green-50  { background-color: rgba(16,185,129,0.08) !important; }
-.bg-green-100 { background-color: rgba(16,185,129,0.14) !important; }
-.bg-emerald-50  { background-color: rgba(16,185,129,0.08) !important; }
-.bg-emerald-100 { background-color: rgba(16,185,129,0.14) !important; }
-.bg-red-50    { background-color: rgba(244,63,94,0.08) !important; }
-.bg-red-100   { background-color: rgba(244,63,94,0.14) !important; }
-.bg-rose-50   { background-color: rgba(244,63,94,0.08) !important; }
-.bg-rose-100  { background-color: rgba(244,63,94,0.14) !important; }
-.bg-orange-50  { background-color: rgba(249,115,22,0.08) !important; }
-.bg-orange-100 { background-color: rgba(249,115,22,0.14) !important; }
-.bg-purple-50  { background-color: rgba(139,92,246,0.08) !important; }
-.bg-purple-100 { background-color: rgba(139,92,246,0.14) !important; }
-.bg-violet-50  { background-color: rgba(139,92,246,0.08) !important; }
-.bg-violet-100 { background-color: rgba(139,92,246,0.14) !important; }
-.bg-cyan-50   { background-color: rgba(6,182,212,0.08) !important; }
-.bg-cyan-100  { background-color: rgba(6,182,212,0.14) !important; }
-.bg-indigo-50  { background-color: rgba(99,102,241,0.08) !important; }
-.bg-indigo-100 { background-color: rgba(99,102,241,0.14) !important; }
+.bg-amber-50  { background-color: rgba(232,163,23,0.10) !important; }
+.bg-amber-100 { background-color: rgba(232,163,23,0.18) !important; }
+.bg-yellow-50  { background-color: rgba(234,179,8,0.10) !important; }
+.bg-yellow-100 { background-color: rgba(234,179,8,0.16) !important; }
+.bg-blue-50   { background-color: rgba(124,107,240,0.09) !important; }
+.bg-blue-100  { background-color: rgba(124,107,240,0.16) !important; }
+.bg-sky-50    { background-color: rgba(56,150,240,0.09) !important; }
+.bg-sky-100   { background-color: rgba(56,150,240,0.16) !important; }
+.bg-green-50  { background-color: rgba(15,169,104,0.10) !important; }
+.bg-green-100 { background-color: rgba(15,169,104,0.16) !important; }
+.bg-emerald-50  { background-color: rgba(15,169,104,0.10) !important; }
+.bg-emerald-100 { background-color: rgba(15,169,104,0.16) !important; }
+.bg-red-50    { background-color: rgba(224,72,61,0.09) !important; }
+.bg-red-100   { background-color: rgba(224,72,61,0.15) !important; }
+.bg-rose-50   { background-color: rgba(224,72,61,0.09) !important; }
+.bg-rose-100  { background-color: rgba(224,72,61,0.15) !important; }
+.bg-orange-50  { background-color: rgba(249,115,22,0.10) !important; }
+.bg-orange-100 { background-color: rgba(249,115,22,0.16) !important; }
+.bg-purple-50  { background-color: rgba(124,107,240,0.09) !important; }
+.bg-purple-100 { background-color: rgba(124,107,240,0.16) !important; }
+.bg-violet-50  { background-color: rgba(124,107,240,0.09) !important; }
+.bg-violet-100 { background-color: rgba(124,107,240,0.16) !important; }
+.bg-cyan-50   { background-color: rgba(6,182,212,0.10) !important; }
+.bg-cyan-100  { background-color: rgba(6,182,212,0.16) !important; }
+.bg-indigo-50  { background-color: rgba(99,102,241,0.10) !important; }
+.bg-indigo-100 { background-color: rgba(99,102,241,0.16) !important; }
 
-/* Textos escuros feitos para tints claras → clareia p/ contraste no dark */
-.text-blue-700, .text-blue-800, .text-blue-900 { color: #fcd34d !important; }
-.text-sky-700, .text-sky-800 { color: #fcd34d !important; }
-.text-green-700, .text-green-800, .text-green-900 { color: #6ee7b7 !important; }
-.text-emerald-700, .text-emerald-800 { color: #6ee7b7 !important; }
-.text-red-700, .text-red-800, .text-red-900 { color: #fda4af !important; }
-.text-rose-700, .text-rose-800 { color: #fda4af !important; }
-.text-yellow-700, .text-yellow-800, .text-yellow-900 { color: #fde68a !important; }
-.text-amber-700, .text-amber-800, .text-amber-900 { color: #fcd34d !important; }
-.text-orange-600, .text-orange-700, .text-orange-800 { color: #fdba74 !important; }
-.text-purple-700, .text-purple-800 { color: #c4b5fd !important; }
-.text-violet-700, .text-violet-800 { color: #c4b5fd !important; }
-.text-cyan-700, .text-cyan-800 { color: #67e8f9 !important; }
-.text-indigo-700, .text-indigo-800 { color: #a5b4fc !important; }
+/* Textos de status → tons legíveis sobre tints claras */
+.text-blue-700, .text-blue-800, .text-blue-900 { color: #5a4fd0 !important; }
+.text-sky-700, .text-sky-800 { color: #1f74c9 !important; }
+.text-green-700, .text-green-800, .text-green-900 { color: #0b7d4e !important; }
+.text-emerald-700, .text-emerald-800 { color: #0b7d4e !important; }
+.text-red-700, .text-red-800, .text-red-900 { color: #c3352b !important; }
+.text-rose-700, .text-rose-800 { color: #c3352b !important; }
+.text-yellow-700, .text-yellow-800, .text-yellow-900 { color: #a9760a !important; }
+.text-amber-700, .text-amber-800, .text-amber-900 { color: #a9760a !important; }
+.text-orange-600, .text-orange-700, .text-orange-800 { color: #c25a12 !important; }
+.text-purple-700, .text-purple-800 { color: #5a4fd0 !important; }
+.text-violet-700, .text-violet-800 { color: #5a4fd0 !important; }
+.text-cyan-700, .text-cyan-800 { color: #0e7490 !important; }
+.text-indigo-700, .text-indigo-800 { color: #4f46e5 !important; }

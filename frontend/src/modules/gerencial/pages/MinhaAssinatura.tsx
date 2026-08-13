@@ -51,10 +51,10 @@ interface Status {
 const ORDEM: AddonKey[] = ['pdvs', 'usuarios', 'filiais'];
 
 const STATUS_LABEL: Record<string, { txt: string; cls: string }> = {
-  ATIVA: { txt: 'Ativa', cls: 'bg-emerald-500/15 text-emerald-400' },
-  TRIAL: { txt: 'Em teste', cls: 'bg-slate-500/15 text-slate-300' },
-  SUSPENSA: { txt: 'Suspensa', cls: 'bg-amber-500/15 text-amber-400' },
-  CANCELADA: { txt: 'Cancelada', cls: 'bg-rose-500/15 text-rose-400' },
+  ATIVA: { txt: 'Ativa', cls: 'bg-emerald-500/15 text-[#0b7d4e]' },
+  TRIAL: { txt: 'Em teste', cls: 'bg-slate-500/15 text-[#8B8D98]' },
+  SUSPENSA: { txt: 'Suspensa', cls: 'bg-amber-500/15 text-[#a9760a]' },
+  CANCELADA: { txt: 'Cancelada', cls: 'bg-rose-500/15 text-[#c3352b]' },
 };
 
 export default function MinhaAssinatura() {
@@ -144,11 +144,11 @@ export default function MinhaAssinatura() {
           ) : (
             <>
               {/* Resumo do plano */}
-              <div className="bg-white/[0.02] backdrop-blur-xl border border-white/[0.07] rounded-2xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+              <div className="bg-[#F6F5F2] backdrop-blur-xl border border-[#E7E5DF] rounded-2xl p-5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-lg font-bold text-white">{status.plano?.nome}</h2>
+                      <h2 className="text-lg font-bold text-[#16171D]">{status.plano?.nome}</h2>
                       {st && <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${st.cls}`}>{st.txt}</span>}
                     </div>
                     <p className="text-xs text-slate-500 mt-1">
@@ -158,17 +158,17 @@ export default function MinhaAssinatura() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-white tabular-nums">{R$(valorCiclo)}</p>
+                    <p className="text-2xl font-bold text-[#16171D] tabular-nums">{R$(valorCiclo)}</p>
                     <p className="text-[11px] text-slate-500">{anual ? 'por ano' : 'por mês'}</p>
                   </div>
                 </div>
 
                 {/* Capacidade atual */}
-                <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-white/[0.06]">
+                <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-[#E7E5DF]">
                   {([['pdvs', 'Caixas', status.limites?.maxPdvs], ['usuarios', 'Usuários', status.limites?.maxUsuarios], ['filiais', 'Lojas', status.limites?.maxFiliais]] as const).map(
                     ([k, rot, val]) => (
                       <div key={k} className="text-center">
-                        <p className="text-lg font-bold text-slate-100 tabular-nums">{limTxt(val)}</p>
+                        <p className="text-lg font-bold text-[#16171D] tabular-nums">{limTxt(val)}</p>
                         <p className="text-[11px] text-slate-500">{rot}</p>
                       </div>
                     ),
@@ -179,8 +179,8 @@ export default function MinhaAssinatura() {
               {/* Ampliar capacidade */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="h-4 w-4 text-amber-300" />
-                  <h3 className="text-sm font-bold text-white">Precisa de mais fôlego?</h3>
+                  <Sparkles className="h-4 w-4 text-[#a9760a]" />
+                  <h3 className="text-sm font-bold text-[#16171D]">Precisa de mais fôlego?</h3>
                 </div>
 
                 <div className="space-y-3">
@@ -190,12 +190,12 @@ export default function MinhaAssinatura() {
                     const preco = precoAddon(k);
                     const n = qtd[k];
                     return (
-                      <div key={k} className="bg-white/[0.02] border border-white/[0.06] rounded-xl p-4 flex items-start gap-4">
+                      <div key={k} className="bg-[#F6F5F2] border border-[#E7E5DF] rounded-xl p-4 flex items-start gap-4">
                         <div className="h-9 w-9 rounded-lg bg-amber-500/12 flex items-center justify-center shrink-0">
-                          <Icon className="h-4 w-4 text-amber-300" />
+                          <Icon className="h-4 w-4 text-[#a9760a]" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-slate-100 leading-snug">{meta.nome}</p>
+                          <p className="text-sm font-semibold text-[#16171D] leading-snug">{meta.nome}</p>
                           <p className="text-[12.5px] text-slate-400 mt-1 leading-relaxed">{meta.desc}</p>
                           <p className="text-[12px] text-slate-500 mt-1.5 font-semibold">+ {R$(preco)}/mês por unidade</p>
                         </div>
@@ -203,11 +203,11 @@ export default function MinhaAssinatura() {
                           <button
                             onClick={() => alterar(k, -1)}
                             disabled={n <= 0}
-                            className="h-8 w-8 rounded-lg bg-white/[0.05] border border-white/[0.09] text-slate-300 hover:bg-white/[0.09] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
+                            className="h-8 w-8 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#8B8D98] hover:bg-[#F6F5F2] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center"
                           >
                             <Minus className="h-4 w-4" />
                           </button>
-                          <span className="w-7 text-center text-sm font-bold text-white tabular-nums">{n}</span>
+                          <span className="w-7 text-center text-sm font-bold text-[#16171D] tabular-nums">{n}</span>
                           <button
                             onClick={() => alterar(k, +1)}
                             disabled={n >= maxAddon(k)}
@@ -223,15 +223,15 @@ export default function MinhaAssinatura() {
               </div>
 
               {/* Barra de confirmação */}
-              <div className="sticky bottom-0 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-4 flex items-center justify-between gap-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]">
+              <div className="sticky bottom-0 bg-[#F6F5F2] backdrop-blur-xl border border-[#E7E5DF] rounded-2xl p-4 flex items-center justify-between gap-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)]">
                 <div>
                   <p className="text-[11px] text-slate-500">Add-ons por mês</p>
-                  <p className="text-base font-bold text-white tabular-nums">{R$(addonsMensal)}</p>
+                  <p className="text-base font-bold text-[#16171D] tabular-nums">{R$(addonsMensal)}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">
                     <p className="text-[11px] text-slate-500">Novo total {anual ? 'anual' : 'mensal'}</p>
-                    <p className="text-base font-bold text-amber-300 tabular-nums">{R$(valorCiclo)}</p>
+                    <p className="text-base font-bold text-[#a9760a] tabular-nums">{R$(valorCiclo)}</p>
                   </div>
                   <button
                     onClick={confirmar}

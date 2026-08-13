@@ -100,12 +100,12 @@ export default function MatrizFiscal() {
         actions={
           <>
             {regras.length === 0 && (
-              <button onClick={semear} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 border border-amber-400/30 text-amber-300 hover:bg-amber-500/25 transition-all duration-300 active:scale-[0.98]">
+              <button onClick={semear} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-500/15 border border-[#E8A317]/40 text-[#a9760a] hover:bg-amber-500/25 transition-all duration-300 active:scale-[0.98]">
                 <Sparkles className="h-3.5 w-3.5" /> Regras-padrão
               </button>
             )}
             <button onClick={carregar} className={btnGlass}>
-              <RefreshCw className="h-3.5 w-3.5 text-amber-300" /> Atualizar
+              <RefreshCw className="h-3.5 w-3.5 text-[#a9760a]" /> Atualizar
             </button>
             <button onClick={() => setEdit({ ...VAZIA })} className={btnPrimary}>
               <Plus className="h-3.5 w-3.5" /> Nova regra
@@ -150,7 +150,7 @@ export default function MatrizFiscal() {
         )}
 
         {loading ? (
-          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full" /></div>
         ) : regras.length === 0 ? (
           <div className="text-center text-gray-400 py-16">
             <Scale className="h-10 w-10 mx-auto mb-2 text-gray-200" />
@@ -188,9 +188,9 @@ export default function MatrizFiscal() {
       </div>
 
       {edit && createPortal((
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setEdit(null)}>
-          <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 sticky top-0 bg-[#0E141F]/95 backdrop-blur-xl z-10">
+        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setEdit(null)}>
+          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl z-10">
               <h2 className="font-bold text-gray-900">{edit.id ? 'Editar' : 'Nova'} regra fiscal</h2>
               <button onClick={() => setEdit(null)}><X className="h-5 w-5 text-gray-400" /></button>
             </div>
@@ -229,8 +229,8 @@ export default function MatrizFiscal() {
                 </div>
               </L>
             </div>
-            <div className="px-5 py-3 border-t border-white/10 flex justify-end gap-2 sticky bottom-0 bg-[#0E141F]/95 backdrop-blur-xl">
-              <button onClick={() => setEdit(null)} className="px-4 py-2 rounded-lg border border-white/10 text-slate-300 text-sm hover:bg-white/5">Cancelar</button>
+            <div className="px-5 py-3 border-t border-[#E7E5DF] flex justify-end gap-2 sticky bottom-0 bg-white backdrop-blur-xl">
+              <button onClick={() => setEdit(null)} className="px-4 py-2 rounded-lg border border-[#E7E5DF] text-[#8B8D98] text-sm hover:bg-white/5">Cancelar</button>
               <button onClick={salvar} className="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm">Salvar</button>
             </div>
           </div>

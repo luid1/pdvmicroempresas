@@ -540,7 +540,7 @@ function AprovacoesTab({
                   <button
                     onClick={() => onEditar(oc)}
                     title="Editar CI"
-                    className="shrink-0 h-8 w-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 hover:bg-neutral-900 hover:text-white active:scale-95 transition"
+                    className="shrink-0 h-8 w-8 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-500 hover:bg-neutral-900 hover:text-[#16171D] active:scale-95 transition"
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
@@ -917,7 +917,7 @@ function ProdutoSheet({
   return (
     <div className="absolute inset-0 z-40 flex items-end">
       <div
-        className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 bg-[#16171D]/40 backdrop-blur-sm transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0'}`}
         onClick={() => sairPara(onClose)}
       />
       <div
@@ -1171,7 +1171,7 @@ function NovaOCModal({
 
   return (
     <div className="absolute inset-0 z-40 flex items-end">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-[#16171D]/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full bg-[#FAFAFA] rounded-t-[2rem] max-h-[94%] overflow-y-auto animate-[slideUp_.25s_ease-out]">
         <div className="sticky top-0 bg-[#FAFAFA] px-6 pt-3 pb-4 z-10">
           <div className="mx-auto h-1.5 w-12 rounded-full bg-neutral-300 mb-4" />

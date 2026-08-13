@@ -97,17 +97,17 @@ export default function Relatorios() {
       {/* Cabeçalho */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-amber-500/15 border border-amber-400/25 flex items-center justify-center">
-            <BarChart3 className="h-4 w-4 text-amber-300" />
+          <div className="h-9 w-9 rounded-xl bg-amber-500/15 border border-[#E8A317]/40 flex items-center justify-center">
+            <BarChart3 className="h-4 w-4 text-[#a9760a]" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white tracking-tight">Relatórios Gerenciais</h1>
+            <h1 className="text-lg font-bold text-[#16171D] tracking-tight">Relatórios Gerenciais</h1>
             <p className="text-[11px] text-slate-500">Curva ABC, giro, rankings e posição financeira</p>
           </div>
         </div>
         <button
           onClick={carregar}
-          className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-slate-300 hover:bg-white/[0.08] transition-all"
+          className="flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#8B8D98] hover:bg-[#F6F5F2] transition-all"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> Atualizar
         </button>
@@ -124,8 +124,8 @@ export default function Relatorios() {
               onClick={() => setAba(a.id)}
               className={`flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-lg border transition-all ${
                 ativo
-                  ? 'bg-amber-400/[0.14] border-amber-400/30 text-amber-200'
-                  : 'bg-white/[0.02] border-white/[0.06] text-slate-400 hover:bg-white/[0.05]'
+                  ? 'bg-amber-400/[0.14] border-[#E8A317]/40 text-[#a9760a]'
+                  : 'bg-[#F6F5F2] border-[#E7E5DF] text-slate-400 hover:bg-[#F6F5F2]'
               }`}
             >
               <Icon className="h-3.5 w-3.5" /> {a.label}
@@ -136,14 +136,14 @@ export default function Relatorios() {
 
       {/* Filtros de período (ABC, giro e ranking usam; aging é posição atual) */}
       {aba !== 'aging' && (
-        <div className="flex flex-wrap items-end gap-3 mb-4 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+        <div className="flex flex-wrap items-end gap-3 mb-4 p-3 rounded-xl bg-[#F6F5F2] border border-[#E7E5DF]">
           <label className="text-[10px] text-slate-500">
             De
             <input
               type="date"
               value={de}
               onChange={(e) => setDe(e.target.value)}
-              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
+              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#E8A317]/40"
             />
           </label>
           <label className="text-[10px] text-slate-500">
@@ -152,7 +152,7 @@ export default function Relatorios() {
               type="date"
               value={ate}
               onChange={(e) => setAte(e.target.value)}
-              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
+              className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#E8A317]/40"
             />
           </label>
           {aba === 'abc' && (
@@ -161,7 +161,7 @@ export default function Relatorios() {
               <select
                 value={abcTipo}
                 onChange={(e) => setAbcTipo(e.target.value as any)}
-                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
+                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#E8A317]/40"
               >
                 <option value="produto">Por produto</option>
                 <option value="cliente">Por cliente</option>
@@ -174,7 +174,7 @@ export default function Relatorios() {
               <select
                 value={rankTipo}
                 onChange={(e) => setRankTipo(e.target.value as any)}
-                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-slate-200 bg-white/[0.04] border border-white/[0.08] focus:outline-none focus:border-amber-400/50"
+                className="block mt-1 text-xs rounded-lg px-2 py-1.5 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#E8A317]/40"
               >
                 <option value="vendedor">Vendedores</option>
                 <option value="cliente">Clientes</option>
@@ -203,17 +203,17 @@ export default function Relatorios() {
 
 function Kpi({ titulo, valor, cor }: { titulo: string; valor: string; cor?: string }) {
   return (
-    <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-3">
+    <div className="rounded-xl bg-[#F6F5F2] border border-[#E7E5DF] p-3">
       <p className="text-[10px] text-slate-500 uppercase tracking-wide">{titulo}</p>
-      <p className={`text-base font-bold mt-0.5 ${cor || 'text-white'}`}>{valor}</p>
+      <p className={`text-base font-bold mt-0.5 ${cor || 'text-[#16171D]'}`}>{valor}</p>
     </div>
   );
 }
 
 const CLASSE_COR: Record<string, string> = {
-  A: 'text-emerald-300 bg-emerald-500/15 border-emerald-400/25',
-  B: 'text-amber-300 bg-amber-500/15 border-amber-400/25',
-  C: 'text-slate-400 bg-white/[0.05] border-white/10',
+  A: 'text-[#0b7d4e] bg-emerald-500/15 border-emerald-400/25',
+  B: 'text-[#a9760a] bg-amber-500/15 border-[#E8A317]/40',
+  C: 'text-slate-400 bg-[#F6F5F2] border-[#E7E5DF]',
 };
 
 function PainelABC({ dados, tipo }: { dados: any; tipo: string }) {
@@ -235,15 +235,15 @@ function PainelABC({ dados, tipo }: { dados: any; tipo: string }) {
   return (
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <Kpi titulo="Faturamento total" valor={brl(dados.total)} cor="text-amber-300" />
-        <Kpi titulo="Classe A" valor={`${dados.resumo.A.itens} • ${brl(dados.resumo.A.valor)}`} cor="text-emerald-300" />
-        <Kpi titulo="Classe B" valor={`${dados.resumo.B.itens} • ${brl(dados.resumo.B.valor)}`} cor="text-amber-300" />
-        <Kpi titulo="Classe C" valor={`${dados.resumo.C.itens} • ${brl(dados.resumo.C.valor)}`} cor="text-slate-300" />
+        <Kpi titulo="Faturamento total" valor={brl(dados.total)} cor="text-[#a9760a]" />
+        <Kpi titulo="Classe A" valor={`${dados.resumo.A.itens} • ${brl(dados.resumo.A.valor)}`} cor="text-[#0b7d4e]" />
+        <Kpi titulo="Classe B" valor={`${dados.resumo.B.itens} • ${brl(dados.resumo.B.valor)}`} cor="text-[#a9760a]" />
+        <Kpi titulo="Classe C" valor={`${dados.resumo.C.itens} • ${brl(dados.resumo.C.valor)}`} cor="text-[#8B8D98]" />
       </div>
       <BotaoExportar onClick={exportar} />
-      <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+      <div className="overflow-x-auto rounded-xl border border-[#E7E5DF]">
         <table className="w-full text-[11px]">
-          <thead className="bg-white/[0.03] text-slate-500">
+          <thead className="bg-[#F6F5F2] text-slate-500">
             <tr>
               <th className="text-left px-3 py-2 font-medium">#</th>
               <th className="text-left px-3 py-2 font-medium">{tipo === 'produto' ? 'Produto' : 'Cliente'}</th>
@@ -256,11 +256,11 @@ function PainelABC({ dados, tipo }: { dados: any; tipo: string }) {
           </thead>
           <tbody>
             {dados.itens.map((i: any) => (
-              <tr key={i.id} className="border-t border-white/[0.04] hover:bg-white/[0.02]">
+              <tr key={i.id} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
                 <td className="px-3 py-1.5 text-slate-500">{i.posicao}</td>
-                <td className="px-3 py-1.5 text-slate-200 truncate max-w-[280px]">{i.rotulo}</td>
+                <td className="px-3 py-1.5 text-[#5B5D69] truncate max-w-[280px]">{i.rotulo}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{num(i.quantidade, 2)}</td>
-                <td className="px-3 py-1.5 text-right text-slate-200">{brl(i.valor)}</td>
+                <td className="px-3 py-1.5 text-right text-[#5B5D69]">{brl(i.valor)}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{pct(i.percentual)}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{pct(i.percentualAcumulado)}</td>
                 <td className="px-3 py-1.5 text-center">
@@ -299,13 +299,13 @@ function PainelGiro({ dados }: { dados: any }) {
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
         <Kpi titulo="Itens analisados" valor={num(dados.resumo.totalItens)} />
-        <Kpi titulo="Itens parados" valor={num(dados.resumo.parados)} cor="text-rose-300" />
+        <Kpi titulo="Itens parados" valor={num(dados.resumo.parados)} cor="text-[#c3352b]" />
         <Kpi titulo="Período (dias)" valor={num(dados.dias)} />
       </div>
       <BotaoExportar onClick={exportar} />
-      <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+      <div className="overflow-x-auto rounded-xl border border-[#E7E5DF]">
         <table className="w-full text-[11px]">
-          <thead className="bg-white/[0.03] text-slate-500">
+          <thead className="bg-[#F6F5F2] text-slate-500">
             <tr>
               <th className="text-left px-3 py-2 font-medium">Produto</th>
               <th className="text-right px-3 py-2 font-medium">Consumo</th>
@@ -317,17 +317,17 @@ function PainelGiro({ dados }: { dados: any }) {
           </thead>
           <tbody>
             {dados.itens.map((i: any) => (
-              <tr key={i.produtoId} className="border-t border-white/[0.04] hover:bg-white/[0.02]">
-                <td className="px-3 py-1.5 text-slate-200 truncate max-w-[280px]">{i.rotulo}</td>
+              <tr key={i.produtoId} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
+                <td className="px-3 py-1.5 text-[#5B5D69] truncate max-w-[280px]">{i.rotulo}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{num(i.consumo, 2)}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{num(i.saldoAtual, 2)}</td>
-                <td className="px-3 py-1.5 text-right text-slate-200">{num(i.giroAnualizado, 2)}</td>
+                <td className="px-3 py-1.5 text-right text-[#5B5D69]">{num(i.giroAnualizado, 2)}</td>
                 <td className="px-3 py-1.5 text-right text-slate-400">{i.coberturaDias === null ? '∞' : `${i.coberturaDias} d`}</td>
                 <td className="px-3 py-1.5 text-center">
                   {i.parado ? (
-                    <span className="inline-block px-1.5 py-0.5 rounded border border-rose-400/25 bg-rose-500/15 text-rose-300 text-[10px] font-bold">Parado</span>
+                    <span className="inline-block px-1.5 py-0.5 rounded border border-rose-400/25 bg-rose-500/15 text-[#c3352b] text-[10px] font-bold">Parado</span>
                   ) : (
-                    <span className="inline-block px-1.5 py-0.5 rounded border border-emerald-400/25 bg-emerald-500/15 text-emerald-300 text-[10px] font-bold">Ativo</span>
+                    <span className="inline-block px-1.5 py-0.5 rounded border border-emerald-400/25 bg-emerald-500/15 text-[#0b7d4e] text-[10px] font-bold">Ativo</span>
                   )}
                 </td>
               </tr>
@@ -361,9 +361,9 @@ function PainelRanking({ dados, tipo }: { dados: any; tipo: string }) {
   return (
     <div>
       <BotaoExportar onClick={exportar} />
-      <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+      <div className="overflow-x-auto rounded-xl border border-[#E7E5DF]">
         <table className="w-full text-[11px]">
-          <thead className="bg-white/[0.03] text-slate-500">
+          <thead className="bg-[#F6F5F2] text-slate-500">
             <tr>
               <th className="text-left px-3 py-2 font-medium">#</th>
               <th className="text-left px-3 py-2 font-medium capitalize">{tipo}</th>
@@ -380,10 +380,10 @@ function PainelRanking({ dados, tipo }: { dados: any; tipo: string }) {
           </thead>
           <tbody>
             {dados.itens.map((i: any, idx: number) => (
-              <tr key={i.id} className="border-t border-white/[0.04] hover:bg-white/[0.02]">
+              <tr key={i.id} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
                 <td className="px-3 py-1.5 text-slate-500">{i.posicao ?? idx + 1}</td>
-                <td className="px-3 py-1.5 text-slate-200 truncate max-w-[280px]">{i.rotulo}</td>
-                <td className="px-3 py-1.5 text-right text-slate-200">{brl(i.valor)}</td>
+                <td className="px-3 py-1.5 text-[#5B5D69] truncate max-w-[280px]">{i.rotulo}</td>
+                <td className="px-3 py-1.5 text-right text-[#5B5D69]">{brl(i.valor)}</td>
                 {temTicket ? (
                   <>
                     <td className="px-3 py-1.5 text-right text-slate-400">{num(i.pedidos)}</td>
@@ -425,14 +425,14 @@ function PainelAging({ dados }: { dados: any }) {
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        <Kpi titulo="Total a receber" valor={brl(dados.aReceber.total)} cor="text-emerald-300" />
-        <Kpi titulo="Total a pagar" valor={brl(dados.aPagar.total)} cor="text-rose-300" />
-        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-emerald-300' : 'text-rose-300'} />
+        <Kpi titulo="Total a receber" valor={brl(dados.aReceber.total)} cor="text-[#0b7d4e]" />
+        <Kpi titulo="Total a pagar" valor={brl(dados.aPagar.total)} cor="text-[#c3352b]" />
+        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-[#0b7d4e]' : 'text-[#c3352b]'} />
       </div>
       <BotaoExportar onClick={exportar} />
-      <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
+      <div className="overflow-x-auto rounded-xl border border-[#E7E5DF]">
         <table className="w-full text-[11px]">
-          <thead className="bg-white/[0.03] text-slate-500">
+          <thead className="bg-[#F6F5F2] text-slate-500">
             <tr>
               <th className="text-left px-3 py-2 font-medium">Faixa de vencimento</th>
               <th className="text-right px-3 py-2 font-medium">A receber</th>
@@ -441,16 +441,16 @@ function PainelAging({ dados }: { dados: any }) {
           </thead>
           <tbody>
             {faixas.map((f) => (
-              <tr key={f.chave} className="border-t border-white/[0.04] hover:bg-white/[0.02]">
-                <td className="px-3 py-1.5 text-slate-300">{f.label}</td>
-                <td className="px-3 py-1.5 text-right text-emerald-300/90">{brl(dados.aReceber[f.chave])}</td>
-                <td className="px-3 py-1.5 text-right text-rose-300/90">{brl(dados.aPagar[f.chave])}</td>
+              <tr key={f.chave} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
+                <td className="px-3 py-1.5 text-[#8B8D98]">{f.label}</td>
+                <td className="px-3 py-1.5 text-right text-[#0b7d4e]/90">{brl(dados.aReceber[f.chave])}</td>
+                <td className="px-3 py-1.5 text-right text-[#c3352b]/90">{brl(dados.aPagar[f.chave])}</td>
               </tr>
             ))}
-            <tr className="border-t border-white/10 font-bold bg-white/[0.02]">
-              <td className="px-3 py-2 text-slate-200">Total</td>
-              <td className="px-3 py-2 text-right text-emerald-300">{brl(dados.aReceber.total)}</td>
-              <td className="px-3 py-2 text-right text-rose-300">{brl(dados.aPagar.total)}</td>
+            <tr className="border-t border-[#E7E5DF] font-bold bg-[#F6F5F2]">
+              <td className="px-3 py-2 text-[#5B5D69]">Total</td>
+              <td className="px-3 py-2 text-right text-[#0b7d4e]">{brl(dados.aReceber.total)}</td>
+              <td className="px-3 py-2 text-right text-[#c3352b]">{brl(dados.aPagar.total)}</td>
             </tr>
           </tbody>
         </table>

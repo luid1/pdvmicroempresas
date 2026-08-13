@@ -98,7 +98,7 @@ export default function NotasEmitidas() {
         subtitulo={`${notasFiltradas.length} de ${notas.length} nota(s)`}
         actions={
           <button onClick={carregar} className={btnGlass}>
-            <RefreshCw className="h-3.5 w-3.5 text-amber-400" /> Atualizar
+            <RefreshCw className="h-3.5 w-3.5 text-[#a9760a]" /> Atualizar
           </button>
         }
       />
@@ -106,11 +106,11 @@ export default function NotasEmitidas() {
       <SeloSimulacao detalhe="notas geradas em simulação — sem transmissão à SEFAZ. CC-e e devolução também são simuladas." />
 
       {/* Barra de filtros */}
-      <div className="bg-white/[0.02] backdrop-blur-xl border-b border-white/[0.06] px-5 py-2.5 flex flex-wrap items-center gap-3 shrink-0">
+      <div className="bg-[#F6F5F2] backdrop-blur-xl border-b border-[#E7E5DF] px-5 py-2.5 flex flex-wrap items-center gap-3 shrink-0">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por chave, nº ou cliente..."
-            className="w-full border border-white/[0.08] bg-white/[0.04] text-slate-100 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-amber-400/60" />
+            className="w-full border border-[#E7E5DF] bg-[#F6F5F2] text-[#16171D] rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none focus:border-[#E8A317]/40" />
         </div>
         <label className="flex items-center gap-1.5 text-xs text-gray-500 font-semibold">De
           <input type="date" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className="border border-gray-300 rounded px-2 py-1.5 text-sm" />
@@ -128,7 +128,7 @@ export default function NotasEmitidas() {
 
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
-          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full" /></div>
         ) : notasFiltradas.length === 0 ? (
           <div className="text-center text-gray-400 py-16"><FileText className="h-10 w-10 mx-auto mb-2 text-gray-200" /> Nenhuma NF-e encontrada com os filtros atuais.</div>
         ) : (
@@ -168,9 +168,9 @@ export default function NotasEmitidas() {
 
       {/* Modal de detalhe da nota */}
       {detalhe && createPortal((
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
-          <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 sticky top-0 bg-[#0E141F]/95 backdrop-blur-xl z-10">
+        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
+          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl z-10">
               <h2 className="font-bold text-gray-900">NF-e {String(detalhe.numero).padStart(6, '0')}/{detalhe.serie} · {detalhe.cliente?.razaoSocial}</h2>
               <button onClick={() => setDetalhe(null)}><X className="h-5 w-5 text-gray-400" /></button>
             </div>
@@ -221,7 +221,7 @@ export default function NotasEmitidas() {
                 </div>
               )}
             </div>
-            <div className="px-5 py-3 border-t border-white/10 flex flex-wrap justify-end gap-2 sticky bottom-0 bg-[#0E141F]/95 backdrop-blur-xl">
+            <div className="px-5 py-3 border-t border-[#E7E5DF] flex flex-wrap justify-end gap-2 sticky bottom-0 bg-white backdrop-blur-xl">
               <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border text-gray-600 text-sm flex items-center gap-1"><Printer className="h-4 w-4" /> DANFE</button>
               <button onClick={() => enviarEmail(detalhe)} className="px-3 py-2 rounded-lg border text-gray-600 text-sm flex items-center gap-1"><Mail className="h-4 w-4" /> Enviar e-mail</button>
               {detalhe.status === 'EMITIDO' && detalhe.finalidade !== '4' && <>

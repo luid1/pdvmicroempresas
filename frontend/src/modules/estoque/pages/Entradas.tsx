@@ -8,7 +8,7 @@ import { CadastroShell, TopBar, FilterBar, TableCard, Th, Modal, Secao, Campo, L
 const dt = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 const UNIDADES = ['KG', 'UN', 'CX', 'MAÇO', 'SACA', 'DZ', 'LT'];
 const soDigitos = (v: string) => v.replace(/\D/g, '');
-const STATUS_COR: Record<string, string> = { CONFERIDA: 'bg-emerald-500/15 text-emerald-400', PENDENTE: 'bg-amber-500/15 text-amber-400', DIVERGENTE: 'bg-rose-500/15 text-rose-400', CANCELADA: 'bg-slate-600/40 text-slate-400' };
+const STATUS_COR: Record<string, string> = { CONFERIDA: 'bg-emerald-500/15 text-[#0b7d4e]', PENDENTE: 'bg-amber-500/15 text-[#a9760a]', DIVERGENTE: 'bg-rose-500/15 text-[#c3352b]', CANCELADA: 'bg-[#F0EEE9] text-slate-400' };
 
 type Item = { produtoId: string; descricao: string; ncm: string; quantidade: string; unidade: string; valorUnitario: string; loteNumero: string; dataValidade: string };
 const itemVazio = (): Item => ({ produtoId: '', descricao: '', ncm: '', quantidade: '', unidade: 'KG', valorUnitario: '', loteNumero: '', dataValidade: '' });
@@ -38,7 +38,7 @@ export default function Entradas() {
     <CadastroShell>
       <TopBar icon={<PackagePlus className="h-5 w-5" />} titulo="Entradas (XML NF-e)" subtitulo={`${lista.length} entrada(s) — recebimento de mercadoria`}
         novoLabel="Nova Entrada" onNovo={() => setModal(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 hover:bg-slate-700 px-3 py-2 rounded-lg text-slate-200 text-sm"><RefreshCw className="h-4 w-4 text-amber-400" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-white border border-[#E7E5DF] hover:bg-[#EFEDE7] px-3 py-2 rounded-lg text-[#5B5D69] text-sm"><RefreshCw className="h-4 w-4 text-[#a9760a]" /> Atualizar</button>} />
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por NF, chave ou fornecedor..." />
 
       <div className="flex-1 overflow-auto p-4">
@@ -47,14 +47,14 @@ export default function Entradas() {
             <thead><tr>{['Data', 'Fornecedor', 'NF', 'Chave', 'Itens', 'Valor', 'Status'].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(e => (
-                <tr key={e.id} className="border-t border-slate-800 hover:bg-amber-500/5">
-                  <td className="px-3 py-2.5 text-slate-300">{dt(e.dataEntrada)}</td>
-                  <td className="px-3 py-2.5 font-semibold text-slate-100">{e.fornecedor?.nomeFantasia || e.fornecedor?.razaoSocial}</td>
-                  <td className="px-3 py-2.5 text-slate-300">{e.numeroNf ? `${e.numeroNf}/${e.serieNf || '1'}` : '—'}</td>
+                <tr key={e.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
+                  <td className="px-3 py-2.5 text-[#8B8D98]">{dt(e.dataEntrada)}</td>
+                  <td className="px-3 py-2.5 font-semibold text-[#16171D]">{e.fornecedor?.nomeFantasia || e.fornecedor?.razaoSocial}</td>
+                  <td className="px-3 py-2.5 text-[#8B8D98]">{e.numeroNf ? `${e.numeroNf}/${e.serieNf || '1'}` : '—'}</td>
                   <td className="px-3 py-2.5 font-mono text-slate-500 text-[11px] max-w-[220px] truncate">{e.chaveNfeEntrada || '—'}</td>
-                  <td className="px-3 py-2.5 text-center text-slate-300">{e._count?.itens ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-right font-mono text-slate-200">{R$(e.valorTotal)}</td>
-                  <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COR[e.status] || 'bg-slate-700'}`}>{e.status}</span></td>
+                  <td className="px-3 py-2.5 text-center text-[#8B8D98]">{e._count?.itens ?? '—'}</td>
+                  <td className="px-3 py-2.5 text-right font-mono text-[#5B5D69]">{R$(e.valorTotal)}</td>
+                  <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COR[e.status] || 'bg-[#F0EEE9]'}`}>{e.status}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -177,13 +177,13 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
   return (
     <Modal titulo={ocNumero ? `Receber OC #${ocNumero} — Entrada de Mercadoria` : 'Nova Entrada de Mercadoria'} onClose={onClose} onSalvar={salvar} salvando={salvando} salvarLabel="Dar entrada" wide>
       {/* Upload XML */}
-      <label className="flex items-center gap-3 bg-slate-800/60 border border-dashed border-slate-600 rounded-lg px-4 py-3 cursor-pointer hover:border-amber-500">
-        <Upload className="h-5 w-5 text-amber-400" />
-        <div className="flex-1"><p className="text-sm font-semibold text-slate-200">Importar XML da NF-e do fornecedor</p><p className="text-xs text-slate-500">Preenche os itens automaticamente (você confere o vínculo dos produtos).</p></div>
+      <label className="flex items-center gap-3 bg-[#FBFAF7] border border-dashed border-[#E7E5DF] rounded-lg px-4 py-3 cursor-pointer hover:border-[#E8A317]">
+        <Upload className="h-5 w-5 text-[#a9760a]" />
+        <div className="flex-1"><p className="text-sm font-semibold text-[#5B5D69]">Importar XML da NF-e do fornecedor</p><p className="text-xs text-slate-500">Preenche os itens automaticamente (você confere o vínculo dos produtos).</p></div>
         <FileCode className="h-4 w-4 text-slate-500" />
         <input type="file" accept=".xml,text/xml" className="hidden" onChange={e => e.target.files?.[0] && onXml(e.target.files[0])} />
       </label>
-      {aviso && <p className="text-xs text-amber-300 bg-amber-500/10 px-3 py-2 rounded-lg">{aviso}</p>}
+      {aviso && <p className="text-xs text-[#a9760a] bg-[#E8A317]/12 px-3 py-2 rounded-lg">{aviso}</p>}
 
       <Secao titulo="Dados da nota" />
       <div className="grid grid-cols-4 gap-3">
@@ -199,7 +199,7 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
       <div className="grid grid-cols-4 gap-3">
         <Campo label="Chave de acesso (opcional · 44 dígitos)" className="col-span-3">
           <input inputMode="numeric" maxLength={44} value={chave} onChange={e => setChave(soDigitos(e.target.value))} className={`${inp} font-mono text-xs`} placeholder="só números — deixe em branco se não tiver a NF-e" />
-          {chave.length > 0 && <span className={`text-[10px] ${chave.length === 44 ? 'text-emerald-400' : 'text-amber-400'}`}>{chave.length}/44 dígitos</span>}
+          {chave.length > 0 && <span className={`text-[10px] ${chave.length === 44 ? 'text-[#0b7d4e]' : 'text-[#a9760a]'}`}>{chave.length}/44 dígitos</span>}
         </Campo>
         <Campo label="Emissão"><input type="date" value={dataEmissao} onChange={e => setDataEmissao(e.target.value)} className={inp} /></Campo>
       </div>
@@ -207,17 +207,17 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
       <Secao titulo="Itens" />
       <div className="space-y-2">
         {itens.map((it, i) => {
-          const fld = 'w-full bg-slate-800 border border-slate-600 rounded px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-400';
+          const fld = 'w-full bg-white border border-[#E7E5DF] rounded px-2 py-1.5 text-xs text-[#16171D] focus:outline-none focus:border-[#E8A317]';
           const lb = 'block text-[9px] font-bold text-slate-500 uppercase mb-0.5';
           return (
-            <div key={i} className="border border-slate-700 rounded-lg p-3 bg-slate-800/30">
+            <div key={i} className="border border-[#E7E5DF] rounded-lg p-3 bg-[#F6F5F2]">
               <div className="grid grid-cols-12 gap-2">
                 <div className="col-span-6 sm:col-span-5"><label className={lb}>Produto (vínculo)</label>
                   <select value={it.produtoId} onChange={e => escolherProduto(i, e.target.value)} className={fld}><option value="">— sem vínculo —</option>{produtos.map(p => <option key={p.id} value={p.id}>{p.descricao}</option>)}</select>
                 </div>
                 <div className="col-span-6 sm:col-span-6"><label className={lb}>Descrição *</label><input value={it.descricao} onChange={e => setItem(i, 'descricao', e.target.value)} className={`${fld} ${!it.descricao.trim() ? 'border-rose-500/40' : ''}`} placeholder="nome do item" /></div>
                 <div className="col-span-12 sm:col-span-1 flex sm:justify-center sm:items-end">
-                  {itens.length > 1 && <button onClick={() => delItem(i)} className="text-slate-500 hover:text-rose-400 flex items-center gap-1 text-[11px] pb-1.5"><Trash2 className="h-4 w-4" /><span className="sm:hidden">remover</span></button>}
+                  {itens.length > 1 && <button onClick={() => delItem(i)} className="text-slate-500 hover:text-[#c3352b] flex items-center gap-1 text-[11px] pb-1.5"><Trash2 className="h-4 w-4" /><span className="sm:hidden">remover</span></button>}
                 </div>
               </div>
               <div className="grid grid-cols-12 gap-2 mt-2">
@@ -232,24 +232,24 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
                 <div className="col-span-5 sm:col-span-2"><label className={lb}>Lote</label><input value={it.loteNumero} onChange={e => setItem(i, 'loteNumero', e.target.value.toUpperCase())} className={fld} placeholder="letras/números" /></div>
                 <div className="col-span-7 sm:col-span-3"><label className={lb}>Validade</label><input type="date" value={it.dataValidade} onChange={e => setItem(i, 'dataValidade', e.target.value)} className={fld} /></div>
               </div>
-              <div className="text-right text-[11px] text-slate-500 mt-1.5">Subtotal: <b className="text-slate-300">{R$((Number(it.quantidade) || 0) * (Number(it.valorUnitario) || 0))}</b></div>
+              <div className="text-right text-[11px] text-slate-500 mt-1.5">Subtotal: <b className="text-[#8B8D98]">{R$((Number(it.quantidade) || 0) * (Number(it.valorUnitario) || 0))}</b></div>
             </div>
           );
         })}
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={addItem} className="flex items-center gap-1 text-xs text-amber-300 hover:text-amber-200 font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
-        <span className="text-sm text-slate-300">Total da nota: <b className="text-slate-100">{R$(totalNota)}</b></span>
+        <button onClick={addItem} className="flex items-center gap-1 text-xs text-[#a9760a] hover:text-[#a9760a] font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
+        <span className="text-sm text-[#8B8D98]">Total da nota: <b className="text-[#16171D]">{R$(totalNota)}</b></span>
       </div>
 
       <Secao titulo="Financeiro" />
       <div className="flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2 text-sm text-slate-200"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-amber-500 h-4 w-4" /> Gerar Contas a Pagar</label>
+        <label className="flex items-center gap-2 text-sm text-[#5B5D69]"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-amber-500 h-4 w-4" /> Gerar Contas a Pagar</label>
         {gerarCP && <Campo label="Vencimento"><input type="date" value={dataVenc} onChange={e => setDataVenc(e.target.value)} className={inp} /></Campo>}
       </div>
       <p className="text-[11px] text-slate-500">Itens vinculados a um produto dão entrada no estoque (com lote/validade se informados). Sem vínculo, entram só como documento.</p>
 
-      {erro && <p className="text-xs text-rose-400 bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
+      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
     </Modal>
   );
 }

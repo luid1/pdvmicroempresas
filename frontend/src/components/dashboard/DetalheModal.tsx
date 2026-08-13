@@ -7,7 +7,7 @@ import { AreaChart, Area, ResponsiveContainer, Tooltip } from 'recharts';
 export interface DetalheLinha {
   label: string;
   valor: string;
-  cor?: string; // classe tailwind opcional p/ o valor (ex: 'text-rose-400')
+  cor?: string; // classe tailwind opcional p/ o valor (ex: 'text-[#E0483D]')
 }
 export interface DetalheRegistro {
   titulo: string;
@@ -33,27 +33,27 @@ export interface DetalheCard {
   listaVazia?: string; // ex: 'Nenhum título vencido'
 }
 
-/* Paleta reaproveitada do Kpi do DashboardPage */
+/* Paleta reaproveitada do Kpi do DashboardPage (Luz / claro) */
 const tones: Record<string, string> = {
-  sky: 'text-sky-300 bg-sky-500/10 border-sky-400/20',
-  emerald: 'text-emerald-300 bg-emerald-500/10 border-emerald-400/20',
-  rose: 'text-rose-300 bg-rose-500/10 border-rose-400/20',
-  amber: 'text-amber-300 bg-amber-500/10 border-amber-400/20',
-  violet: 'text-violet-300 bg-violet-500/10 border-violet-400/20',
-  teal: 'text-teal-300 bg-teal-500/10 border-teal-400/20',
-  blue: 'text-blue-300 bg-blue-500/10 border-blue-400/20',
-  indigo: 'text-indigo-300 bg-indigo-500/10 border-indigo-400/20',
-  slate: 'text-slate-400 bg-white/[0.04] border-white/[0.08]',
+  sky: 'text-[#1f74c9] bg-[#3896f0]/10 border-[#3896f0]/20',
+  emerald: 'text-[#0b7d4e] bg-[#0FA968]/10 border-[#0FA968]/22',
+  rose: 'text-[#c3352b] bg-[#E0483D]/10 border-[#E0483D]/22',
+  amber: 'text-[#a9760a] bg-[#E8A317]/12 border-[#E8A317]/25',
+  violet: 'text-[#5a4fd0] bg-[#7C6BF0]/10 border-[#7C6BF0]/20',
+  teal: 'text-[#0e7490] bg-[#06b6d4]/10 border-[#06b6d4]/20',
+  blue: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20',
+  indigo: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20',
+  slate: 'text-[#5B5D69] bg-[#F6F5F2] border-[#E7E5DF]',
 };
 
-const tipStyle = { background: '#0d1420', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, fontSize: 12, color: '#e2e8f0' };
+const tipStyle = { background: '#FFFFFF', border: '1px solid #E7E5DF', borderRadius: 10, fontSize: 12, color: '#16171D', boxShadow: '0 8px 24px rgba(22,23,29,0.12)' };
 const pct = (v: number) => `${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 function Delta({ v }: { v: number }) {
-  if (!v) return <span className="text-[11px] text-slate-500">estável</span>;
+  if (!v) return <span className="text-[11px] text-[#8B8D98]">estável</span>;
   const up = v > 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${up ? 'text-emerald-400' : 'text-rose-400'}`}>
+    <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${up ? 'text-[#0FA968]' : 'text-[#E0483D]'}`}>
       {up ? <ArrowUpRight className="h-3.5 w-3.5" /> : <ArrowDownRight className="h-3.5 w-3.5" />}
       {pct(Math.abs(v))}
     </span>
@@ -106,27 +106,27 @@ export default function DetalheModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[210] p-4 animate-fade-in"
+      className="fixed inset-0 bg-[#16171D]/40 backdrop-blur-sm flex items-center justify-center z-[210] p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-[0_24px_80px_0_rgba(0,0,0,0.6)] w-full max-w-md animate-fade-in-up"
+        className="bg-white border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_0_rgba(22,23,29,0.28)] w-full max-w-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 flex items-start gap-3 border-b border-white/[0.06]">
+        <div className="px-5 py-4 flex items-start gap-3 border-b border-[#E7E5DF]">
           <div className={`h-10 w-10 rounded-xl border flex items-center justify-center shrink-0 ${tones[tone] || tones.slate}`}>
             <Icon className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-[0.1em] truncate">{titulo}</p>
+              <p className="text-[11px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] truncate">{titulo}</p>
               {delta !== undefined && <Delta v={delta} />}
             </div>
-            <p className="text-2xl font-extrabold text-white tracking-tight tabular-nums truncate mt-0.5">{valorPrincipal}</p>
-            {subtitulo && <p className="text-[11px] text-slate-500 mt-0.5 truncate">{subtitulo}</p>}
+            <p className="font-num text-2xl font-extrabold text-[#16171D] tracking-tight tabular-nums truncate mt-0.5">{valorPrincipal}</p>
+            {subtitulo && <p className="text-[11px] text-[#8B8D98] mt-0.5 truncate">{subtitulo}</p>}
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-200 transition-colors shrink-0 -mr-1 -mt-1">
+          <button onClick={onClose} className="text-[#8B8D98] hover:text-[#16171D] transition-colors shrink-0 -mr-1 -mt-1">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -138,12 +138,12 @@ export default function DetalheModal({
               <AreaChart data={serie} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gDetalhe" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#34d399" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="#34d399" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#0FA968" stopOpacity={0.32} />
+                    <stop offset="100%" stopColor="#0FA968" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <Tooltip contentStyle={tipStyle} formatter={(v: any) => [v, '']} labelFormatter={(_l, p: any) => p?.[0]?.payload?.label ?? ''} cursor={{ stroke: 'rgba(52,211,153,0.3)' }} />
-                <Area type="monotone" dataKey="valor" stroke="#34d399" strokeWidth={2} fill="url(#gDetalhe)" />
+                <Tooltip contentStyle={tipStyle} formatter={(v: any) => [v, '']} labelFormatter={(_l, p: any) => p?.[0]?.payload?.label ?? ''} cursor={{ stroke: 'rgba(15,169,104,0.35)' }} />
+                <Area type="monotone" dataKey="valor" stroke="#0FA968" strokeWidth={2} fill="url(#gDetalhe)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -154,8 +154,8 @@ export default function DetalheModal({
           <div className="px-5 py-4 space-y-2">
             {linhas.map((l, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-slate-400">{l.label}</span>
-                <span className={`font-semibold tabular-nums ${l.cor || 'text-slate-100'}`}>{l.valor}</span>
+                <span className="text-[#5B5D69]">{l.label}</span>
+                <span className={`font-semibold tabular-nums ${l.cor || 'text-[#16171D]'}`}>{l.valor}</span>
               </div>
             ))}
           </div>
@@ -165,23 +165,23 @@ export default function DetalheModal({
         {carregarLista && (
           <div className="px-5 pb-2">
             {listaTitulo && (
-              <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-[0.1em] mb-1.5">{listaTitulo}</p>
+              <p className="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] mb-1.5">{listaTitulo}</p>
             )}
             {carregando && (
               <div className="space-y-2">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2 animate-pulse">
-                    <div className="h-3 w-32 rounded bg-white/[0.08]" />
-                    <div className="h-3 w-16 rounded bg-white/[0.08]" />
+                  <div key={i} className="flex items-center justify-between rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2 animate-pulse">
+                    <div className="h-3 w-32 rounded bg-[#E7E5DF]" />
+                    <div className="h-3 w-16 rounded bg-[#E7E5DF]" />
                   </div>
                 ))}
               </div>
             )}
             {!carregando && erro && (
-              <p className="text-xs text-slate-500 py-3 text-center">Não foi possível carregar a lista.</p>
+              <p className="text-xs text-[#8B8D98] py-3 text-center">Não foi possível carregar a lista.</p>
             )}
             {!carregando && !erro && registros && registros.length === 0 && (
-              <p className="text-xs text-slate-500 py-3 text-center">{listaVazia || 'Nenhum registro.'}</p>
+              <p className="text-xs text-[#8B8D98] py-3 text-center">{listaVazia || 'Nenhum registro.'}</p>
             )}
             {!carregando && !erro && registros && registros.length > 0 && (
               <div className="space-y-1.5 max-h-64 overflow-y-auto -mr-1 pr-1">
@@ -191,13 +191,13 @@ export default function DetalheModal({
                     <div
                       key={i}
                       onClick={clic ? () => irPara(r.rota!) : undefined}
-                      className={`flex items-center justify-between gap-2 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2 ${clic ? 'cursor-pointer hover:bg-white/[0.06] transition-colors' : ''}`}
+                      className={`flex items-center justify-between gap-2 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2 ${clic ? 'cursor-pointer hover:bg-[#EFEDE7] transition-colors' : ''}`}
                     >
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-slate-200 truncate">{r.titulo}</p>
-                        {r.subtitulo && <p className="text-[10px] text-slate-500 truncate">{r.subtitulo}</p>}
+                        <p className="text-xs font-medium text-[#16171D] truncate">{r.titulo}</p>
+                        {r.subtitulo && <p className="text-[10px] text-[#8B8D98] truncate">{r.subtitulo}</p>}
                       </div>
-                      <span className={`text-xs font-semibold tabular-nums shrink-0 ${r.cor || 'text-slate-100'}`}>{r.valor}</span>
+                      <span className={`text-xs font-semibold tabular-nums shrink-0 ${r.cor || 'text-[#16171D]'}`}>{r.valor}</span>
                     </div>
                   );
                 })}
@@ -209,16 +209,16 @@ export default function DetalheModal({
         {/* Atalhos rápidos */}
         {atalhos && atalhos.length > 0 && (
           <div className="px-5 pb-1">
-            <p className="text-[10px] font-semibold text-slate-600 uppercase tracking-[0.1em] mb-1.5">Atalhos</p>
+            <p className="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] mb-1.5">Atalhos</p>
             <div className="flex flex-wrap gap-2">
               {atalhos.map((a, i) => (
                 <button
                   key={i}
                   onClick={() => irPara(a.rota)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-slate-300 hover:bg-white/[0.08] hover:text-white transition-all active:scale-[0.98]"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#E7E5DF] text-xs text-[#5B5D69] hover:bg-[#F6F5F2] hover:text-[#16171D] transition-all active:scale-[0.98]"
                 >
                   {a.label}
-                  <ChevronRight className="h-3 w-3 text-slate-500" />
+                  <ChevronRight className="h-3 w-3 text-[#8B8D98]" />
                 </button>
               ))}
             </div>
@@ -226,17 +226,17 @@ export default function DetalheModal({
         )}
 
         {/* Footer */}
-        <div className="px-5 py-3 mt-2 border-t border-white/[0.06] flex items-center justify-between gap-2">
+        <div className="px-5 py-3 mt-2 border-t border-[#E7E5DF] flex items-center justify-between gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-slate-300 hover:bg-white/[0.08] transition-all duration-300 active:scale-[0.98]"
+            className="px-4 py-2 rounded-lg bg-white border border-[#E7E5DF] text-sm text-[#5B5D69] hover:bg-[#F6F5F2] hover:text-[#16171D] transition-all duration-300 active:scale-[0.98]"
           >
             Fechar
           </button>
           {rota && (
             <button
               onClick={() => irPara(rota)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-900 text-sm font-bold transition-all duration-300 active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#E8A317] hover:bg-[#F5B841] active:bg-[#d69610] text-[#16171D] text-sm font-bold transition-all duration-300 active:scale-[0.98]"
             >
               {verMaisLabel || 'Ver mais'}
               <ArrowRight className="h-4 w-4" />

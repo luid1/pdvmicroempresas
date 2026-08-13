@@ -47,7 +47,7 @@ function Digitando() {
   return (
     <span className="inline-flex items-center gap-1 py-0.5">
       {[0, 1, 2].map((i) => (
-        <span key={i} className="h-1.5 w-1.5 rounded-full bg-amber-300/80 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
+        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#E8A317]/80 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
       ))}
     </span>
   );
@@ -193,12 +193,12 @@ export default function LuCommand() {
         >
           {/* glow que respira atrás do orbe */}
           <span className="lu-aura pointer-events-none" style={{ width: '150%', aspectRatio: '1' }} />
-          <span className="lu-ring lu-orb grid h-14 w-14 place-items-center rounded-full shadow-[0_10px_34px_rgba(255,170,40,0.4)]">
-            <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#151b2b] to-[#0a0d18]">
-              <Sparkles className="h-5 w-5 text-amber-300 transition-transform duration-500 group-hover:rotate-[18deg]" />
+          <span className="lu-ring lu-orb grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_34px_rgba(232,163,23,0.35)]">
+            <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#20232F] to-[#12141C]">
+              <Sparkles className="h-5 w-5 text-[#F5B841] transition-transform duration-500 group-hover:rotate-[18deg]" />
             </span>
           </span>
-          <span className="pointer-events-none absolute -top-1.5 -right-1 rounded-md bg-[#0a0d18]/90 px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-amber-200/80 ring-1 ring-white/10">
+          <span className="pointer-events-none absolute -top-1.5 -right-1 rounded-md bg-[#171A26] px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-[#F5B841]/85 ring-1 ring-white/10">
             ⌘K
           </span>
         </button>
@@ -207,26 +207,26 @@ export default function LuCommand() {
       {/* Spotlight */}
       {aberto && (
         <div className="fixed inset-0 z-[80] flex items-start justify-center px-4 pt-[8vh]">
-          <div className="absolute inset-0 bg-[#070A18]/70 animate-backdrop" onClick={fechar} />
+          <div className="absolute inset-0 bg-[#16171D]/25 animate-backdrop" onClick={fechar} />
 
           <div className="relative w-full max-w-2xl lu-rise">
             {/* Glow iridescente que respira atrás da barra */}
             <div className={`pointer-events-none lu-aura ${carregando ? 'is-thinking' : ''}`} />
 
             {/* Barra — moldura de gradiente vivo (âmbar → violeta) que orbita */}
-            <div className={`lu-ring rounded-[20px] shadow-[0_28px_80px_-16px_rgba(0,0,0,0.8)] ${carregando ? 'is-thinking' : ''}`}>
+            <div className={`lu-ring rounded-[20px] shadow-[0_28px_80px_-16px_rgba(22,23,29,0.4)] ${carregando ? 'is-thinking' : ''}`}>
               <form
                 onSubmit={onSubmit}
-                className="relative overflow-hidden rounded-[18.5px] bg-[#080B16]/95 backdrop-blur-2xl"
+                className="relative overflow-hidden rounded-[18.5px] bg-white/95 backdrop-blur-2xl"
               >
                 {/* brilho superior sutil + varredura quando pensando */}
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#16171D]/10 to-transparent" />
                 {carregando && <span className="pointer-events-none absolute inset-0 lu-sweep" />}
 
                 <div className="flex items-center gap-3.5 px-4 py-4">
                   <span className={`lu-ring ${carregando ? 'is-thinking lu-orb' : ''} grid h-10 w-10 shrink-0 place-items-center rounded-full`}>
-                    <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#161d2e] to-[#090c16]">
-                      {texto && sel < 0 ? <Search className="h-4 w-4 text-amber-300" /> : <Sparkles className="h-4 w-4 text-amber-300" />}
+                    <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#20232F] to-[#12141C]">
+                      {texto && sel < 0 ? <Search className="h-4 w-4 text-[#F5B841]" /> : <Sparkles className="h-4 w-4 text-[#F5B841]" />}
                     </span>
                   </span>
                   <input
@@ -236,14 +236,14 @@ export default function LuCommand() {
                     onKeyDown={onKeyDown}
                     disabled={carregando}
                     placeholder="Pergunte, lance ou encontre algo…"
-                    className="flex-1 min-w-0 bg-transparent text-[18px] text-slate-100 placeholder:text-slate-500/90 outline-none disabled:opacity-60"
+                    className="flex-1 min-w-0 bg-transparent text-[18px] text-[#16171D] placeholder:text-[#8B8D98] outline-none disabled:opacity-60"
                   />
                   {texto ? (
-                    <button type="submit" disabled={carregando} title="Enviar" className="grid h-9 w-9 place-items-center rounded-xl bg-white/[0.06] text-slate-300 hover:bg-amber-400/20 hover:text-amber-200 disabled:opacity-40 transition-colors">
+                    <button type="submit" disabled={carregando} title="Enviar" className="grid h-9 w-9 place-items-center rounded-xl bg-[#F6F5F2] text-[#5B5D69] hover:bg-[#E8A317]/20 hover:text-[#a9760a] disabled:opacity-40 transition-colors">
                       <Send className="h-4 w-4" />
                     </button>
                   ) : (
-                    <button type="button" onClick={fechar} title="Fechar (Esc)" className="grid h-9 w-9 place-items-center rounded-xl text-slate-500 hover:bg-white/[0.06] hover:text-slate-200 transition-colors">
+                    <button type="button" onClick={fechar} title="Fechar (Esc)" className="grid h-9 w-9 place-items-center rounded-xl text-[#8B8D98] hover:bg-[#F6F5F2] hover:text-[#16171D] transition-colors">
                       <X className="h-4 w-4" />
                     </button>
                   )}
@@ -252,8 +252,8 @@ export default function LuCommand() {
             </div>
 
             {/* Painel de resultados */}
-            <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#080B16]/90 backdrop-blur-2xl shadow-[0_24px_70px_-12px_rgba(0,0,0,0.7)]">
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-300/25 to-transparent" />
+            <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-[#E7E5DF] bg-white shadow-[0_24px_70px_-12px_rgba(22,23,29,0.28)]">
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#E8A317]/30 to-transparent" />
               {acao ? (
                 <FormLancamento
                   acao={acao}
@@ -269,15 +269,15 @@ export default function LuCommand() {
                       <button
                         onMouseEnter={() => setSel(-1)}
                         onClick={() => enviar()}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel < 0 ? 'bg-amber-400/[0.12]' : 'hover:bg-white/[0.04]'}`}
+                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel < 0 ? 'bg-[#E8A317]/[0.12]' : 'hover:bg-[#F6F5F2]'}`}
                       >
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-400/15 text-amber-300">
+                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#E8A317]/15 text-[#E8A317]">
                           <Sparkles className="h-3.5 w-3.5" />
                         </span>
-                        <span className="flex-1 min-w-0 truncate text-[13px] text-slate-200">
-                          Perguntar à Lu: <span className="text-slate-400">"{texto}"</span>
+                        <span className="flex-1 min-w-0 truncate text-[13px] text-[#16171D]">
+                          Perguntar à Lu: <span className="text-[#8B8D98]">"{texto}"</span>
                         </span>
-                        <CornerDownLeft className="h-3.5 w-3.5 text-slate-600" />
+                        <CornerDownLeft className="h-3.5 w-3.5 text-[#C7C9D4]" />
                       </button>
 
                       {navMatches.map((t, i) => {
@@ -287,13 +287,13 @@ export default function LuCommand() {
                             key={t.key}
                             onMouseEnter={() => setSel(i)}
                             onClick={() => irPara(t.key)}
-                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel === i ? 'bg-amber-400/[0.12]' : 'hover:bg-white/[0.04]'}`}
+                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel === i ? 'bg-[#E8A317]/[0.12]' : 'hover:bg-[#F6F5F2]'}`}
                           >
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.05] text-slate-300">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#F6F5F2] text-[#5B5D69]">
                               {Icon ? <Icon className="h-3.5 w-3.5" /> : <Search className="h-3.5 w-3.5" />}
                             </span>
-                            <span className="flex-1 min-w-0 truncate text-[13px] text-slate-200">{t.label}</span>
-                            <span className="text-[10px] uppercase tracking-wide text-slate-600">{t.grupo}</span>
+                            <span className="flex-1 min-w-0 truncate text-[13px] text-[#16171D]">{t.label}</span>
+                            <span className="text-[10px] uppercase tracking-wide text-[#8B8D98]">{t.grupo}</span>
                           </button>
                         );
                       })}
@@ -306,17 +306,17 @@ export default function LuCommand() {
                       {mensagens.map((m, i) =>
                         m.autor === 'user' ? (
                           <div key={i} className="flex justify-end">
-                            <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-amber-400/[0.12] border border-amber-400/20 px-3 py-2 text-[13px] text-amber-100">{m.texto}</div>
+                            <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-[#E8A317]/[0.12] border border-[#E8A317]/25 px-3 py-2 text-[13px] text-[#16171D]">{m.texto}</div>
                           </div>
                         ) : (
                           <div key={i} className="flex justify-start">
-                            <div className="max-w-[86%] rounded-2xl rounded-bl-sm bg-white/[0.05] border border-white/[0.08] px-3 py-2.5 text-[13px] text-slate-200 leading-relaxed whitespace-pre-line">{m.texto}</div>
+                            <div className="max-w-[86%] rounded-2xl rounded-bl-sm bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2.5 text-[13px] text-[#16171D] leading-relaxed whitespace-pre-line">{m.texto}</div>
                           </div>
                         ),
                       )}
                       {carregando && (
                         <div className="flex justify-start">
-                          <div className="rounded-2xl rounded-bl-sm bg-white/[0.05] border border-white/[0.08] px-3 py-2.5">
+                          <div className="rounded-2xl rounded-bl-sm bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2.5">
                             <Digitando />
                           </div>
                         </div>
@@ -327,7 +327,7 @@ export default function LuCommand() {
                   {/* Estado inicial — atalhos de partida */}
                   {semThread && !texto && (
                     <div className="p-4">
-                      <p className="mb-2.5 text-[11px] uppercase tracking-wide text-slate-500">Experimente</p>
+                      <p className="mb-2.5 text-[11px] uppercase tracking-wide text-[#8B8D98]">Experimente</p>
                       <div className="flex flex-wrap gap-1.5">
                         {[
                           'Como estão minhas vendas?',
@@ -337,16 +337,16 @@ export default function LuCommand() {
                           <button
                             key={s}
                             onClick={() => { setTexto(s); setTimeout(() => inputRef.current?.focus(), 0); }}
-                            className="rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-[12px] text-slate-300 hover:bg-amber-400/[0.12] hover:border-amber-400/30 hover:text-amber-200 transition-colors"
+                            className="rounded-full border border-[#E7E5DF] bg-white px-3 py-1.5 text-[12px] text-[#5B5D69] hover:bg-[#E8A317]/[0.12] hover:border-[#E8A317]/40 hover:text-[#a9760a] transition-colors"
                           >
                             {s}
                           </button>
                         ))}
                       </div>
-                      <div className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-slate-600">
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-slate-400 ring-1 ring-white/10">↑↓</kbd> navegar</span>
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-slate-400 ring-1 ring-white/10">↵</kbd> abrir / perguntar</span>
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-slate-400 ring-1 ring-white/10">esc</kbd> fechar</span>
+                      <div className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-[#8B8D98]">
+                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F6F5F2] px-1.5 py-0.5 text-[#5B5D69] ring-1 ring-[#E7E5DF]">↑↓</kbd> navegar</span>
+                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F6F5F2] px-1.5 py-0.5 text-[#5B5D69] ring-1 ring-[#E7E5DF]">↵</kbd> abrir / perguntar</span>
+                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F6F5F2] px-1.5 py-0.5 text-[#5B5D69] ring-1 ring-[#E7E5DF]">esc</kbd> fechar</span>
                       </div>
                     </div>
                   )}
@@ -438,49 +438,49 @@ function FormLancamento({
   return (
     <div className="p-4">
       <div className="mb-3 flex items-center gap-2">
-        <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${saida ? 'bg-rose-400/15 text-rose-300' : 'bg-emerald-400/15 text-emerald-300'}`}>
+        <span className={`rounded-md px-2 py-0.5 text-[11px] font-semibold ${saida ? 'bg-[#E0483D]/12 text-[#c3352b]' : 'bg-[#0FA968]/12 text-[#0b7d4e]'}`}>
           {saida ? 'Saída' : 'Entrada'}
         </span>
-        <span className="text-[13px] font-medium text-slate-200">{acao.acao === 'lancar-gasto' ? 'Lançar gasto' : 'Lançar entrada'} na Tesouraria</span>
+        <span className="text-[13px] font-medium text-[#16171D]">{acao.acao === 'lancar-gasto' ? 'Lançar gasto' : 'Lançar entrada'} na Tesouraria</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5">
-        <label className="col-span-1 text-[11px] text-slate-400">
+        <label className="col-span-1 text-[11px] text-[#5B5D69]">
           Valor
-          <div className="mt-1 flex items-center rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5">
-            <span className="text-[12px] text-slate-500">R$</span>
-            <input value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" className="w-full bg-transparent px-1.5 py-2 text-[14px] text-slate-100 outline-none" />
+          <div className="mt-1 flex items-center rounded-lg border border-[#E7E5DF] bg-white px-2.5">
+            <span className="text-[12px] text-[#8B8D98]">R$</span>
+            <input value={valor} onChange={(e) => setValor(e.target.value)} inputMode="decimal" className="w-full bg-transparent px-1.5 py-2 text-[14px] text-[#16171D] outline-none" />
           </div>
         </label>
-        <label className="col-span-1 text-[11px] text-slate-400">
+        <label className="col-span-1 text-[11px] text-[#5B5D69]">
           Data
-          <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="mt-1 w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-2 text-[13px] text-slate-100 outline-none [color-scheme:dark]" />
+          <input type="date" value={data} onChange={(e) => setData(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E7E5DF] bg-white px-2.5 py-2 text-[13px] text-[#16171D] outline-none [color-scheme:light]" />
         </label>
-        <label className="col-span-2 text-[11px] text-slate-400">
+        <label className="col-span-2 text-[11px] text-[#5B5D69]">
           Descrição
-          <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="mt-1 w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-2.5 py-2 text-[13px] text-slate-100 outline-none" />
+          <input value={descricao} onChange={(e) => setDescricao(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E7E5DF] bg-white px-2.5 py-2 text-[13px] text-[#16171D] outline-none" />
         </label>
-        <label className="col-span-1 text-[11px] text-slate-400">
+        <label className="col-span-1 text-[11px] text-[#5B5D69]">
           Conta
-          <select value={contaId} onChange={(e) => setContaId(e.target.value)} className="mt-1 w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-2 py-2 text-[13px] text-slate-100 outline-none [&>option]:bg-[#0E141F]">
+          <select value={contaId} onChange={(e) => setContaId(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E7E5DF] bg-white px-2 py-2 text-[13px] text-[#16171D] outline-none">
             <option value="">Selecione…</option>
             {contas.map((c) => <option key={c.id} value={c.id}>{c.nome}{c.padrao ? ' (padrão)' : ''}</option>)}
           </select>
         </label>
-        <label className="col-span-1 text-[11px] text-slate-400">
-          Categoria <span className="text-slate-600">(opcional)</span>
-          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="mt-1 w-full rounded-lg border border-white/[0.1] bg-white/[0.04] px-2 py-2 text-[13px] text-slate-100 outline-none [&>option]:bg-[#0E141F]">
+        <label className="col-span-1 text-[11px] text-[#5B5D69]">
+          Categoria <span className="text-[#8B8D98]">(opcional)</span>
+          <select value={categoria} onChange={(e) => setCategoria(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E7E5DF] bg-white px-2 py-2 text-[13px] text-[#16171D] outline-none">
             <option value="">Sem categoria</option>
             {categorias.map((c) => <option key={c.id} value={c.codigo}>{c.codigo} · {c.descricao}</option>)}
           </select>
         </label>
       </div>
 
-      {erro && <p className="mt-2.5 text-[12px] text-rose-300">{erro}</p>}
+      {erro && <p className="mt-2.5 text-[12px] text-[#c3352b]">{erro}</p>}
 
       <div className="mt-3.5 flex items-center justify-end gap-2">
-        <button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-slate-300 hover:bg-white/[0.06] disabled:opacity-40 transition-colors">Cancelar</button>
-        <button onClick={confirmar} disabled={salvando} className="rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 px-4 py-2 text-[13px] font-semibold text-[#0B0F2B] shadow-[0_6px_20px_rgba(255,170,40,0.4)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all">
+        <button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5B5D69] hover:bg-[#F6F5F2] disabled:opacity-40 transition-colors">Cancelar</button>
+        <button onClick={confirmar} disabled={salvando} className="rounded-lg bg-gradient-to-br from-[#F5B841] to-[#E8A317] px-4 py-2 text-[13px] font-semibold text-[#16171D] shadow-[0_6px_20px_rgba(232,163,23,0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all">
           {salvando ? 'Lançando…' : 'Confirmar lançamento'}
         </button>
       </div>

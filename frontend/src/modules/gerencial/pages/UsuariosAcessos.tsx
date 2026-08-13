@@ -157,11 +157,11 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
   };
 
   return createPortal((
-    <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-backdrop">
-      <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-modal">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <h2 className="font-bold text-slate-100">{novo ? 'Novo Usuário' : 'Editar Usuário'}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-100"><X className="h-5 w-5" /></button>
+    <div className="fixed inset-0 bg-[#16171D]/40 z-[70] flex items-center justify-center p-4 animate-backdrop">
+      <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-modal">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
+          <h2 className="font-bold text-[#16171D]">{novo ? 'Novo Usuário' : 'Editar Usuário'}</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-3 overflow-auto">
           <div className="grid grid-cols-2 gap-3">
@@ -199,7 +199,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
             {!novo && u?.ativo && <button onClick={inativar} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Power className="h-3.5 w-3.5" /> Inativar</button>}
           </div>
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
             <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>
@@ -234,18 +234,18 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
     } finally { setSalvando(false); }
   };
 
-  const pinInp = 'w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-slate-100 focus:outline-none focus:border-amber-400';
+  const pinInp = 'w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-[#16171D] focus:outline-none focus:border-[#E8A317]';
 
   return createPortal((
-    <div className="fixed inset-0 bg-black/60 z-[80] flex items-center justify-center p-4 animate-backdrop" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <h2 className="font-bold text-slate-100 flex items-center gap-2"><Hash className="h-4 w-4 text-amber-300" /> Definir PIN</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-100"><X className="h-5 w-5" /></button>
+    <div className="fixed inset-0 bg-[#16171D]/40 z-[80] flex items-center justify-center p-4 animate-backdrop" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
+          <h2 className="font-bold text-[#16171D] flex items-center gap-2"><Hash className="h-4 w-4 text-[#a9760a]" /> Definir PIN</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-3">
           <p className="text-xs text-slate-400">
-            PIN de 4 dígitos de <b className="text-slate-200">{usuario.nome}</b> para o login rápido no caixa (selecionar o perfil + digitar o PIN).
+            PIN de 4 dígitos de <b className="text-[#5B5D69]">{usuario.nome}</b> para o login rápido no caixa (selecionar o perfil + digitar o PIN).
           </p>
           <div>
             <label className={lbl}>Novo PIN (4 dígitos)</label>
@@ -261,13 +261,13 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
               onKeyDown={e => { if (e.key === 'Enter' && podeSalvar) salvar(); }}
               className={pinInp} placeholder="••••" />
           </div>
-          <button type="button" onClick={() => setMostrar(m => !m)} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200">
+          <button type="button" onClick={() => setMostrar(m => !m)} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-[#5B5D69]">
             {mostrar ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />} {mostrar ? 'Ocultar' : 'Mostrar'} dígitos
           </button>
-          {erro && <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">{erro}</p>}
+          {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">{erro}</p>}
         </div>
-        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/10">
-          <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+        <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#E7E5DF]">
+          <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
           <button onClick={salvar} disabled={!podeSalvar} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar PIN</button>
         </div>
       </div>
@@ -324,11 +324,11 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
   };
 
   return createPortal((
-    <div className="fixed inset-0 bg-black/60 z-[70] flex items-center justify-center p-4 animate-backdrop">
-      <div className="bg-[#0E141F]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-modal">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/10">
-          <h2 className="font-bold text-slate-100">{novo ? 'Novo Perfil' : `Perfil — ${r?.nome}`}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-100"><X className="h-5 w-5" /></button>
+    <div className="fixed inset-0 bg-[#16171D]/40 z-[70] flex items-center justify-center p-4 animate-backdrop">
+      <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-modal">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
+          <h2 className="font-bold text-[#16171D]">{novo ? 'Novo Perfil' : `Perfil — ${r?.nome}`}</h2>
+          <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
         </div>
         <div className="p-5 space-y-4 overflow-auto">
           <div className="grid grid-cols-2 gap-3">
@@ -401,7 +401,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
             ? <button onClick={excluir} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             : <span />}
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-white/10 text-slate-300 rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
             <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>

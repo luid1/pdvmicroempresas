@@ -104,20 +104,20 @@ export default function Recorrencias() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-amber-500/30 to-amber-400/20 border border-white/10 flex items-center justify-center">
-            <Repeat className="h-5 w-5 text-amber-300" />
+          <div className="h-11 w-11 rounded-2xl bg-gradient-to-br from-amber-500/30 to-amber-400/20 border border-[#E7E5DF] flex items-center justify-center">
+            <Repeat className="h-5 w-5 text-[#a9760a]" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Despesas Recorrentes</h1>
+            <h1 className="text-xl font-bold text-[#16171D]">Despesas Recorrentes</h1>
             <p className="text-sm text-slate-400">Aluguéis, assinaturas e contratos que geram Contas a Pagar automaticamente.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={carregar} className="h-9 w-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center" title="Atualizar">
+          <button onClick={carregar} className="h-9 w-9 rounded-lg bg-white hover:bg-[#EFEDE7] text-[#8B8D98] flex items-center justify-center" title="Atualizar">
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
           {podeOperar && (
-            <button onClick={gerarAgora} disabled={gerando} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold px-3 py-2 rounded-lg disabled:opacity-40">
+            <button onClick={gerarAgora} disabled={gerando} className="flex items-center gap-2 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-2 rounded-lg disabled:opacity-40">
               <Play className={`h-4 w-4 ${gerando ? 'animate-pulse' : ''}`} /> Gerar agora
             </button>
           )}
@@ -131,22 +131,22 @@ export default function Recorrencias() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-[#0e1729]/70 border border-white/10 rounded-2xl p-4">
+        <div className="bg-white border border-[#E7E5DF] rounded-2xl p-4">
           <p className="text-xs text-slate-400">Recorrências ativas</p>
-          <p className="text-2xl font-bold text-white mt-1">{ativas.length}</p>
+          <p className="text-2xl font-bold text-[#16171D] mt-1">{ativas.length}</p>
         </div>
-        <div className="bg-[#0e1729]/70 border border-white/10 rounded-2xl p-4">
+        <div className="bg-white border border-[#E7E5DF] rounded-2xl p-4">
           <p className="text-xs text-slate-400">Estimativa mensal (valor fixo)</p>
-          <p className="text-2xl font-bold text-emerald-300 mt-1">{brl(totalMensalEstimado)}</p>
+          <p className="text-2xl font-bold text-[#0b7d4e] mt-1">{brl(totalMensalEstimado)}</p>
         </div>
-        <div className="bg-[#0e1729]/70 border border-white/10 rounded-2xl p-4">
+        <div className="bg-white border border-[#E7E5DF] rounded-2xl p-4">
           <p className="text-xs text-slate-400">Vencidas (aguardando geração)</p>
-          <p className={`text-2xl font-bold mt-1 ${vencidas.length ? 'text-amber-300' : 'text-white'}`}>{vencidas.length}</p>
+          <p className={`text-2xl font-bold mt-1 ${vencidas.length ? 'text-[#a9760a]' : 'text-[#16171D]'}`}>{vencidas.length}</p>
         </div>
       </div>
 
       {/* Lista */}
-      <div className="bg-[#0e1729]/70 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-[#E7E5DF] rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-slate-400 text-sm">Carregando…</div>
         ) : lista.length === 0 ? (
@@ -154,7 +154,7 @@ export default function Recorrencias() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-slate-400 border-b border-white/10">
+              <tr className="text-left text-xs text-slate-400 border-b border-[#E7E5DF]">
                 <th className="px-4 py-3 font-medium">Descrição</th>
                 <th className="px-4 py-3 font-medium">Periodicidade</th>
                 <th className="px-4 py-3 font-medium text-right">Valor</th>
@@ -168,40 +168,40 @@ export default function Recorrencias() {
               {lista.map((r) => {
                 const venceu = r.ativo && new Date(r.proximaGeracao).getTime() <= Date.now();
                 return (
-                  <tr key={r.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                  <tr key={r.id} className="border-b border-white/5 hover:bg-[#F6F5F2]">
                     <td className="px-4 py-3">
-                      <div className="text-slate-100 font-medium">{r.descricao}</div>
+                      <div className="text-[#16171D] font-medium">{r.descricao}</div>
                       {r.planoContasCodigo && <div className="text-xs text-slate-500">Categoria {r.planoContasCodigo}</div>}
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{LABEL_PERIODO[r.periodicidade]} · dia {r.diaVencimento}</td>
+                    <td className="px-4 py-3 text-[#8B8D98]">{LABEL_PERIODO[r.periodicidade]} · dia {r.diaVencimento}</td>
                     <td className="px-4 py-3 text-right font-mono">
                       {r.valorVariavel
-                        ? <span className="text-amber-300 text-xs">variável (rascunho)</span>
-                        : <span className="text-slate-100">{brl(r.valor)}</span>}
+                        ? <span className="text-[#a9760a] text-xs">variável (rascunho)</span>
+                        : <span className="text-[#16171D]">{brl(r.valor)}</span>}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={venceu ? 'text-amber-300 font-medium' : 'text-slate-300'}>{dataBR(r.proximaGeracao)}</span>
+                      <span className={venceu ? 'text-[#a9760a] font-medium' : 'text-[#8B8D98]'}>{dataBR(r.proximaGeracao)}</span>
                     </td>
                     <td className="px-4 py-3 text-slate-400">{dataBR(r.ultimaGeracao)}</td>
                     <td className="px-4 py-3 text-center">
                       {r.ativo
-                        ? <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-500/15 text-emerald-300">Ativa</span>
+                        ? <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-emerald-500/15 text-[#0b7d4e]">Ativa</span>
                         : <span className="inline-block px-2 py-0.5 rounded-full text-xs bg-slate-500/15 text-slate-400">Pausada</span>}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => setPreviewDe(r)} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center" title="Prever próximas">
+                        <button onClick={() => setPreviewDe(r)} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center" title="Prever próximas">
                           <Eye className="h-4 w-4" />
                         </button>
                         {podeConfigurar && (
                           <>
-                            <button onClick={() => alternarAtivo(r)} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center" title={r.ativo ? 'Pausar' : 'Reativar'}>
-                              <Power className={`h-4 w-4 ${r.ativo ? 'text-emerald-400' : 'text-slate-500'}`} />
+                            <button onClick={() => alternarAtivo(r)} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center" title={r.ativo ? 'Pausar' : 'Reativar'}>
+                              <Power className={`h-4 w-4 ${r.ativo ? 'text-[#0b7d4e]' : 'text-slate-500'}`} />
                             </button>
-                            <button onClick={() => setEditando(r)} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center" title="Editar">
+                            <button onClick={() => setEditando(r)} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center" title="Editar">
                               <Pencil className="h-4 w-4" />
                             </button>
-                            <button onClick={() => remover(r)} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-rose-400 flex items-center justify-center" title="Excluir">
+                            <button onClick={() => remover(r)} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-[#c3352b] flex items-center justify-center" title="Excluir">
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </>
@@ -223,7 +223,7 @@ export default function Recorrencias() {
   );
 }
 
-const inputCls = 'mt-1 w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-amber-400';
+const inputCls = 'mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]';
 
 function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose: () => void; onDone: () => void }) {
   const edicao = !!rec;
@@ -280,11 +280,11 @@ function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop p-4" onClick={onClose}>
-      <div className="relative w-full max-w-md bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop p-4" onClick={onClose}>
+      <div className="relative w-full max-w-md bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-white">{edicao ? 'Editar recorrência' : 'Nova despesa recorrente'}</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#16171D]">{edicao ? 'Editar recorrência' : 'Nova despesa recorrente'}</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
@@ -303,7 +303,7 @@ function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose
               <input type="number" min={1} max={31} value={diaVencimento} onChange={e => setDiaVencimento(e.target.value)} className={inputCls} />
             </label>
           </div>
-          <label className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-[#8B8D98] cursor-pointer">
             <input type="checkbox" checked={valorVariavel} onChange={e => setValorVariavel(e.target.checked)} />
             Valor variável (gera Conta a Pagar em rascunho para ajuste)
           </label>
@@ -352,14 +352,14 @@ function ModalPreview({ rec, onClose }: { rec: Recorrencia; onClose: () => void 
   }, [rec.id]);
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop p-4" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-[#0e1729]/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop p-4" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-amber-300" />
-            <h2 className="font-bold text-white">Próximas ocorrências</h2>
+            <CalendarClock className="h-4 w-4 text-[#a9760a]" />
+            <h2 className="font-bold text-[#16171D]">Próximas ocorrências</h2>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-slate-800 text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <p className="text-xs text-slate-400 mb-3">{rec.descricao}</p>
         {itens === null ? (
@@ -369,10 +369,10 @@ function ModalPreview({ rec, onClose }: { rec: Recorrencia; onClose: () => void 
         ) : (
           <ul className="space-y-2">
             {itens.map((it, i) => (
-              <li key={i} className="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2 text-sm">
-                <span className="text-slate-200">{new Date(it.data).toLocaleDateString('pt-BR')}</span>
-                <span className="font-mono text-slate-300">
-                  {it.rascunho ? <span className="text-amber-300 text-xs">rascunho</span> : brl(it.valor)}
+              <li key={i} className="flex items-center justify-between bg-white rounded-lg px-3 py-2 text-sm">
+                <span className="text-[#5B5D69]">{new Date(it.data).toLocaleDateString('pt-BR')}</span>
+                <span className="font-mono text-[#8B8D98]">
+                  {it.rascunho ? <span className="text-[#a9760a] text-xs">rascunho</span> : brl(it.valor)}
                 </span>
               </li>
             ))}
