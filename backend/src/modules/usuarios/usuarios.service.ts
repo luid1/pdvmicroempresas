@@ -23,7 +23,8 @@ export class UsuariosService {
     nome: string; email: string; senha: string; roleId: string; cpf?: string; ativo?: boolean; filialIds?: string[];
   }) {
     if (!dto.nome || !dto.email || !dto.senha || !dto.roleId) throw new BadRequestException('Nome, e-mail, senha e perfil são obrigatórios.');
-    const existe = await this.prisma.usuario.findFirst({ where: { tenantId, email: dto.email } });
+    const email = dto.email.trim().toLowerCase();
+    const existe = await this.prisma.usuario.findFirst({ where: { tenantId, email } });
     if (existe) throw new ConflictException('Já existe um usuário com este e-mail.');
     const role = await this.prisma.role.findFirst({ where: { id: dto.roleId, tenantId } });
     if (!role) throw new NotFoundException('Perfil não encontrado.');
@@ -31,7 +32,7 @@ export class UsuariosService {
     const hash = await bcrypt.hash(dto.senha, 12);
     const usuario = await this.prisma.usuario.create({
       data: {
-        tenantId, roleId: dto.roleId, nome: dto.nome, email: dto.email, passwordHash: hash,
+        tenantId, roleId: dto.roleId, nome: dto.nome, email, passwordHash: hash,
         cpf: dto.cpf || null, ativo: dto.ativo ?? true,
         filiais: dto.filialIds?.length ? { create: dto.filialIds.map((id) => ({ filialId: id })) } : undefined,
       },
@@ -44,14 +45,15 @@ export class UsuariosService {
   }) {
     const u = await this.prisma.usuario.findFirst({ where: { id, tenantId } });
     if (!u) throw new NotFoundException('Usuário não encontrado.');
-    if (dto.email && dto.email !== u.email) {
-      const dup = await this.prisma.usuario.findFirst({ where: { tenantId, email: dto.email, NOT: { id } } });
+    const email = dto.email?.trim().toLowerCase();
+    if (email && email !== u.email) {
+      const dup = await this.prisma.usuario.findFirst({ where: { tenantId, email, NOT: { id } } });
       if (dup) throw new ConflictException('Já existe um usuário com este e-mail.');
     }
     await this.prisma.usuario.update({
       where: { id },
       data: {
-        nome: dto.nome, email: dto.email, roleId: dto.roleId, cpf: dto.cpf, ativo: dto.ativo,
+        nome: dto.nome, email, roleId: dto.roleId, cpf: dto.cpf, ativo: dto.ativo,
       },
     });
     if (dto.filialIds) {

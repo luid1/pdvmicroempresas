@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import {
   Eye, EyeOff, Lock, Mail, ArrowLeft, Delete,
-  Store, Shield, Crown, ShoppingBag, Boxes, User as UserIcon,
+  Store, Shield, Crown, ShoppingBag, Boxes, Building2, User as UserIcon,
 } from 'lucide-react';
 import { rotaInicial } from '../config/telas';
 
 /** Tenant "vinculado" a este computador (gravado após o 1º login). */
-type PairedTenant = { id: string; nome: string };
+type PairedTenant = { id: string; nome: string; token: string };
 type Perfil = {
   id: string;
   nome: string;
-  email: string;
   temPin: boolean;
   role: { nome: string };
   ultimoAcesso: string | null;
@@ -95,7 +94,10 @@ export default function LoginPage() {
 
   // Estado de vínculo do computador.
   const [paired, setPaired] = useState<PairedTenant | null>(() => {
-    try { return JSON.parse(localStorage.getItem(PAIR_KEY) || 'null'); } catch { return null; }
+    try {
+      const salvo = JSON.parse(localStorage.getItem(PAIR_KEY) || 'null');
+      return salvo?.id && salvo?.nome && salvo?.token ? salvo : null;
+    } catch { return null; }
   });
 
   // 'PAIR' = vincular loja (e-mail+senha) · 'PICKER' = escolher perfil · 'PIN' = digitar PIN/senha
@@ -112,19 +114,21 @@ export default function LoginPage() {
 
   // Carrega os perfis da loja vinculada.
   useEffect(() => {
-    if (modo === 'PICKER' && paired) carregarPerfis(paired.id);
+    if (modo === 'PICKER' && paired) carregarPerfis(paired.id, paired.token);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modo, paired?.id]);
+  }, [modo, paired?.id, paired?.token]);
 
   // Nunca deixa um "Entrando..." travado ao trocar de tela/perfil: cada vez que
   // o passo ou o perfil muda, zera o loading. Evita abrir o perfil já "entrando".
   useEffect(() => { setLoading(false); }, [modo, selecionado?.id]);
 
-  async function carregarPerfis(tenantId: string) {
+  async function carregarPerfis(tenantId: string, pairToken: string) {
     setCarregandoPerfis(true);
     setError('');
     try {
-      const res = await fetchComTimeout(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`);
+      const res = await fetchComTimeout(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`, {
+        headers: { 'x-pair-token': pairToken },
+      });
       const data = await lerJson(res);
       setPerfis(Array.isArray(data) ? data : []);
     } catch (err: any) {
@@ -213,7 +217,11 @@ export default function LoginPage() {
             error={error}
             setError={setError}
             onPaired={(tenant) => {
-              const p = { id: tenant.id, nome: tenant.nomeFantasia || tenant.razaoSocial };
+              const p = {
+                id: tenant.id,
+                nome: tenant.nomeFantasia || tenant.razaoSocial,
+                token: tenant.token,
+              };
               localStorage.setItem(PAIR_KEY, JSON.stringify(p));
               setPaired(p);
               setError('');
@@ -283,6 +291,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
   onPaired: (tenant: any) => void;
 }) {
   const [email, setEmail] = useState('');
+  const [cnpj, setCnpj] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -296,10 +305,14 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
       const res = await fetchComTimeout('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          ...(cnpj.trim() ? { cnpj: cnpj.trim() } : {}),
+        }),
       });
       const data = await lerJson(res);
-      onPaired(data.tenant);
+      onPaired({ ...data.tenant, token: data.pairToken });
     } catch (err: any) {
       setError(err.message);
       setPassword('');
@@ -336,6 +349,24 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="username"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">
+              CNPJ <span className="normal-case tracking-normal text-slate-600">(se o e-mail atende mais de uma empresa)</span>
+            </label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+              <input
+                inputMode="numeric"
+                maxLength={18}
+                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all"
+                placeholder="00.000.000/0001-00"
+                value={cnpj}
+                onChange={(e) => setCnpj(e.target.value)}
+                autoComplete="organization"
               />
             </div>
           </div>

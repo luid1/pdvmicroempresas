@@ -23,6 +23,14 @@ export class LoginDto {
   @IsNotEmpty({ message: 'Senha é obrigatória.' })
   @MaxLength(128)
   password: string;
+
+  @ApiPropertyOptional({
+    description: 'CNPJ da empresa, necessário quando o mesmo e-mail existe em mais de um tenant.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(18)
+  cnpj?: string;
 }
 
 export class LoginPorIdDto {
