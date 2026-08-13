@@ -497,8 +497,8 @@ export default function Pdv() {
   // ── Portões da sessão de caixa ──
   if (carregandoSessao) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-950">
-        <Loader2 className="h-8 w-8 animate-spin text-amber-400" />
+      <div className="flex h-screen items-center justify-center bg-[#0E0F16]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#F5B841]" />
       </div>
     );
   }
@@ -514,13 +514,13 @@ export default function Pdv() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-gray-950 text-gray-100">
+    <div className="flex h-screen flex-col bg-[#0E0F16] text-gray-100">
       {/* Topo */}
-      <header className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-6 py-3">
+      <header className="flex items-center justify-between border-b border-[#222633] bg-[#171A26] px-6 py-3">
         <div className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6 text-amber-400" />
+          <ShoppingCart className="h-6 w-6 text-[#F5B841]" />
           <span className="text-lg font-semibold">Frente de Caixa</span>
-          <span className="ml-2 rounded bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-300">
+          <span className="ml-2 rounded bg-[#12B877]/15 px-2 py-0.5 text-xs font-medium text-emerald-300">
             {filialAtiva?.nome || 'Sem filial'}
           </span>
         </div>
@@ -528,7 +528,7 @@ export default function Pdv() {
           <span>{user?.nome || 'Operador'}</span>
           <button
             onClick={logout}
-            className="flex items-center gap-1 rounded px-2 py-1 text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+            className="flex items-center gap-1 rounded px-2 py-1 text-gray-400 hover:bg-[#222633] hover:text-gray-200"
             title="Sair"
           >
             <LogOut className="h-4 w-4" /> Sair
@@ -540,7 +540,7 @@ export default function Pdv() {
         {/* Lista de itens */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Campo de leitura */}
-          <div className="border-b border-gray-800 bg-gray-900/60 p-4">
+          <div className="border-b border-[#222633] bg-[#171A26]/60 p-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -548,11 +548,11 @@ export default function Pdv() {
               }}
             >
               <div className="relative">
-                <div className="flex items-center gap-3 rounded-lg border border-gray-700 bg-gray-950 px-4 py-3 focus-within:border-amber-400">
+                <div className="flex items-center gap-3 rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-3 focus-within:border-[#F5B841]">
                   {buscando ? (
-                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-amber-400" />
+                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-[#F5B841]" />
                   ) : (
-                    <ScanLine className="h-6 w-6 shrink-0 text-amber-400" />
+                    <ScanLine className="h-6 w-6 shrink-0 text-[#F5B841]" />
                   )}
                   <input
                     ref={inputRef}
@@ -585,14 +585,14 @@ export default function Pdv() {
 
                 {/* Sugestões por nome/código */}
                 {sugestoes.length > 0 && (
-                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-lg border border-gray-700 bg-gray-900 shadow-2xl">
+                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-lg border border-[#2D3140] bg-[#171A26] shadow-2xl">
                     {sugestoes.map((p, idx) => (
                       <li
                         key={p.id}
                         onMouseDown={(e) => { e.preventDefault(); selecionarSugestao(p); }}
                         onMouseEnter={() => setSugIdx(idx)}
                         className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2 ${
-                          idx === sugIdx ? 'bg-amber-500/15' : 'hover:bg-gray-800'
+                          idx === sugIdx ? 'bg-[#E8A317]/15' : 'hover:bg-[#222633]'
                         }`}
                       >
                         <div className="min-w-0">
@@ -628,8 +628,8 @@ export default function Pdv() {
                   onClick={() => aplicarMultiplicador(n)}
                   className={`min-w-[2.75rem] rounded-lg border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
                     mult === n && !selecionadoId
-                      ? 'border-amber-500 bg-amber-500/20 text-amber-200'
-                      : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600 hover:bg-gray-700'
+                      ? 'border-[#E8A317] bg-[#E8A317]/20 text-amber-200'
+                      : 'border-[#2D3140] bg-[#222633] text-gray-300 hover:border-gray-600 hover:bg-[#2D3140]'
                   }`}
                   title={selecionadoId ? `Definir ${n} unidades no item selecionado` : `Próximo item entra com ${n} unidades`}
                 >
@@ -639,7 +639,7 @@ export default function Pdv() {
               {mult > 1 && !selecionadoId && (
                 <button
                   onClick={() => { setMult(1); focar(); }}
-                  className="ml-1 flex items-center gap-1 rounded-lg bg-amber-500/15 px-3 py-1.5 text-sm font-semibold text-amber-200 ring-1 ring-inset ring-amber-500/40"
+                  className="ml-1 flex items-center gap-1 rounded-lg bg-[#E8A317]/15 px-3 py-1.5 text-sm font-semibold text-amber-200 ring-1 ring-inset ring-[#E8A317]/40"
                   title="Próximo item terá esta quantidade. Clique para limpar."
                 >
                   Próximo item × {mult} <X className="h-3.5 w-3.5" />
@@ -657,7 +657,7 @@ export default function Pdv() {
               <div className="flex h-full flex-col items-center justify-center text-gray-600">
                 {ultimoCupom ? (
                   <div className="flex flex-col items-center text-center">
-                    <Check className="mb-3 h-12 w-12 text-emerald-500" />
+                    <Check className="mb-3 h-12 w-12 text-[#12B877]" />
                     <p className="text-lg font-semibold text-emerald-400">
                       Venda #{ultimoCupom.numero} registrada
                     </p>
@@ -667,7 +667,7 @@ export default function Pdv() {
                     </p>
                     <button
                       onClick={() => imprimirCupom(ultimoCupom)}
-                      className="mt-4 flex items-center gap-2 rounded-lg bg-gray-800 px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+                      className="mt-4 flex items-center gap-2 rounded-lg bg-[#222633] px-4 py-2 text-sm text-gray-200 hover:bg-[#2D3140]"
                     >
                       <Printer className="h-4 w-4" /> Reimprimir cupom
                     </button>
@@ -682,7 +682,7 @@ export default function Pdv() {
                           setCupomAuto(e.target.checked);
                           setCupomAutoState(e.target.checked);
                         }}
-                        className="h-4 w-4 accent-emerald-500"
+                        className="h-4 w-4 accent-[#12B877]"
                       />
                       Imprimir cupom automaticamente
                     </label>
@@ -697,7 +697,7 @@ export default function Pdv() {
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-gray-900 text-left text-xs uppercase text-gray-500">
+                <thead className="sticky top-0 bg-[#171A26] text-left text-xs uppercase text-gray-500">
                   <tr>
                     <th className="px-4 py-2">Produto</th>
                     <th className="px-4 py-2 text-right">Preço</th>
@@ -711,8 +711,8 @@ export default function Pdv() {
                     <tr
                       key={i.produtoId}
                       onClick={() => setSelecionadoId(i.produtoId)}
-                      className={`cursor-pointer border-b border-gray-800/60 ${
-                        selecionadoId === i.produtoId ? 'bg-amber-500/10 ring-1 ring-inset ring-amber-500/40' : ''
+                      className={`cursor-pointer border-b border-[#222633]/60 ${
+                        selecionadoId === i.produtoId ? 'bg-[#E8A317]/10 ring-1 ring-inset ring-[#E8A317]/40' : ''
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -726,7 +726,7 @@ export default function Pdv() {
                         <div className="flex items-center justify-center gap-2">
                           <button
                             onClick={() => alterarQtd(i.produtoId, i.unidade === 'KG' ? -0.1 : -1)}
-                            className="rounded bg-gray-800 p-1 hover:bg-gray-700"
+                            className="rounded bg-[#222633] p-1 hover:bg-[#2D3140]"
                             title={i.unidade === 'KG' ? 'Diminuir 0,1 kg' : 'Diminuir 1'}
                           >
                             <Minus className="h-4 w-4" />
@@ -738,7 +738,7 @@ export default function Pdv() {
                           </span>
                           <button
                             onClick={() => alterarQtd(i.produtoId, i.unidade === 'KG' ? 0.1 : 1)}
-                            className="rounded bg-gray-800 p-1 hover:bg-gray-700"
+                            className="rounded bg-[#222633] p-1 hover:bg-[#2D3140]"
                             title={i.unidade === 'KG' ? 'Aumentar 0,1 kg' : 'Aumentar 1'}
                           >
                             <Plus className="h-4 w-4" />
@@ -765,7 +765,7 @@ export default function Pdv() {
         </main>
 
         {/* Painel lateral — total e ações */}
-        <aside className="flex w-80 shrink-0 flex-col border-l border-gray-800 bg-gray-900">
+        <aside className="flex w-80 shrink-0 flex-col border-l border-[#222633] bg-[#171A26]">
           <div className="flex-1 p-6">
             <div className="text-sm text-gray-400">Itens: {totalItens}</div>
             {descontoValor > 0 && (
@@ -775,17 +775,17 @@ export default function Pdv() {
                   <span className="tabular-nums text-gray-400 line-through">{brl(total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-amber-400">
+                  <span className="text-[#F5B841]">
                     Desconto{desconto.tipo === 'PERCENT' ? ` (${desconto.valor}%)` : ''}
                   </span>
-                  <span className="tabular-nums text-amber-400">- {brl(descontoValor)}</span>
+                  <span className="tabular-nums text-[#F5B841]">- {brl(descontoValor)}</span>
                 </div>
               </>
             )}
             <div className="mt-1 text-xs uppercase tracking-wide text-gray-500">
               Total a pagar
             </div>
-            <div className="mt-1 text-5xl font-bold tabular-nums text-amber-400">
+            <div className="mt-1 text-5xl font-bold tabular-nums text-[#F5B841]">
               {brl(totalFinal)}
             </div>
           </div>
@@ -793,7 +793,7 @@ export default function Pdv() {
             <button
               onClick={() => setPagando(true)}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-4 text-lg font-semibold hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0E9560] py-4 text-lg font-semibold hover:bg-[#12B877] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
             >
               <Check className="h-5 w-5" />
               Finalizar (F2)
@@ -801,21 +801,21 @@ export default function Pdv() {
             <button
               onClick={() => setModalDesconto(true)}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 py-2 text-sm text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-sm text-gray-300 hover:bg-[#2D3140] disabled:opacity-40"
             >
-              <Percent className="h-4 w-4 text-amber-400" />
+              <Percent className="h-4 w-4 text-[#F5B841]" />
               {descontoValor > 0 ? 'Alterar desconto' : 'Desconto'} (F4)
             </button>
             <button
               onClick={limpar}
               disabled={itens.length === 0}
-              className="w-full rounded-lg bg-gray-800 py-2 text-sm text-gray-300 hover:bg-gray-700 disabled:opacity-40"
+              className="w-full rounded-lg bg-[#222633] py-2 text-sm text-gray-300 hover:bg-[#2D3140] disabled:opacity-40"
             >
               Cancelar venda
             </button>
 
             {/* Barra do caixa (turno) */}
-            <div className="mt-2 border-t border-gray-800 pt-3">
+            <div className="mt-2 border-t border-[#222633] pt-3">
               <div className="mb-2 flex justify-between text-xs text-gray-500">
                 <span>Turno · {sessao.qtdVendas} venda(s)</span>
                 <span>Gaveta: {brl(sessao.dinheiroEsperadoGaveta)}</span>
@@ -823,36 +823,36 @@ export default function Pdv() {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => setModalCaixa('SANGRIA')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
+                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
                 >
                   <ArrowDownCircle className="h-4 w-4 text-rose-400" /> Sangria
                   <span className="text-[10px] text-gray-500">F7</span>
                 </button>
                 <button
                   onClick={() => setModalCaixa('SUPRIMENTO')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
+                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
                 >
                   <ArrowUpCircle className="h-4 w-4 text-emerald-400" /> Suprim.
                   <span className="text-[10px] text-gray-500">F8</span>
                 </button>
                 <button
                   onClick={() => setModalCaixa('FECHAR')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
+                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
                 >
-                  <Lock className="h-4 w-4 text-amber-400" /> Fechar
+                  <Lock className="h-4 w-4 text-[#F5B841]" /> Fechar
                   <span className="text-[10px] text-gray-500">F9</span>
                 </button>
               </div>
               <button
                 onClick={() => setModalVendas(true)}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
               >
-                <Printer className="h-4 w-4 text-amber-400" /> Vendas / Reimprimir / Estorno
+                <Printer className="h-4 w-4 text-[#F5B841]" /> Vendas / Reimprimir / Estorno
                 <span className="text-[10px] text-gray-500">F10</span>
               </button>
               <button
                 onClick={handleAbrirGaveta}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gray-800 py-2 text-xs text-gray-300 hover:bg-gray-700"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
               >
                 <Coins className="h-4 w-4 text-emerald-400" /> Abrir gaveta
               </button>
@@ -909,7 +909,7 @@ export default function Pdv() {
       {modalCaixa === 'SUPRIMENTO' && (
         <ModalValor
           titulo="Suprimento (reforço)"
-          cor="bg-emerald-600 hover:bg-emerald-500"
+          cor="bg-[#0E9560] hover:bg-[#12B877]"
           icon={<ArrowUpCircle className="h-5 w-5 text-emerald-300" />}
           onFechar={() => setModalCaixa(null)}
           onConfirmar={handleSuprimento}
@@ -1069,8 +1069,8 @@ function ModalPagamento({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+      <div className="w-full max-w-md rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
           <h2 className="text-lg font-semibold">Pagamento</h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1084,7 +1084,7 @@ function ModalPagamento({
             </div>
             <div className="text-right">
               <div className="text-xs uppercase tracking-wide text-gray-500">Restante</div>
-              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-amber-400' : 'text-emerald-400'}`}>
+              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-[#F5B841]' : 'text-emerald-400'}`}>
                 {brl(Math.max(0, restante))}
               </div>
             </div>
@@ -1094,13 +1094,13 @@ function ModalPagamento({
           {pagamentos.length > 0 && (
             <div className="mt-4 space-y-1">
               {pagamentos.map((p, idx) => (
-                <div key={idx} className="flex items-center justify-between rounded-lg bg-gray-950/60 px-3 py-2 text-sm">
+                <div key={idx} className="flex items-center justify-between rounded-lg bg-[#0E0F16]/60 px-3 py-2 text-sm">
                   <span className="flex items-center gap-2">
                     <span className="font-medium text-gray-200">
                       {p.forma.replace('_TEF', '').replace('_POS', '').replace('CARTAO', 'Cartão').replace('DINHEIRO', 'Dinheiro')}
                     </span>
                     {rotuloCanal(p.forma) && (
-                      <span className="rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-gray-400">{rotuloCanal(p.forma)}</span>
+                      <span className="rounded bg-[#222633] px-1.5 py-0.5 text-[10px] text-gray-400">{rotuloCanal(p.forma)}</span>
                     )}
                     {p.nsu && <span className="text-[10px] text-gray-500">NSU {p.nsu}</span>}
                   </span>
@@ -1123,8 +1123,8 @@ function ModalPagamento({
                 onClick={() => setForma(f.id)}
                 className={`flex flex-col items-center gap-1 rounded-lg border py-3 text-sm ${
                   forma === f.id
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-300'
-                    : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                    ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
+                    : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
                 }`}
               >
                 {f.icon}
@@ -1141,14 +1141,14 @@ function ModalPagamento({
               <button
                 onClick={() => setCanal('TEF')}
                 disabled={!temTef}
-                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-amber-500 text-slate-900' : 'bg-gray-800 text-gray-400'} disabled:opacity-40`}
+                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-[#E8A317] text-slate-900' : 'bg-[#222633] text-gray-400'} disabled:opacity-40`}
                 title={temTef ? 'Máquina integrada (TEF) — F6' : 'Nenhum TEF configurado'}
               >
                 Integrada (TEF)
               </button>
               <button
                 onClick={() => setCanal('POS')}
-                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-amber-500 text-slate-900' : 'bg-gray-800 text-gray-400'}`}
+                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-[#E8A317] text-slate-900' : 'bg-[#222633] text-gray-400'}`}
                 title="Maquininha avulsa — operar na mão (F6)"
               >
                 Avulsa (POS)
@@ -1157,11 +1157,11 @@ function ModalPagamento({
                 <span className="ml-auto flex gap-1">
                   <button
                     onClick={() => setTipoCartao('CREDITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-gray-700 text-gray-100' : 'bg-gray-800 text-gray-500'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-[#2D3140] text-gray-100' : 'bg-[#222633] text-gray-500'}`}
                   >Crédito</button>
                   <button
                     onClick={() => setTipoCartao('DEBITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-gray-700 text-gray-100' : 'bg-gray-800 text-gray-500'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-[#2D3140] text-gray-100' : 'bg-[#222633] text-gray-500'}`}
                   >Débito</button>
                 </span>
               )}
@@ -1179,7 +1179,7 @@ function ModalPagamento({
                 onChange={(e) => setValorStr(e.target.value)}
                 placeholder={brl(restante).replace('R$', '').trim()}
                 inputMode="decimal"
-                className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
+                className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
               />
             </div>
             {forma === 'DINHEIRO' && (
@@ -1191,7 +1191,7 @@ function ModalPagamento({
                   onChange={(e) => setRecebidoStr(e.target.value)}
                   placeholder="0,00"
                   inputMode="decimal"
-                  className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
+                  className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
                 />
               </div>
             )}
@@ -1209,7 +1209,7 @@ function ModalPagamento({
           )}
 
           {processando && (
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-[#E8A317]/10 px-3 py-2 text-sm text-amber-300">
               <Loader2 className="h-4 w-4 animate-spin" /> {processando}
             </div>
           )}
@@ -1220,7 +1220,7 @@ function ModalPagamento({
           <button
             onClick={adicionar}
             disabled={salvando || !!processando || restante <= 0.005 || valorAplicado <= 0 || dinheiroInsuficiente}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 py-4 text-lg font-semibold hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0E9560] py-4 text-lg font-semibold hover:bg-[#12B877] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
           >
             {salvando || processando ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -1290,10 +1290,10 @@ function ModalDesconto({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Percent className="h-5 w-5 text-amber-400" /> Desconto na venda
+            <Percent className="h-5 w-5 text-[#F5B841]" /> Desconto na venda
           </h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1310,8 +1310,8 @@ function ModalDesconto({
               onClick={() => setTipo('PERCENT')}
               className={`rounded-lg border py-2 text-sm ${
                 tipo === 'PERCENT'
-                  ? 'border-amber-500 bg-amber-500/10 text-amber-300'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                  ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
+                  : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
               }`}
             >
               Percentual (%)
@@ -1320,8 +1320,8 @@ function ModalDesconto({
               onClick={() => setTipo('VALOR')}
               className={`rounded-lg border py-2 text-sm ${
                 tipo === 'VALOR'
-                  ? 'border-amber-500 bg-amber-500/10 text-amber-300'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-600'
+                  ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
+                  : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
               }`}
             >
               Valor (R$)
@@ -1334,13 +1334,13 @@ function ModalDesconto({
             onChange={(e) => setValorStr(e.target.value)}
             placeholder={tipo === 'PERCENT' ? '0%' : '0,00'}
             inputMode="decimal"
-            className="mt-4 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-500"
+            className="mt-4 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#E8A317]"
           />
 
           <div className="mt-4 space-y-1 text-sm">
             <div className="flex justify-between">
               <span className="text-gray-500">Desconto</span>
-              <span className="tabular-nums text-amber-400">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
+              <span className="tabular-nums text-[#F5B841]">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-500">Novo total</span>
@@ -1357,14 +1357,14 @@ function ModalDesconto({
           <div className="mt-5 flex gap-2">
             <button
               onClick={() => onConfirmar({ tipo: 'VALOR', valor: 0 })}
-              className="flex-1 rounded-lg bg-gray-800 py-3 text-sm text-gray-300 hover:bg-gray-700"
+              className="flex-1 rounded-lg bg-[#222633] py-3 text-sm text-gray-300 hover:bg-[#2D3140]"
             >
               Remover
             </button>
             <button
               onClick={confirmar}
               disabled={excede}
-              className="flex-[2] flex items-center justify-center gap-2 rounded-lg bg-amber-600 py-3 font-semibold hover:bg-amber-500 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
+              className="flex-[2] flex items-center justify-center gap-2 rounded-lg bg-[#CE8F14] py-3 font-semibold hover:bg-[#E8A317] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
             >
               <Check className="h-5 w-5" /> Aplicar (Enter)
             </button>
@@ -1416,10 +1416,10 @@ function ModalPeso({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Scale className="h-5 w-5 text-amber-400" /> Pesar produto
+            <Scale className="h-5 w-5 text-[#F5B841]" /> Pesar produto
           </h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1434,7 +1434,7 @@ function ModalPeso({
           <label className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
             <span>Peso ({unidade || 'KG'})</span>
             {multQtd > 1 && (
-              <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[11px] font-semibold text-amber-300">
+              <span className="rounded bg-[#E8A317]/15 px-1.5 py-0.5 text-[11px] font-semibold text-amber-300">
                 × {multQtd}
               </span>
             )}
@@ -1445,7 +1445,7 @@ function ModalPeso({
             onChange={(e) => setPesoStr(e.target.value)}
             placeholder="0,000"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2.5 text-lg outline-none focus:border-amber-400"
+            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
           />
 
           <div className="mt-4 flex justify-between text-sm">
@@ -1458,7 +1458,7 @@ function ModalPeso({
           <button
             onClick={confirmar}
             disabled={!(kg > 0)}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 py-3 font-semibold text-slate-900 hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-gray-800 disabled:text-gray-600"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#E8A317] py-3 font-semibold text-slate-900 hover:bg-[#F5B841] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
           >
             <Check className="h-5 w-5" /> Adicionar (Enter)
           </button>
@@ -1564,10 +1564,10 @@ function ModalVendas({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-xl border border-gray-800 bg-gray-900 shadow-2xl">
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
+        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Printer className="h-5 w-5 text-amber-400" /> Vendas recentes
+            <Printer className="h-5 w-5 text-[#F5B841]" /> Vendas recentes
           </h2>
           <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
             <X className="h-5 w-5" />
@@ -1579,7 +1579,7 @@ function ModalVendas({
           )}
           {carregando ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-amber-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#F5B841]" />
             </div>
           ) : vendas.length === 0 ? (
             <p className="py-10 text-center text-sm text-gray-500">Nenhuma venda registrada.</p>
@@ -1596,7 +1596,7 @@ function ModalVendas({
               </thead>
               <tbody>
                 {vendas.map((v) => (
-                  <tr key={v.pedidoId} className="border-b border-gray-800/60">
+                  <tr key={v.pedidoId} className="border-b border-[#222633]/60">
                     <td className="px-2 py-2 font-medium">#{v.numero}</td>
                     <td className="px-2 py-2 text-gray-400">
                       {new Date(v.dataEmissao).toLocaleString('pt-BR')}
@@ -1615,7 +1615,7 @@ function ModalVendas({
                         <button
                           onClick={() => reimprimir(v)}
                           disabled={busy === v.pedidoId}
-                          className="flex items-center gap-1 rounded bg-gray-800 px-2 py-1 text-xs text-gray-200 hover:bg-gray-700 disabled:opacity-40"
+                          className="flex items-center gap-1 rounded bg-[#222633] px-2 py-1 text-xs text-gray-200 hover:bg-[#2D3140] disabled:opacity-40"
                         >
                           <Printer className="h-3.5 w-3.5" /> Reimprimir
                         </button>
