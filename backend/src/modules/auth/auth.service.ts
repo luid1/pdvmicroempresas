@@ -1,7 +1,13 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
+import { validarCnpj } from '../../common/utils/fiscal-validators.util';
 
 @Injectable()
 export class AuthService {
@@ -11,28 +17,28 @@ export class AuthService {
    * Retorna a lista de usuários ativos do tenant para a tela de seleção.
    * Público — não expõe senha ou dados sensíveis.
    */
-  async getUsersForLogin(tenantId?: string, cnpj?: string) {
-    let resolvedTenantId = tenantId;
+  async getUsersForLogin(pairToken?: string, tenantId?: string) {
+    if (!pairToken) throw new UnauthorizedException('Este computador não está vinculado a uma empresa.');
 
-    if (!resolvedTenantId && cnpj) {
-      const tenant = await this.prisma.tenant.findUnique({ where: { cnpj } });
-      if (!tenant) return [];
-      resolvedTenantId = tenant.id;
+    let payload: { tenantId?: string; purpose?: string };
+    try {
+      payload = this.jwt.verify(pairToken);
+    } catch {
+      throw new UnauthorizedException('Vínculo expirado ou inválido. Vincule este computador novamente.');
     }
-
-    if (!resolvedTenantId) {
-      // Fallback: pega o único tenant ativo (uso interno / single-tenant)
-      const tenant = await this.prisma.tenant.findFirst({ where: { ativo: true } });
-      if (!tenant) return [];
-      resolvedTenantId = tenant.id;
+    if (payload.purpose !== 'pair' || !payload.tenantId) {
+      throw new UnauthorizedException('Token de vínculo inválido.');
     }
+    if (tenantId && tenantId !== payload.tenantId) {
+      throw new UnauthorizedException('O vínculo não pertence a esta empresa.');
+    }
+    const resolvedTenantId = payload.tenantId;
 
     const usuarios = await this.prisma.usuario.findMany({
       where: { tenantId: resolvedTenantId, ativo: true },
       select: {
         id: true,
         nome: true,
-        email: true,
         pinHash: true,
         role: { select: { nome: true } },
         ultimoAcesso: true,
@@ -47,12 +53,22 @@ export class AuthService {
     return usuarios.map(({ pinHash, ...u }) => ({ ...u, temPin: !!pinHash }));
   }
 
+  /** Token restrito usado somente para listar os perfis no computador vinculado. */
+  private criarPairToken(tenantId: string): string {
+    return this.jwt.sign({ tenantId, purpose: 'pair' }, { expiresIn: '30d' });
+  }
+
   async registerTenant(dto: {
     razaoSocial: string; cnpj: string; regimeTributario?: string;
     adminNome: string; adminEmail: string; password: string;
     filialNome: string; filialCodigo: string;
   }) {
-    const exists = await this.prisma.tenant.findUnique({ where: { cnpj: dto.cnpj } });
+    const cnpj = dto.cnpj.replace(/\D/g, '');
+    if (!validarCnpj(cnpj)) throw new BadRequestException('CNPJ inválido.');
+
+    const exists = await this.prisma.tenant.findFirst({
+      where: { OR: [{ cnpj: dto.cnpj }, { cnpj }] },
+    });
     if (exists) throw new ConflictException('CNPJ já cadastrado.');
 
     const hash = await bcrypt.hash(dto.password, 12);
@@ -61,7 +77,7 @@ export class AuthService {
       const tenant = await tx.tenant.create({
         data: {
           razaoSocial: dto.razaoSocial,
-          cnpj: dto.cnpj,
+          cnpj,
           regimeTributario: dto.regimeTributario || 'SIMPLES_NACIONAL',
         },
       });
@@ -91,7 +107,7 @@ export class AuthService {
           tenantId: tenant.id,
           roleId: role.id,
           nome: dto.adminNome,
-          email: dto.adminEmail,
+          email: dto.adminEmail.trim().toLowerCase(),
           passwordHash: hash,
           filiais: { create: { filialId: filial.id } },
         },
@@ -108,6 +124,7 @@ export class AuthService {
 
     return {
       token,
+      pairToken: this.criarPairToken(result.tenant.id),
       usuario: { id: result.usuario.id, nome: result.usuario.nome, email: result.usuario.email },
       tenant: { id: result.tenant.id, razaoSocial: result.tenant.razaoSocial },
       filial: { id: result.filial.id, codigo: result.filial.codigo, nome: result.filial.nome },
@@ -115,9 +132,14 @@ export class AuthService {
   }
 
   /** Busca o usuário completo (tenant + filiais + role) para montar a sessão. */
-  private async buscarUsuarioCompleto(where: { email?: string; id?: string }) {
+  private async buscarUsuarioCompleto(where: { email?: string; id?: string; tenantId?: string }) {
+    const { email, ...filtros } = where;
     return this.prisma.usuario.findFirst({
-      where: { ...where, ativo: true },
+      where: {
+        ...filtros,
+        ...(email ? { email: { equals: email, mode: 'insensitive' as const } } : {}),
+        ativo: true,
+      },
       include: {
         tenant: true,
         filiais: { include: { filial: true } },
@@ -143,6 +165,7 @@ export class AuthService {
 
     return {
       token,
+      pairToken: this.criarPairToken(usuario.tenant.id),
       usuario: {
         id: usuario.id,
         nome: usuario.nome,
@@ -166,8 +189,39 @@ export class AuthService {
     };
   }
 
-  async login(email: string, password: string) {
-    const usuario = await this.buscarUsuarioCompleto({ email });
+  async login(email: string, password: string, cnpj?: string) {
+    const emailNormalizado = email.trim().toLowerCase();
+    let usuario: Awaited<ReturnType<AuthService['buscarUsuarioCompleto']>>;
+
+    if (cnpj?.trim()) {
+      const cnpjLimpo = cnpj.replace(/\D/g, '');
+      const tenant = await this.prisma.tenant.findFirst({
+        where: { OR: [{ cnpj }, { cnpj: cnpjLimpo }], ativo: true },
+        select: { id: true },
+      });
+      usuario = tenant
+        ? await this.buscarUsuarioCompleto({ email: emailNormalizado, tenantId: tenant.id })
+        : null;
+    } else {
+      const candidatos = await this.prisma.usuario.findMany({
+        where: {
+          email: { equals: emailNormalizado, mode: 'insensitive' },
+          ativo: true,
+          tenant: { ativo: true },
+        },
+        select: { id: true },
+        take: 2,
+      });
+      if (candidatos.length > 1) {
+        throw new UnauthorizedException(
+          'Este e-mail pertence a mais de uma empresa. Informe o CNPJ para continuar.',
+        );
+      }
+      usuario = candidatos.length === 1
+        ? await this.buscarUsuarioCompleto({ id: candidatos[0].id })
+        : null;
+    }
+
     if (!usuario || !(await bcrypt.compare(password, usuario.passwordHash))) {
       throw new UnauthorizedException('Senha incorreta.');
     }

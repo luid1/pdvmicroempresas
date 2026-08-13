@@ -1,7 +1,8 @@
-import { Controller, Post, Put, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, Put, Get, Body, Query, Headers } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Public, CurrentTenant, CurrentUser } from '../../common/decorators/context.decorator';
+import { RequirePermissao } from '../../common/decorators/permissoes.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto, SalvarPreferenciasDto } from './dto/auth.dto';
 
@@ -14,10 +15,10 @@ export class AuthController {
   @Get('users')
   @ApiOperation({ summary: 'Lista usuários ativos para tela de seleção (sem senha)' })
   usersForLogin(
+    @Headers('x-pair-token') pairToken?: string,
     @Query('tenantId') tenantId?: string,
-    @Query('cnpj') cnpj?: string,
   ) {
-    return this.auth.getUsersForLogin(tenantId, cnpj);
+    return this.auth.getUsersForLogin(pairToken, tenantId);
   }
 
   // Anti-brute-force: no máximo 5 tentativas de login por minuto por IP.
@@ -26,7 +27,7 @@ export class AuthController {
   @Post('login')
   @ApiOperation({ summary: 'Login por e-mail + senha' })
   login(@Body() body: LoginDto) {
-    return this.auth.login(body.email, body.password);
+    return this.auth.login(body.email, body.password, body.cnpj);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })
@@ -47,6 +48,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
+  @RequirePermissao('GERENCIAL:CONFIGURAR')
   @Post('definir-pin')
   @ApiOperation({ summary: 'Define/troca o PIN de um usuário da própria empresa' })
   definirPin(@CurrentTenant() tenantId: string, @Body() body: DefinirPinDto) {
@@ -54,6 +56,7 @@ export class AuthController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 3600000 } })
   @Post('register')
   @ApiOperation({ summary: 'Cadastra novo tenant + admin master' })
   register(@Body() body: RegisterTenantDto) {

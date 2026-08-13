@@ -51,7 +51,11 @@ import { HealthController } from './health.controller';
     // Rate limiting global: 120 req/min por IP (protege contra abuso/brute-force).
     // Endpoints sensíveis (login, IA) têm limites mais rígidos via @Throttle.
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 120 }]),
-    JwtModule.register({ secret: getJwtSecret(), global: true }),
+    JwtModule.register({
+      secret: getJwtSecret(),
+      global: true,
+      signOptions: { expiresIn: (process.env.JWT_EXPIRES_IN || '8h') as any },
+    }),
     PrismaModule,
     AuthModule,
     FiliaisModule,
