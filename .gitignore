@@ -1,0 +1,58 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+
+# Build
+dist/
+build/
+.next/
+out/
+
+# Env — NUNCA commitar senhas
+.env
+.env.local
+.env.production
+.env*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Uploads
+uploads/
+backend/uploads/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+
+# Docker override local
+docker-compose.override.yml
+
+frontend/vite.log
+
+# Config local do Claude Code
+.claude/
+
+# Banco Postgres LOCAL e binários embutidos — NUNCA vão pro repositório
+pgdata/
+pgsql/
+pg.log
+pg-backend-dev.log
+
+# Túnel Cloudflare (binário grande + logs)
+cloudflared.exe
+cloudflared.out
+
+# Dev PWA gerado
+frontend/dev-dist/

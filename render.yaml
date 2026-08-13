@@ -1,0 +1,86 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Render Blueprint — Backend Lumin PDV (NestJS + Prisma)  ·  plano FREE
+#
+# Como usar:
+#   1. Suba este repositório no GitHub.
+#   2. Em https://render.com → New → Blueprint → conecte o repo.
+#   3. O Render lê este arquivo e cria o Web Service abaixo.
+#   4. Preencha as variáveis marcadas com "sync: false" no painel (valores secretos).
+#
+# Banco: crie um Postgres grátis no Neon (https://neon.tech) e cole a connection
+#        string em DATABASE_URL (precisa terminar com ?sslmode=require).
+#
+# Observações do plano FREE:
+#   • O serviço "dorme" após 15 min sem acesso e leva ~30–50s para acordar.
+#   • Disco é efêmero: uploads em ./uploads somem a cada deploy (ok para teste).
+# ─────────────────────────────────────────────────────────────────────────────
+services:
+  - type: web
+    name: lumin-pdv-api
+    runtime: node
+    plan: free
+    region: virginia            # mais perto do Brasil dentre as regiões free
+    rootDir: backend
+    # --include=dev garante nest/prisma/typescript (devDependencies) no build,
+    # mesmo com NODE_ENV=production. O db push sincroniza o banco com o schema.
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build && npx prisma db push --accept-data-loss
+    startCommand: node dist/src/main
+    healthCheckPath: /api/v1/planos
+    autoDeploy: true
+    envVars:
+      # Banco Postgres (Neon) — cole a string completa com ?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+      # Segurança
+      - key: JWT_SECRET
+        generateValue: true      # o Render gera um segredo forte automaticamente
+      - key: JWT_EXPIRES_IN
+        value: 8h
+      - key: INTERNAL_WEBHOOK_TOKEN
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      # CORS: domínios do front que podem chamar a API (separados por vírgula).
+      # Se você usar o proxy /api da Netlify (recomendado), pode deixar em branco.
+      - key: FRONTEND_URL
+        sync: false
+      # Uploads (disco efêmero no plano free)
+      - key: UPLOAD_PATH
+        value: ./uploads
+      - key: MAX_FILE_SIZE_MB
+        value: "10"
+      # ── IA "Lu" (Google Gemini) ─────────────────────────────────────────────
+      # "gemini" usa o Google Gemini Flash (exige GEMINI_API_KEY). "simulado"
+      # responde localmente sem rede/custo. Cole a GEMINI_API_KEY no painel do
+      # Render (NUNCA no repositório) — gere em https://aistudio.google.com/apikey.
+      - key: IA_MODO
+        value: gemini
+      - key: GEMINI_MODEL
+        value: gemini-flash-lite-latest
+      - key: GEMINI_API_KEY
+        sync: false
+      # ── NFC-e (nota fiscal do consumidor) ───────────────────────────────────
+      # "simulado" = gera chave/QR fake em cada venda, sem transmitir ao SEFAZ.
+      # Em produção real: "focus" + FOCUS_NFE_TOKEN + certificado A1 + dados fiscais.
+      - key: NFCE_MODO
+        value: simulado
+      # ── Mercado Pago (assinaturas) ──────────────────────────────────────────
+      # Comece em "simulado" para testar sem cobrança. Em produção: "producao"
+      # + MP_ACCESS_TOKEN de produção (APP_USR-...) + FRONT_URL público https.
+      - key: MP_MODO
+        value: simulado
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: FRONT_URL            # URL pública do front (back_url do checkout MP)
+        sync: false
+      # ── E-mail (Resend) ─────────────────────────────────────────────────────
+      # Comece em "simulado" (loga no console). Em produção: "producao" +
+      # RESEND_API_KEY + MAIL_FROM de um domínio verificado no Resend.
+      - key: MAIL_MODO
+        value: simulado
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: "Lumin PDV <onboarding@resend.dev>"
+      - key: APP_URL              # URL do sistema (link de login no e-mail)
+        sync: false

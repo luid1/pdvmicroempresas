@@ -1,0 +1,32 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Netlify — config na RAIZ do repo (monorepo: o front está em /frontend).
+# O comando entra em frontend/, builda, e publica frontend/dist.
+# Isso evita depender de configurar "Base directory" no painel.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/dist"
+
+# Modos de teste do caixa (o Vite expõe as variáveis com prefixo VITE_ no build).
+#   VITE_TEF_MODO=simulado   → botões de cartão aprovam uma transação fake
+#   VITE_GAVETA_MODO=serial  → botão "Abrir gaveta" ativo (exige impressora serial/USB)
+#   VITE_CUPOM_LARGURA=80    → bobina de 80mm (use 58 para bobina pequena)
+# Para desligar em produção, troque VITE_TEF_MODO/VITE_GAVETA_MODO para "desligado".
+[build.environment]
+  VITE_TEF_MODO = "simulado"
+  VITE_GAVETA_MODO = "serial"
+  VITE_CUPOM_LARGURA = "80"
+
+# Encaminha as chamadas de API para o backend no Render (mesma origem, sem CORS).
+[[redirects]]
+  from = "/api/*"
+  to = "https://lumin-pdv-api.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback — qualquer rota volta pro index.html (React Router).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
