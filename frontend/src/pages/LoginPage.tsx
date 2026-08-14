@@ -49,6 +49,72 @@ async function fetchComTimeout(url: string, init?: RequestInit, ms = 12000): Pro
   }
 }
 
+const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+type AtualizarStatus = (texto: string) => void;
+
+/**
+ * O backend pode estar adormecido no plano gratuito do host. Antes de enviar
+ * credenciais, acorda a API por um endpoint público e leve. Enquanto isso a
+ * tela permanece em estado de conexão, sem exibir um falso erro de login.
+ */
+async function aguardarServidor(atualizarStatus: AtualizarStatus, limiteMs = 75000): Promise<void> {
+  const inicio = Date.now();
+  let tentativa = 0;
+
+  while (Date.now() - inicio < limiteMs) {
+    tentativa += 1;
+    atualizarStatus(tentativa === 1
+      ? 'Conectando ao servidor seguro…'
+      : 'O servidor está iniciando. Aguarde, isso pode levar até 1 minuto…');
+
+    try {
+      const res = await fetchComTimeout(`/api/v1/health/ready?t=${Date.now()}`, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+      }, 15000);
+      if (res.ok) {
+        atualizarStatus('Servidor disponível. Validando seu acesso…');
+        return;
+      }
+      // 4xx prova que o servidor respondeu; a chamada de login dará a mensagem
+      // específica. 5xx/502/503/504 ainda podem ser o proxy durante o boot.
+      if (res.status >= 400 && res.status < 500) return;
+    } catch {
+      // Rede/proxy ainda indisponível: tenta novamente até o limite global.
+    }
+
+    await esperar(2500);
+  }
+
+  throw new Error('O serviço não conseguiu iniciar. Verifique sua internet e tente novamente. Se persistir, contate o suporte.');
+}
+
+async function fetchComServidor(
+  url: string,
+  init: RequestInit,
+  atualizarStatus: AtualizarStatus,
+): Promise<Response> {
+  await aguardarServidor(atualizarStatus);
+  let res: Response;
+  try {
+    res = await fetchComTimeout(url, init, 20000);
+  } catch {
+    atualizarStatus('A conexão oscilou. Reconectando ao servidor…');
+    await aguardarServidor(atualizarStatus);
+    res = await fetchComTimeout(url, init, 20000);
+  }
+
+  // Se o proxy reiniciou entre o health check e o login, aquece uma vez e
+  // repete. Login é idempotente para este fim e não cria registros financeiros.
+  if ([502, 503, 504].includes(res.status)) {
+    atualizarStatus('Reconectando ao servidor…');
+    await aguardarServidor(atualizarStatus);
+    res = await fetchComTimeout(url, init, 20000);
+  }
+  return res;
+}
+
 /**
  * Lê o corpo como JSON de forma segura. Se o servidor devolver algo que NÃO é
  * JSON (página de erro HTML, corpo vazio, proxy fora do ar enquanto o backend
@@ -66,7 +132,7 @@ async function lerJson(res: Response): Promise<any> {
     const msg =
       data?.error?.message || data?.message ||
       (res.status >= 500
-        ? 'O servidor teve um problema. Tente de novo em instantes.'
+        ? 'Não foi possível concluir após as tentativas automáticas. Verifique sua conexão e, se persistir, contate o suporte.'
         : 'Não foi possível concluir. Verifique os dados e tente de novo.');
     throw new Error(msg);
   }
@@ -91,6 +157,7 @@ export default function LoginPage() {
   const [hora, setHora] = useState(new Date());
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [serverStatus, setServerStatus] = useState('');
 
   // Estado de vínculo do computador.
   const [paired, setPaired] = useState<PairedTenant | null>(() => {
@@ -126,15 +193,16 @@ export default function LoginPage() {
     setCarregandoPerfis(true);
     setError('');
     try {
-      const res = await fetchComTimeout(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`, {
+      const res = await fetchComServidor(`/api/v1/auth/users?tenantId=${encodeURIComponent(tenantId)}`, {
         headers: { 'x-pair-token': pairToken },
-      });
+      }, setServerStatus);
       const data = await lerJson(res);
       setPerfis(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.message || 'Falha ao carregar os perfis.');
     } finally {
       setCarregandoPerfis(false);
+      setServerStatus('');
     }
   }
 
@@ -210,12 +278,20 @@ export default function LoginPage() {
           <Brand size="sm" />
         </div>
 
+        {serverStatus && (
+          <div role="status" className="mb-4 flex w-full max-w-sm items-center gap-3 rounded-xl border border-[#0F8A72]/35 bg-[#0F8A72]/15 px-4 py-3 text-sm text-[#9FE3D2]">
+            <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#13A184]/30 border-t-[#13A184]" />
+            <span>{serverStatus}</span>
+          </div>
+        )}
+
         {modo === 'PAIR' && (
           <PairForm
             loading={loading}
             setLoading={setLoading}
             error={error}
             setError={setError}
+            setServerStatus={setServerStatus}
             onPaired={(tenant) => {
               const p = {
                 id: tenant.id,
@@ -257,16 +333,18 @@ export default function LoginPage() {
                 const body = credencial.tipo === 'pin'
                   ? { usuarioId: selecionado.id, pin: credencial.valor }
                   : { usuarioId: selecionado.id, password: credencial.valor };
-                const res = await fetchComTimeout(url, {
+                const res = await fetchComServidor(url, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify(body),
-                });
+                }, setServerStatus);
                 const data = await lerJson(res);
                 entrar(data);
               } catch (err: any) {
                 setError(err.message || 'Não foi possível entrar.');
                 setLoading(false);
+              } finally {
+                setServerStatus('');
               }
             }}
           />
@@ -283,11 +361,12 @@ export default function LoginPage() {
 /* ────────────────────────────────────────────────────────────
    PASSO 1 — Vincular o computador à loja (e-mail + senha)
 ──────────────────────────────────────────────────────────── */
-function PairForm({ loading, setLoading, error, setError, onPaired }: {
+function PairForm({ loading, setLoading, error, setError, setServerStatus, onPaired }: {
   loading: boolean;
   setLoading: (v: boolean) => void;
   error: string;
   setError: (v: string) => void;
+  setServerStatus: AtualizarStatus;
   onPaired: (tenant: any) => void;
 }) {
   const [email, setEmail] = useState('');
@@ -302,7 +381,7 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
     setLoading(true);
     setError('');
     try {
-      const res = await fetchComTimeout('/api/v1/auth/login', {
+      const res = await fetchComServidor('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -310,13 +389,15 @@ function PairForm({ loading, setLoading, error, setError, onPaired }: {
           password,
           ...(cnpj.trim() ? { cnpj: cnpj.trim() } : {}),
         }),
-      });
+      }, setServerStatus);
       const data = await lerJson(res);
       onPaired({ ...data.tenant, token: data.pairToken });
     } catch (err: any) {
       setError(err.message);
       setPassword('');
       setLoading(false);
+    } finally {
+      setServerStatus('');
     }
   };
 

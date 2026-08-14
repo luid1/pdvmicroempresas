@@ -25,7 +25,7 @@ services:
     # mesmo com NODE_ENV=production. O db push sincroniza o banco com o schema.
     buildCommand: npm install --include=dev && npx prisma generate && npm run build && npx prisma db push --accept-data-loss
     startCommand: node dist/src/main
-    healthCheckPath: /api/v1/planos
+    healthCheckPath: /api/v1/health/ready
     autoDeploy: true
     envVars:
       # Banco Postgres (Neon) — cole a string completa com ?sslmode=require
