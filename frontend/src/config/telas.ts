@@ -93,8 +93,8 @@ export const TELAS: TelaDef[] = [
   //  AVANÇADO (ERP) — recursos de atacado/distribuição e contabilidade.
   //  Agrupados num único abridor no FIM do menu. Continuam 100% acessíveis;
   //  só saíram da primeira dobra para não poluir o dia a dia do mercado.
-  //  (Controladoria, DRE-rentabilidade e Custos ainda usam dados de
-  //   demonstração — ver PENDENCIAS.md.)
+  //  Alguns recursos avançados ainda estão em migração; cada tela deve
+  //  sinalizar claramente quando uma integração real não estiver disponível.
   // ══════════════════════════════════════════════════════════════════════
   { key: 'grupo:avancado', label: 'Avançado (ERP)', grupo: 'Avançado', icon: Gauge, pasta: true, submenu: [
     { key: '/wms/movimentacoes', label: 'Movimentações', icon: BarChart3, hint: 'Entradas e saídas detalhadas' },
@@ -107,7 +107,7 @@ export const TELAS: TelaDef[] = [
     { key: '/financeiro/controladoria', label: 'Controladoria', icon: Landmark, hint: 'Visão consolidada' },
     { key: '/financeiro/tesouraria', label: 'Tesouraria', icon: Landmark, hint: 'Contas, caixa e conciliação' },
     { key: '/financeiro/plano-contas', label: 'Plano de Contas', icon: Landmark, hint: 'Categorias do DRE' },
-    { key: '/financeiro/custos', label: 'Custos & Margem', icon: Coins, hint: 'Simulador de margem (demo)' },
+    { key: '/financeiro/custos', label: 'Custos & Margem', icon: Coins, hint: 'Margem, rentabilidade e composição real' },
   ] },
   // Rotas reais (ocultas) dos itens do Avançado — herdam rota/permissão.
   { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'Avançado', icon: BarChart3, oculto: true },
