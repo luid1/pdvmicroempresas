@@ -38,19 +38,21 @@ const tones: Record<string, string> = {
   sky: 'text-[#1f74c9] bg-[#3896f0]/10 border-[#3896f0]/20',
   emerald: 'text-[#0b7d4e] bg-[#0FA968]/10 border-[#0FA968]/22',
   rose: 'text-[#c3352b] bg-[#E0483D]/10 border-[#E0483D]/22',
-  amber: 'text-[#a9760a] bg-[#E8A317]/12 border-[#E8A317]/25',
+  brand: 'text-[#0B6F5C] bg-[#0F8A72]/12 border-[#0F8A72]/25',
+  amber: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
+  warning: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
   violet: 'text-[#5a4fd0] bg-[#7C6BF0]/10 border-[#7C6BF0]/20',
   teal: 'text-[#0e7490] bg-[#06b6d4]/10 border-[#06b6d4]/20',
   blue: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20',
   indigo: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20',
-  slate: 'text-[#5B5D69] bg-[#F6F5F2] border-[#E7E5DF]',
+  slate: 'text-[#5F6065] bg-[#F7F7F8] border-[#E5E7EB]',
 };
 
-const tipStyle = { background: '#FFFFFF', border: '1px solid #E7E5DF', borderRadius: 10, fontSize: 12, color: '#16171D', boxShadow: '0 8px 24px rgba(22,23,29,0.12)' };
+const tipStyle = { background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12, color: '#202123', boxShadow: '0 8px 24px rgba(22,23,29,0.12)' };
 const pct = (v: number) => `${(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 function Delta({ v }: { v: number }) {
-  if (!v) return <span className="text-[11px] text-[#8B8D98]">estável</span>;
+  if (!v) return <span className="text-[11px] text-[#8E8F94]">estável</span>;
   const up = v > 0;
   return (
     <span className={`inline-flex items-center gap-0.5 text-xs font-semibold ${up ? 'text-[#0FA968]' : 'text-[#E0483D]'}`}>
@@ -106,27 +108,27 @@ export default function DetalheModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-[#16171D]/40 backdrop-blur-sm flex items-center justify-center z-[210] p-4 animate-fade-in"
+      className="fixed inset-0 bg-[#202123]/40 backdrop-blur-sm flex items-center justify-center z-[210] p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_0_rgba(22,23,29,0.28)] w-full max-w-md animate-fade-in-up"
+        className="bg-white border border-[#E5E7EB] rounded-2xl shadow-[0_24px_80px_0_rgba(22,23,29,0.28)] w-full max-w-md animate-fade-in-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-5 py-4 flex items-start gap-3 border-b border-[#E7E5DF]">
+        <div className="px-5 py-4 flex items-start gap-3 border-b border-[#E5E7EB]">
           <div className={`h-10 w-10 rounded-xl border flex items-center justify-center shrink-0 ${tones[tone] || tones.slate}`}>
             <Icon className="h-5 w-5" strokeWidth={2} />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] truncate">{titulo}</p>
+              <p className="text-[11px] font-semibold text-[#8E8F94] uppercase tracking-[0.1em] truncate">{titulo}</p>
               {delta !== undefined && <Delta v={delta} />}
             </div>
-            <p className="font-num text-2xl font-extrabold text-[#16171D] tracking-tight tabular-nums truncate mt-0.5">{valorPrincipal}</p>
-            {subtitulo && <p className="text-[11px] text-[#8B8D98] mt-0.5 truncate">{subtitulo}</p>}
+            <p className="font-num text-2xl font-extrabold text-[#202123] tracking-tight tabular-nums truncate mt-0.5">{valorPrincipal}</p>
+            {subtitulo && <p className="text-[11px] text-[#8E8F94] mt-0.5 truncate">{subtitulo}</p>}
           </div>
-          <button onClick={onClose} className="text-[#8B8D98] hover:text-[#16171D] transition-colors shrink-0 -mr-1 -mt-1">
+          <button onClick={onClose} className="text-[#8E8F94] hover:text-[#202123] transition-colors shrink-0 -mr-1 -mt-1">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -154,8 +156,8 @@ export default function DetalheModal({
           <div className="px-5 py-4 space-y-2">
             {linhas.map((l, i) => (
               <div key={i} className="flex items-center justify-between text-sm">
-                <span className="text-[#5B5D69]">{l.label}</span>
-                <span className={`font-semibold tabular-nums ${l.cor || 'text-[#16171D]'}`}>{l.valor}</span>
+                <span className="text-[#5F6065]">{l.label}</span>
+                <span className={`font-semibold tabular-nums ${l.cor || 'text-[#202123]'}`}>{l.valor}</span>
               </div>
             ))}
           </div>
@@ -165,23 +167,23 @@ export default function DetalheModal({
         {carregarLista && (
           <div className="px-5 pb-2">
             {listaTitulo && (
-              <p className="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] mb-1.5">{listaTitulo}</p>
+              <p className="text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.1em] mb-1.5">{listaTitulo}</p>
             )}
             {carregando && (
               <div className="space-y-2">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2 animate-pulse">
-                    <div className="h-3 w-32 rounded bg-[#E7E5DF]" />
-                    <div className="h-3 w-16 rounded bg-[#E7E5DF]" />
+                  <div key={i} className="flex items-center justify-between rounded-lg bg-[#F7F7F8] border border-[#E5E7EB] px-3 py-2 animate-pulse">
+                    <div className="h-3 w-32 rounded bg-[#E5E7EB]" />
+                    <div className="h-3 w-16 rounded bg-[#E5E7EB]" />
                   </div>
                 ))}
               </div>
             )}
             {!carregando && erro && (
-              <p className="text-xs text-[#8B8D98] py-3 text-center">Não foi possível carregar a lista.</p>
+              <p className="text-xs text-[#8E8F94] py-3 text-center">Não foi possível carregar a lista.</p>
             )}
             {!carregando && !erro && registros && registros.length === 0 && (
-              <p className="text-xs text-[#8B8D98] py-3 text-center">{listaVazia || 'Nenhum registro.'}</p>
+              <p className="text-xs text-[#8E8F94] py-3 text-center">{listaVazia || 'Nenhum registro.'}</p>
             )}
             {!carregando && !erro && registros && registros.length > 0 && (
               <div className="space-y-1.5 max-h-64 overflow-y-auto -mr-1 pr-1">
@@ -191,13 +193,13 @@ export default function DetalheModal({
                     <div
                       key={i}
                       onClick={clic ? () => irPara(r.rota!) : undefined}
-                      className={`flex items-center justify-between gap-2 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2 ${clic ? 'cursor-pointer hover:bg-[#EFEDE7] transition-colors' : ''}`}
+                      className={`flex items-center justify-between gap-2 rounded-lg bg-[#F7F7F8] border border-[#E5E7EB] px-3 py-2 ${clic ? 'cursor-pointer hover:bg-[#EFEDE7] transition-colors' : ''}`}
                     >
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-[#16171D] truncate">{r.titulo}</p>
-                        {r.subtitulo && <p className="text-[10px] text-[#8B8D98] truncate">{r.subtitulo}</p>}
+                        <p className="text-xs font-medium text-[#202123] truncate">{r.titulo}</p>
+                        {r.subtitulo && <p className="text-[10px] text-[#8E8F94] truncate">{r.subtitulo}</p>}
                       </div>
-                      <span className={`text-xs font-semibold tabular-nums shrink-0 ${r.cor || 'text-[#16171D]'}`}>{r.valor}</span>
+                      <span className={`text-xs font-semibold tabular-nums shrink-0 ${r.cor || 'text-[#202123]'}`}>{r.valor}</span>
                     </div>
                   );
                 })}
@@ -209,16 +211,16 @@ export default function DetalheModal({
         {/* Atalhos rápidos */}
         {atalhos && atalhos.length > 0 && (
           <div className="px-5 pb-1">
-            <p className="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.1em] mb-1.5">Atalhos</p>
+            <p className="text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.1em] mb-1.5">Atalhos</p>
             <div className="flex flex-wrap gap-2">
               {atalhos.map((a, i) => (
                 <button
                   key={i}
                   onClick={() => irPara(a.rota)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#E7E5DF] text-xs text-[#5B5D69] hover:bg-[#F6F5F2] hover:text-[#16171D] transition-all active:scale-[0.98]"
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#E5E7EB] text-xs text-[#5F6065] hover:bg-[#F7F7F8] hover:text-[#202123] transition-all active:scale-[0.98]"
                 >
                   {a.label}
-                  <ChevronRight className="h-3 w-3 text-[#8B8D98]" />
+                  <ChevronRight className="h-3 w-3 text-[#8E8F94]" />
                 </button>
               ))}
             </div>
@@ -226,17 +228,17 @@ export default function DetalheModal({
         )}
 
         {/* Footer */}
-        <div className="px-5 py-3 mt-2 border-t border-[#E7E5DF] flex items-center justify-between gap-2">
+        <div className="px-5 py-3 mt-2 border-t border-[#E5E7EB] flex items-center justify-between gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white border border-[#E7E5DF] text-sm text-[#5B5D69] hover:bg-[#F6F5F2] hover:text-[#16171D] transition-all duration-300 active:scale-[0.98]"
+            className="px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#5F6065] hover:bg-[#F7F7F8] hover:text-[#202123] transition-all duration-300 active:scale-[0.98]"
           >
             Fechar
           </button>
           {rota && (
             <button
               onClick={() => irPara(rota)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#E8A317] hover:bg-[#F5B841] active:bg-[#d69610] text-[#16171D] text-sm font-bold transition-all duration-300 active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#0F8A72] hover:bg-[#13A184] active:bg-[#d69610] text-[#202123] text-sm font-bold transition-all duration-300 active:scale-[0.98]"
             >
               {verMaisLabel || 'Ver mais'}
               <ArrowRight className="h-4 w-4" />

@@ -1,5 +1,9 @@
 # Rebrand completo do sistema Lumin PDV — Design
 
+> **Documento substituído em 2026-08-13.** A direção vigente está em
+> `2026-08-13-lumin-clareza-design.md`. Este arquivo permanece apenas como
+> histórico das decisões anteriores.
+
 **Data:** 2026-07-31
 **Escopo:** Sistema interno (React, `frontend/`) — pós-login. Site de marketing e tela de login já estão em âmbar e ficam como estão.
 **Objetivo:** Unificar o sistema interno à identidade do site (navy + âmbar), padronizar tudo (tamanhos, fontes, botões, gráficos) e deixar com cara de sistema de gestão empresarial (ERP) coeso. Corrigir a estrutura de menu/submenu.

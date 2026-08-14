@@ -1,5 +1,9 @@
 # Rebrand do sistema Lumin PDV — Plano de implementação
 
+> **Plano substituído em 2026-08-13.** Consulte
+> `2026-08-13-lumin-clareza-design.md` antes de executar novas alterações
+> visuais. Este arquivo permanece apenas como histórico.
+
 Baseado em `2026-07-31-rebrand-completo-sistema-design.md`. Execução incremental, aba por aba, com `npm run build` validando cada etapa. Deploy é manual (arrastar `frontend/dist` no Netlify).
 
 ## Etapa 0 — Fontes e meta (base)

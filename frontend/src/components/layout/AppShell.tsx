@@ -88,14 +88,14 @@ export default function AppShell() {
   }, []);
 
   return (
-    <div className="relative flex h-screen overflow-hidden" style={{ backgroundColor: '#F6F5F2' }}>
+    <div className="relative flex h-screen overflow-hidden" style={{ backgroundColor: '#F7F7F8' }}>
       {mobileOpen && (
-        <div className="fixed inset-0 bg-[#16171D]/40 backdrop-blur-sm z-40 lg:hidden animate-fade-in" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 bg-[#202123]/40 backdrop-blur-sm z-40 lg:hidden animate-fade-in" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Sidebar — placa noturna (a "casa" da Lumin). Cores explícitas p/
           ficar imune ao remap claro global. */}
-      <aside className={`fixed lg:relative z-50 h-full flex flex-col bg-[#171A26] border-r border-white/[0.06] transition-all duration-300 ease-in-out shrink-0 ${sw} ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <aside className={`fixed lg:relative z-50 h-full flex flex-col bg-[#212121] border-r border-white/[0.06] transition-all duration-300 ease-in-out shrink-0 ${sw} ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
 
         {/* Logo — passar o mouse revela o controle de abrir/fechar; ao sair, volta a ser a logo. */}
         <div className="group/logo relative flex items-center justify-center border-b border-white/[0.06] h-12 px-3 shrink-0">
@@ -106,7 +106,7 @@ export default function AppShell() {
             className="relative flex h-full w-full items-center justify-center focus:outline-none"
           >
             {/* Wordmark Lumin (expandida) / L (recolhida) */}
-            <span className={`font-logo text-[#F5B841] leading-none transition-opacity duration-200 group-hover/logo:opacity-0 ${collapsed ? 'text-2xl' : 'text-xl'}`}>
+            <span className={`font-logo text-[#13A184] leading-none transition-opacity duration-200 group-hover/logo:opacity-0 ${collapsed ? 'text-2xl' : 'text-xl'}`}>
               {collapsed ? 'L' : 'Lumin'}
             </span>
             {/* Controle de abrir/fechar — aparece no lugar da logo ao passar o mouse */}
@@ -145,16 +145,16 @@ export default function AppShell() {
                             w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-medium
                             transition-all duration-300 ease-in-out group relative active:scale-[0.98]
                             ${ativo
-                              ? 'bg-gradient-to-r from-[#F5B841]/[0.18] to-[#F5B841]/[0.03] text-[#F5B841] shadow-[inset_0_1px_0_0_rgba(245,184,65,0.12)]'
+                              ? 'bg-gradient-to-r from-[#13A184]/[0.18] to-[#13A184]/[0.03] text-[#13A184] shadow-[inset_0_1px_0_0_rgba(19,161,132,0.12)]'
                               : 'text-[#9A9DAD] hover:bg-white/[0.05] hover:text-white'}
                             ${collapsed ? 'justify-center' : ''}
                           `}
                         >
-                          {ativo && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#F5B841] shadow-[0_0_8px_rgba(245,184,65,0.7)]" />}
-                          <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${ativo ? 'text-[#F5B841]' : 'text-[#6B6E82] group-hover:text-[#C7C9D4]'}`} />
+                          {ativo && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#13A184] shadow-[0_0_8px_rgba(19,161,132,0.7)]" />}
+                          <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${ativo ? 'text-[#13A184]' : 'text-[#6B6E82] group-hover:text-[#C7C9D4]'}`} />
                           {!collapsed && <span className="truncate">{label}</span>}
                           {!collapsed && <ChevronRight className="ml-auto h-3 w-3 shrink-0 text-[#5B5E70] group-hover:text-[#C7C9D4] transition-colors duration-200" />}
-                          {collapsed && <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-[#F5B841]/70" />}
+                          {collapsed && <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-[#13A184]/70" />}
                           {collapsed && (
                             <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#20232F] border border-white/[0.08] text-[#C7C9D4] text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
                               {label}
@@ -174,9 +174,9 @@ export default function AppShell() {
                       flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-medium
                       transition-all duration-300 ease-in-out group relative active:scale-[0.98]
                       ${isActive
-                        ? 'bg-gradient-to-r from-[#F5B841]/[0.18] to-[#F5B841]/[0.03] text-[#F5B841] shadow-[inset_0_1px_0_0_rgba(245,184,65,0.12)]'
+                        ? 'bg-gradient-to-r from-[#13A184]/[0.18] to-[#13A184]/[0.03] text-[#13A184] shadow-[inset_0_1px_0_0_rgba(19,161,132,0.12)]'
                         : highlight
-                          ? 'text-[#F5B841]/90 hover:bg-white/[0.05]'
+                          ? 'text-[#13A184]/90 hover:bg-white/[0.05]'
                           : 'text-[#9A9DAD] hover:bg-white/[0.05] hover:text-white'
                       }
                       ${collapsed ? 'justify-center' : ''}
@@ -185,8 +185,8 @@ export default function AppShell() {
                     {({ isActive }) => (
                       <>
                         {/* Indicador cirúrgico de foco */}
-                        {isActive && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#F5B841] shadow-[0_0_8px_rgba(245,184,65,0.7)]" />}
-                        <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${isActive ? 'text-[#F5B841]' : highlight && !isActive ? 'text-[#F5B841]/80' : 'text-[#6B6E82] group-hover:text-[#C7C9D4]'}`} />
+                        {isActive && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#13A184] shadow-[0_0_8px_rgba(19,161,132,0.7)]" />}
+                        <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${isActive ? 'text-[#13A184]' : highlight && !isActive ? 'text-[#13A184]/80' : 'text-[#6B6E82] group-hover:text-[#C7C9D4]'}`} />
                         {!collapsed && <span className="truncate">{label}</span>}
                         {badge && !collapsed && (
                           <span className={`ml-auto h-3.5 w-3.5 rounded-full text-[8px] font-bold text-white flex items-center justify-center ${badgeColor}`}>
@@ -198,7 +198,7 @@ export default function AppShell() {
                           <ChevronRight className={`h-3 w-3 shrink-0 text-[#5B5E70] group-hover:text-[#C7C9D4] transition-colors duration-200 ${badge ? '' : 'ml-auto'}`} />
                         )}
                         {temSub && collapsed && (
-                          <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-[#F5B841]/70" />
+                          <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-[#13A184]/70" />
                         )}
                         {collapsed && (
                           <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#20232F] border border-white/[0.08] text-[#C7C9D4] text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
@@ -221,7 +221,7 @@ export default function AppShell() {
           {!collapsed ? (
             <div>
               <div className="flex items-center gap-2 px-1 mb-1.5">
-                <div className="h-6 w-6 rounded-full bg-[#F5B841]/20 border border-[#F5B841]/30 flex items-center justify-center text-[#F5B841] text-[10px] font-bold shrink-0">
+                <div className="h-6 w-6 rounded-full bg-[#13A184]/20 border border-[#13A184]/30 flex items-center justify-center text-[#13A184] text-[10px] font-bold shrink-0">
                   {user?.nome?.[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -243,9 +243,9 @@ export default function AppShell() {
 
       {/* Main */}
       <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="h-12 bg-white border-b border-[#E7E5DF] flex items-center justify-between px-4 shrink-0">
+        <header className="h-12 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-4 shrink-0">
           <div className="flex items-center gap-3">
-            <button className="lg:hidden p-1.5 text-[#5B5D69] hover:bg-[#F6F5F2] rounded-lg transition-all duration-300" onClick={() => setMobileOpen(!mobileOpen)}>
+            <button className="lg:hidden p-1.5 text-[#5F6065] hover:bg-[#F7F7F8] rounded-lg transition-all duration-300" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
             <FilialSelector />
@@ -253,10 +253,10 @@ export default function AppShell() {
           <div className="flex items-center gap-3">
             <NotificacoesSino />
             <div className="h-1.5 w-1.5 rounded-full bg-[#0FA968] shadow-[0_0_8px_rgba(15,169,104,0.7)] animate-pulse" title="Online" />
-            <span className="text-xs text-[#8B8D98] hidden sm:block">
+            <span className="text-xs text-[#8E8F94] hidden sm:block">
               {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
             </span>
-            <span className="text-xs font-num text-[#5B5D69] hidden sm:block tabular-nums">
+            <span className="text-xs font-num text-[#5F6065] hidden sm:block tabular-nums">
               {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
@@ -268,12 +268,12 @@ export default function AppShell() {
       {/* Flyout de submenu — placa branca que se estende da barra */}
       {flyout && createPortal(
         <div
-          className="fixed z-[60] w-60 rounded-xl border border-[#E7E5DF] bg-white shadow-[0_16px_48px_0_rgba(22,23,29,0.16)] py-1.5 animate-fade-in"
+          className="fixed z-[60] w-60 rounded-xl border border-[#E5E7EB] bg-white shadow-[0_16px_48px_0_rgba(22,23,29,0.16)] py-1.5 animate-fade-in"
           style={{ top: Math.min(flyout.top, window.innerHeight - (flyout.items.length * 46 + 56)), left: flyout.left }}
           onMouseEnter={cancelarFecho}
           onMouseLeave={agendarFecho}
         >
-          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-[#8B8D98] uppercase tracking-[0.12em] border-b border-[#E7E5DF] mb-1">{flyout.label}</p>
+          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.12em] border-b border-[#E5E7EB] mb-1">{flyout.label}</p>
           {flyout.items.map((s) => {
             const SubIcon = s.icon || Circle;
             return (
@@ -281,14 +281,14 @@ export default function AppShell() {
                 key={s.key}
                 to={s.key}
                 onClick={() => setFlyout(null)}
-                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-[#E8A317]/[0.12] text-[#a9760a]' : 'text-[#5B5D69] hover:bg-[#F6F5F2] hover:text-[#16171D]'}`}
+                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-[#0F8A72]/[0.12] text-[#0B6F5C]' : 'text-[#5F6065] hover:bg-[#F7F7F8] hover:text-[#202123]'}`}
               >
                 {({ isActive }) => (
                   <>
-                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-[#E8A317]' : 'text-[#8B8D98]'}`} />
+                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-[#0F8A72]' : 'text-[#8E8F94]'}`} />
                     <span className="min-w-0">
                       <span className="block font-medium truncate">{s.label}</span>
-                      {s.hint && <span className="block text-[10px] text-[#8B8D98] truncate">{s.hint}</span>}
+                      {s.hint && <span className="block text-[10px] text-[#8E8F94] truncate">{s.hint}</span>}
                     </span>
                   </>
                 )}
@@ -317,9 +317,9 @@ function FilialSelector() {
   const { filiais, filialAtiva, setFilialAtiva } = useAuth();
   return (
     <div className="flex items-center gap-1.5">
-      <Building2 className="h-3.5 w-3.5 text-[#8B8D98]" />
+      <Building2 className="h-3.5 w-3.5 text-[#8E8F94]" />
       <select
-        className="text-xs rounded-lg px-2 py-1 text-[#16171D] bg-white border border-[#E7E5DF] hover:border-[#D8D4CA] focus:outline-none focus:border-[#E8A317]/60 transition-all duration-300 cursor-pointer"
+        className="text-xs rounded-lg px-2 py-1 text-[#202123] bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] focus:outline-none focus:border-[#0F8A72]/60 transition-all duration-300 cursor-pointer"
         value={filialAtiva?.id || ''}
         onChange={(e) => { const f = filiais?.find((f) => f.id === e.target.value); if (f) setFilialAtiva(f); }}
       >
