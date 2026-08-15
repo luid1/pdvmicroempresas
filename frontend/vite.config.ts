@@ -2,7 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // `vite dev` usa o backend local; `vite preview` usa a API publicada, para o
+  // localhost de demonstração permitir login mesmo sem Postgres/Nest locais.
+  const apiProxyTarget = process.env.VITE_API_PROXY_TARGET || (
+    mode === 'production'
+      ? 'https://lumin-pdv-api.onrender.com'
+      : 'http://localhost:3012'
+  );
+
+  return {
   plugins: [
     react(),
     VitePWA({
@@ -74,7 +83,7 @@ export default defineConfig({
     // Libera acesso externo via túnel (localtunnel/ngrok/cloudflare) para demonstração
     allowedHosts: ['.loca.lt', '.ngrok-free.app', '.trycloudflare.com'],
     proxy: {
-      '/api': { target: 'http://localhost:3012', changeOrigin: true },
+      '/api': { target: apiProxyTarget, changeOrigin: true },
     },
   },
   // Servidor de PRODUÇÃO (npm run build + npm run preview) — usado para demonstrar via túnel
@@ -82,7 +91,8 @@ export default defineConfig({
     port: 3015,
     allowedHosts: ['.loca.lt', '.ngrok-free.app', '.trycloudflare.com'],
     proxy: {
-      '/api': { target: 'http://localhost:3012', changeOrigin: true },
+      '/api': { target: apiProxyTarget, changeOrigin: true },
     },
   },
+  };
 });
