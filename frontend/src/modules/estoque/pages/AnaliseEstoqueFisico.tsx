@@ -29,19 +29,17 @@ interface ProdutoEstoque {
 }
 
 interface Movimentacao {
-  idDfe: string;
-  nomeCliente: string;
-  natureza: string;
-  observacoes: string;
-  dataHoraVenda: string;
-  dataEntrega: string;
-  qtdeApuracao: number;
-  unidadeApuracao: string;
-  vlrTotalVenda: number;
-  qtdeConvertida: number;
-  unidadeConvertida: string;
-  precoMedio: number;
-  status: number;
+  id: string;
+  tipo: string;
+  quantidade: number;
+  saldoAnterior: number;
+  saldoFinal: number;
+  custoUnitario?: number | null;
+  dataMovimento: string;
+  observacoes?: string | null;
+  lote?: { numero: string; dataValidade?: string | null } | null;
+  usuario?: { nome: string } | null;
+  localizacao?: { rua?: string | null; prateleira?: string | null } | null;
 }
 
 // ─── Famílias e Grupos do NewOxxy ────────────────
@@ -70,57 +68,6 @@ const TIPOS_ITEM = [
   '06-Produto Intermediário',
   '10-Outros Insumos',
 ];
-
-// ─── Dados mock (produtos reais do NewOxxy) ──────
-const TODOS_PRODUTOS: ProdutoEstoque[] = [
-  { id:'1',  codigo:'ALHOC',   descricao:'ALHO',                   familia:'BCA', grupo:'Alhos',   saldoInicial:0,       entradas:233.810, ordensCompra:0,       saidas:-85.500,   saldoFinal:148.310, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:12.13, valorAtualEstoque:1799.00 },
-  { id:'2',  codigo:'ALPD',    descricao:'ALHO DESCASCADO',        familia:'BCA', grupo:'Alhos',   saldoInicial:0,       entradas:21.900,  ordensCompra:200.000, saidas:-100.000,  saldoFinal:121.900, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:13.00, valorAtualEstoque:1584.70 },
-  { id:'3',  codigo:'BAT25',   descricao:'BATATA ASTERIX',         familia:'BCA', grupo:'Batatas', saldoInicial:0,       entradas:147.850, ordensCompra:360.000, saidas:-228.000,  saldoFinal:279.850, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:6.25,  valorAtualEstoque:1749.06 },
-  { id:'4',  codigo:'BATB25',  descricao:'BATATA BOLINHA',         familia:'BCA', grupo:'Batatas', saldoInicial:0,       entradas:167.600, ordensCompra:288.000, saidas:-282.000,  saldoFinal:173.600, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:3.75,  valorAtualEstoque:651.00 },
-  { id:'5',  codigo:'BATN',    descricao:'BATATA LAVADA',          familia:'BCA', grupo:'Batatas', saldoInicial:0,       entradas:21.550,  ordensCompra:240.000, saidas:-408.300,  saldoFinal:146.750, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:5.42,  valorAtualEstoque:-795.39 },
-  { id:'6',  codigo:'BATFLO',  descricao:'BATATA LAVADA FLORAO',   familia:'BCA', grupo:'Batatas', saldoInicial:0,       entradas:151.900, ordensCompra:120.000, saidas:-110.000,  saldoFinal:161.900, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:6.02,  valorAtualEstoque:974.64 },
-  { id:'7',  codigo:'BATM',    descricao:'BATATA MARQUISE CESAR',  familia:'BCA', grupo:'Batatas', saldoInicial:0,       entradas:-78.000, ordensCompra:0,       saidas:0,         saldoFinal:-78.000, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:6.37,  valorAtualEstoque:-496.86 },
-  { id:'8',  codigo:'CEBGRA3', descricao:'CEBOLA CX3',            familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:124.000, ordensCompra:0,       saidas:-75.000,   saldoFinal:49.000,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.71,  valorAtualEstoque:230.79 },
-  { id:'9',  codigo:'CEBGRA4', descricao:'CEBOLA CX4',            familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:-285.550,ordensCompra:950.000, saidas:-838.900,  saldoFinal:-174.450,undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.21,  valorAtualEstoque:-734.43 },
-  { id:'10', codigo:'CEBECHA', descricao:'CEBOLA ECHALOTE',        familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:53.000,  ordensCompra:0,       saidas:-0.500,    saldoFinal:52.500,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:7.36,  valorAtualEstoque:386.40 },
-  { id:'11', codigo:'CEBOPI',  descricao:'CEBOLA PIRULITO',        familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:3.600,   ordensCompra:0,       saidas:0,         saldoFinal:3.600,   undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.00,  valorAtualEstoque:14.40 },
-  { id:'12', codigo:'CEBR',    descricao:'CEBOLA ROXA CX3',       familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:692.300, ordensCompra:380.000, saidas:-112.450,  saldoFinal:959.850, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:5.79,  valorAtualEstoque:5557.53 },
-  { id:'13', codigo:'CRX',     descricao:'CEBOLA ROXA CX4',       familia:'BCA', grupo:'Cebolas', saldoInicial:0,       entradas:61.400,  ordensCompra:76.000,  saidas:-62.000,   saldoFinal:75.400,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.74,  valorAtualEstoque:357.40 },
-  { id:'14', codigo:'COS',     descricao:'COCO SECO',              familia:'BCA', grupo:'Raizes', saldoInicial:0,       entradas:43.880,  ordensCompra:0,       saidas:-1.330,    saldoFinal:42.550,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:3.23,  valorAtualEstoque:137.64 },
-  { id:'15', codigo:'MANDV',   descricao:'MANDIOCA A VACUO',       familia:'BCA', grupo:'Raizes', saldoInicial:0,       entradas:49.000,  ordensCompra:0,       saidas:-5.000,    saldoFinal:44.000,  undEstoque:'PC', contagemFisica:null, diferencaEstoque:0, precoCusto:4.90,  valorAtualEstoque:215.60 },
-  { id:'16', codigo:'ABAC',    descricao:'ABACATE',                familia:'Fruta', grupo:'Nacional',  saldoInicial:143.30, entradas:180.00, ordensCompra:0, saidas:-130.65, saldoFinal:192.65, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:8.50, valorAtualEstoque:1637.53 },
-  { id:'17', codigo:'AVO',     descricao:'ABACATE AVOCADO',        familia:'Fruta', grupo:'Importada', saldoInicial:37.73,  entradas:0,      ordensCompra:0, saidas:-2.00,   saldoFinal:35.73,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:12.00, valorAtualEstoque:428.76 },
-  { id:'18', codigo:'BNAN',    descricao:'BANANA NANICA',          familia:'Fruta', grupo:'Tropical',  saldoInicial:338.12, entradas:400.00, ordensCompra:0, saidas:-799.44, saldoFinal:-61.32, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:3.50, valorAtualEstoque:-214.62 },
-  { id:'19', codigo:'BAN',     descricao:'BANANA PRATA',           familia:'Fruta', grupo:'Tropical',  saldoInicial:53.55,  entradas:395.00, ordensCompra:0, saidas:-419.45, saldoFinal:149.80, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:5.20, valorAtualEstoque:778.96 },
-  { id:'20', codigo:'MANGP20', descricao:'MANGA PALMER',           familia:'Fruta', grupo:'Tropical',  saldoInicial:114.53, entradas:716.00, ordensCompra:0, saidas:-445.19, saldoFinal:385.35, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.80, valorAtualEstoque:1849.68 },
-  { id:'21', codigo:'MAMF',    descricao:'MAMAO FORMOSA',          familia:'Fruta', grupo:'Tropical',  saldoInicial:-88.65, entradas:700.00, ordensCompra:0, saidas:-486.10, saldoFinal:113.25, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.20, valorAtualEstoque:475.65 },
-  { id:'22', codigo:'KIWI',    descricao:'KIWI',                   familia:'Fruta', grupo:'Importada', saldoInicial:51.00,  entradas:0,      ordensCompra:0, saidas:-25.78,  saldoFinal:25.28,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:18.00, valorAtualEstoque:455.04 },
-  { id:'23', codigo:'LIM',     descricao:'LIMAO TAITI',            familia:'Citricos', grupo:'Limão', saldoInicial:200.00, entradas:500.00, ordensCompra:0, saidas:-450.00, saldoFinal:250.00, undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:3.80, valorAtualEstoque:950.00 },
-  { id:'24', codigo:'LARG',    descricao:'LARANJA PERA',           familia:'Citricos', grupo:'Laranja', saldoInicial:80.00,  entradas:300.00, ordensCompra:0, saidas:-320.00, saldoFinal:60.00,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:2.50, valorAtualEstoque:150.00 },
-  { id:'25', codigo:'ABOBI',   descricao:'ABOBRINHA ITALIANA',     familia:'Legumes', grupo:'Outros', saldoInicial:45.00,  entradas:120.00, ordensCompra:0, saidas:-98.00,  saldoFinal:67.00,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:6.50, valorAtualEstoque:435.50 },
-  { id:'26', codigo:'ALFAC',   descricao:'ALFACE CRESPA',          familia:'Verdura', grupo:'Folhosas', saldoInicial:30.00,  entradas:80.00,  ordensCompra:0, saidas:-95.00,  saldoFinal:15.00,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:4.20, valorAtualEstoque:63.00 },
-  { id:'27', codigo:'RUCUL',   descricao:'RUCULA',                 familia:'Verdura', grupo:'Folhosas', saldoInicial:12.00,  entradas:40.00,  ordensCompra:0, saidas:-38.00,  saldoFinal:14.00,  undEstoque:'KG', contagemFisica:null, diferencaEstoque:0, precoCusto:8.00, valorAtualEstoque:112.00 },
-];
-
-// ─── Mock movimentações do BAT25 ─────────────────
-const MOCK_MOVIMENTACOES: Record<string, Movimentacao[]> = {
-  '3': [
-    { idDfe:'Id Venda: 1616...', nomeCliente:'SENAC PENHA',            natureza:'NFe Padrao', observacoes:'PESAR',  dataHoraVenda:'26/06/2026 07:07:58', dataEntrega:'27/06/2026', qtdeApuracao:5.000,  unidadeApuracao:'KG', vlrTotalVenda:67.20,  qtdeConvertida:0.208, unidadeConvertida:'SC', precoMedio:322.612, status:1 },
-    { idDfe:'Id Venda: 1616...', nomeCliente:'MERCEARIA AMAURI',       natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 09:33:21', dataEntrega:'27/06/2026', qtdeApuracao:20.000, unidadeApuracao:'KG', vlrTotalVenda:220.00, qtdeConvertida:0.833, unidadeConvertida:'SC', precoMedio:264.011, status:1 },
-    { idDfe:'Id Venda: 1616...', nomeCliente:'DEMOISELLE BISTRO',      natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 09:56:34', dataEntrega:'27/06/2026', qtdeApuracao:10.000, unidadeApuracao:'KG', vlrTotalVenda:134.40, qtdeConvertida:0.417, unidadeConvertida:'SC', precoMedio:322.534, status:1 },
-    { idDfe:'Id Venda: 1616...', nomeCliente:'HOTEL MARCO PANINI',     natureza:'NFe Padrao', observacoes:'NOIVA',  dataHoraVenda:'26/06/2026 10:16:35', dataEntrega:'29/06/2026', qtdeApuracao:8.000,  unidadeApuracao:'KG', vlrTotalVenda:93.60,  qtdeConvertida:0.333, unidadeConvertida:'SC', precoMedio:280.828, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'103700',                 natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 10:47:00', dataEntrega:'29/06/2026', qtdeApuracao:12.000, unidadeApuracao:'KG', vlrTotalVenda:109.92, qtdeConvertida:0.500, unidadeConvertida:'SC', precoMedio:219.840, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'LE VILLE',               natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 11:10:23', dataEntrega:'27/06/2026', qtdeApuracao:50.000, unidadeApuracao:'KG', vlrTotalVenda:548.50, qtdeConvertida:2.083, unidadeConvertida:'SC', precoMedio:263.284, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'EL PUNTO URUGUAYO',      natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 11:18:48', dataEntrega:'27/06/2026', qtdeApuracao:3.000,  unidadeApuracao:'KG', vlrTotalVenda:35.88,  qtdeConvertida:0.125, unidadeConvertida:'SC', precoMedio:287.040, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'HOSPITAL IPIRANGA MOGI', natureza:'NFe Padrao', observacoes:'NOIVA',  dataHoraVenda:'26/06/2026 11:36:04', dataEntrega:'27/06/2026', qtdeApuracao:10.000, unidadeApuracao:'KG', vlrTotalVenda:70.00,  qtdeConvertida:0.417, unidadeConvertida:'SC', precoMedio:167.987, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'RASCAL JK',              natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 11:47:09', dataEntrega:'27/06/2026', qtdeApuracao:20.000, unidadeApuracao:'KG', vlrTotalVenda:183.20, qtdeConvertida:0.833, unidadeConvertida:'SC', precoMedio:219.849, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'SCANDAL RESTAURANTE',    natureza:'NFe Padrao', observacoes:'NOIVA',  dataHoraVenda:'26/06/2026 12:26:05', dataEntrega:'29/06/2026', qtdeApuracao:5.000,  unidadeApuracao:'KG', vlrTotalVenda:48.50,  qtdeConvertida:0.208, unidadeConvertida:'SC', precoMedio:232.837, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'RASCAL JK',              natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 12:40:26', dataEntrega:'29/06/2026', qtdeApuracao:20.000, unidadeApuracao:'KG', vlrTotalVenda:183.20, qtdeConvertida:0.833, unidadeConvertida:'SC', precoMedio:219.849, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'MAREMONTI CAMPO BELO',   natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 14:44:39', dataEntrega:'29/06/2026', qtdeApuracao:10.000, unidadeApuracao:'KG', vlrTotalVenda:85.90,  qtdeConvertida:0.417, unidadeConvertida:'SC', precoMedio:206.144, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'103700',                 natureza:'NFe Padrao', observacoes:'',       dataHoraVenda:'26/06/2026 13:39:57', dataEntrega:'27/06/2026', qtdeApuracao:15.000, unidadeApuracao:'KG', vlrTotalVenda:137.40, qtdeConvertida:0.625, unidadeConvertida:'SC', precoMedio:219.840, status:1 },
-    { idDfe:'Id Venda: 1617...', nomeCliente:'TERRACO ITALIA RESTAUR...', natureza:'NFe Padrao', observacoes:'NOIVA', dataHoraVenda:'26/06/2026 14:49:11', dataEntrega:'27/06/2026', qtdeApuracao:40.000, unidadeApuracao:'KG', vlrTotalVenda:450.40, qtdeConvertida:1.667, unidadeConvertida:'SC', precoMedio:270.235, status:1 },
-  ],
-};
 
 // ─── Formatação ──────────────────────────────────
 const fmtN = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
@@ -226,6 +173,40 @@ export default function AnaliseEstoqueFisico() {
   // Seleção e detalhe
   const [selId, setSelId]               = useState<string | null>(null);
   const [detalheAberto, setDetalheAberto] = useState<ProdutoEstoque | null>(null);
+  const [movimentacoesDetalhe, setMovimentacoesDetalhe] = useState<Movimentacao[]>([]);
+  const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+  const [erroDetalhe, setErroDetalhe] = useState('');
+
+  // O detalhe usa o mesmo extrato real da tela de Movimentações, filtrado pelo
+  // produto e período selecionados. Não reutiliza mais registros demonstrativos.
+  useEffect(() => {
+    if (!filialAtiva || !detalheAberto) {
+      setMovimentacoesDetalhe([]);
+      setErroDetalhe('');
+      return;
+    }
+
+    let ativo = true;
+    setCarregandoDetalhe(true);
+    setErroDetalhe('');
+    api.get(`/estoque/${filialAtiva.id}/movimentacoes`, {
+      params: {
+        produtoId: detalheAberto.id,
+        dataInicio: dataIni,
+        dataFim: `${dataFim}T23:59:59`,
+      },
+    })
+      .then((res) => { if (ativo) setMovimentacoesDetalhe(Array.isArray(res.data) ? res.data : []); })
+      .catch(() => {
+        if (ativo) {
+          setMovimentacoesDetalhe([]);
+          setErroDetalhe('Não foi possível carregar o histórico real deste produto.');
+        }
+      })
+      .finally(() => { if (ativo) setCarregandoDetalhe(false); });
+
+    return () => { ativo = false; };
+  }, [filialAtiva?.id, detalheAberto?.id, dataIni, dataFim]);
 
   // Grupos disponíveis para a família selecionada
   const gruposDisponiveis = useMemo(() =>
@@ -655,44 +636,52 @@ export default function AnaliseEstoqueFisico() {
               <table className="w-full border-collapse text-[11px]">
                 <thead className="sticky top-0 bg-gray-200 border-b border-gray-400">
                   <tr>
-                    {['Id DFe/Pedido','Nome/Razão Social','Natureza de Operação','Observações','Data/Hora Venda','Data Entrega','Qtde Apuração','Unidade','Vlr Total Venda','Qtde Conv.','Und Conv.','Preço Médio','Status'].map(h => (
+                    {['Data/Hora','Tipo','Quantidade','Saldo anterior','Saldo final','Custo unitário','Lote','Usuário','Observações'].map(h => (
                       <th key={h} className="px-2 py-1 text-left font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {(MOCK_MOVIMENTACOES[detalheAberto.id] || []).map((m, i) => (
-                    <tr key={i} className="border-b border-gray-100 hover:bg-[#F6F5F2]">
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-[#a9760a] whitespace-nowrap">{m.idDfe}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] whitespace-nowrap font-medium">{m.nomeCliente}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.natureza}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-orange-600 font-bold">{m.observacoes}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono whitespace-nowrap">{m.dataHoraVenda}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono">{m.dataEntrega}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold">{fmtN(m.qtdeApuracao)}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.unidadeApuracao}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtR(m.vlrTotalVenda)}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{m.qtdeConvertida.toFixed(3)}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.unidadeConvertida}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtR(m.precoMedio)}</td>
-                      <td className="px-2 py-1 text-center">{m.status}</td>
+                  {movimentacoesDetalhe.map((m) => (
+                    <tr key={m.id} className="border-b border-gray-100 hover:bg-[#F6F5F2]">
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono whitespace-nowrap">{new Date(m.dataMovimento).toLocaleString('pt-BR')}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-semibold">{m.tipo.replace(/_/g, ' ')}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold">{fmtN(Number(m.quantidade))}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtN(Number(m.saldoAnterior))}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtN(Number(m.saldoFinal))}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{m.custoUnitario ? `R$ ${fmtR(Number(m.custoUnitario))}` : '—'}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.lote?.numero || '—'}</td>
+                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.usuario?.nome || '—'}</td>
+                      <td className="px-2 py-1">{m.observacoes || '—'}</td>
                     </tr>
                   ))}
-                  {!(MOCK_MOVIMENTACOES[detalheAberto.id] || []).length && (
-                    <tr><td colSpan={13} className="px-4 py-6 text-center text-gray-400 italic">Nenhuma movimentação para este produto.</td></tr>
+                  {carregandoDetalhe && (
+                    <tr><td colSpan={9} className="px-4 py-6 text-center text-gray-400">Carregando histórico real…</td></tr>
+                  )}
+                  {!carregandoDetalhe && !movimentacoesDetalhe.length && (
+                    <tr><td colSpan={9} className="px-4 py-6 text-center text-gray-400 italic">{erroDetalhe || 'Nenhuma movimentação real para este produto no período.'}</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
 
             <div className="shrink-0 bg-gray-100 border-t border-gray-300 px-4 py-2 flex items-center justify-between text-xs">
-              <span className="text-gray-500">Registros Encontrados: <strong>{(MOCK_MOVIMENTACOES[detalheAberto.id] || []).length}</strong></span>
+              <span className="text-gray-500">Registros reais encontrados: <strong>{movimentacoesDetalhe.length}</strong></span>
               <div className="flex gap-2">
                 <button
                   onClick={() => {
-                    const movs = MOCK_MOVIMENTACOES[detalheAberto.id] || [];
-                    const csv = 'Id DFe;Cliente;Natureza;Obs;Data Venda;Data Entrega;Qtde;Und;Vlr Total;Preco Medio\n' +
-                      movs.map(m => `${m.idDfe};${m.nomeCliente};${m.natureza};${m.observacoes};${m.dataHoraVenda};${m.dataEntrega};${fmtN(m.qtdeApuracao)};${m.unidadeApuracao};${fmtR(m.vlrTotalVenda)};${fmtR(m.precoMedio)}`).join('\n');
+                    const csv = 'Data/Hora;Tipo;Quantidade;Saldo anterior;Saldo final;Custo unitario;Lote;Usuario;Observacoes\n' +
+                      movimentacoesDetalhe.map(m => [
+                        new Date(m.dataMovimento).toLocaleString('pt-BR'),
+                        m.tipo,
+                        fmtN(Number(m.quantidade)),
+                        fmtN(Number(m.saldoAnterior)),
+                        fmtN(Number(m.saldoFinal)),
+                        fmtR(Number(m.custoUnitario || 0)),
+                        m.lote?.numero || '',
+                        m.usuario?.nome || '',
+                        (m.observacoes || '').replace(/;/g, ','),
+                      ].join(';')).join('\n');
                     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                     a.download = `movimentacoes_${detalheAberto.codigo}_${hoje()}.csv`; a.click();
