@@ -158,6 +158,19 @@ export default function LuCommand() {
     [sel, navMatches, irPara, enviar],
   );
 
+  const enviarDaBarra = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+      if (!texto.trim()) {
+        abrir();
+        return;
+      }
+      setAberto(true);
+      void enviar();
+    },
+    [texto, abrir, enviar],
+  );
+
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -182,26 +195,47 @@ export default function LuCommand() {
 
   return createPortal(
     <>
-      {/* Gatilho flutuante — orbe de IA com anel vivo. Elevado p/ não
-          colidir com o botão "+" de cadastro (canto inferior direito). */}
+      {/* Barra persistente: permite conversar com a Lu sem procurar um botão. */}
       {!aberto && (
-        <button
-          onClick={abrir}
-          title="Falar com a Lu  (Ctrl+K)"
-          aria-label="Abrir a Lu (Ctrl+K)"
-          className="group fixed bottom-[5.5rem] right-6 z-[60] transition-transform duration-300 hover:scale-[1.06] active:scale-95"
+        <form
+          onSubmit={enviarDaBarra}
+          aria-label="Conversar com a Lu"
+          className="fixed bottom-4 left-1/2 z-[60] flex w-[min(92vw,430px)] -translate-x-1/2 items-center gap-2 rounded-2xl border border-[#D9E4E1] bg-white/95 p-2 shadow-[0_16px_48px_rgba(22,23,29,0.18)] backdrop-blur-xl lg:left-auto lg:right-6 lg:translate-x-0"
         >
-          {/* glow que respira atrás do orbe */}
-          <span className="lu-aura pointer-events-none" style={{ width: '150%', aspectRatio: '1' }} />
-          <span className="lu-ring lu-orb grid h-14 w-14 place-items-center rounded-full shadow-[0_12px_34px_rgba(15,138,114,0.35)]">
-            <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#20232F] to-[#12141C]">
-              <Sparkles className="h-5 w-5 text-[#13A184] transition-transform duration-500 group-hover:rotate-[18deg]" />
-            </span>
-          </span>
-          <span className="pointer-events-none absolute -top-1.5 -right-1 rounded-md bg-[#212121] px-1.5 py-0.5 font-mono text-[9px] font-semibold tracking-wider text-[#13A184]/85 ring-1 ring-white/10">
-            ⌘K
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={abrir}
+            title="Abrir a Lu (Ctrl+K)"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#212121] text-[#39C5A5] transition-colors hover:bg-[#2F3032]"
+          >
+            <Sparkles className="h-4 w-4" />
+          </button>
+          <input
+            ref={inputRef}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder="Pergunte algo à Lu..."
+            className="min-w-0 flex-1 bg-transparent px-1 text-[14px] text-[#202123] outline-none placeholder:text-[#8E8F94]"
+          />
+          {!texto && (
+            <button
+              type="button"
+              onClick={abrir}
+              className="hidden rounded-lg px-2 py-1 font-mono text-[10px] text-[#8E8F94] transition-colors hover:bg-[#F3F5F4] sm:block"
+              title="Atalho de teclado"
+            >
+              Ctrl K
+            </button>
+          )}
+          <button
+            type="submit"
+            aria-label="Enviar para a Lu"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#0F8A72] text-white transition-colors hover:bg-[#0B6F5C] disabled:cursor-default disabled:bg-[#EDF1F0] disabled:text-[#A5AEAC]"
+            disabled={!texto.trim()}
+          >
+            <Send className="h-4 w-4" />
+          </button>
+        </form>
       )}
 
       {/* Spotlight */}
@@ -210,22 +244,19 @@ export default function LuCommand() {
           <div className="absolute inset-0 bg-[#202123]/25 animate-backdrop" onClick={fechar} />
 
           <div className="relative w-full max-w-2xl lu-rise">
-            {/* Glow iridescente que respira atrás da barra */}
-            <div className={`pointer-events-none lu-aura ${carregando ? 'is-thinking' : ''}`} />
-
-            {/* Barra — moldura de gradiente vivo (âmbar → violeta) que orbita */}
-            <div className={`lu-ring rounded-[20px] shadow-[0_28px_80px_-16px_rgba(22,23,29,0.4)] ${carregando ? 'is-thinking' : ''}`}>
+            {/* Barra principal com aparência limpa, inspirada em uma conversa. */}
+            <div className="rounded-[22px] border border-[#D9E4E1] bg-white shadow-[0_28px_80px_-16px_rgba(22,23,29,0.35)]">
               <form
                 onSubmit={onSubmit}
-                className="relative overflow-hidden rounded-[18.5px] bg-white/95 backdrop-blur-2xl"
+                className="relative overflow-hidden rounded-[21px] bg-white/95 backdrop-blur-2xl"
               >
                 {/* brilho superior sutil + varredura quando pensando */}
                 <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#202123]/10 to-transparent" />
                 {carregando && <span className="pointer-events-none absolute inset-0 lu-sweep" />}
 
                 <div className="flex items-center gap-3.5 px-4 py-4">
-                  <span className={`lu-ring ${carregando ? 'is-thinking lu-orb' : ''} grid h-10 w-10 shrink-0 place-items-center rounded-full`}>
-                    <span className="grid h-[calc(100%-3px)] w-[calc(100%-3px)] place-items-center rounded-full bg-gradient-to-br from-[#20232F] to-[#12141C]">
+                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#212121] ${carregando ? 'animate-pulse' : ''}`}>
+                    <span className="grid h-full w-full place-items-center">
                       {texto && sel < 0 ? <Search className="h-4 w-4 text-[#13A184]" /> : <Sparkles className="h-4 w-4 text-[#13A184]" />}
                     </span>
                   </span>
