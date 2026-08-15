@@ -76,10 +76,12 @@ export default function AppShell() {
     if (fechaTimer.current) clearTimeout(fechaTimer.current);
     const r = e.currentTarget.getBoundingClientRect();
     const margem = 12;
+    const largura = 256;
     const alturaDisponivel = window.innerHeight - margem * 2;
     const alturaEstimada = Math.min(item.submenu.length * 52 + 44, alturaDisponivel);
     const top = Math.max(margem, Math.min(r.top, window.innerHeight - alturaEstimada - margem));
-    setFlyout({ label: item.label, items: item.submenu, top, left: r.right + 8 });
+    const left = Math.max(margem, Math.min(r.right + 8, window.innerWidth - largura - margem));
+    setFlyout({ label: item.label, items: item.submenu, top, left });
   }, []);
 
   const agendarFecho = useCallback(() => {
@@ -275,7 +277,7 @@ export default function AppShell() {
       {/* Flyout de submenu — acompanha a barra e nunca ultrapassa a janela. */}
       {flyout && createPortal(
         <div
-          className="fixed z-[60] w-64 max-h-[calc(100vh-24px)] overflow-y-auto rounded-xl border border-white/[0.08] bg-[#212121] shadow-[0_20px_56px_rgba(0,0,0,0.34)] py-1.5 animate-fade-in"
+          className="fixed z-[100] w-64 max-h-[calc(100vh-24px)] overflow-y-auto overscroll-contain rounded-xl border border-white/[0.09] bg-[#292929] shadow-[0_24px_64px_rgba(0,0,0,0.42)] py-1.5 animate-fade-in"
           style={{ top: flyout.top, left: flyout.left }}
           onMouseEnter={cancelarFecho}
           onMouseLeave={agendarFecho}
