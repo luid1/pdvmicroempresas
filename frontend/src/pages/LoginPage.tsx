@@ -18,14 +18,14 @@ type Perfil = {
 const PAIR_KEY = 'wms_paired_tenant';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.netlify.app';
 
-/** Aparência de cada perfil na tela de seleção (paleta verde/âmbar da marca). */
+/** Aparência de cada perfil na tela de seleção (paleta sóbria do sistema). */
 const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string; bg: string; text: string }> = {
-  ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-amber-400/40',   bg: 'bg-amber-500/15',   text: 'text-amber-300' },
-  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
-  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
-  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-slate-400/40',   bg: 'bg-slate-500/15',   text: 'text-slate-300' },
+  ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-[#0F8A72]/25', bg: 'bg-[#E4F3EF]', text: 'text-[#0B6F5C]' },
+  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
+  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
+  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
 };
-const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-slate-400/40', bg: 'bg-slate-500/15', text: 'text-slate-300' };
+const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-[#D8DADD]', bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' };
 
 const iniciais = (nome: string) =>
   nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
@@ -142,13 +142,15 @@ async function lerJson(res: Response): Promise<any> {
   return data;
 }
 
-/** Logotipo da marca — ponto âmbar + nome (igual à landing). */
-function Brand({ size = 'md' }: { size?: 'sm' | 'md' }) {
+/** Marca usada no login, alinhada à barra lateral do sistema. */
+function Brand({ size = 'md', inverted = false }: { size?: 'sm' | 'md'; inverted?: boolean }) {
   return (
     <div className="flex items-center gap-2.5">
-      <span className="h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_14px_rgba(255,194,75,0.9)]" />
-      <span className={`font-display font-bold text-white ${size === 'sm' ? 'text-sm' : 'text-lg'}`}>Lumin PDV</span>
-      <span className="font-plex-mono text-[10px] text-amber-400/70 tracking-[0.12em] uppercase">· Frente de caixa</span>
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#0F8A72] text-white shadow-[0_6px_18px_rgba(15,138,114,0.24)]">
+        <Store className="h-4 w-4" />
+      </span>
+      <span className={`font-display font-bold ${inverted ? 'text-white' : 'text-[#202123]'} ${size === 'sm' ? 'text-sm' : 'text-lg'}`}>Lumin</span>
+      <span className="font-plex-mono text-[9px] text-[#13A184] tracking-[0.1em] uppercase">PDV & Gestão</span>
     </div>
   );
 }
@@ -227,32 +229,24 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-canvas relative overflow-hidden min-h-screen flex">
-
-      {/* Fundo animado — orbes âmbar Lumin */}
-      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
-        <div className="login-orb-1 absolute -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-amber-500/[0.18] blur-[120px]" />
-        <div className="login-orb-2 absolute top-1/4 left-1/2 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-amber-400/[0.13] blur-[130px]" />
-        <div className="login-orb-3 absolute -bottom-32 -right-28 h-[520px] w-[520px] rounded-full bg-amber-600/[0.16] blur-[120px]" />
-        <div className="login-orb-1 absolute top-1/3 right-1/4 h-[360px] w-[360px] rounded-full bg-amber-500/[0.08] blur-[130px]" />
-      </div>
+    <div className="relative min-h-screen flex overflow-hidden bg-[#F7F7F8] text-[#202123]">
 
       {/* ═══════════ BANNER LATERAL ═══════════ */}
-      <aside className="hidden lg:flex w-[42%] xl:w-[38%] relative z-10 flex-col justify-between overflow-hidden border-r border-white/[0.06] p-10">
-        <Brand />
+      <aside className="hidden lg:flex w-[38%] max-w-[520px] relative z-10 flex-col justify-between overflow-hidden border-r border-black/10 bg-[#212121] p-10">
+        <Brand inverted />
 
         <div className="relative">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(255,194,75,0.9)] animate-pulse" />
-            <span className="font-plex-mono text-[11px] font-medium text-amber-300/80 uppercase tracking-[0.28em]">Ponto de venda</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#39C5A5]" />
+            <span className="font-plex-mono text-[11px] font-medium text-[#39C5A5] uppercase tracking-[0.22em]">Ambiente seguro</span>
           </div>
           <h1 className="font-display text-4xl xl:text-5xl font-bold text-white leading-[1.08]">
-            O caixa que<br />
-            <span className="bg-gradient-to-r from-amber-300 via-amber-200 to-amber-400 bg-clip-text text-transparent">continua vendendo</span>
-            <br />mesmo sem internet.
+            Gestão simples<br />
+            para quem precisa<br />
+            <span className="text-[#39C5A5]">fazer acontecer.</span>
           </h1>
-          <p className="text-slate-400 text-base mt-5 max-w-md leading-relaxed">
-            Venda, estoque e financeiro na mesma tela. Cada pessoa entra pelo seu perfil, com um PIN rápido de 4 dígitos.
+          <p className="text-[#AEB0B8] text-base mt-5 max-w-md leading-relaxed">
+            PDV, estoque, compras, fiscal e financeiro reunidos em um ambiente consistente e preparado para a rotina da loja.
           </p>
         </div>
 
@@ -261,13 +255,13 @@ export default function LoginPage() {
             <p className="text-white text-3xl font-plex-mono font-medium tabular-nums leading-none">
               {hora.toLocaleTimeString('pt-BR')}
             </p>
-            <p className="text-slate-500 text-sm mt-1.5 capitalize">
+            <p className="text-[#777A80] text-sm mt-1.5 capitalize">
               {hora.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-slate-600 text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(255,194,75,0.8)] animate-pulse" />
-            Acesso restrito · v1.0.0
+          <div className="flex items-center gap-2 text-[#777A80] text-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#39C5A5]" />
+            Conexão protegida
           </div>
         </div>
       </aside>
@@ -279,7 +273,7 @@ export default function LoginPage() {
         </div>
 
         {serverStatus && (
-          <div role="status" className="mb-4 flex w-full max-w-sm items-center gap-3 rounded-xl border border-[#0F8A72]/35 bg-[#0F8A72]/15 px-4 py-3 text-sm text-[#9FE3D2]">
+          <div role="status" className="mb-4 flex w-full max-w-sm items-center gap-3 rounded-xl border border-[#BFDCD5] bg-[#E8F5F1] px-4 py-3 text-sm text-[#0B6F5C]">
             <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#13A184]/30 border-t-[#13A184]" />
             <span>{serverStatus}</span>
           </div>
@@ -350,7 +344,7 @@ export default function LoginPage() {
           />
         )}
 
-        <p className="lg:hidden absolute bottom-5 text-slate-600 text-[11px]">
+        <p className="lg:hidden absolute bottom-5 text-[#8E8F94] text-[11px]">
           Lumin PDV · Acesso restrito · v1.0.0
         </p>
       </div>
@@ -404,27 +398,26 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
   return (
     <div className="w-full max-w-sm space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-amber-500/10 border border-amber-400/25 px-3 py-1 mb-3">
-          <Store className="h-3.5 w-3.5 text-amber-400" />
-          <span className="font-plex-mono text-[11px] font-medium text-amber-300 uppercase tracking-wider">Primeiro acesso</span>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] border border-[#CBE4DE] px-3 py-1 mb-3">
+          <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
+          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Primeiro acesso</span>
         </div>
-        <h2 className="font-display text-2xl font-bold text-white">Vincular este computador</h2>
-        <p className="text-slate-400 text-sm mt-1">
-          Entre <b className="text-slate-300">uma vez</b> com o acesso da sua loja. Depois é só clicar no perfil e digitar o PIN.
+        <h2 className="font-display text-2xl font-bold text-[#202123]">Acesse sua loja</h2>
+        <p className="text-[#6F7075] text-sm mt-1">
+          Entre <b className="text-[#202123]">uma vez</b> com o acesso da empresa. Depois, cada pessoa usa o próprio perfil.
         </p>
       </div>
 
-      <div className="relative bg-white/[0.02] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 space-y-4 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/60 to-transparent" aria-hidden />
+      <div className="relative bg-white border border-[#E1E3E5] rounded-2xl p-6 space-y-4 shadow-[0_12px_36px_rgba(22,23,29,0.08)]">
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">E-mail da loja</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">E-mail da loja</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
               <input
                 ref={emailRef}
                 type="email"
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all"
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
                 placeholder="voce@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -435,15 +428,15 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
           </div>
 
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">
-              CNPJ <span className="normal-case tracking-normal text-slate-600">(se o e-mail atende mais de uma empresa)</span>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">
+              CNPJ <span className="normal-case tracking-normal text-[#9A9BA0]">(se o e-mail atende mais de uma empresa)</span>
             </label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
               <input
                 inputMode="numeric"
                 maxLength={18}
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all"
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
                 placeholder="00.000.000/0001-00"
                 value={cnpj}
                 onChange={(e) => setCnpj(e.target.value)}
@@ -453,38 +446,38 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
           </div>
 
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
               <input
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all"
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
                 placeholder="Digite sua senha..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
               />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-900/40 border border-red-700/60 text-red-400 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-              <span className="text-red-500">✕</span> {error}
+            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+              <span>✕</span> {error}
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-amber-500/20"
+            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full" />
+                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
                 Verificando...
               </span>
             ) : 'Vincular e ver perfis'}
@@ -492,9 +485,9 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
         </form>
       </div>
 
-      <p className="text-center text-slate-500 text-xs">
+      <p className="text-center text-[#7E7F84] text-xs">
         Ainda não tem uma conta?{' '}
-        <a href={`${SITE_URL}/assinar.html`} className="text-amber-400 hover:text-amber-300 font-semibold">
+        <a href={`${SITE_URL}/assinar.html`} className="text-[#0F8A72] hover:text-[#0B6F5C] font-semibold">
           Comece agora
         </a>
       </p>
@@ -517,27 +510,27 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
     <div className="w-full max-w-md space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/[0.04] border border-white/[0.08] px-3 py-1 mb-3">
-            <Store className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-[11px] font-semibold text-slate-300 tracking-wide">{tenantNome}</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[#E1E3E5] px-3 py-1 mb-3">
+            <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
+            <span className="text-[11px] font-semibold text-[#5F6065] tracking-wide">{tenantNome}</span>
           </div>
-          <h2 className="font-display text-2xl font-bold text-white">Quem vai usar agora?</h2>
-          <p className="text-slate-400 text-sm mt-1">Toque no seu perfil para entrar.</p>
+          <h2 className="font-display text-2xl font-bold text-[#202123]">Quem vai usar agora?</h2>
+          <p className="text-[#6F7075] text-sm mt-1">Selecione o seu perfil para entrar.</p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-900/40 border border-red-700/60 text-red-400 text-sm px-4 py-3 rounded-xl">{error}</div>
+        <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl">{error}</div>
       )}
 
       {carregando ? (
         <div className="grid grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-2xl bg-white/[0.03] border border-white/[0.06] animate-pulse" />
+            <div key={i} className="h-32 rounded-2xl bg-white border border-[#E1E3E5] animate-pulse" />
           ))}
         </div>
       ) : perfis.length === 0 ? (
-        <div className="text-slate-500 text-sm bg-white/[0.02] border border-white/[0.08] rounded-2xl p-6 text-center">
+        <div className="text-[#7E7F84] text-sm bg-white border border-[#E1E3E5] rounded-2xl p-6 text-center">
           Nenhum perfil ativo encontrado nesta loja.
         </div>
       ) : (
@@ -548,19 +541,19 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
               <button
                 key={p.id}
                 onClick={() => onSelecionar(p)}
-                className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 transition-all hover:bg-white/[0.06] hover:-translate-y-0.5 hover:border-white/20 focus:outline-none focus:ring-2 ${ui.ring}`}
+                className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white border border-[#E1E3E5] p-5 shadow-[0_8px_24px_rgba(22,23,29,0.05)] transition-all hover:-translate-y-0.5 hover:border-[#0F8A72]/35 hover:shadow-[0_12px_28px_rgba(22,23,29,0.08)] focus:outline-none focus:ring-2 ${ui.ring}`}
               >
                 <div className={`flex h-14 w-14 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
                   <span className={`font-display text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
                 </div>
                 <div className="text-center">
-                  <p className="text-white text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
+                  <p className="text-[#202123] text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
                   <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-medium ${ui.text}`}>
                     <ui.Icon className="h-3 w-3" /> {ui.label}
                   </span>
                 </div>
                 {!p.temPin && (
-                  <span className="absolute top-2 right-2 text-[9px] text-slate-500 bg-slate-800/60 rounded px-1.5 py-0.5">senha</span>
+                  <span className="absolute top-2 right-2 text-[9px] text-[#7E7F84] bg-[#F1F2F2] rounded px-1.5 py-0.5">senha</span>
                 )}
               </button>
             );
@@ -569,7 +562,7 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
       )}
 
       <div className="flex items-center justify-center pt-2">
-        <button onClick={onDesvincular} className="text-slate-500 hover:text-slate-300 text-xs inline-flex items-center gap-1.5 transition-colors">
+        <button onClick={onDesvincular} className="text-[#7E7F84] hover:text-[#202123] text-xs inline-flex items-center gap-1.5 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" /> Trocar de loja / desvincular este computador
         </button>
       </div>
@@ -615,7 +608,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
 
   return (
     <div className="w-full max-w-sm space-y-6">
-      <button onClick={onVoltar} className="text-slate-500 hover:text-slate-300 text-sm inline-flex items-center gap-1.5 transition-colors">
+      <button onClick={onVoltar} className="text-[#7E7F84] hover:text-[#202123] text-sm inline-flex items-center gap-1.5 transition-colors">
         <ArrowLeft className="h-4 w-4" /> Trocar de perfil
       </button>
 
@@ -625,7 +618,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
           <span className={`font-display text-xl font-bold ${ui.text}`}>{iniciais(perfil.nome)}</span>
         </div>
         <div>
-          <p className="text-white text-lg font-bold leading-tight">{perfil.nome}</p>
+          <p className="text-[#202123] text-lg font-bold leading-tight">{perfil.nome}</p>
           <span className={`inline-flex items-center gap-1 text-xs font-medium ${ui.text}`}>
             <ui.Icon className="h-3.5 w-3.5" /> {ui.label}
           </span>
@@ -634,19 +627,19 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
 
       {!usarSenha ? (
         <>
-          <p className="text-center text-slate-400 text-sm">Digite seu PIN de 4 dígitos</p>
+          <p className="text-center text-[#6F7075] text-sm">Digite seu PIN de 4 dígitos</p>
 
           {/* Bolinhas do PIN */}
           <div className="flex items-center justify-center gap-3">
             {[0, 1, 2, 3].map((i) => (
               <span
                 key={i}
-                className={`h-3.5 w-3.5 rounded-full transition-all ${i < pin.length ? 'bg-amber-400 scale-110 shadow-[0_0_10px_rgba(255,194,75,0.7)]' : 'bg-white/15'}`}
+                className={`h-3.5 w-3.5 rounded-full transition-all ${i < pin.length ? 'bg-[#0F8A72] scale-110' : 'bg-[#D8DADD]'}`}
               />
             ))}
           </div>
 
-          {error && <p className="text-center text-red-400 text-sm">{error}</p>}
+          {error && <p className="text-center text-[#B63B32] text-sm">{error}</p>}
 
           {/* Teclado numérico */}
           <div className="grid grid-cols-3 gap-3 max-w-[260px] mx-auto">
@@ -655,7 +648,7 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
                 key={t}
                 onClick={() => digitar(t)}
                 disabled={loading}
-                className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-display font-semibold hover:bg-white/[0.09] hover:border-amber-400/30 active:scale-95 transition-all disabled:opacity-40"
+                className="h-16 rounded-2xl bg-white border border-[#E1E3E5] text-[#202123] text-2xl font-display font-semibold shadow-[0_4px_14px_rgba(22,23,29,0.04)] hover:bg-[#F1F7F5] hover:border-[#0F8A72]/35 active:scale-95 transition-all disabled:opacity-40"
               >
                 {t}
               </button>
@@ -664,27 +657,27 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
             <button
               onClick={() => digitar('0')}
               disabled={loading}
-              className="h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-white text-2xl font-display font-semibold hover:bg-white/[0.09] hover:border-amber-400/30 active:scale-95 transition-all disabled:opacity-40"
+              className="h-16 rounded-2xl bg-white border border-[#E1E3E5] text-[#202123] text-2xl font-display font-semibold shadow-[0_4px_14px_rgba(22,23,29,0.04)] hover:bg-[#F1F7F5] hover:border-[#0F8A72]/35 active:scale-95 transition-all disabled:opacity-40"
             >
               0
             </button>
             <button
               onClick={apagar}
               disabled={loading}
-              className="h-16 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-slate-400 flex items-center justify-center hover:bg-white/[0.06] active:scale-95 transition-all disabled:opacity-40"
+              className="h-16 rounded-2xl bg-[#F1F2F2] border border-[#E1E3E5] text-[#6F7075] flex items-center justify-center hover:bg-[#E7E9E9] active:scale-95 transition-all disabled:opacity-40"
             >
               <Delete className="h-6 w-6" />
             </button>
           </div>
 
           {loading && (
-            <div className="flex items-center justify-center gap-2 text-slate-400 text-sm">
-              <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
+            <div className="flex items-center justify-center gap-2 text-[#6F7075] text-sm">
+              <span className="animate-spin h-4 w-4 border-2 border-[#0F8A72]/25 border-t-[#0F8A72] rounded-full" /> Entrando...
             </div>
           )}
 
           <p className="text-center">
-            <button onClick={() => { setError(''); setUsarSenha(true); }} className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+            <button onClick={() => { setError(''); setUsarSenha(true); }} className="text-[#7E7F84] hover:text-[#202123] text-xs transition-colors">
               Prefiro entrar com a senha
             </button>
           </p>
@@ -695,45 +688,45 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
           className="space-y-4"
         >
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-slate-500 uppercase tracking-[0.1em] mb-1.5">Senha</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
               <input
                 autoFocus
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white/[0.04] border border-white/[0.10] text-white rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-slate-600 focus:outline-none focus:border-amber-400/60 focus:ring-2 focus:ring-amber-400/20 transition-all"
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
                 placeholder="Digite sua senha..."
                 value={senha}
                 onChange={(e) => { setError(''); setSenha(e.target.value); }}
                 required
               />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-900/40 border border-red-700/60 text-red-400 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-              <span className="text-red-500">✕</span> {error}
+            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+              <span>✕</span> {error}
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading || !senha}
-            className="w-full bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-amber-500/20"
+            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-slate-950/30 border-t-slate-950 rounded-full" /> Entrando...
+                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
               </span>
             ) : 'Entrar no Sistema'}
           </button>
 
           {perfil.temPin && (
             <p className="text-center">
-              <button type="button" onClick={() => { setError(''); setUsarSenha(false); }} className="text-slate-500 hover:text-slate-300 text-xs transition-colors">
+              <button type="button" onClick={() => { setError(''); setUsarSenha(false); }} className="text-[#7E7F84] hover:text-[#202123] text-xs transition-colors">
                 Voltar para o PIN
               </button>
             </p>
