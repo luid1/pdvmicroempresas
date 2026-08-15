@@ -44,9 +44,7 @@ export interface TelaDef {
 
 export const TELAS: TelaDef[] = [
   // ══════════════════════════════════════════════════════════════════════
-  //  MODO MERCADO — só o que um mercado usa no dia a dia (telas funcionais).
-  //  O que é de atacado/contabilidade fica preservado no grupo "Avançado"
-  //  no fim do menu (nada é removido; todas as rotas continuam ativas).
+  //  MODO MERCADO — telas organizadas pela área responsável.
   // ══════════════════════════════════════════════════════════════════════
 
   // ── Operação ──────────────────────────────────────────────────────────
@@ -60,21 +58,25 @@ export const TELAS: TelaDef[] = [
   { key: '/cadastros/clientes', label: 'Clientes (fiado)', grupo: 'Cadastros', icon: Users },
   { key: '/cadastros/filiais', label: 'Lojas', grupo: 'Cadastros', icon: Warehouse },
 
-  // ── Estoque & Compras ─────────────────────────────────────────────────
-  { key: '/wms/posicao', label: 'Posição de Estoque', grupo: 'Estoque & Compras', icon: Warehouse },
-  { key: '/wms/inventario', label: 'Inventário', grupo: 'Estoque & Compras', icon: ClipboardList },
-  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque & Compras', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
-  { key: '/wms/compras', label: 'Ordens de Compra', grupo: 'Estoque & Compras', icon: ShoppingCart },
-  { key: '/wms/entradas', label: 'Entradas (XML NF-e)', grupo: 'Estoque & Compras', icon: ClipboardList },
+  // ── Estoque ───────────────────────────────────────────────────────────
+  { key: '/wms/posicao', label: 'Posição de Estoque', grupo: 'Estoque', icon: Warehouse },
+  { key: '/wms/inventario', label: 'Inventário', grupo: 'Estoque', icon: ClipboardList },
+  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
 
-  // ── Fiscal & Financeiro ───────────────────────────────────────────────
-  { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'Fiscal & Financeiro', icon: Receipt },
-  { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal & Financeiro', icon: Receipt },
-  { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal & Financeiro', icon: BarChart3 },
-  { key: '/financeiro/pagar', label: 'Contas a Pagar', grupo: 'Fiscal & Financeiro', icon: DollarSign },
-  { key: '/financeiro/receber', label: 'Contas a Receber', grupo: 'Fiscal & Financeiro', icon: DollarSign },
-  { key: '/financeiro/fluxo-caixa', label: 'Fluxo de Caixa', grupo: 'Fiscal & Financeiro', icon: Landmark },
-  { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', grupo: 'Fiscal & Financeiro', icon: Repeat },
+  // ── Compras ───────────────────────────────────────────────────────────
+  { key: '/wms/compras', label: 'Ordens de Compra', grupo: 'Compras', icon: ShoppingCart },
+  { key: '/wms/entradas', label: 'Entradas (XML NF-e)', grupo: 'Compras', icon: ClipboardList },
+
+  // ── Fiscal ─────────────────────────────────────────────────────────────
+  { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'Fiscal', icon: Receipt },
+  { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt },
+  { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal', icon: BarChart3 },
+
+  // ── Financeiro ─────────────────────────────────────────────────────────
+  { key: '/financeiro/pagar', label: 'Contas a Pagar', grupo: 'Financeiro', icon: DollarSign },
+  { key: '/financeiro/receber', label: 'Contas a Receber', grupo: 'Financeiro', icon: DollarSign },
+  { key: '/financeiro/fluxo-caixa', label: 'Fluxo de Caixa', grupo: 'Financeiro', icon: Landmark },
+  { key: '/financeiro/recorrencias', label: 'Despesas Recorrentes', grupo: 'Financeiro', icon: Repeat },
 
   // ── Gerência ──────────────────────────────────────────────────────────
   { key: '/gerencial/relatorios', label: 'Relatórios Gerenciais', grupo: 'Gerência', icon: BarChart3 },
@@ -90,37 +92,21 @@ export const TELAS: TelaDef[] = [
   { key: '/gerencial/assinatura', label: 'Minha Assinatura', grupo: 'Gerência', icon: Gauge },
 
   // ══════════════════════════════════════════════════════════════════════
-  //  AVANÇADO (ERP) — recursos de atacado/distribuição e contabilidade.
-  //  Agrupados num único abridor no FIM do menu. Continuam 100% acessíveis;
-  //  só saíram da primeira dobra para não poluir o dia a dia do mercado.
-  //  Alguns recursos avançados ainda estão em migração; cada tela deve
-  //  sinalizar claramente quando uma integração real não estiver disponível.
+  //  RECURSOS ESPECIALIZADOS — distribuídos por Estoque, Compras, Fiscal
+  //  e Financeiro para manter cada fluxo perto das funções relacionadas.
   // ══════════════════════════════════════════════════════════════════════
-  { key: 'grupo:avancado', label: 'Avançado (ERP)', grupo: 'Avançado', icon: Gauge, pasta: true, submenu: [
-    { key: '/wms/movimentacoes', label: 'Movimentações', icon: BarChart3, hint: 'Entradas e saídas detalhadas' },
-    { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', icon: BarChart3, hint: 'Físico vs. sistema' },
-    { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', icon: Undo2, hint: 'Devolver mercadoria' },
-    { key: '/compras/app', label: 'App de Compras', icon: ShoppingCart, hint: 'Comprador em campo' },
-    { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras de tributação' },
-    { key: '/fiscal/gestao', label: 'Gestão Fiscal', icon: Receipt, hint: 'NF-e + painel de vendas' },
-    { key: '/financeiro/dre', label: 'DRE & Relatórios', icon: BarChart3, hint: 'Resultado do período' },
-    { key: '/financeiro/controladoria', label: 'Controladoria', icon: Landmark, hint: 'Visão consolidada' },
-    { key: '/financeiro/tesouraria', label: 'Tesouraria', icon: Landmark, hint: 'Contas, caixa e conciliação' },
-    { key: '/financeiro/plano-contas', label: 'Plano de Contas', icon: Landmark, hint: 'Categorias do DRE' },
-    { key: '/financeiro/custos', label: 'Custos & Margem', icon: Coins, hint: 'Margem, rentabilidade e composição real' },
-  ] },
-  // Rotas reais (ocultas) dos itens do Avançado — herdam rota/permissão.
-  { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'Avançado', icon: BarChart3, oculto: true },
-  { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', grupo: 'Avançado', icon: BarChart3, oculto: true },
-  { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'Avançado', icon: Undo2, oculto: true },
-  { key: '/compras/app', label: 'App de Compras', grupo: 'Avançado', icon: ShoppingCart, oculto: true },
-  { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'Avançado', icon: FileText, oculto: true },
-  { key: '/fiscal/gestao', label: 'Gestão Fiscal', grupo: 'Avançado', icon: Receipt, oculto: true },
-  { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'Avançado', icon: BarChart3, oculto: true },
-  { key: '/financeiro/controladoria', label: 'Controladoria', grupo: 'Avançado', icon: Landmark, oculto: true },
-  { key: '/financeiro/tesouraria', label: 'Tesouraria', grupo: 'Avançado', icon: Landmark, oculto: true },
-  { key: '/financeiro/plano-contas', label: 'Plano de Contas', grupo: 'Avançado', icon: Landmark, oculto: true },
-  { key: '/financeiro/custos', label: 'Custos & Margem', grupo: 'Avançado', icon: Coins, oculto: true },
+  // Recursos especializados visíveis diretamente em suas áreas.
+  { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'Estoque', icon: BarChart3 },
+  { key: '/wms/analise-estoque', label: 'Análise Estoque Físico', grupo: 'Estoque', icon: BarChart3 },
+  { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'Compras', icon: Undo2 },
+  { key: '/compras/app', label: 'App de Compras', grupo: 'Compras', icon: ShoppingCart },
+  { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'Fiscal', icon: FileText },
+  { key: '/fiscal/gestao', label: 'Gestão Fiscal', grupo: 'Fiscal', icon: Receipt },
+  { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'Financeiro', icon: BarChart3 },
+  { key: '/financeiro/controladoria', label: 'Controladoria', grupo: 'Financeiro', icon: Landmark },
+  { key: '/financeiro/tesouraria', label: 'Tesouraria', grupo: 'Financeiro', icon: Landmark },
+  { key: '/financeiro/plano-contas', label: 'Plano de Contas', grupo: 'Financeiro', icon: Landmark },
+  { key: '/financeiro/custos', label: 'Custos & Margem', grupo: 'Financeiro', icon: Coins },
 ];
 
 function agrupar(lista: TelaDef[]) {

@@ -38,7 +38,7 @@ export default function AppShell() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const sw = collapsed ? 'w-14' : 'w-56';
+  const sw = collapsed ? 'w-14' : 'w-64';
 
   // Alterna a barra e lembra da escolha na próxima visita.
   const toggleCollapsed = useCallback(() => {
@@ -75,7 +75,11 @@ export default function AppShell() {
     if (!item.submenu?.length) { setFlyout(null); return; }
     if (fechaTimer.current) clearTimeout(fechaTimer.current);
     const r = e.currentTarget.getBoundingClientRect();
-    setFlyout({ label: item.label, items: item.submenu, top: r.top, left: r.right + 8 });
+    const margem = 12;
+    const alturaDisponivel = window.innerHeight - margem * 2;
+    const alturaEstimada = Math.min(item.submenu.length * 52 + 44, alturaDisponivel);
+    const top = Math.max(margem, Math.min(r.top, window.innerHeight - alturaEstimada - margem));
+    setFlyout({ label: item.label, items: item.submenu, top, left: r.right + 8 });
   }, []);
 
   const agendarFecho = useCallback(() => {
@@ -119,7 +123,10 @@ export default function AppShell() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-2.5 px-1.5 space-y-3">
+        <nav
+          className="flex-1 overflow-y-auto py-2.5 px-1.5 space-y-3"
+          onScroll={() => setFlyout(null)}
+        >
           {navVisivel.map((group) => (
             <div key={group.group}>
               {!collapsed && (
@@ -265,15 +272,15 @@ export default function AppShell() {
           <TelaGuard><Outlet /></TelaGuard>
         </main>
       </div>
-      {/* Flyout de submenu — placa branca que se estende da barra */}
+      {/* Flyout de submenu — acompanha a barra e nunca ultrapassa a janela. */}
       {flyout && createPortal(
         <div
-          className="fixed z-[60] w-60 rounded-xl border border-[#E5E7EB] bg-white shadow-[0_16px_48px_0_rgba(22,23,29,0.16)] py-1.5 animate-fade-in"
-          style={{ top: Math.min(flyout.top, window.innerHeight - (flyout.items.length * 46 + 56)), left: flyout.left }}
+          className="fixed z-[60] w-64 max-h-[calc(100vh-24px)] overflow-y-auto rounded-xl border border-white/[0.08] bg-[#212121] shadow-[0_20px_56px_rgba(0,0,0,0.34)] py-1.5 animate-fade-in"
+          style={{ top: flyout.top, left: flyout.left }}
           onMouseEnter={cancelarFecho}
           onMouseLeave={agendarFecho}
         >
-          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.12em] border-b border-[#E5E7EB] mb-1">{flyout.label}</p>
+          <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-[#777A8B] uppercase tracking-[0.12em] border-b border-white/[0.07] mb-1">{flyout.label}</p>
           {flyout.items.map((s) => {
             const SubIcon = s.icon || Circle;
             return (
@@ -281,14 +288,14 @@ export default function AppShell() {
                 key={s.key}
                 to={s.key}
                 onClick={() => setFlyout(null)}
-                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-[#0F8A72]/[0.12] text-[#0B6F5C]' : 'text-[#5F6065] hover:bg-[#F7F7F8] hover:text-[#202123]'}`}
+                className={({ isActive }) => `flex items-start gap-2.5 px-3 py-2 text-[12px] transition-colors duration-150 ${isActive ? 'bg-[#13A184]/[0.16] text-[#39C5A5]' : 'text-[#C7C9D4] hover:bg-white/[0.06] hover:text-white'}`}
               >
                 {({ isActive }) => (
                   <>
-                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-[#0F8A72]' : 'text-[#8E8F94]'}`} />
+                    <SubIcon className={`h-3.5 w-3.5 shrink-0 mt-0.5 ${isActive ? 'text-[#39C5A5]' : 'text-[#777A8B]'}`} />
                     <span className="min-w-0">
                       <span className="block font-medium truncate">{s.label}</span>
-                      {s.hint && <span className="block text-[10px] text-[#8E8F94] truncate">{s.hint}</span>}
+                      {s.hint && <span className="block text-[10px] text-[#777A8B] truncate">{s.hint}</span>}
                     </span>
                   </>
                 )}
