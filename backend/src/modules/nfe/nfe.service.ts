@@ -64,6 +64,16 @@ export class NFeService {
     const numero = await proximoNumero(this.prisma, tenantId, `nfe:${filialId}:55:1`, ultimo?.numero || 0);
 
     const valorNfe = r2(Number(pedido.valorTotal) + calc.totais.valorIcmsSt + calc.totais.valorIpi);
+    const aplicaReforma = Number(filial.crt || 1) !== 1 && new Date() >= new Date('2026-08-03T00:00:00-03:00');
+    const reformaPorProduto = new Map(pedido.itens.map((item: any) => {
+      const base = r2(Number(item.valorTotal) - Number(item.desconto || 0));
+      const aUf = aplicaReforma ? Number(item.produto.aliquotaIbsUf || 0) : 0;
+      const aMun = aplicaReforma ? Number(item.produto.aliquotaIbsMun || 0) : 0;
+      const aCbs = aplicaReforma ? Number(item.produto.aliquotaCbs || 0) : 0;
+      return [item.produtoId, { base, aUf, aMun, aCbs, vUf: r2(base * aUf / 100), vMun: r2(base * aMun / 100), vCbs: r2(base * aCbs / 100) }];
+    }));
+    const valorIbs = r2([...reformaPorProduto.values()].reduce((s: number, x: any) => s + x.vUf + x.vMun, 0));
+    const valorCbs = r2([...reformaPorProduto.values()].reduce((s: number, x: any) => s + x.vCbs, 0));
 
     const nfe = await this.prisma.nFe.create({
       data: {
@@ -84,6 +94,10 @@ export class NFeService {
         destCnpjCpf: pedido.cliente?.cnpjCpf,
         destRazaoSocial: pedido.cliente?.razaoSocial,
         destEnderecoJson: pedido.cliente?.enderecoJson,
+        destInscricaoEstadual: pedido.cliente?.ie,
+        indicadorIeDestinatario: pedido.cliente?.ie ? 1 : 9,
+        consumidorFinal: pedido.cliente?.tipo === 'PF' ? 1 : 0,
+        presencaComprador: 9,
         formaPagamento: pedido.formaPagamento,
         valorProdutos: pedido.subtotal,
         valorFrete: pedido.valorFrete,
@@ -94,9 +108,13 @@ export class NFeService {
         valorIpi: calc.totais.valorIpi,
         valorPis: calc.totais.valorPis,
         valorCofins: calc.totais.valorCofins,
+        valorIbs,
+        valorCbs,
         valorNfe,
         itens: {
-          create: calc.itens.map(({ item, imposto }, idx) => ({
+          create: calc.itens.map(({ item, imposto }, idx) => {
+            const reforma: any = reformaPorProduto.get(item.produtoId) || {};
+            return ({
             produtoId: item.produtoId,
             ordem: idx + 1,
             codigo: item.produto.codigo,
@@ -125,7 +143,20 @@ export class NFeService {
             baseCalcCofins: imposto.baseCalcCofins,
             aliquotaCofins: imposto.aliquotaCofins,
             valorCofins: imposto.valorCofins,
-          })),
+            cstIpi: imposto.cstIpi,
+            baseCalcIpi: Number(item.valorTotal),
+            aliquotaIpi: imposto.aliquotaIpi,
+            valorIpi: imposto.valorIpi,
+            cstIbsCbs: item.produto.cstIbsCbs,
+            classTribIbsCbs: item.produto.classTribIbsCbs,
+            baseCalcIbsCbs: reforma.base || 0,
+            aliquotaIbsUf: reforma.aUf || 0,
+            valorIbsUf: reforma.vUf || 0,
+            aliquotaIbsMun: reforma.aMun || 0,
+            valorIbsMun: reforma.vMun || 0,
+            aliquotaCbs: reforma.aCbs || 0,
+            valorCbs: reforma.vCbs || 0,
+          }); }),
         },
       },
       include: { itens: true },
@@ -589,6 +620,29 @@ export class NFeService {
         cartasCorrecao: { orderBy: { sequencia: 'asc' } },
       },
     });
+  }
+
+  configuracaoFiscal() {
+    const ambiente = (process.env.NFE_AMBIENTE || 'homologacao').toLowerCase();
+    return {
+      provider: this.nfeProvider.nome,
+      simulacao: this.nfeProvider.simulacao,
+      ambiente,
+      tokenConfigurado: Boolean(process.env.FOCUS_NFE_TOKEN),
+      prontoParaTransmitir: !this.nfeProvider.simulacao && Boolean(process.env.FOCUS_NFE_TOKEN),
+      aviso: ambiente === 'producao' ? 'Emissões possuem validade fiscal.' : 'Ambiente sem validade fiscal.',
+    };
+  }
+
+  async inutilizarNumeracao(tenantId: string, usuarioId: string, dto: { filialId: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }) {
+    if (!this.nfeProvider.inutilizar) throw new BadRequestException('O provedor fiscal selecionado não oferece inutilização.');
+    if (!dto.justificativa || dto.justificativa.trim().length < 15) throw new BadRequestException('A justificativa deve ter ao menos 15 caracteres.');
+    if (dto.numeroInicial <= 0 || dto.numeroFinal < dto.numeroInicial) throw new BadRequestException('Faixa de numeração inválida.');
+    const filial = await this.prisma.filial.findFirst({ where: { id: dto.filialId, tenantId, ativo: true } });
+    if (!filial?.cnpj) throw new BadRequestException('Filial sem CNPJ configurado.');
+    const resultado = await this.nfeProvider.inutilizar({ cnpj: filial.cnpj, serie: dto.serie, numeroInicial: dto.numeroInicial, numeroFinal: dto.numeroFinal, justificativa: dto.justificativa.trim(), modelo: dto.modelo || '55' });
+    await this.prisma.auditLog.create({ data: { tenantId, usuarioId, modulo: 'NFE', acao: 'INUTILIZAR', entidade: 'NFe', entidadeId: `${dto.modelo || '55'}:${dto.serie}:${dto.numeroInicial}-${dto.numeroFinal}`, dadosDepois: { ...dto, protocolo: resultado.protocolo, status: resultado.status } } });
+    return resultado;
   }
 
 }

@@ -30,6 +30,16 @@ enum TipoMovimentacao {
   PICKING
 }
 
+enum StatusTransferenciaEstoque {
+  RASCUNHO
+  SOLICITADA
+  APROVADA
+  EM_TRANSITO
+  RECEBIDA
+  RECEBIDA_COM_DIVERGENCIA
+  CANCELADA
+}
+
 enum StatusPedido {
   RASCUNHO
   CONFIRMADO
@@ -157,19 +167,20 @@ model Tenant {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  filiais       Filial[]
-  users         Usuario[]
-  clientes      Cliente[]
-  fornecedores  Fornecedor[]
-  produtos      Produto[]
-  pedidos       Pedido[]
-  nfes          NFe[]
-  movimentacoes MovimentacaoEstoque[]
-  auditLogs     AuditLog[]
-  planoContas   PlanoContas[]
-  roles         Role[]
-  certificados  CertificadoDigital[]
-  assinatura    Assinatura?
+  filiais        Filial[]
+  users          Usuario[]
+  clientes       Cliente[]
+  fornecedores   Fornecedor[]
+  produtos       Produto[]
+  pedidos        Pedido[]
+  nfes           NFe[]
+  movimentacoes  MovimentacaoEstoque[]
+  auditLogs      AuditLog[]
+  planoContas    PlanoContas[]
+  roles          Role[]
+  certificados   CertificadoDigital[]
+  transferencias TransferenciaEstoque[]
+  assinatura     Assinatura?
 
   @@index([cnpj])
 }
@@ -255,15 +266,17 @@ model Filial {
   ativo             Boolean  @default(true)
   createdAt         DateTime @default(now())
 
-  estoques      EstoqueSaldo[]
-  localizacoes  LocalizacaoFisica[]
-  movimentacoes MovimentacaoEstoque[]
-  pedidoOrigem  Pedido[]              @relation("PedidoFilialOrigem")
-  pedidoDestino Pedido[]              @relation("PedidoFilialDestino")
-  nfes          NFe[]
-  inventarios   Inventario[]
-  usuarios      UsuarioFilial[]
-  certificados  CertificadoDigital[]
+  estoques              EstoqueSaldo[]
+  localizacoes          LocalizacaoFisica[]
+  movimentacoes         MovimentacaoEstoque[]
+  pedidoOrigem          Pedido[]               @relation("PedidoFilialOrigem")
+  pedidoDestino         Pedido[]               @relation("PedidoFilialDestino")
+  nfes                  NFe[]
+  inventarios           Inventario[]
+  usuarios              UsuarioFilial[]
+  certificados          CertificadoDigital[]
+  transferenciasOrigem  TransferenciaEstoque[] @relation("TransferenciaOrigem")
+  transferenciasDestino TransferenciaEstoque[] @relation("TransferenciaDestino")
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
@@ -425,81 +438,107 @@ model UnidadeMedida {
 }
 
 model Produto {
-  id                  String        @id @default(uuid())
-  tenantId            String
-  tenant              Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  codigo              String // código interno
-  codigoBarras        String? // EAN-13 / EAN-8
-  codigoBarrasSecun   String? // código secundário / GTIN
-  descricao           String
-  descricaoCompleta   String?
-  ncm                 String // Nomenclatura Comum Mercosul (8 dígitos)
-  cest                String? // Código de Especificação da Substituição Tributária
-  cfop                String? // CFOP padrão de venda
-  origem              OrigemProduto @default(NACIONAL_0)
-  unidadeMedidaId     String
-  unidadeMedida       UnidadeMedida @relation(fields: [unidadeMedidaId], references: [id])
-  unidadeTributavel   String? // KG, UN — pode diferir da comercial
-  fatorConversao      Decimal       @default(1) @db.Decimal(10, 4)
-  pesoBruto           Decimal?      @db.Decimal(10, 4) // kg
-  pesoLiquido         Decimal?      @db.Decimal(10, 4) // kg
-  volumeM3            Decimal?      @db.Decimal(10, 4)
-  categoria           String? // FLV: FRUTA, LEGUME, VERDURA
-  grupo               String?
-  subgrupo            String?
-  marca               String?
+  id                    String        @id @default(uuid())
+  tenantId              String
+  tenant                Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  codigo                String // código interno
+  codigoBarras          String? // EAN-13 / EAN-8
+  codigoBarrasSecun     String? // código secundário / GTIN
+  skuFornecedor         String?
+  gtinTributavel        String?
+  codigoBarrasCaixa     String?
+  referencia            String?
+  fabricante            String?
+  descricao             String
+  descricaoCompleta     String?
+  descricaoFiscal       String?
+  ncm                   String // Nomenclatura Comum Mercosul (8 dígitos)
+  cest                  String? // Código de Especificação da Substituição Tributária
+  exTipi                String?
+  codigoBeneficioFiscal String?
+  generoItem            String?
+  cfop                  String? // CFOP padrão de venda
+  origem                OrigemProduto @default(NACIONAL_0)
+  unidadeMedidaId       String
+  unidadeMedida         UnidadeMedida @relation(fields: [unidadeMedidaId], references: [id])
+  unidadeTributavel     String? // KG, UN — pode diferir da comercial
+  fatorConversao        Decimal       @default(1) @db.Decimal(10, 4)
+  pesoBruto             Decimal?      @db.Decimal(10, 4) // kg
+  pesoLiquido           Decimal?      @db.Decimal(10, 4) // kg
+  volumeM3              Decimal?      @db.Decimal(10, 4)
+  alturaCm              Decimal?      @db.Decimal(10, 2)
+  larguraCm             Decimal?      @db.Decimal(10, 2)
+  comprimentoCm         Decimal?      @db.Decimal(10, 2)
+  quantidadeEmbalagem   Decimal       @default(1) @db.Decimal(12, 4)
+  multiploCompra        Decimal       @default(1) @db.Decimal(12, 4)
+  categoria             String? // FLV: FRUTA, LEGUME, VERDURA
+  grupo                 String?
+  subgrupo              String?
+  marca                 String?
   // FLV — classificação e caixaria
-  classificacao       String? // Tipo 1, Tipo 2, Graúdo, Médio, Extra...
-  tipoCaixaria        String? // Caixa Madeira 20kg, Caixa Plástica H, Saca, Maço
-  pesoCaixaria        Decimal?      @db.Decimal(10, 3) // peso líquido médio por caixa (kg)
+  classificacao         String? // Tipo 1, Tipo 2, Graúdo, Médio, Extra...
+  tipoCaixaria          String? // Caixa Madeira 20kg, Caixa Plástica H, Saca, Maço
+  pesoCaixaria          Decimal?      @db.Decimal(10, 3) // peso líquido médio por caixa (kg)
   // Fiscal
-  aliquotaIcms        Decimal       @default(0) @db.Decimal(6, 4)
-  aliquotaPis         Decimal       @default(0) @db.Decimal(6, 4)
-  aliquotaCofins      Decimal       @default(0) @db.Decimal(6, 4)
-  cstIcms             String?
-  cstPis              String?
-  cstCofins           String?
+  aliquotaIcms          Decimal       @default(0) @db.Decimal(6, 4)
+  aliquotaPis           Decimal       @default(0) @db.Decimal(6, 4)
+  aliquotaCofins        Decimal       @default(0) @db.Decimal(6, 4)
+  cstIcms               String?
+  cstPis                String?
+  cstCofins             String?
+  cstIbsCbs             String?
+  classTribIbsCbs       String?
+  aliquotaIbsUf         Decimal       @default(0) @db.Decimal(6, 4)
+  aliquotaIbsMun        Decimal       @default(0) @db.Decimal(6, 4)
+  aliquotaCbs           Decimal       @default(0) @db.Decimal(6, 4)
   // Reforma Tributária (IBS/CBS) — EC 132/2023
-  tipoAliquotaReforma String        @default("PADRAO") // PADRAO, REDUZIDA, ISENTA, SELETIVA
-  confiancaIa         Decimal       @default(0) @db.Decimal(5, 2) // 0..100 — confiança da classificação NCM por IA
+  tipoAliquotaReforma   String        @default("PADRAO") // PADRAO, REDUZIDA, ISENTA, SELETIVA
+  confiancaIa           Decimal       @default(0) @db.Decimal(5, 2) // 0..100 — confiança da classificação NCM por IA
   // Armazenamento
-  requerLote          Boolean       @default(false)
-  requerValidade      Boolean       @default(false) // perecíveis/FLV
-  diasAlertaValidade  Int           @default(3)
-  temperaturaMin      Decimal?      @db.Decimal(5, 2) // °C
-  temperaturaMax      Decimal?      @db.Decimal(5, 2)
-  empilhamentoMax     Int?
+  requerLote            Boolean       @default(false)
+  requerValidade        Boolean       @default(false) // perecíveis/FLV
+  diasAlertaValidade    Int           @default(3)
+  temperaturaMin        Decimal?      @db.Decimal(5, 2) // °C
+  temperaturaMax        Decimal?      @db.Decimal(5, 2)
+  empilhamentoMax       Int?
   // Preços
-  precoCompra         Decimal       @default(0) @db.Decimal(12, 4)
-  precoCusto          Decimal       @default(0) @db.Decimal(12, 4)
-  precoVenda          Decimal       @default(0) @db.Decimal(12, 4)
-  margemMinima        Decimal       @default(0) @db.Decimal(5, 2) // %
+  precoCompra           Decimal       @default(0) @db.Decimal(12, 4)
+  precoCusto            Decimal       @default(0) @db.Decimal(12, 4)
+  precoVenda            Decimal       @default(0) @db.Decimal(12, 4)
+  margemMinima          Decimal       @default(0) @db.Decimal(5, 2) // %
   // Composição analítica do custo (FLV) — precoCusto = resultado calculado
-  custoBase           Decimal       @default(0) @db.Decimal(12, 4) // preço do fornecedor / unidade
-  custoAliquotaImp    Decimal       @default(0) @db.Decimal(6, 4) // % imposto não recuperável s/ custo base
-  custoEmbalagem      Decimal       @default(0) @db.Decimal(12, 4) // embalagem/caixa / unidade
-  custoFrete          Decimal       @default(0) @db.Decimal(12, 4) // frete de entrada rateado / unidade
-  custoChapa          Decimal       @default(0) @db.Decimal(12, 4) // chapa/descarga rateada / unidade
-  fatorPerdaPct       Decimal       @default(0) @db.Decimal(5, 2) // % de quebra esperada
-  estoqueMinimo       Decimal       @default(0) @db.Decimal(12, 4)
-  estoqueMaximo       Decimal?      @db.Decimal(12, 4)
+  custoBase             Decimal       @default(0) @db.Decimal(12, 4) // preço do fornecedor / unidade
+  custoAliquotaImp      Decimal       @default(0) @db.Decimal(6, 4) // % imposto não recuperável s/ custo base
+  custoEmbalagem        Decimal       @default(0) @db.Decimal(12, 4) // embalagem/caixa / unidade
+  custoFrete            Decimal       @default(0) @db.Decimal(12, 4) // frete de entrada rateado / unidade
+  custoChapa            Decimal       @default(0) @db.Decimal(12, 4) // chapa/descarga rateada / unidade
+  fatorPerdaPct         Decimal       @default(0) @db.Decimal(5, 2) // % de quebra esperada
+  estoqueMinimo         Decimal       @default(0) @db.Decimal(12, 4)
+  estoqueMaximo         Decimal?      @db.Decimal(12, 4)
+  estoqueSeguranca      Decimal       @default(0) @db.Decimal(12, 4)
+  pontoReposicao        Decimal       @default(0) @db.Decimal(12, 4)
+  leadTimeDias          Int           @default(0)
+  localizacaoPadrao     String?
   // Item de balança (hortifrúti/açougue): vendido por peso (KG), com EAN de balança prefixo 2.
-  vendidoPorPeso      Boolean       @default(false)
-  ativo               Boolean       @default(true)
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
+  vendidoPorPeso        Boolean       @default(false)
+  ativo                 Boolean       @default(true)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 
-  estoques         EstoqueSaldo[]
-  lotes            Lote[]
-  itensPedido      ItemPedido[]
-  itensNFe         ItemNFe[]
-  movimentacoes    MovimentacaoEstoque[]
-  itensInventario  ItemInventario[]
-  itensOrdemCompra ItemOrdemCompra[]
+  estoques           EstoqueSaldo[]
+  lotes              Lote[]
+  itensPedido        ItemPedido[]
+  itensNFe           ItemNFe[]
+  movimentacoes      MovimentacaoEstoque[]
+  itensInventario    ItemInventario[]
+  itensOrdemCompra   ItemOrdemCompra[]
+  itensTransferencia ItemTransferenciaEstoque[]
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
   @@index([tenantId, codigoBarras])
+  @@index([tenantId, codigoBarrasCaixa])
+  @@index([tenantId, skuFornecedor])
   @@index([tenantId, ncm])
 }
 
@@ -571,39 +610,94 @@ model EstoqueSaldo {
 }
 
 model MovimentacaoEstoque {
-  id              String             @id @default(uuid())
+  id              String                @id @default(uuid())
   tenantId        String
-  tenant          Tenant             @relation(fields: [tenantId], references: [id])
+  tenant          Tenant                @relation(fields: [tenantId], references: [id])
   filialId        String
-  filial          Filial             @relation(fields: [filialId], references: [id])
+  filial          Filial                @relation(fields: [filialId], references: [id])
   usuarioId       String
-  usuario         Usuario            @relation(fields: [usuarioId], references: [id])
+  usuario         Usuario               @relation(fields: [usuarioId], references: [id])
   produtoId       String
-  produto         Produto            @relation(fields: [produtoId], references: [id])
+  produto         Produto               @relation(fields: [produtoId], references: [id])
   loteId          String?
-  lote            Lote?              @relation(fields: [loteId], references: [id])
+  lote            Lote?                 @relation(fields: [loteId], references: [id])
   localizacaoId   String?
-  localizacao     LocalizacaoFisica? @relation(fields: [localizacaoId], references: [id])
+  localizacao     LocalizacaoFisica?    @relation(fields: [localizacaoId], references: [id])
   tipo            TipoMovimentacao
-  quantidade      Decimal            @db.Decimal(12, 4)
-  custoUnitario   Decimal            @default(0) @db.Decimal(12, 4)
-  saldoAnterior   Decimal            @db.Decimal(12, 4)
-  saldoFinal      Decimal            @db.Decimal(12, 4)
+  quantidade      Decimal               @db.Decimal(12, 4)
+  custoUnitario   Decimal               @default(0) @db.Decimal(12, 4)
+  saldoAnterior   Decimal               @db.Decimal(12, 4)
+  saldoFinal      Decimal               @db.Decimal(12, 4)
   // Referências de origem
   pedidoId        String?
-  pedido          Pedido?            @relation(fields: [pedidoId], references: [id])
+  pedido          Pedido?               @relation(fields: [pedidoId], references: [id])
   entradaId       String?
-  entrada         EntradaMercadoria? @relation(fields: [entradaId], references: [id])
+  entrada         EntradaMercadoria?    @relation(fields: [entradaId], references: [id])
   nfeId           String?
-  nfe             NFe?               @relation(fields: [nfeId], references: [id])
+  nfe             NFe?                  @relation(fields: [nfeId], references: [id])
+  transferenciaId String?
+  transferencia   TransferenciaEstoque? @relation(fields: [transferenciaId], references: [id])
   filialDestinoId String? // para transferências
   observacoes     String?
-  dataMovimento   DateTime           @default(now())
+  dataMovimento   DateTime              @default(now())
 
   @@index([tenantId, filialId])
   @@index([tenantId, produtoId])
   @@index([tenantId, tipo, dataMovimento])
   @@index([nfeId])
+  @@index([transferenciaId])
+}
+
+/// Documento logístico entre filiais. A saída ocorre no despacho e a entrada
+/// somente no recebimento, preservando estoque em trânsito e divergências.
+model TransferenciaEstoque {
+  id                   String                     @id @default(uuid())
+  tenantId             String
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  codigo               String
+  filialOrigemId       String
+  filialOrigem         Filial                     @relation("TransferenciaOrigem", fields: [filialOrigemId], references: [id])
+  filialDestinoId      String
+  filialDestino        Filial                     @relation("TransferenciaDestino", fields: [filialDestinoId], references: [id])
+  status               StatusTransferenciaEstoque @default(RASCUNHO)
+  observacoes          String?
+  motivoCancelamento   String?
+  usuarioSolicitanteId String
+  usuarioAprovadorId   String?
+  usuarioDespachoId    String?
+  usuarioRecebimentoId String?
+  solicitadaEm         DateTime?
+  aprovadaEm           DateTime?
+  despachadaEm         DateTime?
+  recebidaEm           DateTime?
+  canceladaEm          DateTime?
+  createdAt            DateTime                   @default(now())
+  updatedAt            DateTime                   @updatedAt
+
+  itens         ItemTransferenciaEstoque[]
+  movimentacoes MovimentacaoEstoque[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, filialOrigemId, status])
+  @@index([tenantId, filialDestinoId, status])
+}
+
+model ItemTransferenciaEstoque {
+  id                    String               @id @default(uuid())
+  transferenciaId       String
+  transferencia         TransferenciaEstoque @relation(fields: [transferenciaId], references: [id], onDelete: Cascade)
+  produtoId             String
+  produto               Produto              @relation(fields: [produtoId], references: [id])
+  loteId                String?
+  localizacaoOrigemId   String?
+  quantidadeSolicitada  Decimal              @db.Decimal(12, 4)
+  quantidadeDespachada  Decimal              @default(0) @db.Decimal(12, 4)
+  quantidadeRecebida    Decimal              @default(0) @db.Decimal(12, 4)
+  custoUnitario         Decimal              @default(0) @db.Decimal(12, 4)
+  observacaoDivergencia String?
+
+  @@index([transferenciaId])
+  @@index([produtoId])
 }
 
 model EntradaMercadoria {
@@ -862,71 +956,77 @@ model CertificadoDigital {
 }
 
 model NFe {
-  id                 String    @id @default(uuid())
-  tenantId           String
-  tenant             Tenant    @relation(fields: [tenantId], references: [id])
-  filialId           String
-  filial             Filial    @relation(fields: [filialId], references: [id])
-  clienteId          String?
-  cliente            Cliente?  @relation(fields: [clienteId], references: [id])
-  pedidoId           String?
-  pedido             Pedido?   @relation(fields: [pedidoId], references: [id])
-  tipo               TipoDFe   @default(NFE)
-  modelo             String    @default("55") // 55=NF-e, 65=NFC-e
-  serie              String    @default("1")
-  numero             Int
-  chaveAcesso        String?   @unique // 44 dígitos
-  protocolo          String?
-  status             StatusDFe @default(RASCUNHO)
+  id                      String    @id @default(uuid())
+  tenantId                String
+  tenant                  Tenant    @relation(fields: [tenantId], references: [id])
+  filialId                String
+  filial                  Filial    @relation(fields: [filialId], references: [id])
+  clienteId               String?
+  cliente                 Cliente?  @relation(fields: [clienteId], references: [id])
+  pedidoId                String?
+  pedido                  Pedido?   @relation(fields: [pedidoId], references: [id])
+  tipo                    TipoDFe   @default(NFE)
+  modelo                  String    @default("55") // 55=NF-e, 65=NFC-e
+  serie                   String    @default("1")
+  numero                  Int
+  chaveAcesso             String?   @unique // 44 dígitos
+  protocolo               String?
+  status                  StatusDFe @default(RASCUNHO)
   // Finalidade / tipo da operação
-  tipoOperacao       String    @default("SAIDA") // SAIDA (1) ou ENTRADA (0 — devolução)
-  finalidade         String    @default("1") // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
+  tipoOperacao            String    @default("SAIDA") // SAIDA (1) ou ENTRADA (0 — devolução)
+  finalidade              String    @default("1") // 1=Normal, 2=Complementar, 3=Ajuste, 4=Devolução
   // Referência (devolução espelha a NF-e original)
-  nfeReferenciadaId  String?
-  nfeReferenciada    NFe?      @relation("NFeDevolucao", fields: [nfeReferenciadaId], references: [id])
-  devolucoes         NFe[]     @relation("NFeDevolucao")
-  chaveReferenciada  String?
-  naturezaOperacao   String
-  cfop               String
+  nfeReferenciadaId       String?
+  nfeReferenciada         NFe?      @relation("NFeDevolucao", fields: [nfeReferenciadaId], references: [id])
+  devolucoes              NFe[]     @relation("NFeDevolucao")
+  chaveReferenciada       String?
+  naturezaOperacao        String
+  cfop                    String
   // Emitente (da filial)
-  emitenteCnpj       String
+  emitenteCnpj            String
   // Destinatário
-  destCnpjCpf        String?
-  destRazaoSocial    String?
-  destEnderecoJson   Json?
+  destCnpjCpf             String?
+  destRazaoSocial         String?
+  destEnderecoJson        Json?
+  destInscricaoEstadual   String?
+  indicadorIeDestinatario Int       @default(9)
+  consumidorFinal         Int       @default(0)
+  presencaComprador       Int       @default(0)
   // Valores
-  valorProdutos      Decimal   @db.Decimal(12, 2)
-  valorFrete         Decimal   @default(0) @db.Decimal(12, 2)
-  valorSeguro        Decimal   @default(0) @db.Decimal(12, 2)
-  valorDesconto      Decimal   @default(0) @db.Decimal(12, 2)
-  valorIcms          Decimal   @default(0) @db.Decimal(12, 2)
-  valorIcmsSt        Decimal   @default(0) @db.Decimal(12, 2)
-  valorFcp           Decimal   @default(0) @db.Decimal(12, 2)
-  valorIpi           Decimal   @default(0) @db.Decimal(12, 2)
-  valorPis           Decimal   @default(0) @db.Decimal(12, 2)
-  valorCofins        Decimal   @default(0) @db.Decimal(12, 2)
-  valorNfe           Decimal   @db.Decimal(12, 2)
+  valorProdutos           Decimal   @db.Decimal(12, 2)
+  valorFrete              Decimal   @default(0) @db.Decimal(12, 2)
+  valorSeguro             Decimal   @default(0) @db.Decimal(12, 2)
+  valorDesconto           Decimal   @default(0) @db.Decimal(12, 2)
+  valorIcms               Decimal   @default(0) @db.Decimal(12, 2)
+  valorIcmsSt             Decimal   @default(0) @db.Decimal(12, 2)
+  valorFcp                Decimal   @default(0) @db.Decimal(12, 2)
+  valorIpi                Decimal   @default(0) @db.Decimal(12, 2)
+  valorPis                Decimal   @default(0) @db.Decimal(12, 2)
+  valorCofins             Decimal   @default(0) @db.Decimal(12, 2)
+  valorIbs                Decimal   @default(0) @db.Decimal(12, 2)
+  valorCbs                Decimal   @default(0) @db.Decimal(12, 2)
+  valorNfe                Decimal   @db.Decimal(12, 2)
   // XML e PDF
-  xmlEmitido         String?   @db.Text
-  xmlCancelamento    String?   @db.Text
-  pdfDanfe           String? // URL/path do DANFE
+  xmlEmitido              String?   @db.Text
+  xmlCancelamento         String?   @db.Text
+  pdfDanfe                String? // URL/path do DANFE
   // NFC-e (modelo 65): QR Code e URL de consulta do consumidor
-  qrCode             String?   @db.Text
-  urlConsultaNfce    String?
-  motivoCancelamento String?
-  dataEmissao        DateTime?
-  dataCancelamento   DateTime?
+  qrCode                  String?   @db.Text
+  urlConsultaNfce         String?
+  motivoCancelamento      String?
+  dataEmissao             DateTime?
+  dataCancelamento        DateTime?
   // Pendência pós-emissão: NF-e autorizada no SEFAZ mas a baixa de estoque e/ou a
   // geração do financeiro falhou. Nunca seguimos em silêncio — sinalizamos aqui
   // para fila de retry/alerta operacional.
-  baixaPendente      Boolean   @default(false)
-  pendenciaMotivo    String?   @db.Text
+  baixaPendente           Boolean   @default(false)
+  pendenciaMotivo         String?   @db.Text
   // Transporte
-  tipoFrete          String?
+  tipoFrete               String?
   // Pagamento
-  formaPagamento     String? // 01=Dinheiro, 03=Cartão, 15=Boleto, 99=Outros
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  formaPagamento          String? // 01=Dinheiro, 03=Cartão, 15=Boleto, 99=Outros
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 
   itens          ItemNFe[]
   movimentacoes  MovimentacaoEstoque[]
@@ -941,45 +1041,58 @@ model NFe {
 }
 
 model ItemNFe {
-  id             String    @id @default(uuid())
-  nfeId          String
-  nfe            NFe       @relation(fields: [nfeId], references: [id], onDelete: Cascade)
-  produtoId      String?
-  produto        Produto?  @relation(fields: [produtoId], references: [id])
-  ordem          Int
-  codigo         String
-  descricao      String
-  ncm            String
-  cfop           String
-  unidade        String
-  quantidade     Decimal   @db.Decimal(12, 4)
-  valorUnitario  Decimal   @db.Decimal(12, 4)
-  valorDesconto  Decimal   @default(0) @db.Decimal(12, 2)
-  valorTotal     Decimal   @db.Decimal(12, 2)
+  id              String    @id @default(uuid())
+  nfeId           String
+  nfe             NFe       @relation(fields: [nfeId], references: [id], onDelete: Cascade)
+  produtoId       String?
+  produto         Produto?  @relation(fields: [produtoId], references: [id])
+  ordem           Int
+  codigo          String
+  descricao       String
+  ncm             String
+  cfop            String
+  unidade         String
+  quantidade      Decimal   @db.Decimal(12, 4)
+  valorUnitario   Decimal   @db.Decimal(12, 4)
+  valorDesconto   Decimal   @default(0) @db.Decimal(12, 2)
+  valorTotal      Decimal   @db.Decimal(12, 2)
   // ICMS
-  origemProd     String    @default("0")
-  cstCsosn       String
-  baseCalcIcms   Decimal   @default(0) @db.Decimal(12, 2)
-  aliquotaIcms   Decimal   @default(0) @db.Decimal(6, 4)
-  valorIcms      Decimal   @default(0) @db.Decimal(12, 2)
+  origemProd      String    @default("0")
+  cstCsosn        String
+  baseCalcIcms    Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaIcms    Decimal   @default(0) @db.Decimal(6, 4)
+  valorIcms       Decimal   @default(0) @db.Decimal(12, 2)
   // FCP (Fundo de Combate à Pobreza) — sobre ICMS próprio e sobre ST
-  baseCalcFcp    Decimal   @default(0) @db.Decimal(12, 2)
-  aliquotaFcp    Decimal   @default(0) @db.Decimal(6, 4)
-  valorFcp       Decimal   @default(0) @db.Decimal(12, 2)
-  valorFcpSt     Decimal   @default(0) @db.Decimal(12, 2)
+  baseCalcFcp     Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaFcp     Decimal   @default(0) @db.Decimal(6, 4)
+  valorFcp        Decimal   @default(0) @db.Decimal(12, 2)
+  valorFcpSt      Decimal   @default(0) @db.Decimal(12, 2)
   // PIS
-  cstPis         String    @default("07")
-  baseCalcPis    Decimal   @default(0) @db.Decimal(12, 2)
-  aliquotaPis    Decimal   @default(0) @db.Decimal(6, 4)
-  valorPis       Decimal   @default(0) @db.Decimal(12, 2)
+  cstPis          String    @default("07")
+  baseCalcPis     Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaPis     Decimal   @default(0) @db.Decimal(6, 4)
+  valorPis        Decimal   @default(0) @db.Decimal(12, 2)
   // COFINS
-  cstCofins      String    @default("07")
-  baseCalcCofins Decimal   @default(0) @db.Decimal(12, 2)
-  aliquotaCofins Decimal   @default(0) @db.Decimal(6, 4)
-  valorCofins    Decimal   @default(0) @db.Decimal(12, 2)
+  cstCofins       String    @default("07")
+  baseCalcCofins  Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaCofins  Decimal   @default(0) @db.Decimal(6, 4)
+  valorCofins     Decimal   @default(0) @db.Decimal(12, 2)
+  cstIpi          String?
+  baseCalcIpi     Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaIpi     Decimal   @default(0) @db.Decimal(6, 4)
+  valorIpi        Decimal   @default(0) @db.Decimal(12, 2)
+  cstIbsCbs       String?
+  classTribIbsCbs String?
+  baseCalcIbsCbs  Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaIbsUf   Decimal   @default(0) @db.Decimal(6, 4)
+  valorIbsUf      Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaIbsMun  Decimal   @default(0) @db.Decimal(6, 4)
+  valorIbsMun     Decimal   @default(0) @db.Decimal(12, 2)
+  aliquotaCbs     Decimal   @default(0) @db.Decimal(6, 4)
+  valorCbs        Decimal   @default(0) @db.Decimal(12, 2)
   // Lote (rastreabilidade)
-  loteNumero     String?
-  dataValidade   DateTime?
+  loteNumero      String?
+  dataValidade    DateTime?
 
   @@index([nfeId])
 }

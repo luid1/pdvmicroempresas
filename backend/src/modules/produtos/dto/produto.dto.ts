@@ -4,6 +4,9 @@ import {
   IsNotEmpty,
   IsOptional,
   IsNumber,
+  IsBoolean,
+  IsInt,
+  Min,
   MaxLength,
   ValidateIf,
 } from 'class-validator';
@@ -17,6 +20,13 @@ const OptionalNumber = () => (target: object, key: string) => {
   IsOptional()(target, key);
   ValidateIf((_, v) => v !== null && v !== undefined && v !== '')(target, key);
   IsNumber({ maxDecimalPlaces: 6 }, { message: `${key} deve ser numérico.` })(target, key);
+};
+
+const OptionalString = (max = 120) => (target: object, key: string) => {
+  IsOptional()(target, key);
+  ValidateIf((_, v) => v !== null)(target, key);
+  IsString()(target, key);
+  MaxLength(max)(target, key);
 };
 
 export class CreateProdutoDto extends TenantAwareDto {
@@ -34,9 +44,45 @@ export class CreateProdutoDto extends TenantAwareDto {
   @IsOptional() @ValidateIf((_, v) => v !== null) @IsString() @MaxLength(60)
   codigoBarras?: string | null;
 
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(60)
+  codigoBarrasSecun?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(60)
+  codigoBarrasCaixa?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(60)
+  gtinTributavel?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(80)
+  skuFornecedor?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(80)
+  referencia?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(120)
+  fabricante?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(500)
+  descricaoCompleta?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(120)
+  descricaoFiscal?: string | null;
+
   @ApiPropertyOptional()
   @IsOptional() @IsString() @MaxLength(8)
   ncm?: string;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(10)
+  cest?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(4)
+  exTipi?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(20)
+  codigoBeneficioFiscal?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(4)
+  generoItem?: string | null;
 
   @ApiPropertyOptional({ nullable: true })
   @IsOptional() @ValidateIf((_, v) => v !== null) @IsString() @MaxLength(10)
@@ -53,6 +99,9 @@ export class CreateProdutoDto extends TenantAwareDto {
   @ApiPropertyOptional({ nullable: true })
   @IsOptional() @ValidateIf((_, v) => v !== null) @IsString() @MaxLength(60)
   marca?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(60)
+  subgrupo?: string | null;
 
   @ApiPropertyOptional({ nullable: true })
   @IsOptional() @ValidateIf((_, v) => v !== null) @IsString() @MaxLength(60)
@@ -81,6 +130,85 @@ export class CreateProdutoDto extends TenantAwareDto {
   @ApiPropertyOptional({ nullable: true })
   @OptionalNumber()
   precoVenda?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  precoCompra?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  estoqueMinimo?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  estoqueMaximo?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  estoqueSeguranca?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  pontoReposicao?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  quantidadeEmbalagem?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  multiploCompra?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  alturaCm?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  larguraCm?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  comprimentoCm?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(80)
+  localizacaoPadrao?: string | null;
+
+  @ApiPropertyOptional({ minimum: 0 })
+  @IsOptional() @IsInt() @Min(0)
+  leadTimeDias?: number;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  requerLote?: boolean;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  requerValidade?: boolean;
+
+  @ApiPropertyOptional() @IsOptional() @IsBoolean()
+  vendidoPorPeso?: boolean;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(3)
+  cstIcms?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(3)
+  cstPis?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(3)
+  cstCofins?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaIcms?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaPis?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaCofins?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(3)
+  cstIbsCbs?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalString(6)
+  classTribIbsCbs?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaIbsUf?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaIbsMun?: number | null;
+
+  @ApiPropertyOptional({ nullable: true }) @OptionalNumber()
+  aliquotaCbs?: number | null;
 }
 
 /** Update aceita todos os campos do create (parciais) + composição analítica de custo. */

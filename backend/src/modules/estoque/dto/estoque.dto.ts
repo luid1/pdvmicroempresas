@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean, IsEnum, ValidateIf } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsBoolean, IsEnum, ValidateIf, ValidateNested, ArrayMinSize, IsArray, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 import { TipoMovimentacao } from '@prisma/client';
 import { TenantAwareDto } from '../../../common/dto/tenant-aware.dto';
 
@@ -102,4 +103,55 @@ export class TransferenciaEstoqueDto extends TenantAwareDto {
 
   @ApiPropertyOptional({ nullable: true }) @optStr()
   observacoes?: string | null;
+}
+
+export class ItemNovaTransferenciaDto {
+  @ApiProperty() @IsString() @IsNotEmpty()
+  produtoId: string;
+
+  @ApiPropertyOptional({ nullable: true }) @optStr()
+  loteId?: string | null;
+
+  @ApiPropertyOptional({ nullable: true }) @optStr()
+  localizacaoOrigemId?: string | null;
+
+  @ApiProperty() @IsNumber({ maxDecimalPlaces: 4 }) @Min(0.0001)
+  quantidade: number;
+}
+
+export class NovaTransferenciaDto extends TenantAwareDto {
+  @ApiProperty() @IsString() @IsNotEmpty()
+  filialOrigemId: string;
+
+  @ApiProperty() @IsString() @IsNotEmpty()
+  filialDestinoId: string;
+
+  @ApiPropertyOptional({ nullable: true }) @optStr()
+  observacoes?: string | null;
+
+  @ApiProperty({ type: [ItemNovaTransferenciaDto] })
+  @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => ItemNovaTransferenciaDto)
+  itens: ItemNovaTransferenciaDto[];
+}
+
+export class ItemRecebimentoTransferenciaDto {
+  @ApiProperty() @IsString() @IsNotEmpty()
+  itemId: string;
+
+  @ApiProperty() @IsNumber({ maxDecimalPlaces: 4 }) @Min(0)
+  quantidadeRecebida: number;
+
+  @ApiPropertyOptional({ nullable: true }) @optStr()
+  observacaoDivergencia?: string | null;
+}
+
+export class ReceberTransferenciaDto extends TenantAwareDto {
+  @ApiProperty({ type: [ItemRecebimentoTransferenciaDto] })
+  @IsArray() @ArrayMinSize(1) @ValidateNested({ each: true }) @Type(() => ItemRecebimentoTransferenciaDto)
+  itens: ItemRecebimentoTransferenciaDto[];
+}
+
+export class CancelarTransferenciaDto extends TenantAwareDto {
+  @ApiProperty() @IsString() @IsNotEmpty()
+  motivo: string;
 }

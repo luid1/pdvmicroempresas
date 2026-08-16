@@ -63,6 +63,7 @@ export const TELAS: TelaDef[] = [
   { key: '/wms/inventario', label: 'Inventário', grupo: 'Estoque', icon: ClipboardList },
   { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
   { key: 'grupo:gestao-estoque', label: 'Gestão de Estoque', grupo: 'Estoque', icon: BarChart3, pasta: true, submenu: [
+    { key: '/wms/transferencias', label: 'Transferências entre Filiais', icon: Repeat, hint: 'Solicitação, trânsito e recebimento' },
     { key: '/wms/movimentacoes', label: 'Movimentações', icon: Warehouse, hint: 'Entradas e saídas detalhadas' },
     { key: '/wms/analise-estoque', label: 'Análise de Estoque Físico', icon: BarChart3, hint: 'Contagem, perdas e divergências' },
   ] },
@@ -80,6 +81,7 @@ export const TELAS: TelaDef[] = [
   { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt },
   { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal', icon: BarChart3 },
   { key: 'grupo:gestao-fiscal', label: 'Gestão Fiscal', grupo: 'Fiscal', icon: ShieldCheck, pasta: true, submenu: [
+    { key: '/fiscal/configuracao', label: 'Central SEFAZ', icon: ShieldCheck, hint: 'Ambiente, credenciais e homologação' },
     { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras e tributação por operação' },
     { key: '/fiscal/gestao', label: 'Visão Fiscal Consolidada', icon: Receipt, hint: 'Documentos e acompanhamento fiscal' },
   ] },
@@ -116,10 +118,12 @@ export const TELAS: TelaDef[] = [
   // ══════════════════════════════════════════════════════════════════════
   // Rotas dos submenus: continuam na matriz de permissões, mas não poluem a barra.
   { key: '/wms/movimentacoes', label: 'Movimentações', grupo: 'Estoque', icon: Warehouse, oculto: true },
+  { key: '/wms/transferencias', label: 'Transferências entre Filiais', grupo: 'Estoque', icon: Repeat, oculto: true },
   { key: '/wms/analise-estoque', label: 'Análise de Estoque Físico', grupo: 'Estoque', icon: BarChart3, oculto: true },
   { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'Compras', icon: Undo2, oculto: true },
   { key: '/compras/app', label: 'Aplicativo de Compras', grupo: 'Compras', icon: ShoppingCart, oculto: true },
   { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'Fiscal', icon: FileText, oculto: true },
+  { key: '/fiscal/configuracao', label: 'Central SEFAZ', grupo: 'Fiscal', icon: ShieldCheck, oculto: true },
   { key: '/fiscal/gestao', label: 'Visão Fiscal Consolidada', grupo: 'Fiscal', icon: Receipt, oculto: true },
   { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'Financeiro', icon: BarChart3, oculto: true },
   { key: '/financeiro/controladoria', label: 'Controladoria', grupo: 'Financeiro', icon: Landmark, oculto: true },

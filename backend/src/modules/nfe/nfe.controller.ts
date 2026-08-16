@@ -11,6 +11,16 @@ import { CurrentTenant, CurrentUser, Modulo } from '../../common/decorators/cont
 export class NFeController {
   constructor(private service: NFeService) {}
 
+  @Get('configuracao/status')
+  @ApiOperation({ summary: 'Diagnóstico seguro do provedor e ambiente fiscal' })
+  configuracao() { return this.service.configuracaoFiscal(); }
+
+  @Post('inutilizacao')
+  @ApiOperation({ summary: 'Inutiliza uma faixa de numeração NF-e/NFC-e na SEFAZ' })
+  inutilizar(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Body() body: any) {
+    return this.service.inutilizarNumeracao(tenantId, user.id, body);
+  }
+
   @Get(':filialId')
   @ApiOperation({ summary: 'Lista NF-e da filial com filtros' })
   findAll(

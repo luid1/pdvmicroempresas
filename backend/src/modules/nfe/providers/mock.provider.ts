@@ -5,6 +5,7 @@ import {
   AutorizacaoNfceResultado,
   CancelamentoResultado,
   CartaCorrecaoResultado,
+  InutilizacaoResultado,
 } from './nfe-provider.interface';
 
 /**
@@ -73,6 +74,10 @@ export class MockNfeProvider implements NfeProvider {
   ): Promise<CartaCorrecaoResultado> {
     const xml = `<evento><infEvento><tpEvento>110110</tpEvento><nSeqEvento>${sequencia}</nSeqEvento><xCorrecao>${texto}</xCorrecao></infEvento></evento>`;
     return { xml, protocolo: `110110${Date.now()}`, status: 'REGISTRADO', simulacao: true };
+  }
+
+  async inutilizar(dados: { cnpj: string; serie: string; numeroInicial: number; numeroFinal: number }): Promise<InutilizacaoResultado> {
+    return { protocolo: `102${Date.now()}`, xml: `<retInutNFe><cStat>102</cStat><nNFIni>${dados.numeroInicial}</nNFIni><nNFFin>${dados.numeroFinal}</nNFFin></retInutNFe>`, status: 'INUTILIZADO', simulacao: true };
   }
 
   /** Monta um XML simplificado (visual/teste) com itens e impostos. */

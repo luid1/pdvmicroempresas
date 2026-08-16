@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, TipoMovimentacao } from '@prisma/client';
+import { Prisma, TipoMovimentacao, StatusTransferenciaEstoque } from '@prisma/client';
 
 export interface MovimentarEstoqueDto {
   filialId: string;
@@ -14,6 +14,7 @@ export interface MovimentarEstoqueDto {
   pedidoId?: string;
   entradaId?: string;
   nfeId?: string;
+  transferenciaId?: string;
   filialDestinoId?: string;
   observacoes?: string;
   usuarioId: string;
@@ -86,7 +87,11 @@ export class EstoqueService {
    * NÚCLEO DO WMS: Movimenta estoque com controle de saldo, FEFO e auditoria.
    * Toda entrada/saída/transferência passa por aqui.
    */
-  async movimentar(tenantId: string, dto: MovimentarEstoqueDto): Promise<void> {
+  async movimentar(
+    tenantId: string,
+    dto: MovimentarEstoqueDto,
+    txExterno?: Prisma.TransactionClient,
+  ): Promise<void> {
     const tiposEntrada: TipoMovimentacao[] = [
       TipoMovimentacao.ENTRADA_COMPRA,
       TipoMovimentacao.ENTRADA_DEVOLUCAO,
@@ -97,7 +102,7 @@ export class EstoqueService {
 
     const isSaida = !isEntrada;
 
-    await this.prisma.$transaction(async (tx) => {
+    const executar = async (tx: Prisma.TransactionClient) => {
       // 1. Busca ou cria saldo
       const saldoKey = {
         tenantId,
@@ -162,11 +167,15 @@ export class EstoqueService {
           pedidoId: dto.pedidoId,
           entradaId: dto.entradaId,
           nfeId: dto.nfeId,
+          transferenciaId: dto.transferenciaId,
           filialDestinoId: dto.filialDestinoId,
           observacoes: dto.observacoes,
         },
       });
-    });
+    };
+
+    if (txExterno) await executar(txExterno);
+    else await this.prisma.$transaction(executar);
 
     // 5. Emite evento para listeners (Event-Driven)
     this.events.emit(`estoque.${dto.tipo.toLowerCase()}`, {
@@ -249,39 +258,177 @@ export class EstoqueService {
     return alocacoes;
   }
 
-  /**
-   * Transferência entre filiais — gera saída na origem e entrada no destino
-   */
+  async listarTransferencias(tenantId: string, filtros?: { filialId?: string; status?: StatusTransferenciaEstoque }) {
+    return this.prisma.transferenciaEstoque.findMany({
+      where: {
+        tenantId,
+        ...(filtros?.status ? { status: filtros.status } : {}),
+        ...(filtros?.filialId ? { OR: [{ filialOrigemId: filtros.filialId }, { filialDestinoId: filtros.filialId }] } : {}),
+      },
+      include: {
+        filialOrigem: { select: { id: true, codigo: true, nome: true } },
+        filialDestino: { select: { id: true, codigo: true, nome: true } },
+        itens: { include: { produto: { select: { codigo: true, descricao: true, unidadeMedida: { select: { sigla: true } } } } } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+    });
+  }
+
+  async obterTransferencia(tenantId: string, id: string) {
+    const transferencia = await this.prisma.transferenciaEstoque.findFirst({
+      where: { id, tenantId },
+      include: {
+        filialOrigem: true, filialDestino: true,
+        itens: { include: { produto: { include: { unidadeMedida: true } } } },
+        movimentacoes: { orderBy: { dataMovimento: 'asc' } },
+      },
+    });
+    if (!transferencia) throw new NotFoundException('Transferência não encontrada.');
+    return transferencia;
+  }
+
+  async criarTransferencia(tenantId: string, usuarioId: string, dto: {
+    filialOrigemId: string; filialDestinoId: string; observacoes?: string;
+    itens: { produtoId: string; loteId?: string; localizacaoOrigemId?: string; quantidade: number }[];
+  }) {
+    if (dto.filialOrigemId === dto.filialDestinoId) throw new BadRequestException('A filial de destino deve ser diferente da origem.');
+    if (!dto.itens?.length) throw new BadRequestException('Inclua ao menos um produto na transferência.');
+    const chavesItens = dto.itens.map((i) => `${i.produtoId}:${i.loteId || ''}:${i.localizacaoOrigemId || ''}`);
+    if (new Set(chavesItens).size !== chavesItens.length) throw new BadRequestException('Há itens duplicados na transferência. Some as quantidades em uma única linha.');
+    const filiais = await this.prisma.filial.count({ where: { tenantId, id: { in: [dto.filialOrigemId, dto.filialDestinoId] }, ativo: true } });
+    if (filiais !== 2) throw new BadRequestException('Filial de origem ou destino inválida.');
+    if (dto.itens.some((i) => !i.produtoId || Number(i.quantidade) <= 0)) throw new BadRequestException('Todos os itens precisam de produto e quantidade positiva.');
+
+    const ids = [...new Set(dto.itens.map((i) => i.produtoId))];
+    const produtos = await this.prisma.produto.count({ where: { tenantId, id: { in: ids }, ativo: true } });
+    if (produtos !== ids.length) throw new BadRequestException('Há produto inválido ou inativo na transferência.');
+    const codigo = `TRF-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Date.now().toString().slice(-6)}`;
+    return this.prisma.transferenciaEstoque.create({
+      data: {
+        tenantId, codigo, filialOrigemId: dto.filialOrigemId, filialDestinoId: dto.filialDestinoId,
+        status: StatusTransferenciaEstoque.SOLICITADA, observacoes: dto.observacoes || null,
+        usuarioSolicitanteId: usuarioId, solicitadaEm: new Date(),
+        itens: { create: dto.itens.map((i) => ({
+          produtoId: i.produtoId, loteId: i.loteId || null, localizacaoOrigemId: i.localizacaoOrigemId || null,
+          quantidadeSolicitada: Number(i.quantidade),
+        })) },
+      },
+      include: { itens: { include: { produto: true } }, filialOrigem: true, filialDestino: true },
+    });
+  }
+
+  async aprovarTransferencia(tenantId: string, id: string, usuarioId: string) {
+    const t = await this.obterTransferencia(tenantId, id);
+    if (t.status !== StatusTransferenciaEstoque.SOLICITADA) throw new BadRequestException(`Transferência ${t.status} não pode ser aprovada.`);
+    return this.prisma.transferenciaEstoque.update({ where: { id }, data: { status: StatusTransferenciaEstoque.APROVADA, usuarioAprovadorId: usuarioId, aprovadaEm: new Date() } });
+  }
+
+  async despacharTransferencia(tenantId: string, id: string, usuarioId: string) {
+    const t = await this.obterTransferencia(tenantId, id);
+    if (t.status !== StatusTransferenciaEstoque.APROVADA) throw new BadRequestException('A transferência precisa estar aprovada para ser despachada.');
+
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of t.itens) {
+        const saldos = await tx.estoqueSaldo.aggregate({
+          where: { tenantId, filialId: t.filialOrigemId, produtoId: item.produtoId, loteId: item.loteId || undefined, localizacaoId: item.localizacaoOrigemId || undefined },
+          _sum: { quantidadeDisponivel: true },
+        });
+        const solicitado = Number(item.quantidadeSolicitada);
+        if (Number(saldos._sum.quantidadeDisponivel || 0) < solicitado) {
+          throw new BadRequestException(`Saldo insuficiente para ${item.produto.descricao}. Disponível: ${Number(saldos._sum.quantidadeDisponivel || 0)}.`);
+        }
+      }
+      for (const item of t.itens) {
+        const quantidade = Number(item.quantidadeSolicitada);
+        const saldos = await tx.estoqueSaldo.findMany({
+          where: { tenantId, filialId: t.filialOrigemId, produtoId: item.produtoId, loteId: item.loteId || undefined, localizacaoId: item.localizacaoOrigemId || undefined, quantidadeDisponivel: { gt: 0 } },
+          include: { lote: { select: { dataValidade: true } } },
+        });
+        saldos.sort((a, b) => (a.lote?.dataValidade?.getTime() || Number.MAX_SAFE_INTEGER) - (b.lote?.dataValidade?.getTime() || Number.MAX_SAFE_INTEGER));
+        let restante = quantidade;
+        let custoTotal = 0;
+        for (const saldo of saldos) {
+          const retirar = Math.min(restante, Number(saldo.quantidadeDisponivel));
+          if (retirar <= 0) continue;
+          await this.movimentar(tenantId, {
+            filialId: t.filialOrigemId, filialDestinoId: t.filialDestinoId, produtoId: item.produtoId,
+            loteId: saldo.loteId || undefined, localizacaoId: saldo.localizacaoId || undefined,
+            tipo: TipoMovimentacao.TRANSFERENCIA_SAIDA, quantidade: retirar, custoUnitario: Number(saldo.custoMedio), usuarioId, transferenciaId: t.id,
+            observacoes: `Despacho ${t.codigo}${t.observacoes ? ` — ${t.observacoes}` : ''}`,
+          }, tx);
+          restante -= retirar;
+          custoTotal += retirar * Number(saldo.custoMedio);
+          if (restante <= 0.0001) break;
+        }
+        if (restante > 0.0001) throw new BadRequestException(`Não foi possível alocar todo o saldo de ${item.produto.descricao}.`);
+        await tx.itemTransferenciaEstoque.update({ where: { id: item.id }, data: { quantidadeDespachada: quantidade, custoUnitario: quantidade > 0 ? custoTotal / quantidade : 0 } });
+      }
+      await tx.transferenciaEstoque.update({ where: { id }, data: { status: StatusTransferenciaEstoque.EM_TRANSITO, usuarioDespachoId: usuarioId, despachadaEm: new Date() } });
+    });
+    this.events.emit('estoque.transferencia.despachada', { tenantId, transferenciaId: id, usuarioId });
+    return this.obterTransferencia(tenantId, id);
+  }
+
+  async receberTransferencia(tenantId: string, id: string, usuarioId: string, recebimentos: { itemId: string; quantidadeRecebida: number; observacaoDivergencia?: string }[]) {
+    const t = await this.obterTransferencia(tenantId, id);
+    if (t.status !== StatusTransferenciaEstoque.EM_TRANSITO) throw new BadRequestException('Apenas transferências em trânsito podem ser recebidas.');
+    const porId = new Map(recebimentos.map((r) => [r.itemId, r]));
+    if (porId.size !== t.itens.length) throw new BadRequestException('Informe o recebimento de todos os itens, inclusive quantidade zero em caso de falta total.');
+    let divergente = false;
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of t.itens) {
+        const r = porId.get(item.id);
+        if (!r) throw new BadRequestException(`Recebimento ausente para ${item.produto.descricao}.`);
+        const recebida = Number(r.quantidadeRecebida);
+        const despachada = Number(item.quantidadeDespachada);
+        if (recebida < 0 || recebida > despachada) throw new BadRequestException(`Quantidade recebida inválida para ${item.produto.descricao}.`);
+        if (Math.abs(recebida - despachada) > 0.0001) divergente = true;
+        if (recebida > 0) {
+          const saidas = t.movimentacoes.filter((m: any) => m.produtoId === item.produtoId && m.tipo === TipoMovimentacao.TRANSFERENCIA_SAIDA && (!item.loteId || m.loteId === item.loteId));
+          let restante = recebida;
+          for (const saida of saidas) {
+            const entrar = Math.min(restante, Number(saida.quantidade));
+            if (entrar <= 0) continue;
+            await this.movimentar(tenantId, {
+              filialId: t.filialDestinoId, produtoId: item.produtoId, loteId: saida.loteId || undefined,
+              tipo: TipoMovimentacao.TRANSFERENCIA_ENTRADA, quantidade: entrar, custoUnitario: Number(saida.custoUnitario),
+              usuarioId, transferenciaId: t.id, observacoes: `Recebimento ${t.codigo}`,
+            }, tx);
+            restante -= entrar;
+            if (restante <= 0.0001) break;
+          }
+        }
+        await tx.itemTransferenciaEstoque.update({ where: { id: item.id }, data: { quantidadeRecebida: recebida, observacaoDivergencia: r.observacaoDivergencia || null } });
+      }
+      await tx.transferenciaEstoque.update({ where: { id }, data: {
+        status: divergente ? StatusTransferenciaEstoque.RECEBIDA_COM_DIVERGENCIA : StatusTransferenciaEstoque.RECEBIDA,
+        usuarioRecebimentoId: usuarioId, recebidaEm: new Date(),
+      } });
+    });
+    this.events.emit('estoque.transferencia.recebida', { tenantId, transferenciaId: id, divergente, usuarioId });
+    return this.obterTransferencia(tenantId, id);
+  }
+
+  async cancelarTransferencia(tenantId: string, id: string, usuarioId: string, motivo: string) {
+    const t = await this.obterTransferencia(tenantId, id);
+    if (![StatusTransferenciaEstoque.SOLICITADA, StatusTransferenciaEstoque.APROVADA, StatusTransferenciaEstoque.RASCUNHO].includes(t.status as any)) {
+      throw new BadRequestException('Transferência despachada não pode ser cancelada; registre o recebimento e uma devolução física.');
+    }
+    if (!motivo?.trim()) throw new BadRequestException('Informe o motivo do cancelamento.');
+    return this.prisma.transferenciaEstoque.update({ where: { id }, data: { status: StatusTransferenciaEstoque.CANCELADA, motivoCancelamento: motivo.trim(), canceladaEm: new Date() } });
+  }
+
+  /** Compatibilidade com o endpoint antigo: cria e conclui uma transferência unitária. */
   async transferir(tenantId: string, dto: {
     filialOrigemId: string; filialDestinoId: string;
     produtoId: string; loteId?: string; localizacaoOrigemId?: string;
     quantidade: number; usuarioId: string; observacoes?: string;
   }) {
-    // Saída da origem
-    await this.movimentar(tenantId, {
-      filialId: dto.filialOrigemId,
-      filialDestinoId: dto.filialDestinoId,
-      produtoId: dto.produtoId,
-      loteId: dto.loteId,
-      localizacaoId: dto.localizacaoOrigemId,
-      tipo: TipoMovimentacao.TRANSFERENCIA_SAIDA,
-      quantidade: dto.quantidade,
-      usuarioId: dto.usuarioId,
-      observacoes: dto.observacoes,
-    });
-
-    // Entrada no destino
-    await this.movimentar(tenantId, {
-      filialId: dto.filialDestinoId,
-      produtoId: dto.produtoId,
-      loteId: dto.loteId,
-      tipo: TipoMovimentacao.TRANSFERENCIA_ENTRADA,
-      quantidade: dto.quantidade,
-      usuarioId: dto.usuarioId,
-      observacoes: dto.observacoes,
-    });
-
-    this.events.emit('estoque.transferencia', { tenantId, ...dto, timestamp: new Date() });
+    const criada = await this.criarTransferencia(tenantId, dto.usuarioId, { ...dto, itens: [{ produtoId: dto.produtoId, loteId: dto.loteId, localizacaoOrigemId: dto.localizacaoOrigemId, quantidade: dto.quantidade }] });
+    await this.aprovarTransferencia(tenantId, criada.id, dto.usuarioId);
+    const despachada = await this.despacharTransferencia(tenantId, criada.id, dto.usuarioId);
+    return this.receberTransferencia(tenantId, criada.id, dto.usuarioId, despachada.itens.map((i) => ({ itemId: i.id, quantidadeRecebida: Number(i.quantidadeDespachada) })));
   }
 
   /**

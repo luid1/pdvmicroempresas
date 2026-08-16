@@ -35,6 +35,7 @@ export default function AppShell() {
     try { return localStorage.getItem('lumin_sidebar_collapsed') === '1'; } catch { return false; }
   });
   const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [pastasAbertas, setPastasAbertas] = useState<Set<string>>(() => new Set());
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -144,12 +145,25 @@ export default function AppShell() {
                   //     das suas páginas está aberta.
                   if (pasta) {
                     const ativo = submenu?.some((s) => location.pathname === s.key) ?? false;
+                    const aberta = ativo || pastasAbertas.has(to);
                     return (
-                      <div key={to} onMouseEnter={(e) => abrirFlyout(e, item)} onMouseLeave={agendarFecho}>
+                      <div key={to} onMouseEnter={(e) => collapsed && abrirFlyout(e, item)} onMouseLeave={() => collapsed && agendarFecho()}>
                         <button
                           type="button"
                           title={collapsed ? label : undefined}
-                          onClick={() => { const first = submenu?.[0]?.key; if (first) navigate(first); }}
+                          aria-expanded={aberta}
+                          onClick={() => {
+                            if (collapsed) {
+                              const first = submenu?.[0]?.key;
+                              if (first) navigate(first);
+                              return;
+                            }
+                            setPastasAbertas((atuais) => {
+                              const proximas = new Set(atuais);
+                              proximas.has(to) ? proximas.delete(to) : proximas.add(to);
+                              return proximas;
+                            });
+                          }}
                           className={`
                             w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-[11px] font-medium
                             transition-all duration-300 ease-in-out group relative active:scale-[0.98]
@@ -162,7 +176,7 @@ export default function AppShell() {
                           {ativo && !collapsed && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-full bg-[#13A184] shadow-[0_0_8px_rgba(19,161,132,0.7)]" />}
                           <Icon className={`h-3.5 w-3.5 shrink-0 transition-colors duration-300 ${ativo ? 'text-[#13A184]' : 'text-[#6B6E82] group-hover:text-[#C7C9D4]'}`} />
                           {!collapsed && <span className="truncate">{label}</span>}
-                          {!collapsed && <ChevronRight className="ml-auto h-3 w-3 shrink-0 text-[#5B5E70] group-hover:text-[#C7C9D4] transition-colors duration-200" />}
+                          {!collapsed && <ChevronRight className={`ml-auto h-3 w-3 shrink-0 text-[#5B5E70] group-hover:text-[#C7C9D4] transition-transform duration-200 ${aberta ? 'rotate-90' : ''}`} />}
                           {collapsed && <span className="absolute right-0.5 top-1 h-1 w-1 rounded-full bg-[#13A184]/70" />}
                           {collapsed && (
                             <span className="absolute left-full ml-2 px-2.5 py-1.5 bg-[#20232F] border border-white/[0.08] text-[#C7C9D4] text-xs rounded-lg shadow-2xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-50 transition-opacity duration-200">
@@ -170,6 +184,27 @@ export default function AppShell() {
                             </span>
                           )}
                         </button>
+                        {!collapsed && aberta && (
+                          <div className="ml-3.5 mt-1 mb-1 border-l border-white/[0.08] pl-2 space-y-0.5">
+                            {submenu?.map((s) => {
+                              const SubIcon = s.icon || Circle;
+                              return (
+                                <NavLink
+                                  key={s.key}
+                                  to={s.key}
+                                  onClick={() => setMobileOpen(false)}
+                                  className={({ isActive }) => `flex items-start gap-2 rounded-lg px-2 py-1.5 text-[10.5px] transition-colors ${isActive ? 'bg-[#13A184]/[0.14] text-[#39C5A5]' : 'text-[#8F93A3] hover:bg-white/[0.05] hover:text-white'}`}
+                                >
+                                  <SubIcon className="h-3 w-3 mt-0.5 shrink-0" />
+                                  <span className="min-w-0">
+                                    <span className="block font-medium leading-4">{s.label}</span>
+                                    {s.hint && <span className="block text-[9px] leading-3 text-[#666A7B]">{s.hint}</span>}
+                                  </span>
+                                </NavLink>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
                     );
                   }

@@ -14,6 +14,10 @@ export class ProdutosService {
             { descricao: { contains: q, mode: 'insensitive' as any } },
             { codigo: { contains: q, mode: 'insensitive' as any } },
             { codigoBarras: { contains: q } },
+            { codigoBarrasSecun: { contains: q } },
+            { codigoBarrasCaixa: { contains: q } },
+            { skuFornecedor: { contains: q, mode: 'insensitive' as any } },
+            { referencia: { contains: q, mode: 'insensitive' as any } },
           ],
         }),
       },
@@ -60,23 +64,64 @@ export class ProdutosService {
     const codigo = dto.codigo || `P${Date.now().toString().slice(-6)}`;
     const exists = await this.prisma.produto.findFirst({ where: { tenantId, codigo } });
     if (exists) throw new ConflictException('Já existe produto com este código.');
+    await this.validarCodigosBarras(tenantId, dto);
 
     return this.prisma.produto.create({
       data: {
         tenantId,
         codigo,
         codigoBarras: dto.codigoBarras || null,
+        codigoBarrasSecun: dto.codigoBarrasSecun || null,
+        codigoBarrasCaixa: dto.codigoBarrasCaixa || null,
+        gtinTributavel: dto.gtinTributavel || null,
+        skuFornecedor: dto.skuFornecedor || null,
+        referencia: dto.referencia || null,
+        fabricante: dto.fabricante || null,
         descricao: dto.descricao,
+        descricaoCompleta: dto.descricaoCompleta || null,
+        descricaoFiscal: dto.descricaoFiscal || null,
         ncm: dto.ncm || '00000000',
+        cest: dto.cest || null,
+        exTipi: dto.exTipi || null,
+        codigoBeneficioFiscal: dto.codigoBeneficioFiscal || null,
+        generoItem: dto.generoItem || null,
         cfop: dto.cfop || null,
         categoria: dto.categoria || null,
         grupo: dto.grupo || null,
+        subgrupo: dto.subgrupo || null,
         marca: dto.marca || null,
         classificacao: dto.classificacao || null,
         tipoCaixaria: dto.tipoCaixaria || null,
         pesoCaixaria: num(dto.pesoCaixaria),
         pesoLiquido: num(dto.pesoLiquido),
+        pesoBruto: num(dto.pesoBruto),
+        alturaCm: num(dto.alturaCm),
+        larguraCm: num(dto.larguraCm),
+        comprimentoCm: num(dto.comprimentoCm),
+        quantidadeEmbalagem: num(dto.quantidadeEmbalagem) ?? 1,
+        multiploCompra: num(dto.multiploCompra) ?? 1,
+        precoCompra: num(dto.precoCompra) ?? 0,
         precoVenda: num(dto.precoVenda) ?? 0,
+        estoqueMinimo: num(dto.estoqueMinimo) ?? 0,
+        estoqueMaximo: num(dto.estoqueMaximo),
+        estoqueSeguranca: num(dto.estoqueSeguranca) ?? 0,
+        pontoReposicao: num(dto.pontoReposicao) ?? 0,
+        leadTimeDias: Number(dto.leadTimeDias || 0),
+        localizacaoPadrao: dto.localizacaoPadrao || null,
+        requerLote: Boolean(dto.requerLote),
+        requerValidade: Boolean(dto.requerValidade),
+        vendidoPorPeso: Boolean(dto.vendidoPorPeso),
+        cstIcms: dto.cstIcms || null,
+        cstPis: dto.cstPis || null,
+        cstCofins: dto.cstCofins || null,
+        aliquotaIcms: num(dto.aliquotaIcms) ?? 0,
+        aliquotaPis: num(dto.aliquotaPis) ?? 0,
+        aliquotaCofins: num(dto.aliquotaCofins) ?? 0,
+        cstIbsCbs: dto.cstIbsCbs || null,
+        classTribIbsCbs: dto.classTribIbsCbs || null,
+        aliquotaIbsUf: num(dto.aliquotaIbsUf) ?? 0,
+        aliquotaIbsMun: num(dto.aliquotaIbsMun) ?? 0,
+        aliquotaCbs: num(dto.aliquotaCbs) ?? 0,
         unidadeMedidaId: unidade.id,
       },
       include: { unidadeMedida: { select: { sigla: true } } },
@@ -93,6 +138,7 @@ export class ProdutosService {
   async update(tenantId: string, id: string, dto: any) {
     const p = await this.prisma.produto.findFirst({ where: { id, tenantId } });
     if (!p) throw new NotFoundException('Produto não encontrado.');
+    await this.validarCodigosBarras(tenantId, dto, id);
     const num = (v: any) => (v === '' || v === null || v === undefined ? undefined : Number(v));
 
     // Se veio composição de custo, recalcula o precoCusto (custo real com absorção da perda).
@@ -113,17 +159,56 @@ export class ProdutosService {
         descricao: dto.descricao ?? undefined,
         codigo: dto.codigo ?? undefined,
         codigoBarras: dto.codigoBarras ?? undefined,
+        codigoBarrasSecun: dto.codigoBarrasSecun ?? undefined,
+        codigoBarrasCaixa: dto.codigoBarrasCaixa ?? undefined,
+        gtinTributavel: dto.gtinTributavel ?? undefined,
+        skuFornecedor: dto.skuFornecedor ?? undefined,
+        referencia: dto.referencia ?? undefined,
+        fabricante: dto.fabricante ?? undefined,
+        descricaoCompleta: dto.descricaoCompleta ?? undefined,
+        descricaoFiscal: dto.descricaoFiscal ?? undefined,
         ncm: dto.ncm ?? undefined,
+        cest: dto.cest ?? undefined,
+        exTipi: dto.exTipi ?? undefined,
+        codigoBeneficioFiscal: dto.codigoBeneficioFiscal ?? undefined,
+        generoItem: dto.generoItem ?? undefined,
         cfop: dto.cfop ?? undefined,
         categoria: dto.categoria ?? undefined,
         grupo: dto.grupo ?? undefined,
+        subgrupo: dto.subgrupo ?? undefined,
         marca: dto.marca ?? undefined,
         classificacao: dto.classificacao ?? undefined,
         tipoCaixaria: dto.tipoCaixaria ?? undefined,
         pesoCaixaria: num(dto.pesoCaixaria),
         pesoLiquido: num(dto.pesoLiquido),
         pesoBruto: num(dto.pesoBruto),
+        alturaCm: num(dto.alturaCm),
+        larguraCm: num(dto.larguraCm),
+        comprimentoCm: num(dto.comprimentoCm),
+        quantidadeEmbalagem: num(dto.quantidadeEmbalagem),
+        multiploCompra: num(dto.multiploCompra),
+        precoCompra: num(dto.precoCompra),
         precoVenda: num(dto.precoVenda),
+        estoqueMinimo: num(dto.estoqueMinimo),
+        estoqueMaximo: dto.estoqueMaximo === null ? null : num(dto.estoqueMaximo),
+        estoqueSeguranca: num(dto.estoqueSeguranca),
+        pontoReposicao: num(dto.pontoReposicao),
+        leadTimeDias: dto.leadTimeDias ?? undefined,
+        localizacaoPadrao: dto.localizacaoPadrao ?? undefined,
+        requerLote: dto.requerLote ?? undefined,
+        requerValidade: dto.requerValidade ?? undefined,
+        vendidoPorPeso: dto.vendidoPorPeso ?? undefined,
+        cstIcms: dto.cstIcms ?? undefined,
+        cstPis: dto.cstPis ?? undefined,
+        cstCofins: dto.cstCofins ?? undefined,
+        aliquotaIcms: num(dto.aliquotaIcms),
+        aliquotaPis: num(dto.aliquotaPis),
+        aliquotaCofins: num(dto.aliquotaCofins),
+        cstIbsCbs: dto.cstIbsCbs ?? undefined,
+        classTribIbsCbs: dto.classTribIbsCbs ?? undefined,
+        aliquotaIbsUf: num(dto.aliquotaIbsUf),
+        aliquotaIbsMun: num(dto.aliquotaIbsMun),
+        aliquotaCbs: num(dto.aliquotaCbs),
         precoCusto: precoCustoCalc,
         // Composição analítica do custo
         custoBase: num(dto.custoBase),
@@ -151,6 +236,9 @@ export class ProdutosService {
             { descricao: { contains: q, mode: 'insensitive' as any } },
             { codigo: { contains: q, mode: 'insensitive' as any } },
             { codigoBarras: { contains: q } },
+            { codigoBarrasSecun: { contains: q } },
+            { codigoBarrasCaixa: { contains: q } },
+            { skuFornecedor: { contains: q, mode: 'insensitive' as any } },
           ],
         }),
       },
@@ -181,5 +269,28 @@ export class ProdutosService {
         estoqueDisponivel: disponivel,
       };
     });
+  }
+
+  /** Impede que um leitor de código de barras encontre dois produtos diferentes. */
+  private async validarCodigosBarras(tenantId: string, dto: any, ignorarId?: string) {
+    const codigos = [dto.codigoBarras, dto.codigoBarrasSecun, dto.codigoBarrasCaixa, dto.gtinTributavel]
+      .filter((v) => typeof v === 'string' && v.trim())
+      .map((v: string) => v.replace(/\s/g, ''));
+    if (new Set(codigos).size !== codigos.length) {
+      throw new ConflictException('Os códigos de barras do produto devem ser diferentes entre si.');
+    }
+    if (!codigos.length) return;
+    const conflito = await this.prisma.produto.findFirst({
+      where: {
+        tenantId,
+        ...(ignorarId ? { id: { not: ignorarId } } : {}),
+        OR: codigos.flatMap((codigo) => [
+          { codigoBarras: codigo }, { codigoBarrasSecun: codigo },
+          { codigoBarrasCaixa: codigo }, { gtinTributavel: codigo },
+        ]),
+      },
+      select: { codigo: true, descricao: true },
+    });
+    if (conflito) throw new ConflictException(`Código de barras já usado no produto ${conflito.codigo} — ${conflito.descricao}.`);
   }
 }

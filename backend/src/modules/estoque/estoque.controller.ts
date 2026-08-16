@@ -2,7 +2,8 @@ import { Controller, Get, Post, Body, Param, Query, UseGuards } from '@nestjs/co
 import { ApiBearerAuth, ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { EstoqueService } from './estoque.service';
 import { CurrentTenant, CurrentUser, Modulo } from '../../common/decorators/context.decorator';
-import { AjusteEstoqueDto, TransferenciaEstoqueDto, RegistrarLoteDto } from './dto/estoque.dto';
+import { AjusteEstoqueDto, TransferenciaEstoqueDto, RegistrarLoteDto, NovaTransferenciaDto, ReceberTransferenciaDto, CancelarTransferenciaDto } from './dto/estoque.dto';
+import { StatusTransferenciaEstoque } from '@prisma/client';
 import { PermissoesGuard } from '../../common/guards/permissoes.guard';
 import { RequirePermissao } from '../../common/decorators/permissoes.decorator';
 
@@ -13,6 +14,53 @@ import { RequirePermissao } from '../../common/decorators/permissoes.decorator';
 @Controller('estoque')
 export class EstoqueController {
   constructor(private service: EstoqueService) {}
+
+  @Get('transferencias')
+  @ApiOperation({ summary: 'Lista documentos de transferência entre filiais' })
+  transferencias(
+    @CurrentTenant() tenantId: string,
+    @Query('filialId') filialId?: string,
+    @Query('status') status?: StatusTransferenciaEstoque,
+  ) {
+    return this.service.listarTransferencias(tenantId, { filialId, status });
+  }
+
+  @Get('transferencias/:id')
+  @ApiOperation({ summary: 'Detalhe e rastreabilidade de uma transferência' })
+  transferencia(@CurrentTenant() tenantId: string, @Param('id') id: string) {
+    return this.service.obterTransferencia(tenantId, id);
+  }
+
+  @Post('transferencias')
+  @RequirePermissao('ESTOQUE:CREATE')
+  @ApiOperation({ summary: 'Solicita transferência de um ou mais produtos' })
+  criarTransferencia(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Body() body: NovaTransferenciaDto) {
+    return this.service.criarTransferencia(tenantId, user.id, body);
+  }
+
+  @Post('transferencias/:id/aprovar')
+  @RequirePermissao('ESTOQUE:UPDATE')
+  aprovarTransferencia(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Param('id') id: string) {
+    return this.service.aprovarTransferencia(tenantId, id, user.id);
+  }
+
+  @Post('transferencias/:id/despachar')
+  @RequirePermissao('ESTOQUE:UPDATE')
+  despacharTransferencia(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Param('id') id: string) {
+    return this.service.despacharTransferencia(tenantId, id, user.id);
+  }
+
+  @Post('transferencias/:id/receber')
+  @RequirePermissao('ESTOQUE:UPDATE')
+  receberTransferencia(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Param('id') id: string, @Body() body: ReceberTransferenciaDto) {
+    return this.service.receberTransferencia(tenantId, id, user.id, body.itens);
+  }
+
+  @Post('transferencias/:id/cancelar')
+  @RequirePermissao('ESTOQUE:UPDATE')
+  cancelarTransferencia(@CurrentTenant() tenantId: string, @CurrentUser() user: any, @Param('id') id: string, @Body() body: CancelarTransferenciaDto) {
+    return this.service.cancelarTransferencia(tenantId, id, user.id, body.motivo);
+  }
 
   @Get(':filialId/saldo')
   @ApiOperation({ summary: 'Posição de estoque da filial (posição completa)' })

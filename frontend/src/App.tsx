@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import PosicaoEstoque from './modules/estoque/pages/PosicaoEstoque';
 import AnaliseEstoqueFisico from './modules/estoque/pages/AnaliseEstoqueFisico';
+import Transferencias from './modules/estoque/pages/Transferencias';
 import Clientes from './modules/cadastros/pages/Clientes';
 import Custos from './modules/financeiro/pages/Custos';
 import ContasReceber from './modules/financeiro/pages/ContasReceber';
@@ -37,6 +38,7 @@ import NotasEmitidas from './modules/fiscal/pages/NotasEmitidas';
 import MatrizFiscal from './modules/fiscal/pages/MatrizFiscal';
 import PainelFaturamento from './modules/fiscal/pages/PainelFaturamento';
 import GestaoFiscal from './modules/fiscal/pages/GestaoFiscal';
+import FiscalConfiguracao from './modules/fiscal/pages/FiscalConfiguracao';
 import Pdv from './modules/pdv/pages/Pdv';
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -78,6 +80,7 @@ export default function App() {
             <Route path="wms/devolucoes-compra" element={<DevolucoesCompra />} />
             <Route path="compras/app" element={<AppComprador />} />
             <Route path="wms/analise-estoque" element={<AnaliseEstoqueFisico />} />
+            <Route path="wms/transferencias" element={<Transferencias />} />
 
             {/* Fiscal */}
             <Route path="fiscal/nfe" element={<NotasEmitidas />} />
@@ -85,6 +88,7 @@ export default function App() {
             <Route path="fiscal/painel" element={<PainelFaturamento />} />
             <Route path="fiscal/matriz" element={<MatrizFiscal />} />
             <Route path="fiscal/gestao" element={<GestaoFiscal />} />
+            <Route path="fiscal/configuracao" element={<FiscalConfiguracao />} />
 
             {/* Financeiro */}
             <Route path="financeiro/fluxo-caixa" element={<FluxoCaixa />} />

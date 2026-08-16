@@ -47,6 +47,13 @@ export interface CartaCorrecaoResultado {
   simulacao: boolean;
 }
 
+export interface InutilizacaoResultado {
+  protocolo?: string;
+  xml: string;
+  status: string;
+  simulacao: boolean;
+}
+
 export interface NfeProvider {
   /** Nome curto do provider (mock/focus/sefaz) — para logs e auditoria. */
   readonly nome: string;
@@ -64,6 +71,9 @@ export interface NfeProvider {
 
   /** Registra uma Carta de Correção Eletrônica. */
   cartaCorrecao(chaveAcesso: string, sequencia: number, texto: string, nfe?: any): Promise<CartaCorrecaoResultado>;
+
+  /** Inutiliza uma faixa de numeração não utilizada. */
+  inutilizar?(dados: { cnpj: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }): Promise<InutilizacaoResultado>;
 }
 
 export const NFE_PROVIDER = Symbol('NFE_PROVIDER');
