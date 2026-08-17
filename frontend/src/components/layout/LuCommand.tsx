@@ -203,7 +203,7 @@ export default function LuCommand() {
         <form
           onSubmit={enviarDaBarra}
           aria-label="Conversar com a Lu"
-          className="fixed bottom-4 left-1/2 z-[60] flex w-[min(92vw,430px)] -translate-x-1/2 items-center gap-2 rounded-2xl border border-[#D9E4E1] bg-white/95 p-2 shadow-[0_16px_48px_rgba(22,23,29,0.18)] backdrop-blur-xl lg:left-auto lg:right-6 lg:translate-x-0"
+          className="fixed bottom-3 left-1/2 z-[60] flex w-[min(calc(100vw-1.5rem),480px)] -translate-x-1/2 items-center gap-2 rounded-[22px] border border-[#D9E4E1] bg-white/95 p-2 shadow-[0_16px_48px_rgba(22,23,29,0.18)] backdrop-blur-xl sm:bottom-4"
         >
           <button
             type="button"

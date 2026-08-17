@@ -622,25 +622,13 @@ export class NFeService {
     });
   }
 
-  configuracaoFiscal() {
-    const ambiente = (process.env.NFE_AMBIENTE || 'homologacao').toLowerCase();
-    return {
-      provider: this.nfeProvider.nome,
-      simulacao: this.nfeProvider.simulacao,
-      ambiente,
-      tokenConfigurado: Boolean(process.env.FOCUS_NFE_TOKEN),
-      prontoParaTransmitir: !this.nfeProvider.simulacao && Boolean(process.env.FOCUS_NFE_TOKEN),
-      aviso: ambiente === 'producao' ? 'Emissões possuem validade fiscal.' : 'Ambiente sem validade fiscal.',
-    };
-  }
-
   async inutilizarNumeracao(tenantId: string, usuarioId: string, dto: { filialId: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }) {
     if (!this.nfeProvider.inutilizar) throw new BadRequestException('O provedor fiscal selecionado não oferece inutilização.');
     if (!dto.justificativa || dto.justificativa.trim().length < 15) throw new BadRequestException('A justificativa deve ter ao menos 15 caracteres.');
     if (dto.numeroInicial <= 0 || dto.numeroFinal < dto.numeroInicial) throw new BadRequestException('Faixa de numeração inválida.');
     const filial = await this.prisma.filial.findFirst({ where: { id: dto.filialId, tenantId, ativo: true } });
     if (!filial?.cnpj) throw new BadRequestException('Filial sem CNPJ configurado.');
-    const resultado = await this.nfeProvider.inutilizar({ cnpj: filial.cnpj, serie: dto.serie, numeroInicial: dto.numeroInicial, numeroFinal: dto.numeroFinal, justificativa: dto.justificativa.trim(), modelo: dto.modelo || '55' });
+    const resultado = await this.nfeProvider.inutilizar({ tenantId, filialId: dto.filialId, cnpj: filial.cnpj, serie: dto.serie, numeroInicial: dto.numeroInicial, numeroFinal: dto.numeroFinal, justificativa: dto.justificativa.trim(), modelo: dto.modelo || '55' });
     await this.prisma.auditLog.create({ data: { tenantId, usuarioId, modulo: 'NFE', acao: 'INUTILIZAR', entidade: 'NFe', entidadeId: `${dto.modelo || '55'}:${dto.serie}:${dto.numeroInicial}-${dto.numeroFinal}`, dadosDepois: { ...dto, protocolo: resultado.protocolo, status: resultado.status } } });
     return resultado;
   }

@@ -12,7 +12,7 @@ const notaBase = {
 };
 
 test('payload Focus inclui identificação, pagamentos, GTIN e IBS/CBS de 2026', () => {
-  const provider = new RealNfeProvider();
+  const provider = new RealNfeProvider({} as any);
   const payload = (provider as any).montarPayload(notaBase, false);
   assert.equal(payload.cnpj_emitente, '12345678000190');
   assert.equal(payload.formas_pagamento[0].forma_pagamento, '17');
@@ -23,7 +23,7 @@ test('payload Focus inclui identificação, pagamentos, GTIN e IBS/CBS de 2026',
 });
 
 test('regime regular bloqueia produto sem CST IBS/CBS e cClassTrib', () => {
-  const provider = new RealNfeProvider();
+  const provider = new RealNfeProvider({} as any);
   const semClassificacao = structuredClone(notaBase);
   delete (semClassificacao.itens[0].produto as any).cstIbsCbs;
   assert.throws(() => (provider as any).montarPayload(semClassificacao, false), /sem CST IBS\/CBS ou cClassTrib/);

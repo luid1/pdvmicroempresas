@@ -1,19 +1,41 @@
-import { Controller, Get, Post, Body, Param, Query, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Patch, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { NFeService } from './nfe.service';
 import { GerarNfeDto } from './dto/gerar-nfe.dto';
 import { CurrentTenant, CurrentUser, Modulo } from '../../common/decorators/context.decorator';
+import { ConfiguracaoFiscalService } from './configuracao-fiscal.service';
+import { SalvarConfiguracaoFiscalDto } from './dto/configuracao-fiscal.dto';
 
 @ApiTags('NF-e')
 @ApiBearerAuth()
 @Modulo('NFE')
 @Controller('nfe')
 export class NFeController {
-  constructor(private service: NFeService) {}
+  constructor(private service: NFeService, private configuracaoFiscalService: ConfiguracaoFiscalService) {}
 
   @Get('configuracao/status')
   @ApiOperation({ summary: 'Diagnóstico seguro do provedor e ambiente fiscal' })
-  configuracao() { return this.service.configuracaoFiscal(); }
+  configuracao(@CurrentTenant() tenantId: string, @Query('filialId') filialId?: string) {
+    return this.configuracaoFiscalService.diagnostico(tenantId, filialId);
+  }
+
+  @Get('configuracao/:filialId')
+  @ApiOperation({ summary: 'Obtém a configuração fiscal segura de uma filial' })
+  obterConfiguracao(@CurrentTenant() tenantId: string, @Param('filialId') filialId: string) {
+    return this.configuracaoFiscalService.obter(tenantId, filialId);
+  }
+
+  @Put('configuracao/:filialId')
+  @ApiOperation({ summary: 'Salva provedor, ambiente e credenciais cifradas da filial' })
+  salvarConfiguracao(@CurrentTenant() tenantId: string, @Param('filialId') filialId: string, @Body() body: SalvarConfiguracaoFiscalDto) {
+    return this.configuracaoFiscalService.salvar(tenantId, filialId, body);
+  }
+
+  @Post('configuracao/:filialId/validar')
+  @ApiOperation({ summary: 'Valida os requisitos mínimos para homologação fiscal' })
+  validarConfiguracao(@CurrentTenant() tenantId: string, @Param('filialId') filialId: string) {
+    return this.configuracaoFiscalService.validar(tenantId, filialId);
+  }
 
   @Post('inutilizacao')
   @ApiOperation({ summary: 'Inutiliza uma faixa de numeração NF-e/NFC-e na SEFAZ' })

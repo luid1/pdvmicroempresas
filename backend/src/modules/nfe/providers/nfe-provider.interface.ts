@@ -73,7 +73,7 @@ export interface NfeProvider {
   cartaCorrecao(chaveAcesso: string, sequencia: number, texto: string, nfe?: any): Promise<CartaCorrecaoResultado>;
 
   /** Inutiliza uma faixa de numeração não utilizada. */
-  inutilizar?(dados: { cnpj: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }): Promise<InutilizacaoResultado>;
+  inutilizar?(dados: { tenantId?: string; filialId?: string; cnpj: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }): Promise<InutilizacaoResultado>;
 }
 
 export const NFE_PROVIDER = Symbol('NFE_PROVIDER');

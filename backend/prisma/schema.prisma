@@ -167,20 +167,21 @@ model Tenant {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  filiais        Filial[]
-  users          Usuario[]
-  clientes       Cliente[]
-  fornecedores   Fornecedor[]
-  produtos       Produto[]
-  pedidos        Pedido[]
-  nfes           NFe[]
-  movimentacoes  MovimentacaoEstoque[]
-  auditLogs      AuditLog[]
-  planoContas    PlanoContas[]
-  roles          Role[]
-  certificados   CertificadoDigital[]
-  transferencias TransferenciaEstoque[]
-  assinatura     Assinatura?
+  filiais              Filial[]
+  users                Usuario[]
+  clientes             Cliente[]
+  fornecedores         Fornecedor[]
+  produtos             Produto[]
+  pedidos              Pedido[]
+  nfes                 NFe[]
+  movimentacoes        MovimentacaoEstoque[]
+  auditLogs            AuditLog[]
+  planoContas          PlanoContas[]
+  roles                Role[]
+  certificados         CertificadoDigital[]
+  configuracoesFiscais ConfiguracaoFiscal[]
+  transferencias       TransferenciaEstoque[]
+  assinatura           Assinatura?
 
   @@index([cnpj])
 }
@@ -275,11 +276,38 @@ model Filial {
   inventarios           Inventario[]
   usuarios              UsuarioFilial[]
   certificados          CertificadoDigital[]
+  configuracaoFiscal    ConfiguracaoFiscal?
   transferenciasOrigem  TransferenciaEstoque[] @relation("TransferenciaOrigem")
   transferenciasDestino TransferenciaEstoque[] @relation("TransferenciaDestino")
 
   @@unique([tenantId, codigo])
   @@index([tenantId])
+}
+
+model ConfiguracaoFiscal {
+  id                 String    @id @default(uuid())
+  tenantId           String
+  tenant             Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  filialId           String    @unique
+  filial             Filial    @relation(fields: [filialId], references: [id], onDelete: Cascade)
+  provedor           String    @default("FOCUS_NFE") // FOCUS_NFE | BUGGY | OUTRO
+  ambiente           String    @default("HOMOLOGACAO") // HOMOLOGACAO | PRODUCAO
+  ativo              Boolean   @default(false)
+  baseUrl            String?
+  tokenCriptografado String?   @db.Text
+  cscId              String?
+  cscCriptografado   String?   @db.Text
+  serieNfe           String    @default("1")
+  serieNfce          String    @default("1")
+  statusConexao      String    @default("PENDENTE")
+  mensagemStatus     String?
+  ultimoTesteEm      DateTime?
+  configPublica      Json?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([tenantId, filialId])
+  @@index([tenantId, ativo])
 }
 
 // ─────────────────────────────────────────

@@ -4,8 +4,10 @@ import {
   CancelamentoResultado, CartaCorrecaoResultado,
   InutilizacaoResultado,
 } from './nfe-provider.interface';
+import { ConfiguracaoFiscalService } from '../configuracao-fiscal.service';
 
 type Documento = 'nfe' | 'nfce';
+type ContextoFiscal = { token: string; ambiente: string; baseUrl: string; origem: string };
 
 /** Integração real com o gateway Focus NFe, que assina e comunica com a SEFAZ. */
 @Injectable()
@@ -13,14 +15,11 @@ export class RealNfeProvider implements NfeProvider {
   readonly nome = 'focus';
   readonly simulacao = false;
   private readonly logger = new Logger(RealNfeProvider.name);
-  private readonly token = process.env.FOCUS_NFE_TOKEN || '';
-  private readonly ambiente = (process.env.NFE_AMBIENTE || 'homologacao').toLowerCase();
-  private readonly baseUrl = (process.env.FOCUS_NFE_URL ||
-    (this.ambiente === 'producao' ? 'https://api.focusnfe.com.br' : 'https://homologacao.focusnfe.com.br')).replace(/\/$/, '');
+  constructor(private configuracaoFiscal: ConfiguracaoFiscalService) {}
 
-  private validarConfiguracao() {
-    if (!this.token) throw new BadRequestException('FOCUS_NFE_TOKEN não configurado. A emissão real permanece bloqueada.');
-    if (this.baseUrl.includes('api.focusnfe.com.br') && this.ambiente !== 'producao') {
+  private validarConfiguracao(ctx: ContextoFiscal) {
+    if (!ctx.token) throw new BadRequestException('Token fiscal não configurado para esta filial. A emissão real permanece bloqueada.');
+    if (ctx.baseUrl.includes('api.focusnfe.com.br') && ctx.ambiente !== 'producao') {
       throw new BadRequestException('Configuração fiscal inconsistente: URL de produção com NFE_AMBIENTE diferente de producao.');
     }
   }
@@ -29,16 +28,16 @@ export class RealNfeProvider implements NfeProvider {
     return `${documento}-${nfe.id}`;
   }
 
-  private async requisitar(path: string, init: RequestInit = {}, aceitos = [200, 201, 202]): Promise<any> {
-    this.validarConfiguracao();
+  private async requisitar(ctx: ContextoFiscal, path: string, init: RequestInit = {}, aceitos = [200, 201, 202]): Promise<any> {
+    this.validarConfiguracao(ctx);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 30000);
     try {
-      const response = await fetch(`${this.baseUrl}${path}`, {
+      const response = await fetch(`${ctx.baseUrl}${path}`, {
         ...init,
         signal: controller.signal,
         headers: {
-          Authorization: `Basic ${Buffer.from(`${this.token}:`).toString('base64')}`,
+          Authorization: `Basic ${Buffer.from(`${ctx.token}:`).toString('base64')}`,
           Accept: 'application/json',
           ...(init.body ? { 'Content-Type': 'application/json' } : {}),
           ...(init.headers || {}),
@@ -58,12 +57,12 @@ export class RealNfeProvider implements NfeProvider {
     } finally { clearTimeout(timeout); }
   }
 
-  private async aguardar(documento: Documento, ref: string, inicial: any): Promise<any> {
+  private async aguardar(ctx: ContextoFiscal, documento: Documento, ref: string, inicial: any): Promise<any> {
     let dados = inicial;
     const pendentes = ['processando_autorizacao', 'processando', 'autorizando'];
     for (let tentativa = 0; tentativa < 20 && pendentes.includes(String(dados?.status || '').toLowerCase()); tentativa++) {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      dados = await this.requisitar(`/v2/${documento}/${encodeURIComponent(ref)}?completa=1`);
+      dados = await this.requisitar(ctx, `/v2/${documento}/${encodeURIComponent(ref)}?completa=1`);
     }
     if (String(dados?.status).toLowerCase() !== 'autorizado') {
       const motivo = dados?.mensagem_sefaz || dados?.mensagem || dados?.status || 'retorno desconhecido';
@@ -72,43 +71,45 @@ export class RealNfeProvider implements NfeProvider {
     return dados;
   }
 
-  private arquivoUrl(caminho?: string) {
+  private arquivoUrl(ctx: ContextoFiscal, caminho?: string) {
     if (!caminho) return '';
-    return caminho.startsWith('http') ? caminho : `${this.baseUrl}${caminho.startsWith('/') ? '' : '/'}${caminho}`;
+    return caminho.startsWith('http') ? caminho : `${ctx.baseUrl}${caminho.startsWith('/') ? '' : '/'}${caminho}`;
   }
 
-  private async baixarXml(caminho?: string) {
-    const url = this.arquivoUrl(caminho);
+  private async baixarXml(ctx: ContextoFiscal, caminho?: string) {
+    const url = this.arquivoUrl(ctx, caminho);
     if (!url) return '';
     try {
-      const response = await fetch(url, { headers: { Authorization: `Basic ${Buffer.from(`${this.token}:`).toString('base64')}` } });
+      const response = await fetch(url, { headers: { Authorization: `Basic ${Buffer.from(`${ctx.token}:`).toString('base64')}` } });
       return response.ok ? await response.text() : url;
     } catch { return url; }
   }
 
   async autorizar(nfe: any): Promise<AutorizacaoResultado> {
+    const ctx = await this.configuracaoFiscal.resolverCredencial(nfe?.tenantId, nfe?.filialId);
     const ref = this.referencia(nfe, 'nfe');
-    this.logger.log(`Transmitindo NF-e ${nfe.serie}/${nfe.numero} (${this.ambiente})`);
-    const inicial = await this.requisitar(`/v2/nfe?ref=${encodeURIComponent(ref)}`, { method: 'POST', body: JSON.stringify(this.montarPayload(nfe, false)) });
-    const dados = await this.aguardar('nfe', ref, inicial);
+    this.logger.log(`Transmitindo NF-e ${nfe.serie}/${nfe.numero} (${ctx.ambiente}, configuração ${ctx.origem})`);
+    const inicial = await this.requisitar(ctx, `/v2/nfe?ref=${encodeURIComponent(ref)}`, { method: 'POST', body: JSON.stringify(this.montarPayload(nfe, false)) });
+    const dados = await this.aguardar(ctx, 'nfe', ref, inicial);
     return {
       chaveAcesso: dados.chave_nfe,
       protocolo: dados.protocolo || dados.numero_protocolo || '',
-      xml: await this.baixarXml(dados.caminho_xml_nota_fiscal || dados.caminho_xml),
-      danfeUrl: this.arquivoUrl(dados.caminho_danfe || dados.caminho_pdf),
+      xml: await this.baixarXml(ctx, dados.caminho_xml_nota_fiscal || dados.caminho_xml),
+      danfeUrl: this.arquivoUrl(ctx, dados.caminho_danfe || dados.caminho_pdf),
       simulacao: false,
     };
   }
 
   async autorizarNfce(nfe: any): Promise<AutorizacaoNfceResultado> {
+    const ctx = await this.configuracaoFiscal.resolverCredencial(nfe?.tenantId, nfe?.filialId);
     const ref = this.referencia(nfe, 'nfce');
-    const inicial = await this.requisitar(`/v2/nfce?ref=${encodeURIComponent(ref)}&completa=1`, { method: 'POST', body: JSON.stringify(this.montarPayload(nfe, true)) });
-    const dados = await this.aguardar('nfce', ref, inicial);
+    const inicial = await this.requisitar(ctx, `/v2/nfce?ref=${encodeURIComponent(ref)}&completa=1`, { method: 'POST', body: JSON.stringify(this.montarPayload(nfe, true)) });
+    const dados = await this.aguardar(ctx, 'nfce', ref, inicial);
     return {
       chaveAcesso: dados.chave_nfe, protocolo: dados.protocolo || dados.numero_protocolo || '',
-      xml: await this.baixarXml(dados.caminho_xml_nota_fiscal || dados.caminho_xml),
+      xml: await this.baixarXml(ctx, dados.caminho_xml_nota_fiscal || dados.caminho_xml),
       qrCode: dados.qrcode_url || dados.qrcode || '', urlConsulta: dados.url_consulta_nf || dados.url_consulta || '',
-      danfeUrl: this.arquivoUrl(dados.caminho_danfe || dados.caminho_pdf), simulacao: false,
+      danfeUrl: this.arquivoUrl(ctx, dados.caminho_danfe || dados.caminho_pdf), simulacao: false,
     };
   }
 
@@ -191,24 +192,27 @@ export class RealNfeProvider implements NfeProvider {
 
   async cancelar(_chave: string, motivo: string, nfe?: any): Promise<CancelamentoResultado> {
     if (!nfe?.id) throw new BadRequestException('Documento fiscal sem referência interna para cancelamento.');
+    const ctx = await this.configuracaoFiscal.resolverCredencial(nfe?.tenantId, nfe?.filialId);
     const documento: Documento = nfe.modelo === '65' ? 'nfce' : 'nfe';
-    const dados = await this.requisitar(`/v2/${documento}/${encodeURIComponent(this.referencia(nfe, documento))}`, { method: 'DELETE', body: JSON.stringify({ justificativa: motivo }) });
-    return { xml: await this.baixarXml(dados.caminho_xml_cancelamento || dados.caminho_xml), protocolo: dados.protocolo || dados.numero_protocolo, simulacao: false };
+    const dados = await this.requisitar(ctx, `/v2/${documento}/${encodeURIComponent(this.referencia(nfe, documento))}`, { method: 'DELETE', body: JSON.stringify({ justificativa: motivo }) });
+    return { xml: await this.baixarXml(ctx, dados.caminho_xml_cancelamento || dados.caminho_xml), protocolo: dados.protocolo || dados.numero_protocolo, simulacao: false };
   }
 
   async cartaCorrecao(_chave: string, _sequencia: number, texto: string, nfe?: any): Promise<CartaCorrecaoResultado> {
     if (!nfe?.id || nfe.modelo === '65') throw new BadRequestException('Carta de correção é permitida somente para NF-e modelo 55 com referência interna.');
-    const dados = await this.requisitar(`/v2/nfe/${encodeURIComponent(this.referencia(nfe, 'nfe'))}/carta_correcao`, { method: 'POST', body: JSON.stringify({ correcao: texto, data_evento: this.dataIsoBrasil() }) });
-    return { xml: await this.baixarXml(dados.caminho_xml_carta_correcao || dados.caminho_xml), protocolo: dados.protocolo || dados.numero_protocolo || '', status: 'REGISTRADO', simulacao: false };
+    const ctx = await this.configuracaoFiscal.resolverCredencial(nfe?.tenantId, nfe?.filialId);
+    const dados = await this.requisitar(ctx, `/v2/nfe/${encodeURIComponent(this.referencia(nfe, 'nfe'))}/carta_correcao`, { method: 'POST', body: JSON.stringify({ correcao: texto, data_evento: this.dataIsoBrasil() }) });
+    return { xml: await this.baixarXml(ctx, dados.caminho_xml_carta_correcao || dados.caminho_xml), protocolo: dados.protocolo || dados.numero_protocolo || '', status: 'REGISTRADO', simulacao: false };
   }
 
 
-  async inutilizar(dados: { cnpj: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }): Promise<InutilizacaoResultado> {
+  async inutilizar(dados: { tenantId?: string; filialId?: string; cnpj: string; serie: string; numeroInicial: number; numeroFinal: number; justificativa: string; modelo?: '55' | '65' }): Promise<InutilizacaoResultado> {
+    const ctx = await this.configuracaoFiscal.resolverCredencial(dados.tenantId, dados.filialId);
     const documento: Documento = dados.modelo === '65' ? 'nfce' : 'nfe';
-    const retorno = await this.requisitar(`/v2/${documento}/inutilizacao`, { method: 'POST', body: JSON.stringify({
+    const retorno = await this.requisitar(ctx, `/v2/${documento}/inutilizacao`, { method: 'POST', body: JSON.stringify({
       cnpj: dados.cnpj.replace(/\D/g, ''), serie: String(dados.serie), numero_inicial: String(dados.numeroInicial),
       numero_final: String(dados.numeroFinal), justificativa: dados.justificativa,
     }) });
-    return { protocolo: retorno.protocolo || retorno.numero_protocolo, xml: await this.baixarXml(retorno.caminho_xml || retorno.xml), status: retorno.status || 'INUTILIZADO', simulacao: false };
+    return { protocolo: retorno.protocolo || retorno.numero_protocolo, xml: await this.baixarXml(ctx, retorno.caminho_xml || retorno.xml), status: retorno.status || 'INUTILIZADO', simulacao: false };
   }
 }

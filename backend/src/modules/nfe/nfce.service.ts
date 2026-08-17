@@ -6,6 +6,7 @@ import { proximoNumero } from '../../common/utils/sequencia.util';
 import { MockNfeProvider } from './providers/mock.provider';
 import { RealNfeProvider } from './providers/real.provider';
 import { NfeProvider, AutorizacaoNfceResultado } from './providers/nfe-provider.interface';
+import { ConfiguracaoFiscalService } from './configuracao-fiscal.service';
 
 const r2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
 
@@ -29,6 +30,7 @@ export class NfceService {
     private fiscal: FiscalService,
     private mock: MockNfeProvider,
     private real: RealNfeProvider,
+    private configuracaoFiscal: ConfiguracaoFiscalService,
   ) {}
 
   /** Modo configurado (normalizado). */
@@ -55,7 +57,8 @@ export class NfceService {
    * Idempotente: se já existir NFC-e emitida para o pedido, retorna a existente.
    */
   async emitirDePedido(tenantId: string, pedidoId: string, filialId: string, _usuarioId: string) {
-    if (!this.habilitado()) {
+    const configuracaoAtiva = await this.configuracaoFiscal.deveTransmitir(tenantId, filialId);
+    if (!this.habilitado() && !configuracaoAtiva) {
       throw new BadRequestException('Emissão de NFC-e desligada (defina NFCE_MODO=simulado|focus|sefaz).');
     }
 
@@ -163,7 +166,8 @@ export class NfceService {
     });
 
     try {
-      const resultado: AutorizacaoNfceResultado = await this.provider().autorizarNfce(nfe);
+      const provider = configuracaoAtiva ? this.real : this.provider();
+      const resultado: AutorizacaoNfceResultado = await provider.autorizarNfce(nfe);
 
       await this.prisma.nFe.update({
         where: { id: nfe.id },

@@ -10,6 +10,8 @@ import { RealNfeProvider } from './providers/real.provider';
 import { nfeProviderFactory } from './providers/nfe-provider.factory';
 import { CertificadoService } from './certificado.service';
 import { CertificadoController } from './certificado.controller';
+import { ConfiguracaoFiscalService } from './configuracao-fiscal.service';
+import { RoteadorNfeProvider } from './providers/roteador.provider';
 
 @Module({
   imports: [EstoqueModule, FiscalModule],
@@ -20,8 +22,10 @@ import { CertificadoController } from './certificado.controller';
     RealNfeProvider,
     nfeProviderFactory,
     CertificadoService,
+    ConfiguracaoFiscalService,
+    RoteadorNfeProvider,
   ],
   controllers: [NFeController, NfceController, CertificadoController],
-  exports: [NFeService, NfceService],
+  exports: [NFeService, NfceService, ConfiguracaoFiscalService],
 })
 export class NFeModule {}

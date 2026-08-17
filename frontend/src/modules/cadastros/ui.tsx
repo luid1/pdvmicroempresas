@@ -46,7 +46,7 @@ export function TopBar({ icon, titulo, subtitulo, onNovo, novoLabel = 'Novo Cada
 export function FAB({ onClick, label }: { onClick: () => void; label: string }) {
   return createPortal(
     <button onClick={onClick} title={label}
-      className="group fixed bottom-6 right-6 z-40 flex items-center gap-0 h-12 rounded-full bg-[#0F8A72] hover:bg-[#13A184] text-[#202123] shadow-[0_10px_28px_rgba(15,138,114,0.35)] border border-[#13A184]/50 transition-all duration-300 hover:-translate-y-[2px] active:scale-95 overflow-hidden pl-3.5 pr-3.5 hover:pr-5">
+      className="group fixed bottom-20 right-4 z-40 flex h-12 items-center gap-0 overflow-hidden rounded-full border border-[#13A184]/50 bg-[#0F8A72] pl-3.5 pr-3.5 text-white shadow-[0_10px_28px_rgba(15,138,114,0.35)] transition-all duration-300 hover:-translate-y-[2px] hover:bg-[#13A184] hover:pr-5 active:scale-95 sm:bottom-6 sm:right-6">
       <Plus className="h-5 w-5 shrink-0" />
       <span className="max-w-0 group-hover:max-w-[200px] overflow-hidden whitespace-nowrap font-bold text-sm transition-all duration-300 group-hover:ml-2">{label}</span>
     </button>,
@@ -77,13 +77,14 @@ export function PageHeader({ icon, titulo, subtitulo, actions }:
 export function FilterBar({ busca, onBusca, placeholder = 'Buscar...', children }:
   { busca: string; onBusca: (v: string) => void; placeholder?: string; children?: ReactNode }) {
   return (
-    <div className="border-b border-[#E5E7EB] px-5 py-2 flex flex-wrap items-center gap-3 shrink-0 bg-[#F3F4F6]">
-      <div className="relative flex-1 min-w-[220px] max-w-md">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
-        <input value={busca} onChange={e => onBusca(e.target.value)} placeholder={placeholder}
-          className="w-full bg-white border border-[#E5E7EB] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#202123] placeholder:text-[#8E8F94] focus:outline-none focus:border-[#0F8A72]/60 transition-all duration-300" />
+    <div className="flex shrink-0 flex-col gap-2.5 border-b border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 sm:flex-row sm:items-center sm:px-5">
+      <div className="group relative w-full min-w-0 sm:max-w-[440px] sm:flex-1">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E8F94] transition-colors group-focus-within:text-[#0F8A72]" />
+        <input type="search" aria-label={placeholder} value={busca} onChange={e => onBusca(e.target.value)} placeholder={placeholder}
+          className="h-10 w-full rounded-full border border-[#DDE1E5] bg-white pl-10 pr-10 text-[13px] text-[#202123] shadow-[0_1px_2px_rgba(22,23,29,0.04)] outline-none transition-all placeholder:text-[#8E8F94] focus:border-[#0F8A72]/60 focus:ring-4 focus:ring-[#0F8A72]/10" />
+        {busca && <button type="button" onClick={() => onBusca('')} aria-label="Limpar pesquisa" title="Limpar pesquisa" className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-[#8E8F94] transition-colors hover:bg-[#F0F2F3] hover:text-[#202123]"><X className="h-3.5 w-3.5" /></button>}
       </div>
-      {children}
+      {children && <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin] sm:overflow-visible">{children}</div>}
     </div>
   );
 }
