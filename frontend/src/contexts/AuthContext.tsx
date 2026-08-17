@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { podeAcao, AcaoTela } from '../config/telas';
 import { authApi } from '../services/api';
 
@@ -11,6 +11,7 @@ interface AuthCtx {
   filiais: Filial[];
   filialAtiva: Filial | null;
   setFilialAtiva: (f: Filial) => void;
+  refreshFiliais: () => Promise<Filial[]>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
@@ -27,6 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [filialAtiva, setFilialAtivaState] = useState<Filial | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshFiliais = useCallback(async () => {
+    if (!localStorage.getItem('wms_token')) return [];
+    const { data } = await authApi.filiais();
+    const atualizadas: Filial[] = (data || []).filter((f: any) => f.ativo !== false);
+    setFiliais(atualizadas);
+    localStorage.setItem('wms_filiais', JSON.stringify(atualizadas));
+    setFilialAtivaState((atual) => {
+      const preservada = atualizadas.find((f) => f.id === atual?.id) || atualizadas[0] || null;
+      if (preservada) localStorage.setItem('wms_filial', JSON.stringify(preservada));
+      else localStorage.removeItem('wms_filial');
+      return preservada;
+    });
+    return atualizadas;
+  }, []);
+
   useEffect(() => {
     const stored = localStorage.getItem('wms_user');
     const storedFilial = localStorage.getItem('wms_filial');
@@ -35,7 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedFiliais) setFiliais(JSON.parse(storedFiliais));
     if (storedFilial) setFilialAtivaState(JSON.parse(storedFilial));
     setIsLoading(false);
-  }, []);
+    if (stored && localStorage.getItem('wms_token')) void refreshFiliais().catch(() => { /* mantem cache offline */ });
+  }, [refreshFiliais]);
 
   const login = async (email: string, password: string) => {
     const res = await fetch('/api/v1/auth/login', {
@@ -97,7 +114,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, login, logout, isLoading, pode, preferencias, savePreferencias }}>
+    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, refreshFiliais, login, logout, isLoading, pode, preferencias, savePreferencias }}>
       {children}
     </Ctx.Provider>
   );

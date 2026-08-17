@@ -27,6 +27,8 @@ export default api;
 
 // Auth / perfil do usuário
 export const authApi = {
+  // Lista viva de filiais; nao depende do snapshot gravado no login.
+  filiais: () => api.get('/filiais'),
   // Preferências de UI que seguem a conta (merge raso no backend).
   salvarPreferencias: (preferencias: Record<string, unknown>) =>
     api.put('/auth/me/preferencias', { preferencias }),
@@ -322,6 +324,43 @@ export type ComandoLuResp =
         descricao: string;
         categoriaTexto: string | null;
         data: string;
+      };
+    }
+  | {
+      tipo: 'acao';
+      acao: 'transferir-estoque';
+      resumo: string;
+      rascunho: {
+        acao: 'transferir-estoque';
+        filialOrigemId: string;
+        filialOrigemNome: string;
+        filialDestinoId: string;
+        filialDestinoNome: string;
+        produtoId: string;
+        produtoCodigo: string;
+        produtoDescricao: string;
+        unidade: string;
+        quantidade: number;
+        saldoDisponivel: number;
+        observacoes: string | null;
+      };
+    }
+  | {
+      tipo: 'acao';
+      acao: 'cadastrar-produto';
+      resumo: string;
+      rascunho: {
+        acao: 'cadastrar-produto';
+        descricao: string;
+        codigo: string | null;
+        codigoBarras: string | null;
+        unidadeSigla: string;
+        ncm: string;
+        categoria: string | null;
+        precoCompra: number | null;
+        precoVenda: number | null;
+        estoqueMinimo: number | null;
+        vendidoPorPeso: boolean;
       };
     };
 

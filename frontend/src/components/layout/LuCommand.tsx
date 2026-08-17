@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { CornerDownLeft, Search, Send, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, TELAS, type TelaDef } from '../../config/telas';
-import { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
+import api, { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
 
 /**
  * "Lu Command" — barra de comando (spotlight) da assistente. Abre com ⌘/Ctrl+K
@@ -137,7 +137,8 @@ export default function LuCommand() {
       const { data } = await iaApi.comando(q, historico, filialAtiva?.id);
       const r = data as ComandoLuResp;
       if (r.tipo === 'acao') {
-        setMensagens((m) => [...m, { autor: 'lu', texto: 'Preparei este lançamento — confira e confirme. 👇' }]);
+        const objeto = r.acao === 'transferir-estoque' ? 'a transferência' : r.acao === 'cadastrar-produto' ? 'o cadastro do produto' : 'o lançamento';
+        setMensagens((m) => [...m, { autor: 'lu', texto: `Preparei ${objeto}. Confira, complete se quiser e confirme abaixo.` }]);
         setAcao(r);
       } else {
         setMensagens((m) => [...m, { autor: 'lu', texto: r.texto || 'Não entendi dessa vez. Pode reformular?' }]);
@@ -187,10 +188,12 @@ export default function LuCommand() {
   // Confirmação do lançamento gravou com sucesso → registra na conversa.
   const aposLancar = useCallback((resumo: string) => {
     setAcao(null);
-    setMensagens((m) => [...m, { autor: 'lu', texto: `Pronto! ${resumo} lançado na Tesouraria. ✔️` }]);
+    setMensagens((m) => [...m, { autor: 'lu', texto: `Pronto! ${resumo}. ✔️` }]);
   }, []);
 
   const podeLancar = podeVerTela(user?.telas, user?.role, '/financeiro/tesouraria') || podeVerTela(user?.telas, user?.role, '/financeiro/fluxo-caixa');
+  const podeTransferir = podeVerTela(user?.telas, user?.role, '/wms/transferencias') || podeVerTela(user?.telas, user?.role, '/wms/posicao');
+  const podeCadastrarProduto = podeVerTela(user?.telas, user?.role, '/cadastros/produtos');
   const semThread = mensagens.length === 0;
 
   return createPortal(
@@ -286,12 +289,9 @@ export default function LuCommand() {
             <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_24px_70px_-12px_rgba(22,23,29,0.28)]">
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0F8A72]/30 to-transparent" />
               {acao ? (
-                <FormLancamento
-                  acao={acao}
-                  filialId={filialAtiva?.id}
-                  onCancelar={() => setAcao(null)}
-                  onFeito={aposLancar}
-                />
+                acao.acao === 'transferir-estoque' ? <FormTransferencia acao={acao} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
+                : acao.acao === 'cadastrar-produto' ? <FormProduto acao={acao} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
+                : <FormLancamento acao={acao} filialId={filialAtiva?.id} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
               ) : (
                 <>
                   {/* Sugestões de navegação (aparecem enquanto digita) */}
@@ -364,6 +364,8 @@ export default function LuCommand() {
                           'Como estão minhas vendas?',
                           'O que está acabando no estoque?',
                           ...(podeLancar ? ['Paguei R$ 80 de conta de luz'] : []),
+                          ...(podeTransferir ? ['Transfira 10 un de arroz da Matriz para a Filial Centro'] : []),
+                          ...(podeCadastrarProduto ? ['Cadastre o produto Café 500g por R$ 18,90'] : []),
                         ].map((s) => (
                           <button
                             key={s}
@@ -397,13 +399,75 @@ export default function LuCommand() {
  * rascunho; a gravação chama o endpoint oficial de tesouraria (mesmo guard de
  * permissão e auditoria). A Lu nunca grava sozinha — você confirma aqui.
  */
+function FormTransferencia({ acao, onCancelar, onFeito }: {
+  acao: Extract<ComandoLuResp, { acao: 'transferir-estoque' }>;
+  onCancelar: () => void;
+  onFeito: (resumo: string) => void;
+}) {
+  const r = acao.rascunho;
+  const [quantidade, setQuantidade] = useState(String(r.quantidade).replace('.', ','));
+  const [observacoes, setObservacoes] = useState(r.observacoes || '');
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+  const qtd = Number(quantidade.replace(',', '.'));
+  const confirmar = async () => {
+    if (!Number.isFinite(qtd) || qtd <= 0) return setErro('Informe uma quantidade maior que zero.');
+    setErro(''); setSalvando(true);
+    try {
+      await api.post('/estoque/transferencias', { filialOrigemId: r.filialOrigemId, filialDestinoId: r.filialDestinoId, observacoes: observacoes.trim() || undefined, itens: [{ produtoId: r.produtoId, quantidade: qtd }] });
+      onFeito(`Transferência de ${qtd.toLocaleString('pt-BR')} ${r.unidade} solicitada para ${r.filialDestinoNome}`);
+    } catch (e: any) { setErro(e?.response?.data?.message || 'Não foi possível solicitar a transferência.'); }
+    finally { setSalvando(false); }
+  };
+  return <div className="p-4">
+    <div className="mb-3 flex items-center gap-2"><PackagePlus className="h-4 w-4 text-[#0F8A72]" /><b className="text-[13px] text-[#202123]">Revisar transferência</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">aguarda sua confirmação</span></div>
+    <div className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-3 text-[13px]"><b className="min-w-0 flex-1 truncate">{r.filialOrigemNome}</b><ArrowRight className="h-4 w-4 shrink-0 text-[#0F8A72]" /><b className="min-w-0 flex-1 truncate text-right">{r.filialDestinoNome}</b></div>
+    <div className="mt-3 rounded-xl border border-[#E5E7EB] p-3"><p className="text-[12px] font-semibold text-[#202123]">{r.produtoCodigo} · {r.produtoDescricao}</p><p className="mt-1 text-[11px] text-[#8E8F94]">Saldo disponível na origem: {r.saldoDisponivel.toLocaleString('pt-BR')} {r.unidade}</p></div>
+    <div className="mt-3 grid gap-2.5 sm:grid-cols-[160px_1fr]"><label className="text-[11px] text-[#5F6065]">Quantidade<input value={quantidade} onChange={(e) => setQuantidade(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" /></label><label className="text-[11px] text-[#5F6065]">Observações (opcional)<input value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" placeholder="Prioridade, transporte, conferência..." /></label></div>
+    {qtd > r.saldoDisponivel && <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">A quantidade é maior que o saldo atual. A solicitação pode ser criada, mas o despacho exigirá saldo suficiente.</p>}
+    {erro && <p className="mt-2 text-[12px] text-[#c3352b]">{erro}</p>}
+    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#0F8A72] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Solicitando…' : 'Confirmar transferência'}</button></div>
+  </div>;
+}
+
+function FormProduto({ acao, onCancelar, onFeito }: {
+  acao: Extract<ComandoLuResp, { acao: 'cadastrar-produto' }>;
+  onCancelar: () => void;
+  onFeito: (resumo: string) => void;
+}) {
+  const r = acao.rascunho;
+  const [f, setF] = useState({ descricao: r.descricao, codigo: r.codigo || '', codigoBarras: r.codigoBarras || '', unidadeSigla: r.unidadeSigla || 'UN', ncm: r.ncm || '', categoria: r.categoria || '', precoCompra: r.precoCompra == null ? '' : String(r.precoCompra), precoVenda: r.precoVenda == null ? '' : String(r.precoVenda), estoqueMinimo: r.estoqueMinimo == null ? '' : String(r.estoqueMinimo), vendidoPorPeso: r.vendidoPorPeso });
+  const set = (k: string, v: any) => setF((a) => ({ ...a, [k]: v }));
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+  const confirmar = async () => {
+    if (!f.descricao.trim()) return setErro('Informe a descrição do produto.');
+    const ncm = f.ncm.replace(/\D/g, '');
+    if (ncm && ncm.length !== 8) return setErro('O NCM precisa ter 8 dígitos ou ficar vazio para completar depois.');
+    setErro(''); setSalvando(true);
+    try {
+      await api.post('/produtos', { descricao: f.descricao.trim(), codigo: f.codigo.trim() || undefined, codigoBarras: f.codigoBarras.trim() || null, unidadeSigla: f.unidadeSigla, ncm: ncm || '00000000', categoria: f.categoria.trim() || null, precoCompra: f.precoCompra === '' ? null : Number(String(f.precoCompra).replace(',', '.')), precoVenda: f.precoVenda === '' ? null : Number(String(f.precoVenda).replace(',', '.')), estoqueMinimo: f.estoqueMinimo === '' ? null : Number(String(f.estoqueMinimo).replace(',', '.')), vendidoPorPeso: f.vendidoPorPeso });
+      onFeito(`Produto ${f.descricao.trim()} cadastrado`);
+    } catch (e: any) { setErro(e?.response?.data?.message || 'Não foi possível cadastrar o produto.'); }
+    finally { setSalvando(false); }
+  };
+  const campo = (label: string, k: keyof typeof f, placeholder = '') => <label className="text-[11px] text-[#5F6065]">{label}<input value={String(f[k])} onChange={(e) => set(k, e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" placeholder={placeholder} /></label>;
+  return <div className="p-4">
+    <div className="mb-3 flex items-center gap-2"><Barcode className="h-4 w-4 text-[#0F8A72]" /><b className="text-[13px] text-[#202123]">Revisar novo produto</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">rascunho da Lu</span></div>
+    <div className="grid gap-2.5 sm:grid-cols-2">{campo('Descrição *', 'descricao')}{campo('SKU / código interno', 'codigo', 'Automático se vazio')}{campo('Código de barras / GTIN', 'codigoBarras')}{campo('NCM', 'ncm', '8 dígitos; pode completar depois')}{campo('Categoria', 'categoria')}<label className="text-[11px] text-[#5F6065]">Unidade<select value={f.unidadeSigla} onChange={(e) => set('unidadeSigla', e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none">{['UN', 'KG', 'CX', 'PC', 'LT', 'ML'].map((u) => <option key={u}>{u}</option>)}</select></label>{campo('Preço de compra', 'precoCompra')}{campo('Preço de venda', 'precoVenda')}{campo('Estoque mínimo', 'estoqueMinimo')}<label className="flex items-end gap-2 pb-2 text-[12px] text-[#5F6065]"><input type="checkbox" checked={f.vendidoPorPeso} onChange={(e) => set('vendidoPorPeso', e.target.checked)} /> Vendido por peso</label></div>
+    {!f.ncm && <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">O produto será salvo com NCM provisório 00000000. Complete a classificação fiscal antes de emitir nota.</p>}
+    {erro && <p className="mt-2 text-[12px] text-[#c3352b]">{erro}</p>}
+    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#0F8A72] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Cadastrando…' : 'Cadastrar produto'}</button></div>
+  </div>;
+}
+
 function FormLancamento({
   acao,
   filialId,
   onCancelar,
   onFeito,
 }: {
-  acao: Extract<ComandoLuResp, { tipo: 'acao' }>;
+  acao: Extract<ComandoLuResp, { acao: 'lancar-gasto' | 'lancar-entrada' }>;
   filialId?: string;
   onCancelar: () => void;
   onFeito: (resumo: string) => void;

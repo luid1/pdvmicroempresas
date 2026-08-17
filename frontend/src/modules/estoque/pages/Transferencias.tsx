@@ -15,7 +15,7 @@ const statusCor: Record<string, string> = {
 };
 
 export default function Transferencias() {
-  const { filiais, filialAtiva } = useAuth();
+  const { filiais, filialAtiva, refreshFiliais } = useAuth();
   const [lista, setLista] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [novo, setNovo] = useState(false);
@@ -27,6 +27,7 @@ export default function Transferencias() {
     finally { setLoading(false); }
   };
   useEffect(() => { carregar(); }, [filialAtiva?.id]);
+  useEffect(() => { void refreshFiliais().catch(() => toast('Usando a ultima lista de filiais disponivel.', 'info')); }, [refreshFiliais]);
 
   const acao = async (t: any, tipo: 'aprovar' | 'despachar') => {
     const verbo = tipo === 'aprovar' ? 'aprovar' : 'despachar';
