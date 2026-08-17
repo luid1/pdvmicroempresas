@@ -203,28 +203,29 @@ export default function LuCommand() {
         <form
           onSubmit={enviarDaBarra}
           aria-label="Conversar com a Lu"
-          className="fixed bottom-3 left-1/2 z-[60] flex w-[min(calc(100vw-1.5rem),480px)] -translate-x-1/2 items-center gap-2 rounded-[22px] border border-[#D9E4E1] bg-white/95 p-2 shadow-[0_16px_48px_rgba(22,23,29,0.18)] backdrop-blur-xl sm:bottom-4"
+          className="group fixed bottom-3 left-1/2 z-[60] flex w-[min(calc(100vw-1.5rem),680px)] -translate-x-1/2 items-center gap-2 rounded-full border border-[#D9E4E1] bg-white/95 p-1.5 pl-2 shadow-[0_18px_56px_rgba(22,23,29,0.20)] backdrop-blur-xl transition-all focus-within:border-[#0F8A72]/55 focus-within:ring-4 focus-within:ring-[#0F8A72]/10 sm:bottom-4 sm:w-[min(calc(100vw-10rem),680px)]"
         >
           <button
             type="button"
             onClick={abrir}
             title="Abrir a Lu (Ctrl+K)"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#212121] text-[#39C5A5] transition-colors hover:bg-[#2F3032]"
+            className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#0F8A72]/10 text-[#0F8A72] transition-colors hover:bg-[#0F8A72]/15"
           >
             <Sparkles className="h-4 w-4" />
+            <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#39C5A5]" />
           </button>
           <input
             ref={inputRef}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            placeholder="Pergunte algo à Lu..."
-            className="min-w-0 flex-1 bg-transparent px-1 text-[14px] text-[#202123] outline-none placeholder:text-[#8E8F94]"
+            placeholder="Converse com a Lu ou peça uma ação..."
+            className="min-w-0 flex-1 bg-transparent px-1.5 text-[14px] text-[#202123] outline-none placeholder:text-[#8E8F94]"
           />
           {!texto && (
             <button
               type="button"
               onClick={abrir}
-              className="hidden rounded-lg px-2 py-1 font-mono text-[10px] text-[#8E8F94] transition-colors hover:bg-[#F3F5F4] sm:block"
+              className="hidden rounded-full bg-[#F3F5F4] px-2.5 py-1 font-mono text-[10px] text-[#8E8F94] transition-colors hover:text-[#202123] md:block"
               title="Atalho de teclado"
             >
               Ctrl K
@@ -233,7 +234,7 @@ export default function LuCommand() {
           <button
             type="submit"
             aria-label="Enviar para a Lu"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#0F8A72] text-white transition-colors hover:bg-[#0B6F5C] disabled:cursor-default disabled:bg-[#EDF1F0] disabled:text-[#A5AEAC]"
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#202123] text-white transition-colors hover:bg-[#0F8A72] disabled:cursor-default disabled:bg-[#EDF1F0] disabled:text-[#A5AEAC]"
             disabled={!texto.trim()}
           >
             <Send className="h-4 w-4" />

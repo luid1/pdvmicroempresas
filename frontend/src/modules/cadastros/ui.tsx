@@ -73,17 +73,25 @@ export function PageHeader({ icon, titulo, subtitulo, actions }:
   );
 }
 
+// Campo de pesquisa compartilhado entre cadastros, estoque e demais módulos.
+export function SearchField({ busca, onBusca, placeholder = 'Buscar...', className = '' }:
+  { busca: string; onBusca: (v: string) => void; placeholder?: string; className?: string }) {
+  return (
+    <div className={`group relative w-full min-w-0 ${className}`}>
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E8F94] transition-colors group-focus-within:text-[#0F8A72]" />
+      <input type="search" aria-label={placeholder} value={busca} onChange={e => onBusca(e.target.value)} placeholder={placeholder}
+        className="h-10 w-full rounded-full border border-[#DDE1E5] bg-white pl-10 pr-10 text-[13px] text-[#202123] shadow-[0_1px_2px_rgba(22,23,29,0.04)] outline-none transition-all placeholder:text-[#8E8F94] focus:border-[#0F8A72]/60 focus:ring-4 focus:ring-[#0F8A72]/10" />
+      {busca && <button type="button" onClick={() => onBusca('')} aria-label="Limpar pesquisa" title="Limpar pesquisa" className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-[#8E8F94] transition-colors hover:bg-[#F0F2F3] hover:text-[#202123]"><X className="h-3.5 w-3.5" /></button>}
+    </div>
+  );
+}
+
 // Barra de filtros (busca + filtros rápidos)
 export function FilterBar({ busca, onBusca, placeholder = 'Buscar...', children }:
   { busca: string; onBusca: (v: string) => void; placeholder?: string; children?: ReactNode }) {
   return (
     <div className="flex shrink-0 flex-col gap-2.5 border-b border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 sm:flex-row sm:items-center sm:px-5">
-      <div className="group relative w-full min-w-0 sm:max-w-[440px] sm:flex-1">
-        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8E8F94] transition-colors group-focus-within:text-[#0F8A72]" />
-        <input type="search" aria-label={placeholder} value={busca} onChange={e => onBusca(e.target.value)} placeholder={placeholder}
-          className="h-10 w-full rounded-full border border-[#DDE1E5] bg-white pl-10 pr-10 text-[13px] text-[#202123] shadow-[0_1px_2px_rgba(22,23,29,0.04)] outline-none transition-all placeholder:text-[#8E8F94] focus:border-[#0F8A72]/60 focus:ring-4 focus:ring-[#0F8A72]/10" />
-        {busca && <button type="button" onClick={() => onBusca('')} aria-label="Limpar pesquisa" title="Limpar pesquisa" className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-[#8E8F94] transition-colors hover:bg-[#F0F2F3] hover:text-[#202123]"><X className="h-3.5 w-3.5" /></button>}
-      </div>
+      <SearchField busca={busca} onBusca={onBusca} placeholder={placeholder} className="sm:max-w-[440px] sm:flex-1" />
       {children && <div className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:thin] sm:overflow-visible">{children}</div>}
     </div>
   );

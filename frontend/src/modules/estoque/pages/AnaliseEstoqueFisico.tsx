@@ -1,10 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { CheckCircle, Printer, Download, X, ChevronRight, Search, AlertTriangle, TrendingDown, BarChart3, SlidersHorizontal, Package, Coins, PackageX, RefreshCw } from 'lucide-react';
+import { CheckCircle, Printer, Download, X, ChevronRight, AlertTriangle, TrendingDown, BarChart3, SlidersHorizontal, Package, Coins, PackageX, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import api from '../../../services/api';
 import { toast, confirmDialog } from '../../../components/ui/feedback';
-import { PageHeader, btnGlass, btnPrimary } from '../../cadastros/ui';
+import { PageHeader, SearchField, btnGlass, btnPrimary } from '../../cadastros/ui';
 
 // ─── Tipos ───────────────────────────────────────
 interface ProdutoEstoque {
@@ -455,19 +455,17 @@ export default function AnaliseEstoqueFisico() {
           <KpiCard icon={<TrendingDown className="h-4 w-4" />} label="Perda / Quebra" value={`R$ ${fmtR(totais.valorPerdido)}`} tone={totais.valorPerdido > 0 ? 'amber' : undefined} />
         </div>
 
-        {/* FilterBar — busca + chips + filtros avançados */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <div className="relative flex-1 min-w-[220px] max-w-md">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Filtrar por código ou descrição..."
-              className="w-full bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#16171D] placeholder:text-slate-500 focus:outline-none focus:border-[#E8A317]/40 transition-all duration-300" />
+        {/* Busca + chips + filtros avançados */}
+        <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center">
+          <SearchField busca={busca} onBusca={setBusca} placeholder="Filtrar por código ou descrição..." className="sm:max-w-[520px] sm:flex-1" />
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 sm:justify-end sm:overflow-visible sm:pb-0">
+            {familia !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-semibold text-[#0B6F5C]">{familia}<button onClick={() => handleFamiliaChange('<Todas>')} aria-label="Remover filtro de família"><X className="h-3 w-3" /></button></span>}
+            {grupo !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#F0F2F3] px-2.5 py-1 text-xs font-semibold text-[#5F6065]">{grupo}<button onClick={() => setGrupo('<Todas>')} aria-label="Remover filtro de grupo"><X className="h-3 w-3" /></button></span>}
+            {confFisica && <span className="shrink-0 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-semibold text-[#0B6F5C]">Conferência física</span>}
+            <button onClick={() => setFiltros(true)} className={btnGlass + ' ml-auto shrink-0'}>
+              <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
+            </button>
           </div>
-          {familia !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-amber-500/15 text-[#a9760a] px-2.5 py-1 rounded-lg text-xs font-semibold">{familia}<button onClick={() => handleFamiliaChange('<Todas>')}><X className="h-3 w-3" /></button></span>}
-          {grupo !== '<Todas>' && <span className="inline-flex items-center gap-1 bg-[#F6F5F2] text-[#8B8D98] px-2.5 py-1 rounded-lg text-xs font-semibold">{grupo}<button onClick={() => setGrupo('<Todas>')}><X className="h-3 w-3" /></button></span>}
-          {confFisica && <span className="bg-amber-500/15 text-[#a9760a] px-2.5 py-1 rounded-lg text-xs font-semibold">Conferência física</span>}
-          <button onClick={() => setFiltros(true)} className={btnGlass + ' ml-auto'}>
-            <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
-          </button>
         </div>
 
         {/* ── Grade em card de vidro ── */}
