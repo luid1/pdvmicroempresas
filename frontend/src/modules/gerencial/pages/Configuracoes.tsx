@@ -120,6 +120,7 @@ export default function Configuracoes() {
                 <Campo label="Regime tributário">
                   <select className={inp} value={cfg.regimeTributario} onChange={(e) => set('regimeTributario', e.target.value)}>
                     <option value="SIMPLES">Simples Nacional</option>
+                    <option value="MEI">MEI (Microempreendedor Individual)</option>
                     <option value="PRESUMIDO">Lucro Presumido</option>
                     <option value="REAL">Lucro Real</option>
                   </select>
@@ -133,6 +134,9 @@ export default function Configuracoes() {
                 <Campo label="Série da NF-e"><input className={inp} value={cfg.serieNFe} onChange={(e) => set('serieNFe', e.target.value)} /></Campo>
                 <Campo label="Próximo número"><input className={inp} value={cfg.proximoNumero} onChange={(e) => set('proximoNumero', e.target.value)} /></Campo>
               </div>
+              <p className="mt-3 text-xs text-slate-500">
+                O regime que vale para a <b>emissão</b> é o definido por loja em <b>Cadastros → Filiais/Boxes</b> (é ele que define o CRT da NF-e). Este campo é só uma preferência geral.
+              </p>
               {cfg.ambienteNFe === 'producao' && (
                 <div className="mt-4 flex items-start gap-2 text-[#a9760a] bg-amber-500/[0.08] border border-[#E8A317]/40 rounded-xl px-4 py-3 text-xs">
                   <Info className="h-4 w-4 shrink-0 mt-0.5" />

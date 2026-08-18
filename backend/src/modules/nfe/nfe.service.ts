@@ -64,7 +64,9 @@ export class NFeService {
     const numero = await proximoNumero(this.prisma, tenantId, `nfe:${filialId}:55:1`, ultimo?.numero || 0);
 
     const valorNfe = r2(Number(pedido.valorTotal) + calc.totais.valorIcmsSt + calc.totais.valorIpi);
-    const aplicaReforma = Number(filial.crt || 1) !== 1 && new Date() >= new Date('2026-08-03T00:00:00-03:00');
+    // Regime regular = CRT 2 (Simples excesso) ou 3 (Normal). Simples (1) e MEI (4) ficam de fora da reforma IBS/CBS.
+    const crtNum = Number(filial.crt || 1);
+    const aplicaReforma = (crtNum === 2 || crtNum === 3) && new Date() >= new Date('2026-08-03T00:00:00-03:00');
     const reformaPorProduto = new Map(pedido.itens.map((item: any) => {
       const base = r2(Number(item.valorTotal) - Number(item.desconto || 0));
       const aUf = aplicaReforma ? Number(item.produto.aliquotaIbsUf || 0) : 0;

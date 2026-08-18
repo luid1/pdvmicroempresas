@@ -2,8 +2,8 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { validarCnpjCpf, validarIE, validarNcm, validarCfop, isCsosn, isCstIcms } from '../../common/utils/fiscal-validators.util';
 
-/** Regimes tributários suportados no cálculo. */
-export type RegimeTributario = 'SIMPLES_NACIONAL' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL';
+/** Regimes tributários suportados no cálculo. MEI apura como o Simples na nota. */
+export type RegimeTributario = 'SIMPLES_NACIONAL' | 'MEI' | 'LUCRO_PRESUMIDO' | 'LUCRO_REAL';
 
 /**
  * Alíquotas de PIS/COFINS por apuração.
@@ -79,6 +79,7 @@ export class FiscalService {
   /** Normaliza o texto do regime da filial para o enum interno (tolera "SIMPLES"). */
   private normalizarRegime(valor: unknown): RegimeTributario {
     const v = String(valor ?? '').toUpperCase();
+    if (v.includes('MEI')) return 'MEI';
     if (v.includes('REAL')) return 'LUCRO_REAL';
     if (v.includes('PRESUMIDO')) return 'LUCRO_PRESUMIDO';
     return 'SIMPLES_NACIONAL';
@@ -151,7 +152,8 @@ export class FiscalService {
   }): ImpostoItem {
     const { valorItem, interestadual, consumidorFinal, regra, produto, tipoOperacao, regime } = params;
     const dev = tipoOperacao === 'DEVOLUCAO';
-    const simples = regime === 'SIMPLES_NACIONAL';
+    // MEI emite como o Simples na nota (CSOSN 102, PIS/COFINS no DAS → sem destaque).
+    const simples = regime === 'SIMPLES_NACIONAL' || regime === 'MEI';
 
     // ---- CFOP ----
     let cfop: string;

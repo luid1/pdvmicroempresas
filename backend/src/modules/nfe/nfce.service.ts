@@ -42,9 +42,19 @@ export class NfceService {
     return 'desligado';
   }
 
-  /** true se a emissão de NFC-e está habilitada. */
+  /** true se a emissão de NFC-e está habilitada por variável de ambiente (NFCE_MODO). */
   habilitado(): boolean {
     return this.modo() !== 'desligado';
+  }
+
+  /**
+   * true se a NFC-e deve ser emitida para ESTA filial — turnkey.
+   * Basta o usuário ativar a configuração fiscal no painel (Central Fiscal):
+   * o PDV passa a emitir sem depender de nenhuma variável de ambiente.
+   */
+  async habilitadoParaFilial(tenantId: string, filialId: string): Promise<boolean> {
+    if (this.habilitado()) return true;
+    return this.configuracaoFiscal.deveTransmitir(tenantId, filialId);
   }
 
   /** Seleciona o provider conforme o modo. */

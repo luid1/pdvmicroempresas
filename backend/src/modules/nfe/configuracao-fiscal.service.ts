@@ -95,6 +95,36 @@ export class ConfiguracaoFiscalService {
     };
   }
 
+  /**
+   * Ping real no provedor Focus NFe: valida o token com autenticação Basic
+   * (token como usuário, senha vazia). Usa GET numa referência sentinela:
+   *   token inválido  → HTTP 401/403 ("permissao_negada")  → vermelho
+   *   token válido     → HTTP 404 ("nao_encontrado", ref inexistente) → verde
+   * (o endpoint /v2/empresas responde 404 mesmo com token falso, por isso não serve.)
+   */
+  private async pingFocus(config: any): Promise<{ ok: boolean; mensagem: string }> {
+    let token = '';
+    try { token = this.decifrar(config.tokenCriptografado); }
+    catch { return { ok: false, mensagem: 'Não foi possível descriptografar o token salvo (verifique FISCAL_ENC_KEY).' }; }
+    const ambiente = (config.ambiente || 'HOMOLOGACAO').toLowerCase();
+    const baseUrl = (config.baseUrl || (ambiente === 'producao' ? 'https://api.focusnfe.com.br' : 'https://homologacao.focusnfe.com.br')).replace(/\/$/, '');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const resp = await fetch(`${baseUrl}/v2/nfe/lumin-teste-conexao?completa=1`, {
+        method: 'GET',
+        headers: { Authorization: `Basic ${Buffer.from(`${token}:`).toString('base64')}`, Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      if (resp.status === 401 || resp.status === 403) return { ok: false, mensagem: `Token recusado pelo provedor (HTTP ${resp.status}). Confira o token da Focus NFe e o ambiente (homologação × produção).` };
+      if (resp.status === 404 || resp.ok) return { ok: true, mensagem: `Conexão com a Focus NFe validada (${ambiente}). Token aceito.` };
+      return { ok: false, mensagem: `Provedor respondeu HTTP ${resp.status}. Tente novamente em instantes.` };
+    } catch (e: any) {
+      if (e?.name === 'AbortError') return { ok: false, mensagem: 'Tempo esgotado (12s) ao contatar o provedor. Verifique a rede/URL.' };
+      return { ok: false, mensagem: `Falha de rede ao contatar o provedor: ${e?.message || e}.` };
+    } finally { clearTimeout(timeout); }
+  }
+
   async validar(tenantId: string, filialId: string) {
     const filial = await this.validarFilial(tenantId, filialId);
     const config = await this.prisma.configuracaoFiscal.findFirst({ where: { tenantId, filialId } });
@@ -102,12 +132,23 @@ export class ConfiguracaoFiscalService {
     const pendencias = [!filial.cnpj && 'CNPJ', !filial.ie && 'IE', !filial.crt && 'CRT', !config.tokenCriptografado && 'token do provedor'].filter(Boolean);
     const adapterDisponivel = config.provedor === 'FOCUS_NFE';
     if (!adapterDisponivel) pendencias.push('adaptador do provedor');
+
+    // Se os dados mínimos estão presentes, testa a conexão de verdade com o provedor.
+    let conexao: { ok: boolean; mensagem: string } | null = null;
+    if (pendencias.length === 0 && config.tokenCriptografado) {
+      conexao = await this.pingFocus(config);
+      if (!conexao.ok) pendencias.push('conexão com o provedor');
+    }
+
     const ok = pendencias.length === 0;
+    const mensagemStatus = ok
+      ? `${conexao?.mensagem || 'Dados mínimos conferidos.'} Realize emissões de homologação antes de ativar produção.`
+      : `Pendências: ${pendencias.join(', ')}.${conexao && !conexao.ok ? ` ${conexao.mensagem}` : ''}`;
     const atualizado = await this.prisma.configuracaoFiscal.update({ where: { id: config.id }, data: {
       statusConexao: ok ? 'PRONTO_HOMOLOGACAO' : 'PENDENTE', ultimoTesteEm: new Date(),
-      mensagemStatus: ok ? 'Dados mínimos conferidos. Realize emissões de homologação antes de ativar produção.' : `Pendências: ${pendencias.join(', ')}.`,
+      mensagemStatus,
     } });
-    return { ...this.seguro(atualizado, filial), ok, pendencias };
+    return { ...this.seguro(atualizado, filial), ok, pendencias, conexao };
   }
 
   async resolverCredencial(tenantId?: string, filialId?: string) {

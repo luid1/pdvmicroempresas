@@ -138,7 +138,7 @@ export class RealNfeProvider implements NfeProvider {
       uf_destinatario: dest.uf, cep_destinatario: dest.cep, telefone_destinatario: dest.telefone, pais_destinatario: 'Brasil',
       valor_produtos: Number(nfe.valorProdutos || 0), valor_frete: Number(nfe.valorFrete || 0), valor_desconto: Number(nfe.valorDesconto || 0),
       valor_total: Number(nfe.valorNfe || 0), formas_pagamento: pagamentos,
-      items: (nfe.itens || []).map((item: any, indice: number) => this.item(item, indice, Number(filial.crt || 1) !== 1)),
+      items: (nfe.itens || []).map((item: any, indice: number) => this.item(item, indice, [2, 3].includes(Number(filial.crt || 1)))),
     });
   }
 

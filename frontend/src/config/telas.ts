@@ -81,7 +81,7 @@ export const TELAS: TelaDef[] = [
   { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt },
   { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal', icon: BarChart3 },
   { key: 'grupo:gestao-fiscal', label: 'Gestão Fiscal', grupo: 'Fiscal', icon: ShieldCheck, pasta: true, submenu: [
-    { key: '/fiscal/configuracao', label: 'Central SEFAZ', icon: ShieldCheck, hint: 'Ambiente, credenciais e homologação' },
+    { key: '/fiscal/configuracao', label: 'Central Fiscal', icon: ShieldCheck, hint: 'Cole o token, teste e ative a emissão' },
     { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras e tributação por operação' },
     { key: '/fiscal/gestao', label: 'Visão Fiscal Consolidada', icon: Receipt, hint: 'Documentos e acompanhamento fiscal' },
   ] },
@@ -123,7 +123,7 @@ export const TELAS: TelaDef[] = [
   { key: '/wms/devolucoes-compra', label: 'Devoluções ao Fornecedor', grupo: 'Compras', icon: Undo2, oculto: true },
   { key: '/compras/app', label: 'Aplicativo de Compras', grupo: 'Compras', icon: ShoppingCart, oculto: true },
   { key: '/fiscal/matriz', label: 'Matriz Fiscal', grupo: 'Fiscal', icon: FileText, oculto: true },
-  { key: '/fiscal/configuracao', label: 'Central SEFAZ', grupo: 'Fiscal', icon: ShieldCheck, oculto: true },
+  { key: '/fiscal/configuracao', label: 'Central Fiscal', grupo: 'Fiscal', icon: ShieldCheck, oculto: true },
   { key: '/fiscal/gestao', label: 'Visão Fiscal Consolidada', grupo: 'Fiscal', icon: Receipt, oculto: true },
   { key: '/financeiro/dre', label: 'DRE & Relatórios', grupo: 'Financeiro', icon: BarChart3, oculto: true },
   { key: '/financeiro/controladoria', label: 'Controladoria', grupo: 'Financeiro', icon: Landmark, oculto: true },

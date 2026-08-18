@@ -7,8 +7,15 @@ echo   MERCADO PDV - iniciando tudo...
 echo ============================================
 echo.
 
-echo [1/3] Subindo o banco PostgreSQL (porta 5432)...
-"%~dp0pgsql\bin\pg_ctl.exe" -D "%~dp0pgdata" -l "%~dp0pg.log" -o "-p 5432" start
+echo [1/3] Garantindo o PostgreSQL (servico do Windows na porta 5432)...
+sc query postgresql-x64-16 | find "RUNNING" >nul
+if errorlevel 1 (
+  echo    PostgreSQL parado - iniciando o servico postgresql-x64-16...
+  net start postgresql-x64-16
+  if errorlevel 1 echo    [AVISO] Nao consegui iniciar automaticamente. Rode este .bat como Administrador ou inicie o servico manualmente.
+) else (
+  echo    PostgreSQL ja esta rodando. OK.
+)
 echo.
 
 echo [2/3] Subindo o backend (porta 3012)...

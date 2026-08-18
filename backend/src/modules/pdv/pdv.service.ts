@@ -293,11 +293,12 @@ export class PdvService {
       usuario,
     });
 
-    // 5) NFC-e (modelo 65) — CAMADA PLUGÁVEL, desligada por padrão (NFCE_MODO).
+    // 5) NFC-e (modelo 65) — CAMADA PLUGÁVEL. Liga sozinha quando a Central Fiscal
+    //    da filial está ativa (turnkey) OU quando NFCE_MODO está setado no ambiente.
     //    A venda já foi registrada (estoque + caixa); a emissão fiscal é um extra
     //    que NUNCA pode derrubar a venda. Falha vira apenas um aviso no cupom.
     let fiscal: any = null;
-    if (this.nfce.habilitado()) {
+    if (await this.nfce.habilitadoParaFilial(tenantId, dto.filialId)) {
       try {
         const r = await this.nfce.emitirDePedido(tenantId, pedido.id, dto.filialId, usuario.id);
         fiscal = {

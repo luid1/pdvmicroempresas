@@ -67,7 +67,8 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
   const ed = item?.endereco || {};
   const [f, setF] = useState({
     nome: item?.nome || '', codigo: item?.codigo || '', tipo: item?.tipo || 'BOX_CEASA', cnpj: item?.cnpj || '',
-    ie: item?.ie || '', responsavel: item?.responsavel || '', capacidadePaletes: String(item?.capacidadePaletes ?? ''),
+    ie: item?.ie || '', regimeTributario: item?.regimeTributario || 'SIMPLES_NACIONAL',
+    responsavel: item?.responsavel || '', capacidadePaletes: String(item?.capacidadePaletes ?? ''),
     ocupacaoPaletes: String(item?.ocupacaoPaletes ?? '0'), camaraFria: item?.camaraFria ?? false, ativo: item?.ativo ?? true,
     rua: ed.rua || '', cidade: ed.cidade || '', uf: ed.uf || 'SP',
   });
@@ -79,6 +80,7 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
     setSalvando(true); setErro('');
     const payload: any = {
       nome: f.nome.trim(), tipo: f.tipo, cnpj: f.cnpj.trim() || null, ie: f.ie.trim() || null,
+      regimeTributario: f.regimeTributario,
       responsavel: f.responsavel.trim() || null,
       capacidadePaletes: f.capacidadePaletes === '' ? null : Number(f.capacidadePaletes),
       ocupacaoPaletes: Number(f.ocupacaoPaletes) || 0, camaraFria: f.camaraFria, ativo: f.ativo,
@@ -106,6 +108,21 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
             <Campo label="CNPJ atrelado"><input value={f.cnpj} onChange={e => set('cnpj', e.target.value)} className={inp} /></Campo>
             <Campo label="Inscrição Estadual"><input value={f.ie} onChange={e => set('ie', e.target.value)} className={inp} /></Campo>
           </div>
+          <div className="grid grid-cols-1 gap-3">
+            <Campo label="Regime tributário (define o CRT e como a nota é emitida)">
+              <select value={f.regimeTributario} onChange={e => set('regimeTributario', e.target.value)} className={inp}>
+                <option value="SIMPLES_NACIONAL">Simples Nacional (CRT 1)</option>
+                <option value="MEI">MEI — Microempreendedor Individual (CRT 4)</option>
+                <option value="LUCRO_PRESUMIDO">Lucro Presumido (CRT 3)</option>
+                <option value="LUCRO_REAL">Lucro Real (CRT 3)</option>
+              </select>
+            </Campo>
+          </div>
+          {f.regimeTributario === 'MEI' && (
+            <p className="text-xs text-[#a9760a] bg-amber-500/[0.08] border border-[#E8A317]/40 rounded-lg px-3 py-2">
+              <b>MEI:</b> nota sai como Simples (CSOSN 102, sem destaque de PIS/COFINS) e fora da reforma IBS/CBS. Atenção ao limite de faturamento (~R$ 81 mil/ano) e às atividades permitidas — confirme com seu contador.
+            </p>
+          )}
         </Step>
 
         <Step title="Operação & armazenagem" icon={<User className="h-3.5 w-3.5" />} hint="Avançar para localização"
