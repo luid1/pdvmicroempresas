@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import {
-  Eye, EyeOff, Lock, Mail, ArrowLeft, Delete,
+  Eye, EyeOff, Lock, Mail, ArrowLeft,
   Store, Shield, Crown, ShoppingBag, Boxes, Building2, User as UserIcon,
 } from 'lucide-react';
 import { rotaInicial } from '../config/telas';
 
-/** Tenant "vinculado" a este computador (gravado após o 1º login). */
+/** Tenant "vinculado" a este computador (gravado após liberar o 1º acesso). */
 type PairedTenant = { id: string; nome: string; token: string };
 type Perfil = {
   id: string;
@@ -27,8 +27,32 @@ const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string
 };
 const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-[#D8DADD]', bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' };
 
+/**
+ * "Setor" que agrupa os perfis na tela de seleção. Hoje o setor é o próprio
+ * cargo do usuário — assim, quando o admin cadastra a "Maria" como caixa, ela
+ * aparece automaticamente no grupo "Caixa / Vendas". A ordem controla a posição
+ * das seções na tela.
+ */
+const SETORES: Record<string, { label: string; ordem: number }> = {
+  ADMIN:          { label: 'Administração', ordem: 1 },
+  GERENTE:        { label: 'Gerência',      ordem: 2 },
+  OPERADOR_CAIXA: { label: 'Caixa / Vendas', ordem: 3 },
+  ESTOQUISTA:     { label: 'Estoque',       ordem: 4 },
+};
+const setorDoRole = (nome: string) => SETORES[nome] || { label: 'Outros', ordem: 99 };
+
 const iniciais = (nome: string) =>
   nome.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
+
+/** Mascara o CNPJ progressivamente (00.000.000/0001-00) para exibição. */
+function formatCnpj(v: string) {
+  const d = v.replace(/\D/g, '').slice(0, 14);
+  return d
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2');
+}
 
 /**
  * fetch com timeout — evita que a tela fique presa em "Entrando..." para sempre
@@ -169,8 +193,11 @@ export default function LoginPage() {
     } catch { return null; }
   });
 
-  // 'PAIR' = vincular loja (e-mail+senha) · 'PICKER' = escolher perfil · 'PIN' = digitar PIN/senha
-  const [modo, setModo] = useState<'PAIR' | 'PICKER' | 'PIN'>(paired ? 'PICKER' : 'PAIR');
+  // 'PAIR'   = liberar o computador (CNPJ + senha do admin)
+  // 'DONO'   = acesso do dono da plataforma (e-mail + senha)
+  // 'PICKER' = escolher o perfil (agrupado por setor)
+  // 'SENHA'  = digitar a senha do perfil escolhido
+  const [modo, setModo] = useState<'PAIR' | 'DONO' | 'PICKER' | 'SENHA'>(paired ? 'PICKER' : 'PAIR');
   const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [carregandoPerfis, setCarregandoPerfis] = useState(false);
   const [selecionado, setSelecionado] = useState<Perfil | null>(null);
@@ -208,15 +235,18 @@ export default function LoginPage() {
     }
   }
 
-  /** Grava a sessão no localStorage e redireciona para a tela inicial do perfil. */
-  function entrar(data: any) {
+  /**
+   * Grava a sessão no localStorage e redireciona. Por padrão vai para a tela
+   * inicial do perfil; `destino` força uma rota (ex.: o dono da plataforma).
+   */
+  function entrar(data: any, destino?: string) {
     const authUser = { ...data.usuario, tenantId: data.tenant.id };
     const filiais = data.usuario.filiais || [];
     localStorage.setItem('wms_token', data.token);
     localStorage.setItem('wms_user', JSON.stringify(authUser));
     localStorage.setItem('wms_filiais', JSON.stringify(filiais));
     if (filiais[0]) localStorage.setItem('wms_filial', JSON.stringify(filiais[0]));
-    window.location.href = rotaInicial(data.usuario.telas, data.usuario.role, data.usuario.telaInicial);
+    window.location.href = destino || rotaInicial(data.usuario.telas, data.usuario.role, data.usuario.telaInicial);
   }
 
   function desvincular() {
@@ -286,6 +316,7 @@ export default function LoginPage() {
             error={error}
             setError={setError}
             setServerStatus={setServerStatus}
+            onDono={() => { setError(''); setModo('DONO'); }}
             onPaired={(tenant) => {
               const p = {
                 id: tenant.id,
@@ -295,8 +326,20 @@ export default function LoginPage() {
               localStorage.setItem(PAIR_KEY, JSON.stringify(p));
               setPaired(p);
               setError('');
-              setModo('PICKER'); // vincula e mostra os perfis (não entra direto)
+              setModo('PICKER'); // libera e mostra os perfis (não entra direto)
             }}
+          />
+        )}
+
+        {modo === 'DONO' && (
+          <OwnerForm
+            loading={loading}
+            setLoading={setLoading}
+            error={error}
+            setError={setError}
+            setServerStatus={setServerStatus}
+            onVoltar={() => { setError(''); setModo('PAIR'); }}
+            onEntrar={(data) => entrar(data, '/plataforma')}
           />
         )}
 
@@ -306,31 +349,27 @@ export default function LoginPage() {
             perfis={perfis}
             carregando={carregandoPerfis}
             error={error}
-            onSelecionar={(p) => { setSelecionado(p); setError(''); setModo('PIN'); }}
+            onSelecionar={(p) => { setSelecionado(p); setError(''); setModo('SENHA'); }}
             onDesvincular={desvincular}
           />
         )}
 
-        {modo === 'PIN' && selecionado && (
-          <PinPad
+        {modo === 'SENHA' && selecionado && (
+          <SenhaForm
             perfil={selecionado}
             loading={loading}
             error={error}
             setError={setError}
             onVoltar={() => { setSelecionado(null); setError(''); setModo('PICKER'); }}
-            onEntrar={async (credencial) => {
+            onEntrar={async (senha) => {
               if (loading) return; // evita envio duplicado (duplo clique / Enter repetido)
               setLoading(true);
               setError('');
               try {
-                const url = credencial.tipo === 'pin' ? '/api/v1/auth/login-pin' : '/api/v1/auth/login-por-id';
-                const body = credencial.tipo === 'pin'
-                  ? { usuarioId: selecionado.id, pin: credencial.valor }
-                  : { usuarioId: selecionado.id, password: credencial.valor };
-                const res = await fetchComServidor(url, {
+                const res = await fetchComServidor('/api/v1/auth/login-por-id', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(body),
+                  body: JSON.stringify({ usuarioId: selecionado.id, password: senha }),
                 }, setServerStatus);
                 const data = await lerJson(res);
                 entrar(data);
@@ -353,18 +392,145 @@ export default function LoginPage() {
 }
 
 /* ────────────────────────────────────────────────────────────
-   PASSO 1 — Vincular o computador à loja (e-mail + senha)
+   PASSO 1 — Liberar o computador (CNPJ + senha do administrador)
 ──────────────────────────────────────────────────────────── */
-function PairForm({ loading, setLoading, error, setError, setServerStatus, onPaired }: {
+function PairForm({ loading, setLoading, error, setError, setServerStatus, onDono, onPaired }: {
   loading: boolean;
   setLoading: (v: boolean) => void;
   error: string;
   setError: (v: string) => void;
   setServerStatus: AtualizarStatus;
+  onDono: () => void;
   onPaired: (tenant: any) => void;
 }) {
-  const [email, setEmail] = useState('');
   const [cnpj, setCnpj] = useState('');
+  const [senha, setSenha] = useState('');
+  const [showPwd, setShowPwd] = useState(false);
+  const cnpjRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { setTimeout(() => cnpjRef.current?.focus(), 100); }, []);
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetchComServidor('/api/v1/auth/vincular', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cnpj: cnpj.trim(), senha }),
+      }, setServerStatus);
+      const data = await lerJson(res);
+      onPaired({ ...data.tenant, token: data.pairToken });
+    } catch (err: any) {
+      setError(err.message);
+      setSenha('');
+      setLoading(false);
+    } finally {
+      setServerStatus('');
+    }
+  };
+
+  return (
+    <div className="w-full max-w-sm space-y-6">
+      <div>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] border border-[#CBE4DE] px-3 py-1 mb-3">
+          <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
+          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Liberar este computador</span>
+        </div>
+        <h2 className="font-display text-2xl font-bold text-[#202123]">Acesse sua loja</h2>
+        <p className="text-[#6F7075] text-sm mt-1">
+          Informe o <b className="text-[#202123]">CNPJ</b> e a <b className="text-[#202123]">senha do administrador</b> <b className="text-[#202123]">uma vez</b>. Depois, cada pessoa entra pelo próprio perfil.
+        </p>
+      </div>
+
+      <div className="relative bg-white border border-[#E1E3E5] rounded-2xl p-6 space-y-4 shadow-[0_12px_36px_rgba(22,23,29,0.08)]">
+        <form onSubmit={submit} className="space-y-4">
+          <div>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">CNPJ da loja</label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <input
+                ref={cnpjRef}
+                inputMode="numeric"
+                maxLength={18}
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                placeholder="00.000.000/0001-00"
+                value={cnpj}
+                onChange={(e) => setCnpj(formatCnpj(e.target.value))}
+                required
+                autoComplete="off"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha do administrador</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <input
+                type={showPwd ? 'text' : 'password'}
+                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                placeholder="Senha do administrador..."
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
+                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+              <span>✕</span> {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !cnpj || !senha}
+            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
+          >
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
+                Verificando...
+              </span>
+            ) : 'Liberar e ver perfis'}
+          </button>
+        </form>
+      </div>
+
+      <div className="flex flex-col items-center gap-2">
+        <button onClick={onDono} className="text-[#7E7F84] hover:text-[#202123] text-xs inline-flex items-center gap-1.5 transition-colors">
+          <Crown className="h-3.5 w-3.5" /> Sou o dono da plataforma
+        </button>
+        <p className="text-center text-[#7E7F84] text-xs">
+          Ainda não tem uma conta?{' '}
+          <a href={`${SITE_URL}/assinar.html`} className="text-[#0F8A72] hover:text-[#0B6F5C] font-semibold">
+            Comece agora
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ────────────────────────────────────────────────────────────
+   ACESSO DO DONO DA PLATAFORMA — e-mail + senha → /plataforma
+──────────────────────────────────────────────────────────── */
+function OwnerForm({ loading, setLoading, error, setError, setServerStatus, onVoltar, onEntrar }: {
+  loading: boolean;
+  setLoading: (v: boolean) => void;
+  error: string;
+  setError: (v: string) => void;
+  setServerStatus: AtualizarStatus;
+  onVoltar: () => void;
+  onEntrar: (data: any) => void;
+}) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
@@ -378,14 +544,16 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
       const res = await fetchComServidor('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          password,
-          ...(cnpj.trim() ? { cnpj: cnpj.trim() } : {}),
-        }),
+        body: JSON.stringify({ email: email.trim(), password }),
       }, setServerStatus);
       const data = await lerJson(res);
-      onPaired({ ...data.tenant, token: data.pairToken });
+      if (!data.usuario?.isSuperAdmin) {
+        setError('Este acesso não é de dono da plataforma. Use o acesso da loja.');
+        setPassword('');
+        setLoading(false);
+        return;
+      }
+      onEntrar(data);
     } catch (err: any) {
       setError(err.message);
       setPassword('');
@@ -397,50 +565,34 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
 
   return (
     <div className="w-full max-w-sm space-y-6">
+      <button onClick={onVoltar} className="text-[#7E7F84] hover:text-[#202123] text-sm inline-flex items-center gap-1.5 transition-colors">
+        <ArrowLeft className="h-4 w-4" /> Voltar para o acesso da loja
+      </button>
+
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] border border-[#CBE4DE] px-3 py-1 mb-3">
-          <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
-          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Primeiro acesso</span>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#E4F3EF] border border-[#CBE4DE] px-3 py-1 mb-3">
+          <Crown className="h-3.5 w-3.5 text-[#0B6F5C]" />
+          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Dono da plataforma</span>
         </div>
-        <h2 className="font-display text-2xl font-bold text-[#202123]">Acesse sua loja</h2>
-        <p className="text-[#6F7075] text-sm mt-1">
-          Entre <b className="text-[#202123]">uma vez</b> com o acesso da empresa. Depois, cada pessoa usa o próprio perfil.
-        </p>
+        <h2 className="font-display text-2xl font-bold text-[#202123]">Painel da plataforma</h2>
+        <p className="text-[#6F7075] text-sm mt-1">Acesso do administrador do SaaS — entra direto no painel.</p>
       </div>
 
       <div className="relative bg-white border border-[#E1E3E5] rounded-2xl p-6 space-y-4 shadow-[0_12px_36px_rgba(22,23,29,0.08)]">
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">E-mail da loja</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">E-mail</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
               <input
                 ref={emailRef}
                 type="email"
                 className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
-                placeholder="voce@empresa.com"
+                placeholder="dono@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="username"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">
-              CNPJ <span className="normal-case tracking-normal text-[#9A9BA0]">(se o e-mail atende mais de uma empresa)</span>
-            </label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
-              <input
-                inputMode="numeric"
-                maxLength={18}
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
-                placeholder="00.000.000/0001-00"
-                value={cnpj}
-                onChange={(e) => setCnpj(e.target.value)}
-                autoComplete="organization"
               />
             </div>
           </div>
@@ -480,23 +632,16 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onPai
                 <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
                 Verificando...
               </span>
-            ) : 'Vincular e ver perfis'}
+            ) : 'Entrar no painel'}
           </button>
         </form>
       </div>
-
-      <p className="text-center text-[#7E7F84] text-xs">
-        Ainda não tem uma conta?{' '}
-        <a href={`${SITE_URL}/assinar.html`} className="text-[#0F8A72] hover:text-[#0B6F5C] font-semibold">
-          Comece agora
-        </a>
-      </p>
     </div>
   );
 }
 
 /* ────────────────────────────────────────────────────────────
-   PASSO 2 — Escolher o perfil (cartões)
+   PASSO 2 — Escolher o perfil (cartões agrupados por setor)
 ──────────────────────────────────────────────────────────── */
 function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, onDesvincular }: {
   tenantNome: string;
@@ -506,6 +651,15 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
   onSelecionar: (p: Perfil) => void;
   onDesvincular: () => void;
 }) {
+  // Agrupa os perfis por setor (cargo) e ordena as seções.
+  const grupos = Object.values(
+    perfis.reduce((acc, p) => {
+      const s = setorDoRole(p.role.nome);
+      (acc[s.label] ??= { label: s.label, ordem: s.ordem, itens: [] }).itens.push(p);
+      return acc;
+    }, {} as Record<string, { label: string; ordem: number; itens: Perfil[] }>),
+  ).sort((a, b) => a.ordem - b.ordem);
+
   return (
     <div className="w-full max-w-md space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -534,30 +688,38 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
           Nenhum perfil ativo encontrado nesta loja.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3">
-          {perfis.map((p) => {
-            const ui = roleUi(p.role.nome);
-            return (
-              <button
-                key={p.id}
-                onClick={() => onSelecionar(p)}
-                className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white border border-[#E1E3E5] p-5 shadow-[0_8px_24px_rgba(22,23,29,0.05)] transition-all hover:-translate-y-0.5 hover:border-[#0F8A72]/35 hover:shadow-[0_12px_28px_rgba(22,23,29,0.08)] focus:outline-none focus:ring-2 ${ui.ring}`}
-              >
-                <div className={`flex h-14 w-14 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
-                  <span className={`font-display text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
-                </div>
-                <div className="text-center">
-                  <p className="text-[#202123] text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
-                  <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-medium ${ui.text}`}>
-                    <ui.Icon className="h-3 w-3" /> {ui.label}
-                  </span>
-                </div>
-                {!p.temPin && (
-                  <span className="absolute top-2 right-2 text-[9px] text-[#7E7F84] bg-[#F1F2F2] rounded px-1.5 py-0.5">senha</span>
-                )}
-              </button>
-            );
-          })}
+        <div className="space-y-5">
+          {grupos.map((g) => (
+            <section key={g.label} className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="font-plex-mono text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.14em]">{g.label}</span>
+                <span className="h-px flex-1 bg-[#E7E9E9]" />
+                <span className="text-[10px] text-[#A7A8AC]">{g.itens.length}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {g.itens.map((p) => {
+                  const ui = roleUi(p.role.nome);
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => onSelecionar(p)}
+                      className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white border border-[#E1E3E5] p-5 shadow-[0_8px_24px_rgba(22,23,29,0.05)] transition-all hover:-translate-y-0.5 hover:border-[#0F8A72]/35 hover:shadow-[0_12px_28px_rgba(22,23,29,0.08)] focus:outline-none focus:ring-2 ${ui.ring}`}
+                    >
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
+                        <span className={`font-display text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[#202123] text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
+                        <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-medium ${ui.text}`}>
+                          <ui.Icon className="h-3 w-3" /> {ui.label}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
       )}
 
@@ -571,40 +733,22 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
 }
 
 /* ────────────────────────────────────────────────────────────
-   PASSO 3 — Digitar o PIN (ou senha, se o perfil não tiver PIN)
+   PASSO 3 — Digitar a senha do perfil escolhido
 ──────────────────────────────────────────────────────────── */
-function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
+function SenhaForm({ perfil, loading, error, setError, onVoltar, onEntrar }: {
   perfil: Perfil;
   loading: boolean;
   error: string;
   setError: (v: string) => void;
   onVoltar: () => void;
-  onEntrar: (c: { tipo: 'pin' | 'senha'; valor: string }) => void;
+  onEntrar: (senha: string) => void;
 }) {
   const ui = roleUi(perfil.role.nome);
-  const [usarSenha, setUsarSenha] = useState(!perfil.temPin);
-  const [pin, setPin] = useState('');
   const [senha, setSenha] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const enviouRef = useRef(false);
 
-  // Autoenvio quando o PIN chega a 4 dígitos.
-  useEffect(() => {
-    if (!usarSenha && pin.length === 4 && !loading && !enviouRef.current) {
-      enviouRef.current = true;
-      onEntrar({ tipo: 'pin', valor: pin });
-    }
-    if (pin.length < 4) enviouRef.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pin, usarSenha, loading]);
-
-  // Limpa o PIN quando dá erro, pra tentar de novo.
-  useEffect(() => { if (error) setPin(''); }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const digitar = (d: string) => { setError(''); setPin((p) => (p.length < 4 ? p + d : p)); };
-  const apagar = () => { setError(''); setPin((p) => p.slice(0, -1)); };
-
-  const teclas = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
+  // Limpa a senha quando dá erro, pra tentar de novo.
+  useEffect(() => { if (error) setSenha(''); }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="w-full max-w-sm space-y-6">
@@ -625,114 +769,47 @@ function PinPad({ perfil, loading, error, setError, onVoltar, onEntrar }: {
         </div>
       </div>
 
-      {!usarSenha ? (
-        <>
-          <p className="text-center text-[#6F7075] text-sm">Digite seu PIN de 4 dígitos</p>
-
-          {/* Bolinhas do PIN */}
-          <div className="flex items-center justify-center gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <span
-                key={i}
-                className={`h-3.5 w-3.5 rounded-full transition-all ${i < pin.length ? 'bg-[#0F8A72] scale-110' : 'bg-[#D8DADD]'}`}
-              />
-            ))}
-          </div>
-
-          {error && <p className="text-center text-[#B63B32] text-sm">{error}</p>}
-
-          {/* Teclado numérico */}
-          <div className="grid grid-cols-3 gap-3 max-w-[260px] mx-auto">
-            {teclas.map((t) => (
-              <button
-                key={t}
-                onClick={() => digitar(t)}
-                disabled={loading}
-                className="h-16 rounded-2xl bg-white border border-[#E1E3E5] text-[#202123] text-2xl font-display font-semibold shadow-[0_4px_14px_rgba(22,23,29,0.04)] hover:bg-[#F1F7F5] hover:border-[#0F8A72]/35 active:scale-95 transition-all disabled:opacity-40"
-              >
-                {t}
-              </button>
-            ))}
-            <div />
-            <button
-              onClick={() => digitar('0')}
-              disabled={loading}
-              className="h-16 rounded-2xl bg-white border border-[#E1E3E5] text-[#202123] text-2xl font-display font-semibold shadow-[0_4px_14px_rgba(22,23,29,0.04)] hover:bg-[#F1F7F5] hover:border-[#0F8A72]/35 active:scale-95 transition-all disabled:opacity-40"
-            >
-              0
-            </button>
-            <button
-              onClick={apagar}
-              disabled={loading}
-              className="h-16 rounded-2xl bg-[#F1F2F2] border border-[#E1E3E5] text-[#6F7075] flex items-center justify-center hover:bg-[#E7E9E9] active:scale-95 transition-all disabled:opacity-40"
-            >
-              <Delete className="h-6 w-6" />
+      <form
+        onSubmit={(e) => { e.preventDefault(); if (senha && !loading) onEntrar(senha); }}
+        className="space-y-4"
+      >
+        <div>
+          <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+            <input
+              autoFocus
+              type={showPwd ? 'text' : 'password'}
+              className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+              placeholder="Digite sua senha..."
+              value={senha}
+              onChange={(e) => { setError(''); setSenha(e.target.value); }}
+              required
+            />
+            <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
+              {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
+        </div>
 
-          {loading && (
-            <div className="flex items-center justify-center gap-2 text-[#6F7075] text-sm">
-              <span className="animate-spin h-4 w-4 border-2 border-[#0F8A72]/25 border-t-[#0F8A72] rounded-full" /> Entrando...
-            </div>
-          )}
+        {error && (
+          <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+            <span>✕</span> {error}
+          </div>
+        )}
 
-          <p className="text-center">
-            <button onClick={() => { setError(''); setUsarSenha(true); }} className="text-[#7E7F84] hover:text-[#202123] text-xs transition-colors">
-              Prefiro entrar com a senha
-            </button>
-          </p>
-        </>
-      ) : (
-        <form
-          onSubmit={(e) => { e.preventDefault(); if (senha) onEntrar({ tipo: 'senha', valor: senha }); }}
-          className="space-y-4"
+        <button
+          type="submit"
+          disabled={loading || !senha}
+          className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
         >
-          <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
-              <input
-                autoFocus
-                type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
-                placeholder="Digite sua senha..."
-                value={senha}
-                onChange={(e) => { setError(''); setSenha(e.target.value); }}
-                required
-              />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
-                {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
-              <span>✕</span> {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading || !senha}
-            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
-          >
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
-              </span>
-            ) : 'Entrar no Sistema'}
-          </button>
-
-          {perfil.temPin && (
-            <p className="text-center">
-              <button type="button" onClick={() => { setError(''); setUsarSenha(false); }} className="text-[#7E7F84] hover:text-[#202123] text-xs transition-colors">
-                Voltar para o PIN
-              </button>
-            </p>
-          )}
-        </form>
-      )}
+          {loading ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
+            </span>
+          ) : 'Entrar no Sistema'}
+        </button>
+      </form>
     </div>
   );
 }

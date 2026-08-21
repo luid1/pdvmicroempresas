@@ -1196,7 +1196,7 @@ function NovaOCModal({
             <div className="grid grid-cols-2 gap-3">
               <Campo label="Fornecedor *">
                 <select value={fornecedorId} onChange={(e) => setFornecedorId(e.target.value)} className="campo">
-                  <option value="">— selecione —</option>
+                  <option value="">Selecione</option>
                   {fornecedores.map((f) => (
                     <option key={f.id} value={f.id}>{nomeForn(f)}</option>
                   ))}
@@ -1227,7 +1227,7 @@ function NovaOCModal({
                   <div key={i} className="rounded-2xl border border-neutral-200 bg-white p-3">
                     <div className="flex items-center gap-2">
                       <select value={it.produtoId} onChange={(e) => escolherProduto(i, e.target.value)} className="campo flex-1">
-                        <option value="">— produto —</option>
+                        <option value="">Selecione o produto</option>
                         {produtos.map((p) => (
                           <option key={p.id} value={p.id}>{p.descricao}</option>
                         ))}

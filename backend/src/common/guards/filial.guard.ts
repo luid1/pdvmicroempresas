@@ -25,6 +25,7 @@ export class FilialGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
     if (!user) return true;                 // rota pública
+    if (user.isSuperAdmin) return true;     // dono da plataforma opera todas as filiais/lojas
     if (user.role === 'ADMIN') return true; // ADMIN opera todas as filiais
 
     const permitidas: string[] = Array.isArray(user.filiais) ? user.filiais : [];

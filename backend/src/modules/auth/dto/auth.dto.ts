@@ -33,6 +33,20 @@ export class LoginDto {
   cnpj?: string;
 }
 
+export class VincularDto {
+  @ApiProperty({ description: 'CNPJ da loja', example: '00.000.000/0001-00' })
+  @IsString()
+  @IsNotEmpty({ message: 'CNPJ é obrigatório.' })
+  @MaxLength(18)
+  cnpj: string;
+
+  @ApiProperty({ example: 'admin123', description: 'Senha de um administrador da loja' })
+  @IsString()
+  @IsNotEmpty({ message: 'Senha é obrigatória.' })
+  @MaxLength(128)
+  senha: string;
+}
+
 export class LoginPorIdDto {
   @ApiProperty({ description: 'ID do usuário selecionado na tela visual' })
   @IsString()

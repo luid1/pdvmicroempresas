@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
 import { validarCnpj } from '../../common/utils/fiscal-validators.util';
+import { ehDonoPlataforma } from '../../common/utils/plataforma.util';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +36,8 @@ export class AuthService {
     const resolvedTenantId = payload.tenantId;
 
     const usuarios = await this.prisma.usuario.findMany({
-      where: { tenantId: resolvedTenantId, ativo: true },
+      // O dono da plataforma (super-admin) não é um perfil da loja — não aparece aqui.
+      where: { tenantId: resolvedTenantId, ativo: true, isSuperAdmin: false },
       select: {
         id: true,
         nome: true,
@@ -56,6 +58,48 @@ export class AuthService {
   /** Token restrito usado somente para listar os perfis no computador vinculado. */
   private criarPairToken(tenantId: string): string {
     return this.jwt.sign({ tenantId, purpose: 'pair' }, { expiresIn: '30d' });
+  }
+
+  /**
+   * "Libera" (vincula) este computador a uma loja identificada pelo CNPJ.
+   * Exige a senha de um ADMINISTRADOR da loja — assim, a lista de perfis (os
+   * nomes dos funcionários) só aparece para quem o dono/admin autorizou. Feito
+   * uma vez por computador; depois o dia a dia é só escolher o perfil + senha.
+   */
+  async vincularPorCnpj(cnpj: string, senha: string) {
+    const cnpjLimpo = (cnpj || '').replace(/\D/g, '');
+    // Mensagem sempre genérica: não revela se o CNPJ existe nem se a senha errou.
+    const invalido = () =>
+      new UnauthorizedException('CNPJ ou senha do administrador inválidos.');
+    if (!cnpjLimpo) throw invalido();
+
+    const tenant = await this.prisma.tenant.findFirst({
+      where: { OR: [{ cnpj }, { cnpj: cnpjLimpo }], ativo: true },
+      select: { id: true, razaoSocial: true, nomeFantasia: true },
+    });
+    if (!tenant) throw invalido();
+
+    const admins = await this.prisma.usuario.findMany({
+      where: { tenantId: tenant.id, ativo: true, role: { nome: 'ADMIN' } },
+      select: { passwordHash: true },
+    });
+    let autorizado = false;
+    for (const a of admins) {
+      if (await bcrypt.compare(senha, a.passwordHash)) {
+        autorizado = true;
+        break;
+      }
+    }
+    if (!autorizado) throw invalido();
+
+    return {
+      pairToken: this.criarPairToken(tenant.id),
+      tenant: {
+        id: tenant.id,
+        razaoSocial: tenant.razaoSocial,
+        nomeFantasia: tenant.nomeFantasia,
+      },
+    };
   }
 
   async registerTenant(dto: {
@@ -171,6 +215,8 @@ export class AuthService {
         nome: usuario.nome,
         email: usuario.email,
         role: usuario.role.nome,
+        // Dono da plataforma → o frontend mostra o menu "Plataforma".
+        isSuperAdmin: ehDonoPlataforma(usuario.email, usuario.isSuperAdmin),
         telas: usuario.role.telas || [],
         telaInicial: usuario.role.telaInicial || null,
         acoes: usuario.role.acoes || {},

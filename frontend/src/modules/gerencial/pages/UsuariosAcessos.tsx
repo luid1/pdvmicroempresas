@@ -345,7 +345,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
               <div>
                 <label className={lbl}>Tela inicial (onde o usuário cai ao logar)</label>
                 <select value={telaInicial} onChange={e => setTelaInicial(e.target.value)} className={inp}>
-                  <option value="">— primeira tela liberada —</option>
+                  <option value="">Primeira tela liberada</option>
                   {TELAS.filter(t => telas.includes(t.key)).map(t => <option key={t.key} value={t.key}>{t.label}</option>)}
                 </select>
               </div>

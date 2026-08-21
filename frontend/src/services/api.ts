@@ -364,6 +364,21 @@ export type ComandoLuResp =
       };
     };
 
+// Painel do DONO DA PLATAFORMA (SaaS) — cross-tenant, restrito ao super-admin.
+export const plataformaApi = {
+  listarLojas: (params?: { q?: string; status?: string }) =>
+    api.get('/plataforma/lojas', { params }),
+  obterLoja: (id: string) => api.get(`/plataforma/lojas/${id}`),
+  criarLoja: (data: object) => api.post('/plataforma/lojas', data),
+  atualizarLoja: (id: string, data: object) => api.patch(`/plataforma/lojas/${id}`, data),
+  adicionarFilial: (lojaId: string, data: object) =>
+    api.post(`/plataforma/lojas/${lojaId}/filiais`, data),
+  atualizarFilial: (filialId: string, data: object) =>
+    api.put(`/plataforma/filiais/${filialId}`, data),
+  toggleFilial: (filialId: string, ativo: boolean) =>
+    api.patch(`/plataforma/filiais/${filialId}/toggle`, { ativo }),
+};
+
 // Assinatura / capacidade (add-ons contratáveis no painel)
 export const assinaturaApi = {
   me: () => api.get('/assinaturas/me'),

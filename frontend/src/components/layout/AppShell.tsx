@@ -59,14 +59,14 @@ export default function AppShell() {
         // Filtra os subitens do flyout pela permissão da própria rota.
         .map((i) => ({
           ...i,
-          submenu: i.submenu?.filter((s) => podeVerTela(user?.telas, user?.role, s.key)),
+          submenu: i.submenu?.filter((s) => podeVerTela(user?.telas, user?.role, s.key, user?.isSuperAdmin)),
         }))
         // Pasta: aparece se tiver ao menos um filho visível. Página: pela permissão da rota.
         .filter((i) => i.pasta
           ? !!(i.submenu && i.submenu.length > 0)
-          : podeVerTela(user?.telas, user?.role, i.to)),
+          : podeVerTela(user?.telas, user?.role, i.to, user?.isSuperAdmin)),
     }))
-    .filter((g) => g.items.length > 0), [user?.telas, user?.role]);
+    .filter((g) => g.items.length > 0), [user?.telas, user?.role, user?.isSuperAdmin]);
 
   // Flyout (submenu que abre ao passar o mouse sobre o item pai)
   const [flyout, setFlyout] = useState<FlyoutState | null>(null);
@@ -353,7 +353,7 @@ function TelaGuard({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const location = useLocation();
   const path = location.pathname;
-  if (podeVerTela(user?.telas, user?.role, path)) return <>{children}</>;
+  if (podeVerTela(user?.telas, user?.role, path, user?.isSuperAdmin)) return <>{children}</>;
   return <Navigate to={rotaInicial(user?.telas, user?.role, user?.telaInicial)} replace />;
 }
 

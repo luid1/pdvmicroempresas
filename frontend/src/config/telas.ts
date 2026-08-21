@@ -7,7 +7,7 @@ import {
   DollarSign, ClipboardList, BarChart3, Settings,
   Building2, AlertTriangle, Receipt, ShieldCheck,
   ShoppingCart, Coins, Landmark, Repeat,
-  Tags, Undo2, Gauge,
+  Tags, Undo2, Gauge, Store,
 } from 'lucide-react';
 import type { ElementType } from 'react';
 
@@ -31,6 +31,11 @@ export interface TelaDef {
   badgeColor?: string;
   /** Fora do menu lateral, mas ainda acessível por rota/permissão. */
   oculto?: boolean;
+  /**
+   * Tela do DONO DA PLATAFORMA (SaaS): só o super-admin enxerga/acessa,
+   * mesmo o ADMIN da loja (que normalmente vê tudo) fica de fora.
+   */
+  soDono?: boolean;
   /**
    * Item "pasta": NÃO é uma página (o `key` é sintético, não uma rota).
    * Serve só de abridor — ao passar o mouse, o submenu lista as páginas
@@ -112,6 +117,9 @@ export const TELAS: TelaDef[] = [
   { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'Gerência', icon: ShieldCheck, oculto: true },
   { key: '/gerencial/assinatura', label: 'Minha Assinatura', grupo: 'Gerência', icon: Gauge },
 
+  // ── Plataforma (DONO DO SaaS) — cross-tenant, só o super-admin enxerga ──
+  { key: '/plataforma', label: 'Painel da Plataforma', grupo: 'Plataforma', icon: Store, soDono: true },
+
   // ══════════════════════════════════════════════════════════════════════
   //  RECURSOS ESPECIALIZADOS — distribuídos por Estoque, Compras, Fiscal
   //  e Financeiro para manter cada fluxo perto das funções relacionadas.
@@ -149,8 +157,20 @@ export const TELAS_MENU = TELAS.filter((t) => !t.oculto);
 /** Telas do menu agrupadas — usado pela sidebar (AppShell). */
 export const TELAS_MENU_POR_GRUPO = agrupar(TELAS_MENU);
 
-/** Um usuário com telas ['*'] (ou role ADMIN) enxerga tudo. */
-export function podeVerTela(telas: string[] | undefined, role: string | undefined, key: string): boolean {
+/** Telas marcadas `soDono` — acessíveis SÓ pelo dono da plataforma (super-admin). */
+const TELAS_SO_DONO = new Set(TELAS.filter((t) => t.soDono).map((t) => t.key));
+
+/**
+ * Um usuário com telas ['*'] (ou role ADMIN) enxerga tudo — EXCETO as telas
+ * do dono da plataforma (`soDono`), que exigem `isSuperAdmin`.
+ */
+export function podeVerTela(
+  telas: string[] | undefined,
+  role: string | undefined,
+  key: string,
+  isSuperAdmin?: boolean,
+): boolean {
+  if (TELAS_SO_DONO.has(key)) return !!isSuperAdmin; // painel da plataforma: só o dono do SaaS
   if (role === 'ADMIN') return true;
   if (!telas || telas.length === 0) return false;
   return telas.includes('*') || telas.includes(key);

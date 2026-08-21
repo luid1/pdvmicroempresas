@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../../prisma/prisma.service';
 import { getJwtSecret } from '../../common/config/jwt-secret';
+import { ehDonoPlataforma } from '../../common/utils/plataforma.util';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -27,6 +28,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       tenantId: user.tenantId,
       roleId: user.roleId,
       role: user.role.nome,
+      // Dono da plataforma (SaaS): libera o painel cross-tenant /plataforma e faz
+      // os guards de isolamento (tenant/filial/plano) liberarem passagem.
+      isSuperAdmin: ehDonoPlataforma(user.email, (user as any).isSuperAdmin),
       // Telas que o perfil pode ver (['*'] = todas). Usado pelo escopo da IA
       // para revelar só os indicadores que o papel já enxerga no menu.
       telas: user.role.telas || [],

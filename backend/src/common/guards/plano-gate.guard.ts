@@ -43,6 +43,7 @@ export class PlanoGateGuard implements CanActivate {
     const req = ctx.switchToHttp().getRequest();
     const user = req.user;
     if (!user?.tenantId) return true;
+    if (user.isSuperAdmin) return true; // dono da plataforma não é limitado por plano
 
     const info = await this.carregar(user.tenantId);
     if (!info) return true; // tenant sem assinatura (legado) → não aplica gate

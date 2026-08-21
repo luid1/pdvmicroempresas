@@ -360,6 +360,7 @@ model Usuario {
   pinHash      String? // PIN de 4 dígitos (hash) para login rápido no caixa
   cpf          String?
   ativo        Boolean   @default(true)
+  isSuperAdmin Boolean   @default(false) // dono da plataforma (SaaS) — acessa o painel cross-tenant
   ultimoAcesso DateTime?
   preferencias Json? // Preferências de UI que seguem a conta (ex.: período padrão do dashboard)
   createdAt    DateTime  @default(now())

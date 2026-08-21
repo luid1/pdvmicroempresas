@@ -40,6 +40,7 @@ import PainelFaturamento from './modules/fiscal/pages/PainelFaturamento';
 import GestaoFiscal from './modules/fiscal/pages/GestaoFiscal';
 import FiscalConfiguracao from './modules/fiscal/pages/FiscalConfiguracao';
 import Pdv from './modules/pdv/pages/Pdv';
+import Plataforma from './modules/plataforma/pages/Plataforma';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -107,6 +108,9 @@ export default function App() {
             <Route path="gerencial/usuarios" element={<UsuariosAcessos />} />
             <Route path="gerencial/configuracoes" element={<Configuracoes />} />
             <Route path="gerencial/assinatura" element={<MinhaAssinatura />} />
+
+            {/* Plataforma (dono do SaaS) — só o super-admin acessa (TelaGuard + soDono) */}
+            <Route path="plataforma" element={<Plataforma />} />
           </Route>
         </Routes>
         <PwaPrompt />

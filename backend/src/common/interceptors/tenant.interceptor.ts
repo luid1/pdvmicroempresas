@@ -7,6 +7,10 @@ export class TenantInterceptor implements NestInterceptor {
     const req = ctx.switchToHttp().getRequest();
     if (!req.user) return next.handle();
 
+    // Dono da plataforma opera cross-tenant (painel /plataforma): não force o
+    // tenantId dele no body — as rotas do painel recebem o tenant alvo explícito.
+    if (req.user.isSuperAdmin) return next.handle();
+
     const jwtTenant = req.user.tenantId;
 
     // Bloqueia qualquer tentativa de injetar tenantId diferente

@@ -151,7 +151,7 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
       <div className="grid grid-cols-4 gap-3">
         <Campo label="Fornecedor *" className="col-span-2">
           <select value={fornecedorId} onChange={e => setFornecedorId(e.target.value)} className={`${inp} ${!fornecedorId ? 'border-rose-500/50' : ''}`}>
-            <option value="">— selecione —</option>
+            <option value="">Selecione</option>
             {fornecedores.map(f => <option key={f.id} value={f.id}>{f.nomeFantasia || f.razaoSocial}</option>)}
           </select>
         </Campo>
@@ -165,7 +165,7 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
           <div key={i} className="border border-[#E7E5DF] rounded-lg p-3 bg-[#F6F5F2]">
             <div className="grid grid-cols-12 gap-2">
               <div className="col-span-6 sm:col-span-5"><label className={lb}>Produto (vínculo)</label>
-                <select value={it.produtoId} onChange={e => escolherProduto(i, e.target.value)} className={fld}><option value="">— sem vínculo —</option>{produtos.map(p => <option key={p.id} value={p.id}>{p.descricao}</option>)}</select>
+                <select value={it.produtoId} onChange={e => escolherProduto(i, e.target.value)} className={fld}><option value="">Sem vínculo</option>{produtos.map(p => <option key={p.id} value={p.id}>{p.descricao}</option>)}</select>
               </div>
               <div className="col-span-6"><label className={lb}>Descrição *</label><input value={it.descricao} onChange={e => setItem(i, 'descricao', e.target.value)} className={`${fld} ${!it.descricao.trim() ? 'border-rose-500/40' : ''}`} placeholder="nome do item" /></div>
               <div className="col-span-12 sm:col-span-1 flex sm:justify-center sm:items-end">

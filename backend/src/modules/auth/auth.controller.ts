@@ -4,7 +4,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Public, CurrentTenant, CurrentUser } from '../../common/decorators/context.decorator';
 import { RequirePermissao } from '../../common/decorators/permissoes.decorator';
 import { AuthService } from './auth.service';
-import { LoginDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto, SalvarPreferenciasDto } from './dto/auth.dto';
+import { LoginDto, VincularDto, LoginPorIdDto, LoginPorPinDto, DefinirPinDto, RegisterTenantDto, SalvarPreferenciasDto } from './dto/auth.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -28,6 +28,15 @@ export class AuthController {
   @ApiOperation({ summary: 'Login por e-mail + senha' })
   login(@Body() body: LoginDto) {
     return this.auth.login(body.email, body.password, body.cnpj);
+  }
+
+  // "Libera" o computador para uma loja (CNPJ + senha do administrador).
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Public()
+  @Post('vincular')
+  @ApiOperation({ summary: 'Vincula este computador a uma loja (CNPJ + senha do administrador)' })
+  vincular(@Body() body: VincularDto) {
+    return this.auth.vincularPorCnpj(body.cnpj, body.senha);
   }
 
   @Throttle({ default: { limit: 5, ttl: 60000 } })

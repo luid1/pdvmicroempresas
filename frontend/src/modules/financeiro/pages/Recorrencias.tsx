@@ -316,14 +316,14 @@ function ModalRecorrencia({ rec, onClose, onDone }: { rec?: Recorrencia; onClose
           <label className="block">
             <span className="text-xs text-slate-400">Categoria (plano de contas)</span>
             <select value={planoContasCodigo} onChange={e => setPlanoContasCodigo(e.target.value)} className={inputCls}>
-              <option value="">— Sem categoria —</option>
+              <option value="">Sem categoria</option>
               {contasPlano.map((c) => <option key={c.id} value={c.codigo}>{c.codigo} · {c.descricao}</option>)}
             </select>
           </label>
           <label className="block">
             <span className="text-xs text-slate-400">Fornecedor (opcional)</span>
             <select value={fornecedorId} onChange={e => setFornecedorId(e.target.value)} className={inputCls}>
-              <option value="">— Nenhum —</option>
+              <option value="">Nenhum</option>
               {fornecedores.map((f) => <option key={f.id} value={f.id}>{nomeForn(f)}</option>)}
             </select>
           </label>

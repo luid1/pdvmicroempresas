@@ -4,7 +4,7 @@ import { authApi } from '../services/api';
 
 interface Filial { id: string; codigo: string; nome: string }
 type Preferencias = Record<string, unknown>;
-interface AuthUser { id: string; nome: string; email: string; role: string; tenantId: string; telas?: string[]; telaInicial?: string | null; acoes?: Record<string, string[]>; preferencias?: Preferencias }
+interface AuthUser { id: string; nome: string; email: string; role: string; tenantId: string; isSuperAdmin?: boolean; telas?: string[]; telaInicial?: string | null; acoes?: Record<string, string[]>; preferencias?: Preferencias }
 
 interface AuthCtx {
   user: AuthUser | null;
