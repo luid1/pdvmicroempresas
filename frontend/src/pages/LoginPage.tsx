@@ -19,6 +19,18 @@ const PAIR_KEY = 'wms_paired_tenant';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.netlify.app';
 
 /**
+ * Acesso OCULTO do dono da plataforma. O login do dono não aparece mais na tela
+ * — só é revelado quando a URL contém este parâmetro (ex.: /login?dono).
+ * Guarde este link: ele é a única porta de entrada visível para o painel do SaaS.
+ * (A segurança real continua no backend: e-mail + senha + isSuperAdmin.)
+ */
+const DONO_PARAM = 'dono';
+const querAcessoDono = () => {
+  try { return new URLSearchParams(window.location.search).has(DONO_PARAM); }
+  catch { return false; }
+};
+
+/**
  * Aparência de cada perfil na tela de seleção.
  * Alinhada ao design do site (luminmkt.shop): base escura + azul #01B8FA.
  * O ADMIN recebe o azul da marca; os demais, um tom neutro sobre o escuro.
@@ -224,7 +236,9 @@ export default function LoginPage() {
   // 'DONO'   = acesso do dono da plataforma (e-mail + senha)
   // 'PICKER' = escolher o perfil (agrupado por setor)
   // 'SENHA'  = digitar a senha do perfil escolhido
-  const [modo, setModo] = useState<'PAIR' | 'DONO' | 'PICKER' | 'SENHA'>(paired ? 'PICKER' : 'PAIR');
+  const [modo, setModo] = useState<'PAIR' | 'DONO' | 'PICKER' | 'SENHA'>(
+    querAcessoDono() ? 'DONO' : paired ? 'PICKER' : 'PAIR',
+  );
   const [perfis, setPerfis] = useState<Perfil[]>([]);
   const [carregandoPerfis, setCarregandoPerfis] = useState(false);
   const [selecionado, setSelecionado] = useState<Perfil | null>(null);
@@ -352,7 +366,6 @@ export default function LoginPage() {
             error={error}
             setError={setError}
             setServerStatus={setServerStatus}
-            onDono={() => { setError(''); setModo('DONO'); }}
             onPaired={(tenant) => {
               const p = {
                 id: tenant.id,
@@ -430,13 +443,12 @@ export default function LoginPage() {
 /* ────────────────────────────────────────────────────────────
    PASSO 1 — Liberar o computador (CNPJ + senha do administrador)
 ──────────────────────────────────────────────────────────── */
-function PairForm({ loading, setLoading, error, setError, setServerStatus, onDono, onPaired }: {
+function PairForm({ loading, setLoading, error, setError, setServerStatus, onPaired }: {
   loading: boolean;
   setLoading: (v: boolean) => void;
   error: string;
   setError: (v: string) => void;
   setServerStatus: AtualizarStatus;
-  onDono: () => void;
   onPaired: (tenant: any) => void;
 }) {
   const [cnpj, setCnpj] = useState('');
@@ -540,9 +552,6 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onDon
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <button onClick={onDono} className="text-[#9BA1AD] hover:text-[#F7F8FA] text-xs inline-flex items-center gap-1.5 transition-colors">
-          <Crown className="h-3.5 w-3.5" /> Sou o dono da plataforma
-        </button>
         <p className="text-center text-[#9BA1AD] text-xs">
           Ainda não tem uma conta?{' '}
           <a href={`${SITE_URL}/assinar.html`} className="text-[#01B8FA] hover:text-[#3DC8FB] font-semibold">
