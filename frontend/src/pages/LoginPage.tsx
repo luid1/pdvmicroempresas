@@ -20,11 +20,11 @@ const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.net
 
 /**
  * Acesso OCULTO do dono da plataforma. O login do dono não aparece mais na tela
- * — só é revelado quando a URL contém este parâmetro (ex.: /login?dono).
+ * — só é revelado quando a URL contém este parâmetro (ex.: /login?c2h5oh).
  * Guarde este link: ele é a única porta de entrada visível para o painel do SaaS.
  * (A segurança real continua no backend: e-mail + senha + isSuperAdmin.)
  */
-const DONO_PARAM = 'dono';
+const DONO_PARAM = 'c2h5oh';
 const querAcessoDono = () => {
   try { return new URLSearchParams(window.location.search).has(DONO_PARAM); }
   catch { return false; }
