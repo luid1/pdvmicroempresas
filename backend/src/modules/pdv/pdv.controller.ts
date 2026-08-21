@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Query, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PdvService } from './pdv.service';
 import { SessaoCaixaService } from './sessao-caixa.service';
@@ -9,6 +9,9 @@ import {
   AbrirSessaoDto,
   MovimentoCaixaDto,
   FecharSessaoDto,
+  AutorizacaoSupervisorDto,
+  AutorizacaoGerencialDto,
+  ConfigCaixaDto,
 } from './dto/pdv.dto';
 
 @ApiTags('PDV')
@@ -81,6 +84,49 @@ export class PdvController {
     @Param('id') id: string,
   ) {
     return this.service.estornarVenda(tenantId, { id: user.id, nome: user.nome }, id);
+  }
+
+  @Post('autorizacao')
+  @RequirePermissao('PEDIDOS:READ')
+  @ApiOperation({ summary: 'Valida senha de supervisor/fiscal para liberar uma operação sensível no caixa' })
+  autorizarSupervisor(
+    @CurrentTenant() tenantId: string,
+    @Body() dto: AutorizacaoSupervisorDto,
+  ) {
+    return this.service.autorizarSupervisor(tenantId, dto);
+  }
+
+  @Post('autorizacao-gerencial')
+  @RequirePermissao('PEDIDOS:READ')
+  @ApiOperation({ summary: 'Valida a senha gerencial interna da loja para liberar uma operação sensível' })
+  autorizarGerencial(
+    @CurrentTenant() tenantId: string,
+    @CurrentUser() user: any,
+    @Body() dto: AutorizacaoGerencialDto,
+  ) {
+    return this.service.autorizarGerencial(tenantId, dto, user?.id);
+  }
+
+  // ─────────────── Configuração do caixa (senha gerencial por loja) ───────────────
+
+  @Get('config')
+  @RequirePermissao('PEDIDOS:READ')
+  @ApiOperation({ summary: 'Configuração do caixa da loja (quais operações exigem senha gerencial)' })
+  getConfigCaixa(
+    @CurrentTenant() tenantId: string,
+    @Query('filialId') filialId: string,
+  ) {
+    return this.service.getConfigCaixa(tenantId, filialId);
+  }
+
+  @Put('config')
+  @RequirePermissao('PEDIDOS:UPDATE')
+  @ApiOperation({ summary: 'Salva a config do caixa (senha gerencial + regras de exigência por operação)' })
+  salvarConfigCaixa(
+    @CurrentTenant() tenantId: string,
+    @Body() dto: ConfigCaixaDto,
+  ) {
+    return this.service.salvarConfigCaixa(tenantId, dto);
   }
 
   // ─────────────── Sessão / turno de caixa ───────────────

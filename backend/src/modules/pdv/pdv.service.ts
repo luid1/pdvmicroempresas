@@ -1,4 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
+import * as bcrypt from 'bcryptjs';
 import { TipoMovimento, OrigemMovimento, TipoMovimentacao } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EstoqueService } from '../estoque/estoque.service';
@@ -6,7 +13,24 @@ import { TesourariaService } from '../tesouraria/tesouraria.service';
 import { SessaoCaixaService } from './sessao-caixa.service';
 import { NfceService } from '../nfe/nfce.service';
 import { proximoNumero } from '../../common/utils/sequencia.util';
-import { RegistrarVendaDto } from './dto/pdv.dto';
+import {
+  RegistrarVendaDto,
+  AutorizacaoSupervisorDto,
+  AutorizacaoGerencialDto,
+  ConfigCaixaDto,
+} from './dto/pdv.dto';
+
+/** Chaves de exigência de senha por operação (espelham a ConfiguracaoCaixa). */
+const CHAVES_CONFIG_CAIXA = [
+  'senhaCancelarVenda',
+  'senhaRemoverItem',
+  'senhaDesconto',
+  'senhaSangria',
+  'senhaSuprimento',
+  'senhaFecharCaixa',
+  'senhaEstorno',
+] as const;
+type ChaveConfigCaixa = (typeof CHAVES_CONFIG_CAIXA)[number];
 
 interface UsuarioCtx {
   id: string;
@@ -300,15 +324,23 @@ export class PdvService {
     let fiscal: any = null;
     if (await this.nfce.habilitadoParaFilial(tenantId, dto.filialId)) {
       try {
-        const r = await this.nfce.emitirDePedido(tenantId, pedido.id, dto.filialId, usuario.id);
+        const r = await this.nfce.emitirDePedido(tenantId, pedido.id, dto.filialId, usuario.id, {
+          cpfNota: dto.cpfNota,
+        });
         fiscal = {
           modelo: '65',
+          nfeId: r.nfeId,
           status: r.status,
+          numero: r.numero,
+          serie: r.serie,
           chaveAcesso: r.chaveAcesso,
+          protocolo: r.protocolo,
           qrCode: r.qrCode,
           urlConsulta: r.urlConsulta,
           danfeUrl: r.danfeUrl,
+          destCnpjCpf: (r as any).destCnpjCpf ?? null,
           simulacao: r.simulacao,
+          erro: (r as any).erro ?? (r as any).motivo ?? null,
         };
       } catch (e: any) {
         fiscal = { modelo: '65', status: 'FALHOU', erro: e?.message || 'erro ao emitir NFC-e' };
@@ -501,7 +533,22 @@ export class PdvService {
       },
     });
 
-    // 5) Trilha de auditoria.
+    // 5) NFC-e: se a venda emitiu cupom fiscal, tenta cancelá-lo no SEFAZ.
+    //    Best-effort — se falhar (ex.: fora do prazo de 30min), a venda segue
+    //    estornada e o Monitor Fiscal mostra a pendência para o fiscal resolver.
+    let fiscal: any = null;
+    try {
+      const r = await this.nfce.cancelarPorPedido(
+        tenantId,
+        pedido.id,
+        `Estorno da venda PDV #${pedido.numero}`,
+      );
+      if (r) fiscal = { status: r.status, nfeId: r.nfeId, simulacao: r.simulacao };
+    } catch (e: any) {
+      fiscal = { status: 'CANCELAMENTO_PENDENTE', erro: e?.message || 'erro ao cancelar NFC-e' };
+    }
+
+    // 6) Trilha de auditoria.
     await this.prisma.auditLog.create({
       data: {
         tenantId,
@@ -511,10 +558,151 @@ export class PdvService {
         entidade: 'Pedido',
         entidadeId: pedido.id,
         dadosAntes: { status: 'FATURADO', valorTotal: Number(pedido.valorTotal) },
-        dadosDepois: { status: 'CANCELADO', motivo: 'Estorno PDV' },
+        dadosDepois: { status: 'CANCELADO', motivo: 'Estorno PDV', fiscal },
       },
     });
 
-    return { ok: true, pedidoId: pedido.id, numero: pedido.numero, estornadoEm: new Date() };
+    return { ok: true, pedidoId: pedido.id, numero: pedido.numero, estornadoEm: new Date(), fiscal };
+  }
+
+  /**
+   * Valida as credenciais de um supervisor/fiscal para autorizar uma operação
+   * sensível no caixa (estorno, cancelamento, sangria acima do limite).
+   * O supervisor precisa ter alçada de cancelamento (PEDIDOS:CANCELAR),
+   * ser super-admin ou ter acesso total (telas = ["*"]).
+   */
+  async autorizarSupervisor(tenantId: string, dto: AutorizacaoSupervisorDto) {
+    const email = (dto.email || '').trim().toLowerCase();
+    const usuario = await this.prisma.usuario.findFirst({
+      where: { tenantId, email: { equals: email, mode: 'insensitive' }, ativo: true },
+      include: { role: { include: { permissoes: { include: { permissao: true } } } } },
+    });
+
+    if (!usuario || !(await bcrypt.compare(dto.senha || '', usuario.passwordHash))) {
+      throw new UnauthorizedException('Credenciais de supervisor inválidas.');
+    }
+
+    const permissoes = usuario.role.permissoes.map(
+      (rp) => `${rp.permissao.modulo}:${rp.permissao.acao}`,
+    );
+    const temAlcada =
+      usuario.isSuperAdmin ||
+      (usuario.role.telas || []).includes('*') ||
+      permissoes.includes('PEDIDOS:CANCELAR');
+
+    if (!temAlcada) {
+      throw new ForbiddenException(
+        'Este usuário não tem alçada para autorizar esta operação. Chame o gerente/fiscal.',
+      );
+    }
+
+    await this.prisma.auditLog.create({
+      data: {
+        tenantId,
+        usuarioId: usuario.id,
+        modulo: 'PEDIDOS',
+        acao: 'APROVAR',
+        entidade: 'AutorizacaoCaixa',
+        entidadeId: usuario.id,
+        dadosDepois: { acao: dto.acao || 'operacao_sensivel', autorizadoPor: usuario.nome },
+      },
+    });
+
+    return { ok: true, autorizadoPor: usuario.nome, cargo: usuario.role.nome };
+  }
+
+  // ─────────────── Configuração do caixa (senha gerencial por loja) ───────────────
+
+  /** Projeção pública da config — NUNCA expõe o hash da senha. */
+  private configPublica(cfg: {
+    filialId: string;
+    senhaGerencialHash: string | null;
+    senhaCancelarVenda: boolean;
+    senhaRemoverItem: boolean;
+    senhaDesconto: boolean;
+    senhaSangria: boolean;
+    senhaSuprimento: boolean;
+    senhaFecharCaixa: boolean;
+    senhaEstorno: boolean;
+  }) {
+    return {
+      filialId: cfg.filialId,
+      senhaDefinida: !!cfg.senhaGerencialHash,
+      senhaCancelarVenda: cfg.senhaCancelarVenda,
+      senhaRemoverItem: cfg.senhaRemoverItem,
+      senhaDesconto: cfg.senhaDesconto,
+      senhaSangria: cfg.senhaSangria,
+      senhaSuprimento: cfg.senhaSuprimento,
+      senhaFecharCaixa: cfg.senhaFecharCaixa,
+      senhaEstorno: cfg.senhaEstorno,
+    };
+  }
+
+  /** Config do caixa da loja (cria a padrão se ainda não existir). */
+  async getConfigCaixa(tenantId: string, filialId: string) {
+    if (!filialId) throw new BadRequestException('Informe a filial.');
+    const filial = await this.prisma.filial.findFirst({ where: { id: filialId, tenantId } });
+    if (!filial) throw new NotFoundException('Filial não encontrada.');
+    const cfg = await this.prisma.configuracaoCaixa.upsert({
+      where: { filialId },
+      update: {},
+      create: { tenantId, filialId },
+    });
+    return this.configPublica(cfg);
+  }
+
+  /** Salva a config do caixa (upsert). Só altera a senha quando informada. */
+  async salvarConfigCaixa(tenantId: string, dto: ConfigCaixaDto) {
+    const filial = await this.prisma.filial.findFirst({ where: { id: dto.filialId, tenantId } });
+    if (!filial) throw new NotFoundException('Filial não encontrada.');
+
+    const data: Record<string, unknown> = {};
+    for (const k of CHAVES_CONFIG_CAIXA) {
+      const v = dto[k as ChaveConfigCaixa];
+      if (v !== undefined) data[k] = v;
+    }
+
+    const senha = (dto.senhaGerencial || '').trim();
+    if (senha) {
+      if (senha.length < 4) {
+        throw new BadRequestException('A senha gerencial deve ter ao menos 4 caracteres.');
+      }
+      data.senhaGerencialHash = await bcrypt.hash(senha, 10);
+    }
+
+    const cfg = await this.prisma.configuracaoCaixa.upsert({
+      where: { filialId: dto.filialId },
+      update: data,
+      create: { tenantId, filialId: dto.filialId, ...data },
+    });
+    return this.configPublica(cfg);
+  }
+
+  /** Valida a SENHA GERENCIAL interna da loja para liberar uma operação sensível. */
+  async autorizarGerencial(tenantId: string, dto: AutorizacaoGerencialDto, operadorId?: string) {
+    const cfg = await this.prisma.configuracaoCaixa.findFirst({
+      where: { tenantId, filialId: dto.filialId },
+    });
+    if (!cfg || !cfg.senhaGerencialHash) {
+      throw new BadRequestException(
+        'Nenhuma senha gerencial configurada para esta loja. Defina em Configurações do Caixa.',
+      );
+    }
+    const ok = await bcrypt.compare(dto.senha || '', cfg.senhaGerencialHash);
+    if (!ok) throw new UnauthorizedException('Senha gerencial inválida.');
+
+    await this.prisma.auditLog.create({
+      data: {
+        tenantId,
+        usuarioId: operadorId || null,
+        modulo: 'PEDIDOS',
+        acao: 'APROVAR',
+        entidade: 'AutorizacaoCaixa',
+        entidadeId: dto.filialId,
+        dadosDepois: { acao: dto.acao || 'operacao_sensivel', via: 'senha_gerencial' },
+      },
+    });
+
+    return { ok: true };
   }
 }

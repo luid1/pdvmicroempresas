@@ -54,6 +54,7 @@ export const TELAS: TelaDef[] = [
 
   // ── Operação ──────────────────────────────────────────────────────────
   { key: '/pdv', label: 'Caixa (PDV)', grupo: 'Operação', icon: ShoppingCart, highlight: true },
+  { key: '/pdv/config', label: 'Segurança do Caixa', grupo: 'Operação', icon: ShieldCheck },
   { key: '/dashboard', label: 'Dashboard', grupo: 'Operação', icon: LayoutDashboard },
 
   // ── Cadastros ─────────────────────────────────────────────────────────
@@ -83,6 +84,7 @@ export const TELAS: TelaDef[] = [
 
   // ── Fiscal ─────────────────────────────────────────────────────────────
   { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'Fiscal', icon: Receipt },
+  { key: '/fiscal/monitor', label: 'Monitor Fiscal', grupo: 'Fiscal', icon: Gauge },
   { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt },
   { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal', icon: BarChart3 },
   { key: 'grupo:gestao-fiscal', label: 'Gestão Fiscal', grupo: 'Fiscal', icon: ShieldCheck, pasta: true, submenu: [

@@ -25,11 +25,31 @@ export type SessaoRel = {
   dinheiroEsperadoGaveta: number;
   saldoFinalInformado: number | null;
   diferenca: number | null;
+  // Conferência por meio de pagamento (informado no fechamento).
+  cartaoInformado: number | null;
+  pixInformado: number | null;
+  diferencaCartao: number | null;
+  diferencaPix: number | null;
 };
 
 function extrairMsg(e: any, fallback: string) {
   const msg = e?.response?.data?.message || fallback;
   return Array.isArray(msg) ? msg[0] : msg;
+}
+
+// Máscara de moeda para os campos de conferência: o operador digita só os
+// números (ex.: 12345) e o campo mostra "123,45" — pontuação bonitinha.
+function moedaMask(raw: string) {
+  const digits = (raw || '').replace(/\D/g, '').slice(0, 12);
+  const cents = digits === '' ? 0 : parseInt(digits, 10);
+  return (cents / 100).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+function moedaParaNumero(raw: string) {
+  const digits = (raw || '').replace(/\D/g, '').slice(0, 12);
+  return digits === '' ? 0 : parseInt(digits, 10) / 100;
 }
 
 /** Tela de abertura de caixa — exibida quando não há sessão aberta. */
@@ -66,42 +86,47 @@ export function AbrirCaixa({
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-[#0E0F16] p-6">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] p-6 shadow-2xl">
-        <div className="mb-4 flex items-center gap-2">
-          <Lock className="h-6 w-6 text-[#F5B841]" />
-          <h2 className="text-lg font-semibold text-gray-100">Caixa fechado</h2>
+    <div className="flex h-full flex-col items-center justify-center bg-[#F4F5F7] p-6">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="mb-1 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/20">
+            <Lock className="h-5 w-5 text-[#0F8A72]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold leading-tight text-[#202123]">Caixa fechado</h2>
+            <p className="text-xs text-[#8E8F94]">Abra o caixa para começar a vender</p>
+          </div>
         </div>
-        <p className="mb-4 text-sm text-gray-400">
+        <p className="mb-5 mt-4 text-sm text-[#5F6065]">
           Informe o fundo de troco inicial na gaveta para abrir o caixa.
         </p>
 
-        <label className="text-sm text-gray-400">Fundo de troco (R$)</label>
+        <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Fundo de troco (R$)</label>
         <input
           autoFocus
           value={fundo}
           onChange={(e) => setFundo(e.target.value)}
           placeholder="0,00"
           inputMode="decimal"
-          className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-3 text-lg text-gray-100 outline-none focus:border-[#F5B841]"
+          className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-lg text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
         />
 
-        <label className="mt-4 block text-sm text-gray-400">Observação (opcional)</label>
+        <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Observação (opcional)</label>
         <input
           value={obs}
           onChange={(e) => setObs(e.target.value)}
           placeholder="Ex.: turno da manhã"
-          className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-2 text-gray-100 outline-none focus:border-[#F5B841]"
+          className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
         />
 
         {erro && (
-          <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
+          <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">{erro}</div>
         )}
 
         <button
           onClick={abrir}
           disabled={salvando}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#CE8F14] py-4 text-lg font-semibold text-white hover:bg-[#E8A317] disabled:bg-[#222633] disabled:text-gray-600"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
         >
           {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Unlock className="h-5 w-5" />}
           {salvando ? 'Abrindo...' : 'Abrir caixa'}
@@ -142,40 +167,40 @@ export function ModalValor({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
           <div className="flex items-center gap-2">
             {icon}
-            <h2 className="text-lg font-semibold text-gray-100">{titulo}</h2>
+            <h2 className="text-lg font-semibold text-[#202123]">{titulo}</h2>
           </div>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <label className="text-sm text-gray-400">Valor (R$)</label>
+          <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Valor (R$)</label>
           <input
             autoFocus
             value={valor}
             onChange={(e) => setValor(e.target.value)}
             placeholder="0,00"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-3 text-lg text-gray-100 outline-none focus:border-[#F5B841]"
+            className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-lg text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
-          <label className="mt-4 block text-sm text-gray-400">Motivo (opcional)</label>
+          <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Motivo (opcional)</label>
           <input
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-2 text-gray-100 outline-none focus:border-[#F5B841]"
+            className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
           {erro && (
-            <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
+            <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">{erro}</div>
           )}
           <button
             onClick={confirmar}
             disabled={salvando || valorNum <= 0}
-            className={`mt-6 flex w-full items-center justify-center gap-2 rounded-lg py-3 text-lg font-semibold text-white disabled:bg-[#222633] disabled:text-gray-600 ${cor}`}
+            className={`mt-6 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-lg font-semibold text-white shadow-lg transition-all active:scale-[0.99] disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none ${cor}`}
           >
             {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
             Confirmar
@@ -186,89 +211,163 @@ export function ModalValor({
   );
 }
 
-/** Modal de fechamento de caixa (conferência). */
+/** Modal de fechamento de caixa (conferência por meio de pagamento). */
 export function ModalFechar({
   esperado,
+  esperadoCartao,
+  esperadoPix,
   onFechar,
   onConfirmar,
 }: {
   esperado: number;
+  esperadoCartao: number;
+  esperadoPix: number;
   onFechar: () => void;
-  onConfirmar: (informado: number, obs: string) => Promise<{ ok: boolean; erro?: string }>;
+  onConfirmar: (dados: {
+    dinheiro: number;
+    cartao: number;
+    pix: number;
+    obs: string;
+  }) => Promise<{ ok: boolean; erro?: string }>;
 }) {
-  const [informado, setInformado] = useState('');
+  const [dinheiro, setDinheiro] = useState('');
+  const [cartao, setCartao] = useState('');
+  const [pix, setPix] = useState('');
   const [obs, setObs] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
-  const informadoNum = parseFloat(informado.replace(',', '.')) || 0;
-  const diferenca = informadoNum - esperado;
+
+  const dinheiroNum = moedaParaNumero(dinheiro);
+  const cartaoNum = moedaParaNumero(cartao);
+  const pixNum = moedaParaNumero(pix);
+
+  const difDinheiro = dinheiroNum - esperado;
+  const difCartao = cartaoNum - esperadoCartao;
+  const difPix = pixNum - esperadoPix;
+
+  // Conferência global: soma do que foi contado x soma do que era esperado.
+  const totalEsperado = esperado + esperadoCartao + esperadoPix;
+  const totalContado = dinheiroNum + cartaoNum + pixNum;
+  const difTotal = totalContado - totalEsperado;
 
   async function confirmar() {
+    if (dinheiro === '') {
+      setErro('Informe o dinheiro contado na gaveta.');
+      return;
+    }
     setSalvando(true);
     setErro(null);
-    const res = await onConfirmar(informadoNum, obs);
+    const res = await onConfirmar({ dinheiro: dinheiroNum, cartao: cartaoNum, pix: pixNum, obs });
     if (!res.ok) {
       setErro(res.erro || 'Falha ao fechar o caixa.');
       setSalvando(false);
     }
   }
 
+  // Linha de conferência de um meio: rótulo, esperado, campo e diferença.
+  const linhaDif = (dif: number, preenchido: boolean) => {
+    if (!preenchido) return null;
+    const ok = Math.abs(dif) < 0.005;
+    return (
+      <div
+        className={`mt-1 text-right text-xs font-medium ${
+          ok ? 'text-[#0F8A72]' : dif > 0 ? 'text-amber-600' : 'text-rose-600'
+        }`}
+      >
+        {ok ? 'Confere' : dif > 0 ? `Sobra ${brl(dif)}` : `Falta ${brl(-dif)}`}
+      </div>
+    );
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="max-h-[92vh] w-full max-w-sm overflow-y-auto rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="sticky top-0 flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-4">
           <div className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-[#F5B841]" />
-            <h2 className="text-lg font-semibold text-gray-100">Fechar caixa</h2>
+            <Lock className="h-5 w-5 text-[#0F8A72]" />
+            <h2 className="text-lg font-semibold text-[#202123]">Fechar caixa</h2>
           </div>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <div className="mb-4 flex justify-between rounded-lg bg-[#0E0F16] px-4 py-3 text-sm">
-            <span className="text-gray-400">Dinheiro esperado na gaveta</span>
-            <span className="font-semibold text-gray-100">{brl(esperado)}</span>
+          {/* Dinheiro na gaveta */}
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Dinheiro contado (R$)</label>
+            <span className="text-xs text-[#8E8F94]">Esperado {brl(esperado)}</span>
           </div>
-          <label className="text-sm text-gray-400">Dinheiro contado (R$)</label>
           <input
             autoFocus
-            value={informado}
-            onChange={(e) => setInformado(e.target.value)}
+            value={dinheiro}
+            onChange={(e) => setDinheiro(moedaMask(e.target.value))}
             placeholder="0,00"
-            inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-3 text-lg text-gray-100 outline-none focus:border-[#F5B841]"
+            inputMode="numeric"
+            className="w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-right text-lg tabular-nums text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
-          {informado !== '' && (
+          {linhaDif(difDinheiro, dinheiro !== '')}
+
+          {/* Cartão (maquininha) */}
+          <div className="mb-1.5 mt-4 flex items-center justify-between">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Cartão na maquininha (R$)</label>
+            <span className="text-xs text-[#8E8F94]">Esperado {brl(esperadoCartao)}</span>
+          </div>
+          <input
+            value={cartao}
+            onChange={(e) => setCartao(moedaMask(e.target.value))}
+            placeholder="0,00"
+            inputMode="numeric"
+            className="w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-right text-lg tabular-nums text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+          />
+          {linhaDif(difCartao, cartao !== '')}
+
+          {/* PIX */}
+          <div className="mb-1.5 mt-4 flex items-center justify-between">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">PIX recebido (R$)</label>
+            <span className="text-xs text-[#8E8F94]">Esperado {brl(esperadoPix)}</span>
+          </div>
+          <input
+            value={pix}
+            onChange={(e) => setPix(moedaMask(e.target.value))}
+            placeholder="0,00"
+            inputMode="numeric"
+            className="w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3 text-right text-lg tabular-nums text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+          />
+          {linhaDif(difPix, pix !== '')}
+
+          {/* Conferência total */}
+          <div className="mt-4 space-y-1 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
+            <div className="flex justify-between text-sm">
+              <span className="text-[#5F6065]">Total esperado</span>
+              <span className="font-semibold tabular-nums text-[#202123]">{brl(totalEsperado)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-[#5F6065]">Total contado</span>
+              <span className="font-semibold tabular-nums text-[#202123]">{brl(totalContado)}</span>
+            </div>
             <div
-              className={`mt-2 text-right text-sm font-medium ${
-                Math.abs(diferenca) < 0.005
-                  ? 'text-emerald-400'
-                  : diferenca > 0
-                  ? 'text-[#F5B841]'
-                  : 'text-rose-400'
+              className={`flex justify-between border-t border-[#E5E7EB] pt-1.5 text-sm font-semibold ${
+                Math.abs(difTotal) < 0.005 ? 'text-[#0F8A72]' : difTotal > 0 ? 'text-amber-600' : 'text-rose-600'
               }`}
             >
-              {Math.abs(diferenca) < 0.005
-                ? 'Caixa confere'
-                : diferenca > 0
-                ? `Sobra ${brl(diferenca)}`
-                : `Falta ${brl(-diferenca)}`}
+              <span>Diferença</span>
+              <span className="tabular-nums">{brl(difTotal)}</span>
             </div>
-          )}
-          <label className="mt-4 block text-sm text-gray-400">Observação (opcional)</label>
+          </div>
+
+          <label className="mt-4 block text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Observação (opcional)</label>
           <input
             value={obs}
             onChange={(e) => setObs(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-2 text-gray-100 outline-none focus:border-[#F5B841]"
+            className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-2.5 text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
           {erro && (
-            <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
+            <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">{erro}</div>
           )}
           <button
             onClick={confirmar}
-            disabled={salvando || informado === ''}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#CE8F14] py-3 text-lg font-semibold text-white hover:bg-[#E8A317] disabled:bg-[#222633] disabled:text-gray-600"
+            disabled={salvando || dinheiro === ''}
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3.5 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
           >
             {salvando ? <Loader2 className="h-5 w-5 animate-spin" /> : <Lock className="h-5 w-5" />}
             Fechar caixa
@@ -283,24 +382,28 @@ export function ModalFechar({
 export function RelatorioZ({ z, onNovo }: { z: SessaoRel; onNovo: () => void }) {
   const linha = (label: string, valor: number, destaque = false) => (
     <div className="flex justify-between py-1.5 text-sm">
-      <span className="text-gray-400">{label}</span>
-      <span className={destaque ? 'font-semibold text-gray-100' : 'text-gray-200'}>{brl(valor)}</span>
+      <span className="text-[#5F6065]">{label}</span>
+      <span className={destaque ? 'font-semibold text-[#202123]' : 'text-[#202123]'}>{brl(valor)}</span>
     </div>
   );
 
   const conferido = z.diferenca != null && Math.abs(z.diferenca) < 0.005;
 
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-[#0E0F16] p-6">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] p-6 shadow-2xl">
-        <div className="mb-4 flex items-center gap-2">
-          <Printer className="h-6 w-6 text-[#F5B841]" />
-          <h2 className="text-lg font-semibold text-gray-100">Relatório Z · Caixa fechado</h2>
+    <div className="flex h-full flex-col items-center justify-center bg-[#F4F5F7] p-6">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white p-6 shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="grid h-11 w-11 place-items-center rounded-xl bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/20">
+            <Printer className="h-5 w-5 text-[#0F8A72]" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold leading-tight text-[#202123]">Relatório Z</h2>
+            <p className="text-xs text-[#8E8F94]">
+              Caixa fechado · {z.operador} · {z.qtdVendas} venda(s)
+            </p>
+          </div>
         </div>
-        <div className="text-xs text-gray-500">
-          {z.operador} · {z.qtdVendas} venda(s)
-        </div>
-        <div className="mt-3 divide-y divide-[#222633] border-y border-[#222633]">
+        <div className="mt-3 divide-y divide-[#EEF0F2] rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3">
           {linha('Fundo de troco', z.saldoInicial)}
           {linha('Vendas em dinheiro', z.totalDinheiro)}
           {linha('Vendas no cartão', z.totalCartao)}
@@ -309,21 +412,51 @@ export function RelatorioZ({ z, onNovo }: { z: SessaoRel; onNovo: () => void }) 
           {linha('Sangrias', -z.totalSangria)}
           {linha('Total vendido', z.totalVendas, true)}
         </div>
-        <div className="mt-3 space-y-1">
+        <div className="mt-3 space-y-1 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-1.5">
           {linha('Esperado na gaveta', z.dinheiroEsperadoGaveta, true)}
-          {linha('Contado', z.saldoFinalInformado ?? 0, true)}
+          {linha('Dinheiro contado', z.saldoFinalInformado ?? 0, true)}
           <div
             className={`flex justify-between py-1.5 text-sm font-semibold ${
-              conferido ? 'text-emerald-400' : 'text-rose-400'
+              conferido ? 'text-[#0F8A72]' : 'text-rose-600'
             }`}
           >
-            <span>Diferença</span>
+            <span>Diferença (dinheiro)</span>
             <span>{brl(z.diferenca ?? 0)}</span>
           </div>
         </div>
+        {(z.cartaoInformado != null || z.pixInformado != null) && (
+          <div className="mt-3 space-y-1 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-1.5">
+            {z.cartaoInformado != null && (
+              <>
+                {linha('Cartão informado', z.cartaoInformado)}
+                <div
+                  className={`flex justify-between py-1 text-xs font-semibold ${
+                    Math.abs(z.diferencaCartao ?? 0) < 0.005 ? 'text-[#0F8A72]' : 'text-rose-600'
+                  }`}
+                >
+                  <span>Diferença (cartão)</span>
+                  <span>{brl(z.diferencaCartao ?? 0)}</span>
+                </div>
+              </>
+            )}
+            {z.pixInformado != null && (
+              <>
+                {linha('PIX informado', z.pixInformado)}
+                <div
+                  className={`flex justify-between py-1 text-xs font-semibold ${
+                    Math.abs(z.diferencaPix ?? 0) < 0.005 ? 'text-[#0F8A72]' : 'text-rose-600'
+                  }`}
+                >
+                  <span>Diferença (PIX)</span>
+                  <span>{brl(z.diferencaPix ?? 0)}</span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
         <button
           onClick={onNovo}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-[#CE8F14] py-3 text-lg font-semibold text-white hover:bg-[#E8A317]"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3.5 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99]"
         >
           <Unlock className="h-5 w-5" />
           Abrir novo caixa

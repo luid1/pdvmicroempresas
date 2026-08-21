@@ -40,6 +40,22 @@ export interface CancelamentoResultado {
   simulacao: boolean;
 }
 
+/** Resultado da consulta de status de um documento fiscal no SEFAZ. */
+export interface ConsultaNfceResultado {
+  /** Status normalizado do provedor: autorizado | cancelado | denegado | processando | erro | nao_encontrado. */
+  status: string;
+  /** true quando o SEFAZ confirmou a autorização de uso do documento. */
+  autorizado: boolean;
+  motivo?: string;
+  protocolo?: string;
+  chaveAcesso?: string;
+  qrCode?: string;
+  urlConsulta?: string;
+  danfeUrl?: string;
+  xml?: string;
+  simulacao: boolean;
+}
+
 export interface CartaCorrecaoResultado {
   xml: string;
   protocolo: string;
@@ -65,6 +81,9 @@ export interface NfeProvider {
 
   /** Autoriza (transmite) uma NFC-e (modelo 65) ao SEFAZ. Retorna QR Code + URL de consulta. */
   autorizarNfce(nfe: any): Promise<AutorizacaoNfceResultado>;
+
+  /** Consulta o status atual de um documento no SEFAZ (autorizado? cancelado? ainda processando?). */
+  consultarNfce?(nfe: any): Promise<ConsultaNfceResultado>;
 
   /** Cancela uma NF-e autorizada pela chave de acesso. */
   cancelar(chaveAcesso: string, motivo: string, nfe?: any): Promise<CancelamentoResultado>;

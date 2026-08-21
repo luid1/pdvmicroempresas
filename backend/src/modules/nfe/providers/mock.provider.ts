@@ -5,6 +5,7 @@ import {
   AutorizacaoNfceResultado,
   CancelamentoResultado,
   CartaCorrecaoResultado,
+  ConsultaNfceResultado,
   InutilizacaoResultado,
 } from './nfe-provider.interface';
 
@@ -55,6 +56,28 @@ export class MockNfeProvider implements NfeProvider {
       qrCode,
       urlConsulta,
       danfeUrl: `https://sistema.exemplo.com/danfe-nfce/${nfe.id}.pdf`,
+      simulacao: true,
+    };
+  }
+
+  async consultarNfce(nfe: any): Promise<ConsultaNfceResultado> {
+    // Simulação: um documento com chave/protocolo é considerado autorizado.
+    // Um sem chave ainda "está processando" (nunca foi transmitido de verdade).
+    const cancelado = nfe.status === 'CANCELADO';
+    const autorizado = !cancelado && Boolean(nfe.chaveAcesso);
+    return {
+      status: cancelado ? 'cancelado' : autorizado ? 'autorizado' : 'processando',
+      autorizado,
+      motivo: cancelado
+        ? 'Cancelamento homologado (simulação).'
+        : autorizado
+          ? 'Autorizado o uso da NFC-e (simulação).'
+          : 'Aguardando transmissão ao SEFAZ (simulação).',
+      protocolo: nfe.protocolo || undefined,
+      chaveAcesso: nfe.chaveAcesso || undefined,
+      qrCode: nfe.qrCode || undefined,
+      urlConsulta: nfe.urlConsultaNfce || undefined,
+      danfeUrl: nfe.pdfDanfe || undefined,
       simulacao: true,
     };
   }

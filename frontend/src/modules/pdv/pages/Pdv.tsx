@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Barcode, Trash2, Plus, Minus, ShoppingCart, CreditCard,
+  Barcode, Trash2, ShoppingCart, CreditCard,
   Banknote, QrCode, X, Check, ScanLine, LogOut, Loader2,
   ArrowDownCircle, ArrowUpCircle, Lock, Printer, Percent, Coins, Scale,
+  ShieldCheck, FileText, AlertTriangle, User as UserIcon,
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { useAuth } from '../../../contexts/AuthContext';
 import { pdvApi } from '../../../services/api';
 import {
@@ -12,6 +14,10 @@ import {
 import { getTefProvider, type CanalPagamento } from '../tef/tef';
 import { beepOk, beepErro } from '../som';
 import { imprimirCupom, getCupomAuto, setCupomAuto, type CupomImpressao } from '../cupom';
+import {
+  imprimirCupomFiscal, imprimirComprovanteMovimento, imprimirComprovanteFechamento,
+  type CupomFiscalImpressao, type DadosFiscais,
+} from '../comprovante';
 import { abrirGavetaAuto, abrirGavetaManual } from '../gaveta';
 
 /**
@@ -44,6 +50,39 @@ type ProdutoBusca = {
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+// Operações do caixa que podem exigir senha gerencial (config por loja).
+type AcaoGerencial =
+  | 'cancelar'
+  | 'remover'
+  | 'desconto'
+  | 'sangria'
+  | 'suprimento'
+  | 'fechar'
+  | 'estorno';
+
+// Config pública do caixa (nunca traz o hash — só se há senha definida + toggles).
+type ConfigCaixaRel = {
+  senhaDefinida: boolean;
+  senhaCancelarVenda: boolean;
+  senhaRemoverItem: boolean;
+  senhaDesconto: boolean;
+  senhaSangria: boolean;
+  senhaSuprimento: boolean;
+  senhaFecharCaixa: boolean;
+  senhaEstorno: boolean;
+};
+
+// Cada operação sensível aponta para o seu toggle na config da loja.
+const CONFIG_POR_ACAO: Record<AcaoGerencial, keyof ConfigCaixaRel> = {
+  cancelar: 'senhaCancelarVenda',
+  remover: 'senhaRemoverItem',
+  desconto: 'senhaDesconto',
+  sangria: 'senhaSangria',
+  suprimento: 'senhaSuprimento',
+  fechar: 'senhaFecharCaixa',
+  estorno: 'senhaEstorno',
+};
+
 export type PagamentoEnvio = {
   forma: string;
   valor: number;
@@ -61,6 +100,13 @@ export default function Pdv() {
   const [buscando, setBuscando] = useState(false);
   const [pagando, setPagando] = useState(false);
   const [ultimoCupom, setUltimoCupom] = useState<CupomImpressao | null>(null);
+  // Dados fiscais (NFC-e) da última venda — chave/QR/status para exibir e reimprimir.
+  const [ultimaFiscal, setUltimaFiscal] = useState<DadosFiscais | null>(null);
+  const [ultimoCupomFiscal, setUltimoCupomFiscal] = useState<CupomFiscalImpressao | null>(null);
+  // Portão de autorização por senha gerencial para operações sensíveis.
+  const [gate, setGate] = useState<{ label: string; onOk: () => void } | null>(null);
+  // Config do caixa da loja: quais operações exigem a senha gerencial interna.
+  const [configCaixa, setConfigCaixa] = useState<ConfigCaixaRel | null>(null);
   // Impressão automática do cupom após a venda — opt-in por terminal (padrão OFF).
   const [cupomAuto, setCupomAutoState] = useState<boolean>(() => getCupomAuto());
   const [selecionadoId, setSelecionadoId] = useState<string | null>(null);
@@ -99,6 +145,21 @@ export default function Pdv() {
   useEffect(() => {
     carregarSessao();
   }, [carregarSessao]);
+
+  // Carrega a config do caixa da loja (quais operações pedem senha gerencial).
+  useEffect(() => {
+    if (!filialAtiva?.id) return;
+    let ativo = true;
+    (async () => {
+      try {
+        const { data } = await pdvApi.configCaixaGet(filialAtiva.id);
+        if (ativo) setConfigCaixa(data);
+      } catch {
+        if (ativo) setConfigCaixa(null);
+      }
+    })();
+    return () => { ativo = false; };
+  }, [filialAtiva?.id]);
 
   const total = useMemo(
     () => itens.reduce((s, i) => s + i.precoUnit * i.quantidade, 0),
@@ -173,9 +234,24 @@ export default function Pdv() {
    * uma sugestão escolhida por nome. Trata produto por peso (abre o modal de
    * pesagem) e o multiplicador de quantidade.
    */
+  // Portão por senha gerencial da loja. Se a operação não exige senha (config
+  // desligada) ou ainda não há senha cadastrada, executa direto (fail-open —
+  // não dá pra travar sem senha). Caso contrário, abre o modal e só executa
+  // onOk após validar a senha gerencial.
+  function pedirGerencial(acao: AcaoGerencial, label: string, onOk: () => void) {
+    const exige = configCaixa ? !!configCaixa[CONFIG_POR_ACAO[acao]] : false;
+    if (!exige || !configCaixa?.senhaDefinida) {
+      onOk();
+      return;
+    }
+    setGate({ label, onOk });
+  }
+
   function inserirNoCarrinho(prod: ProdutoBusca, qtd: number) {
     beepOk();
     setUltimoCupom(null);
+    setUltimaFiscal(null);
+    setUltimoCupomFiscal(null);
     setSugestoes([]);
     setSugIdx(-1);
     // Produto por peso: não dá pra assumir 1 kg — pede o peso ao operador.
@@ -216,18 +292,25 @@ export default function Pdv() {
   }
 
   // Escolhe uma sugestão da lista (clique ou Enter/seta) e a lança no carrinho.
+  // Respeita a quantidade digitada como prefixo ("2xmorango") ou o multiplicador armado.
   function selecionarSugestao(prod: ProdutoBusca) {
-    inserirNoCarrinho(prod, mult > 0 ? mult : 1);
+    const mm = codigo.trim().match(/^(\d+(?:[.,]\d+)?)\s*[*xX]\s*/);
+    const qtd = mm ? (parseNum(mm[1]) || 1) : (mult > 0 ? mult : 1);
+    inserirNoCarrinho(prod, qtd);
     focar();
   }
 
-  // Busca por nome/código enquanto digita (debounce). Não sugere para código
-  // de barras puro (só dígitos) nem quando há multiplicador ("5*"), preservando
-  // o fluxo do leitor. Descarta respostas antigas via `buscaSeq`.
+  // Busca por nome/código enquanto digita (debounce). Aceita multiplicador na
+  // frente ("2xmorango" → busca "morango" e depois lança com qtd 2). Não sugere
+  // para código de barras puro (só dígitos) nem para "2x" ainda sem nome,
+  // preservando o fluxo do leitor. Descarta respostas antigas via `buscaSeq`.
   useEffect(() => {
     const termo = codigo.trim();
-    const soDigitos = /^\d+$/.test(termo);
-    if (termo.length < 2 || soDigitos || /[*xX]/.test(termo)) {
+    // Remove um multiplicador inicial ("2x", "3*") para buscar pelo nome/código seguinte.
+    const mm = termo.match(/^(\d+(?:[.,]\d+)?)\s*[*xX]\s*(.*)$/);
+    const busca = mm ? mm[2].trim() : termo;
+    const soDigitos = /^\d+$/.test(busca);
+    if (busca.length < 2 || soDigitos) {
       setSugestoes([]);
       setSugIdx(-1);
       return;
@@ -235,7 +318,7 @@ export default function Pdv() {
     const seq = ++buscaSeq.current;
     const t = setTimeout(async () => {
       try {
-        const { data } = await pdvApi.buscarProdutos(termo, filialAtiva?.id);
+        const { data } = await pdvApi.buscarProdutos(busca, filialAtiva?.id);
         if (seq !== buscaSeq.current) return;
         setSugestoes(data);
         setSugIdx(data.length ? 0 : -1);
@@ -250,25 +333,12 @@ export default function Pdv() {
   }, [codigo, filialAtiva?.id]);
 
   /**
-   * Chip ×N: se houver uma linha selecionada, define a quantidade dela para N
-   * (fácil de corrigir "vendi 6 desse"); senão, arma o multiplicador para o
-   * próximo item bipado. Um clique, sem digitar.
+   * Chip ×N: arma o multiplicador para o PRÓXIMO item bipado. Não altera a
+   * quantidade de itens já lançados — depois de bipar não se muda a quantidade
+   * (anti-fraude). Para corrigir, remove o item (com senha) e bipa de novo.
    */
   function aplicarMultiplicador(n: number) {
-    if (selecionadoId) {
-      const sel = itens.find((i) => i.produtoId === selecionadoId);
-      // Produto por peso: ×N não faz sentido (a quantidade é o peso da balança).
-      // Ignora para não substituir, ex., 0,850 kg por "6".
-      if (sel && sel.unidade === 'KG') {
-        focar();
-        return;
-      }
-      setItens((prev) =>
-        prev.map((i) => (i.produtoId === selecionadoId ? { ...i, quantidade: n } : i)),
-      );
-    } else {
-      setMult(n);
-    }
+    setMult(n);
     focar();
   }
 
@@ -301,18 +371,6 @@ export default function Pdv() {
     });
   }
 
-  function alterarQtd(produtoId: string, delta: number) {
-    setItens((prev) =>
-      prev
-        .map((i) =>
-          i.produtoId === produtoId
-            ? { ...i, quantidade: Math.max(0, round3(i.quantidade + delta)) }
-            : i,
-        )
-        .filter((i) => i.quantidade > 0),
-    );
-  }
-
   function remover(produtoId: string) {
     setItens((prev) => prev.filter((i) => i.produtoId !== produtoId));
   }
@@ -328,7 +386,10 @@ export default function Pdv() {
     focar();
   }
 
-  async function confirmarPagamento(pagamentos: PagamentoEnvio[]) {
+  async function confirmarPagamento(
+    pagamentos: PagamentoEnvio[],
+    opts?: { cpfNota?: string },
+  ) {
     if (!filialAtiva?.id) {
       setAviso('Nenhuma filial ativa. Refaça o login.');
       return { ok: false };
@@ -344,39 +405,70 @@ export default function Pdv() {
           descricao: i.descricao,
           unidade: i.unidade,
         })),
+        ...(opts?.cpfNota ? { cpfNota: opts.cpfNota } : {}),
         ...(descontoValor > 0 && {
           desconto: descontoValor,
           descontoTipo: desconto.tipo,
           descontoPercent: desconto.tipo === 'PERCENT' ? desconto.valor : undefined,
         }),
       });
+      const itensCupom = (data.itens || []).map((i: any) => ({
+        descricao: i.descricao,
+        quantidade: Number(i.quantidade),
+        unidade: i.unidade || 'UN',
+        precoUnit: Number(i.precoUnit),
+        valorTotal: Number(i.valorTotal),
+      }));
+      const pagCupom = (data.pagamentos || []).map((p: any) => ({
+        forma: p.forma,
+        valor: Number(p.valor),
+        troco: Number(p.troco || 0),
+      }));
       const cupom: CupomImpressao = {
         loja: filialAtiva?.nome || 'Loja',
         operador: user?.nome || 'Operador',
         numero: data.numero,
         formaPagamento: data.formaPagamento,
         dataEmissao: data.dataEmissao,
-        itens: (data.itens || []).map((i: any) => ({
-          descricao: i.descricao,
-          quantidade: Number(i.quantidade),
-          unidade: i.unidade || 'UN',
-          precoUnit: Number(i.precoUnit),
-          valorTotal: Number(i.valorTotal),
-        })),
+        itens: itensCupom,
         valorTotal: Number(data.valorTotal),
         desconto: Number(data.desconto || 0),
-        pagamentos: (data.pagamentos || []).map((p: any) => ({
-          forma: p.forma,
-          valor: Number(p.valor),
-          troco: Number(p.troco || 0),
-        })),
+        pagamentos: pagCupom,
         troco: Number(data.troco || 0),
       };
       setUltimoCupom(cupom);
+
+      // NFC-e: se a venda emitiu (ou tentou emitir) cupom fiscal, guardamos os
+      // dados p/ exibir chave/QR na tela e (re)imprimir o DANFCE. Quando a nota
+      // sai autorizada, o DANFCE substitui o cupom não-fiscal na impressão auto.
+      const fiscal: DadosFiscais | null = data.fiscal || null;
+      setUltimaFiscal(fiscal);
+      const emitido = !!fiscal && (fiscal.status === 'EMITIDO' || !!fiscal.chaveAcesso);
+      let cupomFiscal: CupomFiscalImpressao | null = null;
+      if (emitido && fiscal) {
+        cupomFiscal = {
+          loja: filialAtiva?.nome || 'Loja',
+          cnpjLoja: (filialAtiva as any)?.cnpj || null,
+          operador: user?.nome || 'Operador',
+          numeroVenda: data.numero,
+          dataEmissao: data.dataEmissao,
+          itens: itensCupom,
+          valorTotal: Number(data.valorTotal),
+          desconto: Number(data.desconto || 0),
+          pagamentos: pagCupom.map((p) => ({ forma: p.forma, valor: p.valor })),
+          troco: Number(data.troco || 0),
+          fiscal,
+        };
+      }
+      setUltimoCupomFiscal(cupomFiscal);
+
       // Só imprime sozinho se o terminal ativou o automático; senão o operador
       // usa o botão "Reimprimir cupom" quando quiser (evita o diálogo do Chrome
       // a cada venda em quem não tem impressora térmica configurada).
-      if (cupomAuto) imprimirCupom(cupom);
+      if (cupomAuto) {
+        if (cupomFiscal) void imprimirCupomFiscal(cupomFiscal);
+        else imprimirCupom(cupom);
+      }
       // Gaveta abre automaticamente quando há dinheiro na venda (não em cartão/PIX puro).
       if (pagamentos.some((p) => (p.forma || '').toUpperCase().startsWith('DINHEIRO'))) {
         void abrirGavetaAuto();
@@ -413,22 +505,26 @@ export default function Pdv() {
           if (itens.length > 0) { e.preventDefault(); setPagando(true); }
           break;
         case 'F4':
-          if (itens.length > 0) { e.preventDefault(); setModalDesconto(true); }
+          if (itens.length > 0) { e.preventDefault(); pedirGerencial('desconto', 'Aplicar desconto', () => setModalDesconto(true)); }
           break;
         case 'F10':
           e.preventDefault(); setModalVendas(true);
           break;
         case 'F7':
-          e.preventDefault(); setModalCaixa('SANGRIA');
+          e.preventDefault(); pedirGerencial('sangria', 'Sangria (retirada de caixa)', () => setModalCaixa('SANGRIA'));
           break;
         case 'F8':
-          e.preventDefault(); setModalCaixa('SUPRIMENTO');
+          e.preventDefault(); pedirGerencial('suprimento', 'Suprimento (reforço de troco)', () => setModalCaixa('SUPRIMENTO'));
           break;
         case 'F9':
-          e.preventDefault(); setModalCaixa('FECHAR');
+          e.preventDefault(); pedirGerencial('fechar', 'Fechar caixa', () => setModalCaixa('FECHAR'));
           break;
         case 'Delete':
-          if (selecionadoId) { e.preventDefault(); remover(selecionadoId); setSelecionadoId(null); }
+          if (selecionadoId) {
+            e.preventDefault();
+            const alvo = selecionadoId;
+            pedirGerencial('remover', 'Remover item da venda', () => { remover(alvo); setSelecionadoId(null); });
+          }
           break;
         case 'ArrowDown':
         case 'ArrowUp': {
@@ -446,13 +542,22 @@ export default function Pdv() {
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [itens, pagando, modalCaixa, modalDesconto, modalVendas, pesoModal, selecionadoId]);
+  }, [itens, pagando, modalCaixa, modalDesconto, modalVendas, pesoModal, selecionadoId, configCaixa]);
 
   async function handleSangria(valor: number, descricao: string) {
     try {
       const { data } = await pdvApi.sangria({ valor, descricao });
       setSessao(data);
       setModalCaixa(null);
+      // Comprovante de sangria (assim como a nota fiscal — sai impresso).
+      imprimirComprovanteMovimento({
+        tipo: 'SANGRIA',
+        loja: filialAtiva?.nome || 'Loja',
+        operador: user?.nome || 'Operador',
+        valor,
+        descricao,
+        saldoGaveta: data?.dinheiroEsperadoGaveta,
+      });
       return { ok: true };
     } catch (e: any) {
       const msg = e?.response?.data?.message || 'Falha na sangria.';
@@ -465,6 +570,14 @@ export default function Pdv() {
       const { data } = await pdvApi.suprimento({ valor, descricao });
       setSessao(data);
       setModalCaixa(null);
+      imprimirComprovanteMovimento({
+        tipo: 'SUPRIMENTO',
+        loja: filialAtiva?.nome || 'Loja',
+        operador: user?.nome || 'Operador',
+        valor,
+        descricao,
+        saldoGaveta: data?.dinheiroEsperadoGaveta,
+      });
       return { ok: true };
     } catch (e: any) {
       const msg = e?.response?.data?.message || 'Falha no suprimento.';
@@ -477,16 +590,45 @@ export default function Pdv() {
     setAviso(r.ok ? 'Gaveta aberta.' : r.mensagem || 'Não foi possível abrir a gaveta.');
   }
 
-  async function handleFechar(informado: number, obs: string) {
+  async function handleFechar({ dinheiro, cartao, pix, obs }: { dinheiro: number; cartao: number; pix: number; obs: string }) {
     if (itens.length > 0) {
       return { ok: false, erro: 'Finalize ou cancele a venda em andamento antes de fechar.' };
     }
     try {
-      const { data } = await pdvApi.fecharSessao({ saldoFinalInformado: informado, observacoes: obs });
+      const { data } = await pdvApi.fecharSessao({
+        saldoFinalInformado: dinheiro,
+        cartaoInformado: cartao,
+        pixInformado: pix,
+        observacoes: obs,
+      });
       setModalCaixa(null);
       setSessao(null);
       setUltimoCupom(null);
+      setUltimaFiscal(null);
+      setUltimoCupomFiscal(null);
       setZReport(data);
+      // Comprovante de fechamento (relatório Z) — sai impresso ao fechar o caixa.
+      imprimirComprovanteFechamento({
+        loja: filialAtiva?.nome || 'Loja',
+        operador: data.operador || user?.nome || 'Operador',
+        abertaEm: data.abertaEm,
+        fechadaEm: data.fechadaEm,
+        saldoInicial: data.saldoInicial,
+        qtdVendas: data.qtdVendas,
+        totalVendas: data.totalVendas,
+        totalDinheiro: data.totalDinheiro,
+        totalCartao: data.totalCartao,
+        totalPix: data.totalPix,
+        totalSangria: data.totalSangria,
+        totalSuprimento: data.totalSuprimento,
+        dinheiroEsperadoGaveta: data.dinheiroEsperadoGaveta,
+        saldoFinalInformado: data.saldoFinalInformado,
+        diferenca: data.diferenca,
+        cartaoInformado: data.cartaoInformado,
+        pixInformado: data.pixInformado,
+        diferencaCartao: data.diferencaCartao,
+        diferencaPix: data.diferencaPix,
+      });
       return { ok: true };
     } catch (e: any) {
       const msg = e?.response?.data?.message || 'Falha ao fechar o caixa.';
@@ -497,8 +639,8 @@ export default function Pdv() {
   // ── Portões da sessão de caixa ──
   if (carregandoSessao) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0E0F16]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F5B841]" />
+      <div className="flex h-screen items-center justify-center bg-[#F4F5F7]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#0F8A72]" />
       </div>
     );
   }
@@ -514,21 +656,30 @@ export default function Pdv() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[#0E0F16] text-gray-100">
+    <div className="flex h-screen flex-col bg-[#F4F5F7] text-[#202123]">
       {/* Topo */}
-      <header className="flex items-center justify-between border-b border-[#222633] bg-[#171A26] px-6 py-3">
-        <div className="flex items-center gap-2">
-          <ShoppingCart className="h-6 w-6 text-[#F5B841]" />
-          <span className="text-lg font-semibold">Frente de Caixa</span>
-          <span className="ml-2 rounded bg-[#12B877]/15 px-2 py-0.5 text-xs font-medium text-emerald-300">
+      <header className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-3 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
+        <div className="flex items-center gap-3">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/20">
+            <ShoppingCart className="h-5 w-5 text-[#0F8A72]" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="text-[15px] font-semibold tracking-tight">Frente de Caixa</span>
+            <span className="mt-0.5 text-[11px] text-[#8E8F94]">Lumin PDV</span>
+          </div>
+          <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-medium text-[#0b7d4e] ring-1 ring-inset ring-[#0F8A72]/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#0FA968]" />
             {filialAtiva?.nome || 'Sem filial'}
           </span>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-400">
-          <span>{user?.nome || 'Operador'}</span>
+        <div className="flex items-center gap-3 text-sm text-[#5F6065]">
+          <span className="flex items-center gap-2 rounded-full bg-[#F7F7F8] px-3 py-1.5 ring-1 ring-inset ring-[#E5E7EB]">
+            <UserIcon className="h-3.5 w-3.5 text-[#0F8A72]" />
+            {user?.nome || 'Operador'}
+          </span>
           <button
             onClick={logout}
-            className="flex items-center gap-1 rounded px-2 py-1 text-gray-400 hover:bg-[#222633] hover:text-gray-200"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[#5F6065] transition-colors hover:bg-rose-50 hover:text-rose-600"
             title="Sair"
           >
             <LogOut className="h-4 w-4" /> Sair
@@ -540,7 +691,7 @@ export default function Pdv() {
         {/* Lista de itens */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Campo de leitura */}
-          <div className="border-b border-[#222633] bg-[#171A26]/60 p-4">
+          <div className="border-b border-[#E5E7EB] bg-white p-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -548,17 +699,30 @@ export default function Pdv() {
               }}
             >
               <div className="relative">
-                <div className="flex items-center gap-3 rounded-lg border border-[#2D3140] bg-[#0E0F16] px-4 py-3 focus-within:border-[#F5B841]">
+                <div className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3.5 transition-all focus-within:border-[#0F8A72]/60 focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0F8A72]/15">
                   {buscando ? (
-                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-[#F5B841]" />
+                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-[#0F8A72]" />
                   ) : (
-                    <ScanLine className="h-6 w-6 shrink-0 text-[#F5B841]" />
+                    <ScanLine className="h-6 w-6 shrink-0 text-[#0F8A72]" />
                   )}
                   <input
                     ref={inputRef}
                     autoFocus
                     value={codigo}
-                    onChange={(e) => setCodigo(e.target.value)}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      // "2*arroz" / "2xarroz": assim que uma LETRA vem depois do
+                      // multiplicador, tira o "2*" do campo e mostra embaixo
+                      // "Próximo item × 2". O campo fica só com o nome (não gruda).
+                      const m = v.match(/^(\d+(?:[.,]\d+)?)\s*[*xX]\s*(.*)$/);
+                      if (m && /^\p{L}/u.test(m[2])) {
+                        const n = parseNum(m[1]);
+                        setMult(n > 0 ? n : 1);
+                        setCodigo(m[2]);
+                        return;
+                      }
+                      setCodigo(v);
+                    }}
                     onBlur={() => setTimeout(() => { setSugestoes([]); setSugIdx(-1); }, 120)}
                     onKeyDown={(e) => {
                       if (sugestoes.length === 0) return;
@@ -578,28 +742,28 @@ export default function Pdv() {
                       }
                     }}
                     placeholder="Bipe o código de barras ou digite o nome do produto"
-                    className="w-full bg-transparent text-lg outline-none placeholder:text-gray-600"
+                    className="w-full bg-transparent text-lg outline-none placeholder:text-[#9CA3AF]"
                     autoComplete="off"
                   />
                 </div>
 
                 {/* Sugestões por nome/código */}
                 {sugestoes.length > 0 && (
-                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-lg border border-[#2D3140] bg-[#171A26] shadow-2xl">
+                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-xl border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(22,23,29,0.12)]">
                     {sugestoes.map((p, idx) => (
                       <li
                         key={p.id}
                         onMouseDown={(e) => { e.preventDefault(); selecionarSugestao(p); }}
                         onMouseEnter={() => setSugIdx(idx)}
                         className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2 ${
-                          idx === sugIdx ? 'bg-[#E8A317]/15' : 'hover:bg-[#222633]'
+                          idx === sugIdx ? 'bg-[#0F8A72]/10' : 'hover:bg-[#F7F7F8]'
                         }`}
                       >
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-medium text-gray-100">{p.descricao}</div>
-                          <div className="truncate text-xs text-gray-500">
+                          <div className="truncate text-sm font-medium text-[#202123]">{p.descricao}</div>
+                          <div className="truncate text-xs text-[#8E8F94]">
                             {p.codigoBarras || p.codigo}
-                            <span className={p.estoqueDisponivel > 0 ? 'text-gray-500' : 'text-rose-400'}>
+                            <span className={p.estoqueDisponivel > 0 ? 'text-[#8E8F94]' : 'text-rose-500'}>
                               {' · '}
                               {p.vendidoPorPeso
                                 ? `${p.estoqueDisponivel.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg`
@@ -607,9 +771,9 @@ export default function Pdv() {
                             </span>
                           </div>
                         </div>
-                        <div className="shrink-0 tabular-nums text-sm font-semibold text-emerald-400">
+                        <div className="shrink-0 tabular-nums text-sm font-semibold text-[#0F8A72]">
                           {brl(p.precoVenda)}
-                          {p.vendidoPorPeso && <span className="text-xs text-gray-500">/kg</span>}
+                          {p.vendidoPorPeso && <span className="text-xs text-[#8E8F94]">/kg</span>}
                         </div>
                       </li>
                     ))}
@@ -617,29 +781,30 @@ export default function Pdv() {
                 )}
               </div>
             </form>
-            {/* Multiplicador de quantidade — clique rápido (ou digite "5*" no campo). */}
+            {/* Multiplicador de quantidade — arma o PRÓXIMO item bipado.
+                Clique um ×N ou digite "2*" antes do nome/código. */}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-xs uppercase tracking-wide text-gray-500">
-                {selecionadoId ? 'Definir qtd do item' : 'Multiplicar'} ×
+              <span className="text-xs uppercase tracking-wide text-[#8E8F94]">
+                Multiplicar ×
               </span>
               {[2, 3, 4, 5, 6, 10, 12].map((n) => (
                 <button
                   key={n}
                   onClick={() => aplicarMultiplicador(n)}
-                  className={`min-w-[2.75rem] rounded-lg border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
-                    mult === n && !selecionadoId
-                      ? 'border-[#E8A317] bg-[#E8A317]/20 text-amber-200'
-                      : 'border-[#2D3140] bg-[#222633] text-gray-300 hover:border-gray-600 hover:bg-[#2D3140]'
+                  className={`min-w-[2.75rem] rounded-xl border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
+                    mult === n
+                      ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e]'
+                      : 'border-[#E5E7EB] bg-white text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
                   }`}
-                  title={selecionadoId ? `Definir ${n} unidades no item selecionado` : `Próximo item entra com ${n} unidades`}
+                  title={`Próximo item entra com ${n} unidades`}
                 >
                   ×{n}
                 </button>
               ))}
-              {mult > 1 && !selecionadoId && (
+              {mult > 1 && (
                 <button
                   onClick={() => { setMult(1); focar(); }}
-                  className="ml-1 flex items-center gap-1 rounded-lg bg-[#E8A317]/15 px-3 py-1.5 text-sm font-semibold text-amber-200 ring-1 ring-inset ring-[#E8A317]/40"
+                  className="ml-1 flex items-center gap-1 rounded-xl bg-[#0F8A72]/10 px-3 py-1.5 text-sm font-semibold text-[#0b7d4e] ring-1 ring-inset ring-[#0F8A72]/30"
                   title="Próximo item terá esta quantidade. Clique para limpar."
                 >
                   Próximo item × {mult} <X className="h-3.5 w-3.5" />
@@ -647,32 +812,40 @@ export default function Pdv() {
               )}
             </div>
             {aviso && (
-              <div className="mt-2 text-sm font-medium text-rose-400">{aviso}</div>
+              <div className="mt-2 text-sm font-medium text-rose-500">{aviso}</div>
             )}
           </div>
 
           {/* Itens */}
           <div className="min-h-0 flex-1 overflow-auto">
             {itens.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-gray-600">
+              <div className="flex h-full flex-col items-center justify-center text-[#8E8F94]">
                 {ultimoCupom ? (
                   <div className="flex flex-col items-center text-center">
-                    <Check className="mb-3 h-12 w-12 text-[#12B877]" />
-                    <p className="text-lg font-semibold text-emerald-400">
+                    <div className="mb-3 grid h-16 w-16 place-items-center rounded-full bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/25">
+                      <Check className="h-9 w-9 text-[#0F8A72]" />
+                    </div>
+                    <p className="text-lg font-semibold text-[#0b7d4e]">
                       Venda #{ultimoCupom.numero} registrada
                     </p>
-                    <p className="mt-1 text-sm text-gray-400">
+                    <p className="mt-1 text-sm text-[#5F6065]">
                       {brl(ultimoCupom.valorTotal)} · {ultimoCupom.formaPagamento}
                       {ultimoCupom.troco > 0 && ` · Troco ${brl(ultimoCupom.troco)}`}
                     </p>
+
+                    {/* Situação fiscal (NFC-e) da venda: chave, QR e status SEFAZ. */}
+                    {ultimaFiscal && (
+                      <FiscalVendaStatus fiscal={ultimaFiscal} cupomFiscal={ultimoCupomFiscal} />
+                    )}
+
                     <button
                       onClick={() => imprimirCupom(ultimoCupom)}
-                      className="mt-4 flex items-center gap-2 rounded-lg bg-[#222633] px-4 py-2 text-sm text-gray-200 hover:bg-[#2D3140]"
+                      className="mt-4 flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm text-[#202123] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.98]"
                     >
                       <Printer className="h-4 w-4" /> Reimprimir cupom
                     </button>
                     <label
-                      className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-gray-400 select-none"
+                      className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-[#5F6065] select-none"
                       title="Ligue apenas se este caixa tem impressora térmica. Sem térmica, isto abre o diálogo de impressão do Chrome a cada venda."
                     >
                       <input
@@ -682,28 +855,31 @@ export default function Pdv() {
                           setCupomAuto(e.target.checked);
                           setCupomAutoState(e.target.checked);
                         }}
-                        className="h-4 w-4 accent-[#12B877]"
+                        className="h-4 w-4 accent-[#0F8A72]"
                       />
                       Imprimir cupom automaticamente
                     </label>
-                    <p className="mt-3 text-sm text-gray-600">Bipe uma mercadoria para a próxima venda.</p>
+                    <p className="mt-3 text-sm text-[#8E8F94]">Bipe uma mercadoria para a próxima venda.</p>
                   </div>
                 ) : (
                   <>
-                    <Barcode className="mb-3 h-12 w-12" />
-                    <p>Nenhum item. Bipe uma mercadoria para começar.</p>
+                    <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-white ring-1 ring-inset ring-[#E5E7EB]">
+                      <Barcode className="h-8 w-8 text-[#C4C6CB]" />
+                    </div>
+                    <p className="text-sm">Nenhum item. Bipe uma mercadoria para começar.</p>
+                    <p className="mt-1 text-xs text-[#B0B2B7]">Use o leitor de código de barras ou digite o nome do produto.</p>
                   </>
                 )}
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-[#171A26] text-left text-xs uppercase text-gray-500">
-                  <tr>
-                    <th className="px-4 py-2">Produto</th>
-                    <th className="px-4 py-2 text-right">Preço</th>
-                    <th className="px-4 py-2 text-center">Qtd</th>
-                    <th className="px-4 py-2 text-right">Subtotal</th>
-                    <th className="px-4 py-2" />
+                <thead className="sticky top-0 z-10 bg-[#F7F7F8]/95 text-left text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94] backdrop-blur">
+                  <tr className="border-b border-[#E5E7EB]">
+                    <th className="px-4 py-2.5">Produto</th>
+                    <th className="px-4 py-2.5 text-right">Preço</th>
+                    <th className="px-4 py-2.5 text-center">Qtd</th>
+                    <th className="px-4 py-2.5 text-right">Subtotal</th>
+                    <th className="px-4 py-2.5" />
                   </tr>
                 </thead>
                 <tbody>
@@ -711,38 +887,27 @@ export default function Pdv() {
                     <tr
                       key={i.produtoId}
                       onClick={() => setSelecionadoId(i.produtoId)}
-                      className={`cursor-pointer border-b border-[#222633]/60 ${
-                        selecionadoId === i.produtoId ? 'bg-[#E8A317]/10 ring-1 ring-inset ring-[#E8A317]/40' : ''
+                      className={`cursor-pointer border-b border-[#EEF0F2] transition-colors ${
+                        selecionadoId === i.produtoId ? 'bg-[#0F8A72]/[0.08] ring-1 ring-inset ring-[#0F8A72]/30' : 'hover:bg-[#F7F7F8]'
                       }`}
                     >
                       <td className="px-4 py-3">
                         <div className="font-medium">{i.descricao}</div>
-                        <div className="text-xs text-gray-500">{i.codigoBarras}</div>
+                        <div className="text-xs text-[#8E8F94]">{i.codigoBarras}</div>
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums">
                         {brl(i.precoUnit)}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center justify-center gap-2">
-                          <button
-                            onClick={() => alterarQtd(i.produtoId, i.unidade === 'KG' ? -0.1 : -1)}
-                            className="rounded bg-[#222633] p-1 hover:bg-[#2D3140]"
-                            title={i.unidade === 'KG' ? 'Diminuir 0,1 kg' : 'Diminuir 1'}
-                          >
-                            <Minus className="h-4 w-4" />
-                          </button>
-                          <span className="w-16 text-center tabular-nums">
+                        {/* Quantidade é definida no momento do bipe (multiplicador).
+                            Não se altera depois — anti-fraude. Para corrigir, remove
+                            o item (com senha) e bipa de novo. */}
+                        <div className="text-center">
+                          <span className="inline-block min-w-[3.5rem] rounded-lg bg-[#F7F7F8] px-3 py-1.5 text-center font-semibold tabular-nums text-[#202123] ring-1 ring-inset ring-[#E5E7EB]">
                             {i.unidade === 'KG'
                               ? `${i.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`
                               : i.quantidade}
                           </span>
-                          <button
-                            onClick={() => alterarQtd(i.produtoId, i.unidade === 'KG' ? 0.1 : 1)}
-                            className="rounded bg-[#222633] p-1 hover:bg-[#2D3140]"
-                            title={i.unidade === 'KG' ? 'Aumentar 0,1 kg' : 'Aumentar 1'}
-                          >
-                            <Plus className="h-4 w-4" />
-                          </button>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right font-medium tabular-nums">
@@ -750,8 +915,9 @@ export default function Pdv() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
-                          onClick={() => remover(i.produtoId)}
-                          className="rounded p-1 text-gray-500 hover:bg-rose-500/10 hover:text-rose-400"
+                          onClick={() => pedirGerencial('remover', 'Remover item da venda', () => remover(i.produtoId))}
+                          className="rounded p-1 text-[#8E8F94] hover:bg-rose-50 hover:text-rose-600"
+                          title="Remover item (pode exigir senha gerencial)"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -765,96 +931,122 @@ export default function Pdv() {
         </main>
 
         {/* Painel lateral — total e ações */}
-        <aside className="flex w-80 shrink-0 flex-col border-l border-[#222633] bg-[#171A26]">
-          <div className="flex-1 p-6">
-            <div className="text-sm text-gray-400">Itens: {totalItens}</div>
+        <aside className="flex w-80 shrink-0 flex-col border-l border-[#E5E7EB] bg-white">
+          <div className="flex-1 p-5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[#5F6065]">Itens</span>
+              <span className="rounded-full bg-[#F7F7F8] px-2.5 py-0.5 text-xs font-semibold tabular-nums text-[#202123] ring-1 ring-inset ring-[#E5E7EB]">{totalItens}</span>
+            </div>
             {descontoValor > 0 && (
               <>
-                <div className="mt-2 flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="tabular-nums text-gray-400 line-through">{brl(total)}</span>
+                <div className="mt-3 flex justify-between text-sm">
+                  <span className="text-[#8E8F94]">Subtotal</span>
+                  <span className="tabular-nums text-[#8E8F94] line-through">{brl(total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#F5B841]">
+                  <span className="text-[#0F8A72]">
                     Desconto{desconto.tipo === 'PERCENT' ? ` (${desconto.valor}%)` : ''}
                   </span>
-                  <span className="tabular-nums text-[#F5B841]">- {brl(descontoValor)}</span>
+                  <span className="tabular-nums text-[#0F8A72]">- {brl(descontoValor)}</span>
                 </div>
               </>
             )}
-            <div className="mt-1 text-xs uppercase tracking-wide text-gray-500">
-              Total a pagar
-            </div>
-            <div className="mt-1 text-5xl font-bold tabular-nums text-[#F5B841]">
-              {brl(totalFinal)}
+            {/* Hero do total a pagar */}
+            <div className="mt-4 rounded-2xl border border-[#0F8A72]/20 bg-[#0F8A72]/[0.06] p-4">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0F8A72]">
+                Total a pagar
+              </div>
+              <div className="mt-1 text-[2.75rem] font-bold leading-none tabular-nums text-[#0F8A72]">
+                {brl(totalFinal)}
+              </div>
             </div>
           </div>
           <div className="space-y-2 p-4">
             <button
               onClick={() => setPagando(true)}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#0E9560] py-4 text-lg font-semibold hover:bg-[#12B877] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
             >
               <Check className="h-5 w-5" />
               Finalizar (F2)
             </button>
             <button
-              onClick={() => setModalDesconto(true)}
+              onClick={() => pedirGerencial('desconto', 'Aplicar desconto', () => setModalDesconto(true))}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-sm text-gray-300 hover:bg-[#2D3140] disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99] disabled:opacity-40"
             >
-              <Percent className="h-4 w-4 text-[#F5B841]" />
+              <Percent className="h-4 w-4 text-[#0F8A72]" />
               {descontoValor > 0 ? 'Alterar desconto' : 'Desconto'} (F4)
             </button>
             <button
-              onClick={limpar}
+              onClick={() => pedirGerencial('cancelar', 'Cancelar venda', limpar)}
               disabled={itens.length === 0}
-              className="w-full rounded-lg bg-[#222633] py-2 text-sm text-gray-300 hover:bg-[#2D3140] disabled:opacity-40"
+              className="w-full rounded-xl bg-transparent py-2 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 active:scale-[0.99] disabled:opacity-40"
             >
               Cancelar venda
             </button>
 
             {/* Barra do caixa (turno) */}
-            <div className="mt-2 border-t border-[#222633] pt-3">
-              <div className="mb-2 flex justify-between text-xs text-gray-500">
+            <div className="mt-2 border-t border-[#E5E7EB] pt-3">
+              {/* Identificação do caixa aberto — cada operador tem o SEU caixa. */}
+              <div className="mb-3 rounded-xl border border-[#0F8A72]/20 bg-[#0F8A72]/[0.06] px-3.5 py-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#0b7d4e]">
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#0F8A72]/15 ring-1 ring-inset ring-[#0F8A72]/25">
+                    <Lock className="h-3.5 w-3.5" />
+                  </span>
+                  Caixa aberto às {horaHM(sessao.abertaEm)}
+                </div>
+                <div className="mt-2.5 flex items-center justify-between text-xs">
+                  <span className="text-[#8E8F94]">Saldo inicial</span>
+                  <span className="tabular-nums font-semibold text-[#202123]">{brl(sessao.saldoInicial)}</span>
+                </div>
+                <div className="mt-1.5 flex items-center justify-between text-xs">
+                  <span className="text-[#8E8F94]">Operador</span>
+                  <span className="flex items-center gap-1.5 font-semibold text-[#202123]">
+                    <UserIcon className="h-3.5 w-3.5 text-[#0F8A72]" />
+                    {sessao.operador || user?.nome || 'Operador'}
+                  </span>
+                </div>
+              </div>
+              <div className="mb-2 flex justify-between px-0.5 text-xs text-[#8E8F94]">
                 <span>Turno · {sessao.qtdVendas} venda(s)</span>
                 <span>Gaveta: {brl(sessao.dinheiroEsperadoGaveta)}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <button
-                  onClick={() => setModalCaixa('SANGRIA')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
+                  onClick={() => pedirGerencial('sangria', 'Sangria (retirada de caixa)', () => setModalCaixa('SANGRIA'))}
+                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
                 >
-                  <ArrowDownCircle className="h-4 w-4 text-rose-400" /> Sangria
-                  <span className="text-[10px] text-gray-500">F7</span>
+                  <ArrowDownCircle className="h-4 w-4 text-rose-500" /> Sangria
+                  <span className="text-[10px] text-[#8E8F94]">F7</span>
                 </button>
                 <button
-                  onClick={() => setModalCaixa('SUPRIMENTO')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
+                  onClick={() => pedirGerencial('suprimento', 'Suprimento (reforço de troco)', () => setModalCaixa('SUPRIMENTO'))}
+                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
                 >
-                  <ArrowUpCircle className="h-4 w-4 text-emerald-400" /> Suprim.
-                  <span className="text-[10px] text-gray-500">F8</span>
+                  <ArrowUpCircle className="h-4 w-4 text-[#0F8A72]" /> Suprim.
+                  <span className="text-[10px] text-[#8E8F94]">F8</span>
                 </button>
                 <button
-                  onClick={() => setModalCaixa('FECHAR')}
-                  className="flex flex-col items-center gap-1 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
+                  onClick={() => pedirGerencial('fechar', 'Fechar caixa', () => setModalCaixa('FECHAR'))}
+                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
                 >
-                  <Lock className="h-4 w-4 text-[#F5B841]" /> Fechar
-                  <span className="text-[10px] text-gray-500">F9</span>
+                  <Lock className="h-4 w-4 text-[#0F8A72]" /> Fechar
+                  <span className="text-[10px] text-[#8E8F94]">F9</span>
                 </button>
               </div>
               <button
                 onClick={() => setModalVendas(true)}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99]"
               >
-                <Printer className="h-4 w-4 text-[#F5B841]" /> Vendas / Reimprimir / Estorno
-                <span className="text-[10px] text-gray-500">F10</span>
+                <Printer className="h-4 w-4 text-[#0F8A72]" /> Vendas / Reimprimir / Estorno
+                <span className="text-[10px] text-[#8E8F94]">F10</span>
               </button>
               <button
                 onClick={handleAbrirGaveta}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#222633] py-2 text-xs text-gray-300 hover:bg-[#2D3140]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99]"
               >
-                <Coins className="h-4 w-4 text-emerald-400" /> Abrir gaveta
+                <Coins className="h-4 w-4 text-[#0F8A72]" /> Abrir gaveta
               </button>
             </div>
           </div>
@@ -894,14 +1086,15 @@ export default function Pdv() {
           filialId={filialAtiva?.id}
           onFechar={() => setModalVendas(false)}
           onEstornou={carregarSessao}
+          pedirGerencial={pedirGerencial}
         />
       )}
 
       {modalCaixa === 'SANGRIA' && (
         <ModalValor
           titulo="Sangria (retirada)"
-          cor="bg-rose-600 hover:bg-rose-500"
-          icon={<ArrowDownCircle className="h-5 w-5 text-rose-300" />}
+          cor="bg-rose-600 hover:bg-rose-700"
+          icon={<ArrowDownCircle className="h-5 w-5 text-rose-500" />}
           onFechar={() => setModalCaixa(null)}
           onConfirmar={handleSangria}
         />
@@ -909,8 +1102,8 @@ export default function Pdv() {
       {modalCaixa === 'SUPRIMENTO' && (
         <ModalValor
           titulo="Suprimento (reforço)"
-          cor="bg-[#0E9560] hover:bg-[#12B877]"
-          icon={<ArrowUpCircle className="h-5 w-5 text-emerald-300" />}
+          cor="bg-[#0F8A72] hover:bg-[#0d7a64]"
+          icon={<ArrowUpCircle className="h-5 w-5 text-[#0F8A72]" />}
           onFechar={() => setModalCaixa(null)}
           onConfirmar={handleSuprimento}
         />
@@ -918,8 +1111,24 @@ export default function Pdv() {
       {modalCaixa === 'FECHAR' && (
         <ModalFechar
           esperado={sessao.dinheiroEsperadoGaveta}
+          esperadoCartao={sessao.totalCartao}
+          esperadoPix={sessao.totalPix}
           onFechar={() => setModalCaixa(null)}
           onConfirmar={handleFechar}
+        />
+      )}
+
+      {/* Portão por senha gerencial da loja (operações sensíveis) */}
+      {gate && (
+        <ModalSenhaGerencial
+          acao={gate.label}
+          filialId={filialAtiva?.id}
+          onFechar={() => setGate(null)}
+          onAutorizado={() => {
+            const cb = gate.onOk;
+            setGate(null);
+            cb();
+          }}
         />
       )}
     </div>
@@ -929,6 +1138,11 @@ export default function Pdv() {
 const round2 = (v: number) => Math.round(v * 100) / 100;
 const round3 = (v: number) => Math.round(v * 1000) / 1000; // preserva precisão de peso (kg)
 const parseNum = (s: string) => parseFloat((s || '').replace(',', '.')) || 0;
+// Hora curta no padrão brasileiro do caixa: "7h03", "14h30".
+const horaHM = (d: string | Date) => {
+  const dt = new Date(d);
+  return `${dt.getHours()}h${String(dt.getMinutes()).padStart(2, '0')}`;
+};
 
 type Categoria = 'DINHEIRO' | 'CARTAO' | 'PIX';
 
@@ -941,6 +1155,7 @@ function ModalPagamento({
   onFechar: () => void;
   onConfirmar: (
     pagamentos: PagamentoEnvio[],
+    opts?: { cpfNota?: string },
   ) => Promise<{ ok: boolean; erro?: string }>;
 }) {
   const tef = getTefProvider();
@@ -955,6 +1170,9 @@ function ModalPagamento({
   const [processando, setProcessando] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  // CPF/CNPJ na nota (opcional) — vai para a NFC-e como consumidor identificado.
+  const [cpfNota, setCpfNota] = useState('');
+  const [pedirCpf, setPedirCpf] = useState(false);
   const valorRef = useRef<HTMLInputElement>(null);
   // Trava síncrona contra dupla finalização (Enter repetido + auto-finalizar).
   const finalizandoRef = useRef(false);
@@ -984,7 +1202,7 @@ function ModalPagamento({
     finalizandoRef.current = true;
     setSalvando(true);
     setErro(null);
-    const res = await onConfirmar(lista);
+    const res = await onConfirmar(lista, { cpfNota: cpfNota.replace(/\D/g, '') || undefined });
     if (!res.ok) {
       setErro(res.erro || 'Falha ao registrar a venda.');
       setSalvando(false);
@@ -1068,23 +1286,25 @@ function ModalPagamento({
     c.endsWith('_TEF') ? 'TEF' : c.endsWith('_POS') ? 'POS' : '';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-md rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
-          <h2 className="text-lg font-semibold">Pagamento</h2>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <CreditCard className="h-5 w-5 text-[#0F8A72]" /> Pagamento
+          </h2>
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <div className="flex items-end justify-between">
+          <div className="flex items-end justify-between rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
             <div>
-              <div className="text-xs uppercase tracking-wide text-gray-500">Total</div>
-              <div className="text-3xl font-bold tabular-nums text-gray-200">{brl(total)}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">Total</div>
+              <div className="text-3xl font-bold tabular-nums text-[#202123]">{brl(total)}</div>
             </div>
             <div className="text-right">
-              <div className="text-xs uppercase tracking-wide text-gray-500">Restante</div>
-              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-[#F5B841]' : 'text-emerald-400'}`}>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">Restante</div>
+              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-[#202123]' : 'text-[#0F8A72]'}`}>
                 {brl(Math.max(0, restante))}
               </div>
             </div>
@@ -1094,19 +1314,19 @@ function ModalPagamento({
           {pagamentos.length > 0 && (
             <div className="mt-4 space-y-1">
               {pagamentos.map((p, idx) => (
-                <div key={idx} className="flex items-center justify-between rounded-lg bg-[#0E0F16]/60 px-3 py-2 text-sm">
+                <div key={idx} className="flex items-center justify-between rounded-lg bg-[#F7F7F8] px-3 py-2 text-sm">
                   <span className="flex items-center gap-2">
-                    <span className="font-medium text-gray-200">
+                    <span className="font-medium text-[#202123]">
                       {p.forma.replace('_TEF', '').replace('_POS', '').replace('CARTAO', 'Cartão').replace('DINHEIRO', 'Dinheiro')}
                     </span>
                     {rotuloCanal(p.forma) && (
-                      <span className="rounded bg-[#222633] px-1.5 py-0.5 text-[10px] text-gray-400">{rotuloCanal(p.forma)}</span>
+                      <span className="rounded bg-[#F7F7F8] px-1.5 py-0.5 text-[10px] text-[#5F6065]">{rotuloCanal(p.forma)}</span>
                     )}
-                    {p.nsu && <span className="text-[10px] text-gray-500">NSU {p.nsu}</span>}
+                    {p.nsu && <span className="text-[10px] text-[#8E8F94]">NSU {p.nsu}</span>}
                   </span>
                   <span className="flex items-center gap-3">
-                    <span className="tabular-nums text-gray-300">{brl(p.valor)}</span>
-                    <button onClick={() => removerPagamento(idx)} className="text-gray-500 hover:text-rose-400">
+                    <span className="tabular-nums text-[#5F6065]">{brl(p.valor)}</span>
+                    <button onClick={() => removerPagamento(idx)} className="text-[#8E8F94] hover:text-rose-600">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </span>
@@ -1121,15 +1341,15 @@ function ModalPagamento({
               <button
                 key={f.id}
                 onClick={() => setForma(f.id)}
-                className={`flex flex-col items-center gap-1 rounded-lg border py-3 text-sm ${
+                className={`flex flex-col items-center gap-1 rounded-xl border py-3 text-sm transition-all active:scale-[0.97] ${
                   forma === f.id
-                    ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
-                    : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
+                    ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
+                    : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
                 }`}
               >
                 {f.icon}
                 {f.label}
-                <span className="text-[10px] text-gray-500">{f.tecla}</span>
+                <span className="text-[10px] text-[#8E8F94]">{f.tecla}</span>
               </button>
             ))}
           </div>
@@ -1137,18 +1357,18 @@ function ModalPagamento({
           {/* Canal TEF x POS (cartão/PIX) */}
           {forma !== 'DINHEIRO' && (
             <div className="mt-3 flex items-center gap-2 text-sm">
-              <span className="text-gray-500">Máquina:</span>
+              <span className="text-[#8E8F94]">Máquina:</span>
               <button
                 onClick={() => setCanal('TEF')}
                 disabled={!temTef}
-                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-[#E8A317] text-slate-900' : 'bg-[#222633] text-gray-400'} disabled:opacity-40`}
+                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-[#0F8A72] text-white' : 'bg-[#F7F7F8] text-[#5F6065]'} disabled:opacity-40`}
                 title={temTef ? 'Máquina integrada (TEF) — F6' : 'Nenhum TEF configurado'}
               >
                 Integrada (TEF)
               </button>
               <button
                 onClick={() => setCanal('POS')}
-                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-[#E8A317] text-slate-900' : 'bg-[#222633] text-gray-400'}`}
+                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-[#0F8A72] text-white' : 'bg-[#F7F7F8] text-[#5F6065]'}`}
                 title="Maquininha avulsa — operar na mão (F6)"
               >
                 Avulsa (POS)
@@ -1157,11 +1377,11 @@ function ModalPagamento({
                 <span className="ml-auto flex gap-1">
                   <button
                     onClick={() => setTipoCartao('CREDITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-[#2D3140] text-gray-100' : 'bg-[#222633] text-gray-500'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-[#0F8A72]/10 text-[#0b7d4e]' : 'bg-[#F7F7F8] text-[#8E8F94]'}`}
                   >Crédito</button>
                   <button
                     onClick={() => setTipoCartao('DEBITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-[#2D3140] text-gray-100' : 'bg-[#222633] text-gray-500'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-[#0F8A72]/10 text-[#0b7d4e]' : 'bg-[#F7F7F8] text-[#8E8F94]'}`}
                   >Débito</button>
                 </span>
               )}
@@ -1171,7 +1391,7 @@ function ModalPagamento({
           {/* Valor da parcela + (dinheiro) valor recebido */}
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-gray-400">Valor {pagamentos.length > 0 || valorStr ? 'a lançar' : '(total)'}</label>
+              <label className="text-xs text-[#5F6065]">Valor {pagamentos.length > 0 || valorStr ? 'a lançar' : '(total)'}</label>
               <input
                 ref={valorRef}
                 autoFocus={forma !== 'DINHEIRO'}
@@ -1179,19 +1399,19 @@ function ModalPagamento({
                 onChange={(e) => setValorStr(e.target.value)}
                 placeholder={brl(restante).replace('R$', '').trim()}
                 inputMode="decimal"
-                className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
+                className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
               />
             </div>
             {forma === 'DINHEIRO' && (
               <div>
-                <label className="text-xs text-gray-400">Valor recebido</label>
+                <label className="text-xs text-[#5F6065]">Valor recebido</label>
                 <input
                   autoFocus
                   value={recebidoStr}
                   onChange={(e) => setRecebidoStr(e.target.value)}
                   placeholder="0,00"
                   inputMode="decimal"
-                  className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
+                  className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
                 />
               </div>
             )}
@@ -1200,27 +1420,53 @@ function ModalPagamento({
           {(trocoAtual > 0 || trocoAcum > 0 || dinheiroInsuficiente) && (
             <div className="mt-2 flex justify-between text-sm">
               {dinheiroInsuficiente ? (
-                <span className="text-rose-400">Recebido menor que o valor</span>
+                <span className="text-rose-600">Recebido menor que o valor</span>
               ) : (
-                <span className="text-gray-500">&nbsp;</span>
+                <span className="text-[#8E8F94]">&nbsp;</span>
               )}
-              <span className="text-emerald-400">Troco: {brl(round2(trocoAtual + trocoAcum))}</span>
+              <span className="text-[#0F8A72]">Troco: {brl(round2(trocoAtual + trocoAcum))}</span>
             </div>
           )}
 
           {processando && (
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-[#E8A317]/10 px-3 py-2 text-sm text-amber-300">
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-[#0F8A72]/10 px-3 py-2 text-sm text-[#0b7d4e]">
               <Loader2 className="h-4 w-4 animate-spin" /> {processando}
             </div>
           )}
           {erro && (
-            <div className="mt-4 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
+            <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600">{erro}</div>
           )}
+
+          {/* CPF/CNPJ na nota (opcional) — identifica o consumidor na NFC-e */}
+          <div className="mt-4">
+            {!pedirCpf ? (
+              <button
+                onClick={() => setPedirCpf(true)}
+                className="flex items-center gap-2 text-sm text-[#5F6065] hover:text-[#0F8A72]"
+              >
+                <UserIcon className="h-4 w-4" /> Incluir CPF/CNPJ na nota
+              </button>
+            ) : (
+              <div>
+                <label className="flex items-center gap-2 text-xs text-[#5F6065]">
+                  <UserIcon className="h-4 w-4" /> CPF/CNPJ do consumidor (opcional)
+                </label>
+                <input
+                  autoFocus
+                  value={cpfNota}
+                  onChange={(e) => setCpfNota(e.target.value)}
+                  placeholder="000.000.000-00"
+                  inputMode="numeric"
+                  className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2 text-base outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                />
+              </div>
+            )}
+          </div>
 
           <button
             onClick={adicionar}
             disabled={salvando || !!processando || restante <= 0.005 || valorAplicado <= 0 || dinheiroInsuficiente}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0E9560] py-4 text-lg font-semibold hover:bg-[#12B877] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
           >
             {salvando || processando ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -1289,39 +1535,39 @@ function ModalDesconto({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Percent className="h-5 w-5 text-[#F5B841]" /> Desconto na venda
+            <Percent className="h-5 w-5 text-[#0F8A72]" /> Desconto na venda
           </h2>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
           <div className="mb-4 flex justify-between text-sm">
-            <span className="text-gray-500">Total atual</span>
-            <span className="tabular-nums text-gray-300">{brl(total)}</span>
+            <span className="text-[#8E8F94]">Total atual</span>
+            <span className="tabular-nums text-[#5F6065]">{brl(total)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => setTipo('PERCENT')}
-              className={`rounded-lg border py-2 text-sm ${
+              className={`rounded-xl border py-2 text-sm transition-all active:scale-[0.97] ${
                 tipo === 'PERCENT'
-                  ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
-                  : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
+                  ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
+                  : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
               }`}
             >
               Percentual (%)
             </button>
             <button
               onClick={() => setTipo('VALOR')}
-              className={`rounded-lg border py-2 text-sm ${
+              className={`rounded-xl border py-2 text-sm transition-all active:scale-[0.97] ${
                 tipo === 'VALOR'
-                  ? 'border-[#E8A317] bg-[#E8A317]/10 text-amber-300'
-                  : 'border-[#2D3140] text-gray-400 hover:border-gray-600'
+                  ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
+                  : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
               }`}
             >
               Valor (R$)
@@ -1334,22 +1580,22 @@ function ModalDesconto({
             onChange={(e) => setValorStr(e.target.value)}
             placeholder={tipo === 'PERCENT' ? '0%' : '0,00'}
             inputMode="decimal"
-            className="mt-4 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#E8A317]"
+            className="mt-4 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
 
           <div className="mt-4 space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-500">Desconto</span>
-              <span className="tabular-nums text-[#F5B841]">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
+              <span className="text-[#8E8F94]">Desconto</span>
+              <span className="tabular-nums text-[#0F8A72]">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-500">Novo total</span>
-              <span className="tabular-nums font-semibold text-emerald-400">{brl(totalFinal)}</span>
+              <span className="text-[#8E8F94]">Novo total</span>
+              <span className="tabular-nums font-semibold text-[#0F8A72]">{brl(totalFinal)}</span>
             </div>
           </div>
 
           {excede && (
-            <div className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">
+            <div className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">
               Desconto acima do limite do operador ({DESCONTO_MAX_PCT}%). Chame o gerente.
             </div>
           )}
@@ -1357,14 +1603,14 @@ function ModalDesconto({
           <div className="mt-5 flex gap-2">
             <button
               onClick={() => onConfirmar({ tipo: 'VALOR', valor: 0 })}
-              className="flex-1 rounded-lg bg-[#222633] py-3 text-sm text-gray-300 hover:bg-[#2D3140]"
+              className="flex-1 rounded-xl bg-[#F7F7F8] py-3 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#EEF0F2] active:scale-[0.98]"
             >
               Remover
             </button>
             <button
               onClick={confirmar}
               disabled={excede}
-              className="flex-[2] flex items-center justify-center gap-2 rounded-lg bg-[#CE8F14] py-3 font-semibold hover:bg-[#E8A317] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
+              className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
             >
               <Check className="h-5 w-5" /> Aplicar (Enter)
             </button>
@@ -1415,26 +1661,26 @@ function ModalPeso({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-sm rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Scale className="h-5 w-5 text-[#F5B841]" /> Pesar produto
+            <Scale className="h-5 w-5 text-[#0F8A72]" /> Pesar produto
           </h2>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <div className="mb-1 text-sm font-medium text-gray-200">{descricao}</div>
-          <div className="mb-4 text-sm text-gray-500">
+          <div className="mb-1 text-sm font-medium text-[#202123]">{descricao}</div>
+          <div className="mb-4 text-sm text-[#8E8F94]">
             {brl(precoUnit)} / {unidade || 'KG'}
           </div>
 
-          <label className="flex items-center justify-between text-xs uppercase tracking-wide text-gray-500">
+          <label className="flex items-center justify-between text-xs uppercase tracking-wide text-[#8E8F94]">
             <span>Peso ({unidade || 'KG'})</span>
             {multQtd > 1 && (
-              <span className="rounded bg-[#E8A317]/15 px-1.5 py-0.5 text-[11px] font-semibold text-amber-300">
+              <span className="rounded bg-[#0F8A72]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#0b7d4e]">
                 × {multQtd}
               </span>
             )}
@@ -1445,20 +1691,20 @@ function ModalPeso({
             onChange={(e) => setPesoStr(e.target.value)}
             placeholder="0,000"
             inputMode="decimal"
-            className="mt-1 w-full rounded-lg border border-[#2D3140] bg-[#0E0F16] px-3 py-2.5 text-lg outline-none focus:border-[#F5B841]"
+            className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
           />
 
           <div className="mt-4 flex justify-between text-sm">
-            <span className="text-gray-500">
+            <span className="text-[#8E8F94]">
               Subtotal{multQtd > 1 ? ` (${kg > 0 ? kg.toLocaleString('pt-BR', { maximumFractionDigits: 3 }) : 0} kg × ${multQtd})` : ''}
             </span>
-            <span className="tabular-nums font-semibold text-emerald-400">{brl(subtotal)}</span>
+            <span className="tabular-nums font-semibold text-[#0F8A72]">{brl(subtotal)}</span>
           </div>
 
           <button
             onClick={confirmar}
             disabled={!(kg > 0)}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg bg-[#E8A317] py-3 font-semibold text-slate-900 hover:bg-[#F5B841] disabled:cursor-not-allowed disabled:bg-[#222633] disabled:text-gray-600"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
           >
             <Check className="h-5 w-5" /> Adicionar (Enter)
           </button>
@@ -1483,10 +1729,12 @@ function ModalVendas({
   filialId,
   onFechar,
   onEstornou,
+  pedirGerencial,
 }: {
   filialId?: string;
   onFechar: () => void;
   onEstornou: () => void;
+  pedirGerencial: (acao: AcaoGerencial, label: string, onOk: () => void) => void;
 }) {
   const [vendas, setVendas] = useState<VendaRecente[]>([]);
   const [carregando, setCarregando] = useState(true);
@@ -1541,13 +1789,19 @@ function ModalVendas({
     }
   }
 
-  async function estornar(v: VendaRecente) {
+  // Estorno é operação sensível: pede confirmação e, em seguida, a senha
+  // gerencial da loja (se exigida) antes de reverter estoque + caixa + NFC-e.
+  function estornar(v: VendaRecente) {
     if (
       !window.confirm(
         `Estornar a venda #${v.numero} (${brl(v.valorTotal)})?\nIsso devolve o estoque e reverte a entrada no caixa.`,
       )
     )
       return;
+    pedirGerencial('estorno', `Estorno da venda #${v.numero}`, () => void doEstornar(v));
+  }
+
+  async function doEstornar(v: VendaRecente) {
     setBusy(v.pedidoId);
     setErro(null);
     try {
@@ -1563,30 +1817,30 @@ function ModalVendas({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-xl border border-[#222633] bg-[#171A26] shadow-2xl">
-        <div className="flex items-center justify-between border-b border-[#222633] px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Printer className="h-5 w-5 text-[#F5B841]" /> Vendas recentes
+            <Printer className="h-5 w-5 text-[#0F8A72]" /> Vendas recentes
           </h2>
-          <button onClick={onFechar} className="text-gray-500 hover:text-gray-300" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-4">
           {erro && (
-            <div className="mb-3 rounded-lg bg-rose-500/10 px-3 py-2 text-sm text-rose-400">{erro}</div>
+            <div className="mb-3 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">{erro}</div>
           )}
           {carregando ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-[#F5B841]" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#0F8A72]" />
             </div>
           ) : vendas.length === 0 ? (
-            <p className="py-10 text-center text-sm text-gray-500">Nenhuma venda registrada.</p>
+            <p className="py-10 text-center text-sm text-[#8E8F94]">Nenhuma venda registrada.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="text-left text-xs uppercase text-gray-500">
-                <tr>
+              <thead className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">
+                <tr className="border-b border-[#E5E7EB]">
                   <th className="px-2 py-2">Nº</th>
                   <th className="px-2 py-2">Data</th>
                   <th className="px-2 py-2">Forma</th>
@@ -1596,16 +1850,16 @@ function ModalVendas({
               </thead>
               <tbody>
                 {vendas.map((v) => (
-                  <tr key={v.pedidoId} className="border-b border-[#222633]/60">
+                  <tr key={v.pedidoId} className="border-b border-[#EEF0F2] transition-colors hover:bg-[#F7F7F8]">
                     <td className="px-2 py-2 font-medium">#{v.numero}</td>
-                    <td className="px-2 py-2 text-gray-400">
+                    <td className="px-2 py-2 text-[#5F6065]">
                       {new Date(v.dataEmissao).toLocaleString('pt-BR')}
                     </td>
-                    <td className="px-2 py-2 text-gray-400">{v.formaPagamento || '—'}</td>
+                    <td className="px-2 py-2 text-[#5F6065]">{v.formaPagamento || '—'}</td>
                     <td className="px-2 py-2 text-right tabular-nums">
                       {brl(v.valorTotal)}
                       {v.estornada && (
-                        <span className="ml-2 rounded bg-rose-500/15 px-1.5 py-0.5 text-[10px] text-rose-300">
+                        <span className="ml-2 rounded bg-rose-100 px-1.5 py-0.5 text-[10px] text-rose-700">
                           ESTORNADA
                         </span>
                       )}
@@ -1615,7 +1869,7 @@ function ModalVendas({
                         <button
                           onClick={() => reimprimir(v)}
                           disabled={busy === v.pedidoId}
-                          className="flex items-center gap-1 rounded bg-[#222633] px-2 py-1 text-xs text-gray-200 hover:bg-[#2D3140] disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-lg bg-[#F7F7F8] px-2.5 py-1.5 text-xs text-[#202123] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#EEF0F2] active:scale-[0.97] disabled:opacity-40"
                         >
                           <Printer className="h-3.5 w-3.5" /> Reimprimir
                         </button>
@@ -1623,7 +1877,7 @@ function ModalVendas({
                           <button
                             onClick={() => estornar(v)}
                             disabled={busy === v.pedidoId}
-                            className="flex items-center gap-1 rounded bg-rose-500/10 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/20 disabled:opacity-40"
+                            className="flex items-center gap-1 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs text-rose-600 ring-1 ring-inset ring-rose-200 transition-all hover:bg-rose-100 active:scale-[0.97] disabled:opacity-40"
                           >
                             {busy === v.pedidoId ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1640,6 +1894,205 @@ function ModalVendas({
               </tbody>
             </table>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** QR Code renderizado a partir de um texto/URL (gera data-URL em efeito). */
+function QRImg({ texto, size = 132 }: { texto: string; size?: number }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    let vivo = true;
+    QRCode.toDataURL(texto, { margin: 1, width: size * 2, errorCorrectionLevel: 'M' })
+      .then((url) => vivo && setSrc(url))
+      .catch(() => vivo && setSrc(null));
+    return () => {
+      vivo = false;
+    };
+  }, [texto, size]);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      width={size}
+      height={size}
+      alt="QR Code NFC-e"
+      className="rounded-lg bg-white p-1.5 ring-1 ring-inset ring-[#E5E7EB]"
+    />
+  );
+}
+
+/** Formata a chave de acesso (44 dígitos) em grupos de 4 p/ leitura humana. */
+function fmtChave(chave?: string | null): string {
+  const c = (chave || '').replace(/\D/g, '');
+  if (c.length !== 44) return chave || '';
+  return c.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+}
+
+/** Bloco de situação fiscal (NFC-e) mostrado no painel de venda concluída. */
+function FiscalVendaStatus({
+  fiscal,
+  cupomFiscal,
+}: {
+  fiscal: DadosFiscais;
+  cupomFiscal: CupomFiscalImpressao | null;
+}) {
+  const emitido = fiscal.status === 'EMITIDO' || !!fiscal.chaveAcesso;
+  const pendente = !emitido && (fiscal.status === 'PENDENTE' || fiscal.status === 'CONTINGENCIA');
+  const falhou = !emitido && !pendente;
+
+  if (emitido) {
+    return (
+      <div className="mt-4 w-full max-w-sm rounded-2xl border border-[#0F8A72]/25 bg-[#0F8A72]/[0.06] p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-[#0b7d4e]">
+          <ShieldCheck className="h-4 w-4" /> NFC-e autorizada
+          {fiscal.simulacao && (
+            <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
+              HOMOLOGAÇÃO
+            </span>
+          )}
+        </div>
+        {(fiscal.numero || fiscal.serie) && (
+          <div className="mt-1 text-xs text-[#5F6065]">
+            Nº {fiscal.numero ?? '—'} · Série {fiscal.serie ?? '—'}
+          </div>
+        )}
+        {fiscal.chaveAcesso && (
+          <div className="mt-2 break-all px-2 font-mono text-[11px] leading-tight text-[#5F6065]">
+            {fmtChave(fiscal.chaveAcesso)}
+          </div>
+        )}
+        {(fiscal.qrCode || fiscal.urlConsulta) && (
+          <div className="mt-3 flex justify-center">
+            <QRImg texto={fiscal.qrCode || fiscal.urlConsulta || ''} />
+          </div>
+        )}
+        {cupomFiscal && (
+          <button
+            onClick={() => void imprimirCupomFiscal(cupomFiscal)}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99]"
+          >
+            <FileText className="h-4 w-4" /> Imprimir cupom fiscal (NFC-e)
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  if (pendente) {
+    return (
+      <div className="mt-4 w-full max-w-sm rounded-2xl border border-amber-300 bg-amber-50 p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-amber-700">
+          <AlertTriangle className="h-4 w-4" /> NFC-e pendente de envio
+        </div>
+        <p className="mt-1 text-xs text-[#5F6065]">
+          A venda foi registrada e a nota ficou salva para reenvio automático ao SEFAZ.
+          Acompanhe no Monitor Fiscal.
+        </p>
+        {fiscal.erro && <p className="mt-2 text-[11px] text-amber-600">{fiscal.erro}</p>}
+      </div>
+    );
+  }
+
+  if (falhou) {
+    return (
+      <div className="mt-4 w-full max-w-sm rounded-2xl border border-rose-300 bg-rose-50 p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-rose-700">
+          <AlertTriangle className="h-4 w-4" /> NFC-e não emitida
+        </div>
+        <p className="mt-1 text-xs text-[#5F6065]">
+          A venda está salva. Tente reemitir pelo Monitor Fiscal.
+        </p>
+        {fiscal.erro && <p className="mt-2 text-[11px] text-rose-600">{fiscal.erro}</p>}
+      </div>
+    );
+  }
+
+  return null;
+}
+
+/**
+ * Modal de autorização por SENHA GERENCIAL interna da loja (modelo simples do
+ * mercadinho). Uma única senha por filial libera operações sensíveis — sem
+ * precisar do e-mail/senha de um usuário supervisor.
+ */
+function ModalSenhaGerencial({
+  acao,
+  filialId,
+  onFechar,
+  onAutorizado,
+}: {
+  acao: string;
+  filialId?: string;
+  onFechar: () => void;
+  onAutorizado: () => void;
+}) {
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState<string | null>(null);
+  const [validando, setValidando] = useState(false);
+
+  async function validar() {
+    if (!senha) {
+      setErro('Informe a senha gerencial.');
+      return;
+    }
+    if (!filialId) {
+      setErro('Filial não identificada.');
+      return;
+    }
+    setValidando(true);
+    setErro(null);
+    try {
+      await pdvApi.autorizarGerencial({ filialId, senha, acao });
+      onAutorizado();
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || 'Senha gerencial incorreta.';
+      setErro(Array.isArray(msg) ? msg[0] : msg);
+      setValidando(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <ShieldCheck className="h-5 w-5 text-[#0F8A72]" /> Senha gerencial
+          </h2>
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="p-6">
+          <p className="text-sm text-[#5F6065]">
+            Operação sensível: <span className="font-medium text-[#202123]">{acao}</span>.
+            Peça ao responsável a senha gerencial da loja para continuar.
+          </p>
+          <div className="mt-4">
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Senha gerencial</label>
+            <input
+              autoFocus
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && validar()}
+              placeholder="••••••••"
+              type="password"
+              className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-center text-lg tracking-[0.3em] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+            />
+          </div>
+          {erro && (
+            <div className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-600 ring-1 ring-inset ring-rose-200">{erro}</div>
+          )}
+          <button
+            onClick={validar}
+            disabled={validando}
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 text-base font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:opacity-50"
+          >
+            {validando ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+            {validando ? 'Validando...' : 'Liberar'}
+          </button>
         </div>
       </div>
     </div>

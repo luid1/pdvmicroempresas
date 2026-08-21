@@ -212,6 +212,16 @@ export class SessaoCaixaService {
     const informado = round2(Number(dto.saldoFinalInformado));
     const diferenca = round2(informado - saldoCalculado);
 
+    // Conferência de cartão/PIX na maquininha (opcional): guarda o informado e a
+    // diferença contra o que o sistema registrou nas vendas.
+    const cartaoInformado =
+      dto.cartaoInformado != null ? round2(Number(dto.cartaoInformado)) : null;
+    const pixInformado = dto.pixInformado != null ? round2(Number(dto.pixInformado)) : null;
+    const diferencaCartao =
+      cartaoInformado != null ? round2(cartaoInformado - Number(aberta.totalCartao)) : null;
+    const diferencaPix =
+      pixInformado != null ? round2(pixInformado - Number(aberta.totalPix)) : null;
+
     await this.prisma.sessaoCaixa.update({
       where: { id: aberta.id },
       data: {
@@ -220,6 +230,10 @@ export class SessaoCaixaService {
         saldoFinalCalculado: saldoCalculado,
         saldoFinalInformado: informado,
         diferenca,
+        cartaoInformado,
+        pixInformado,
+        diferencaCartao,
+        diferencaPix,
         observacoesFechamento: dto.observacoes || null,
       },
     });
@@ -265,6 +279,10 @@ export class SessaoCaixaService {
       dinheiroEsperadoGaveta: saldoCalculado,
       saldoFinalInformado: s.saldoFinalInformado != null ? Number(s.saldoFinalInformado) : null,
       diferenca: s.diferenca != null ? Number(s.diferenca) : null,
+      cartaoInformado: s.cartaoInformado != null ? Number(s.cartaoInformado) : null,
+      pixInformado: s.pixInformado != null ? Number(s.pixInformado) : null,
+      diferencaCartao: s.diferencaCartao != null ? Number(s.diferencaCartao) : null,
+      diferencaPix: s.diferencaPix != null ? Number(s.diferencaPix) : null,
     };
   }
 }

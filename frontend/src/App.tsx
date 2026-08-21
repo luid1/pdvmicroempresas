@@ -39,7 +39,9 @@ import MatrizFiscal from './modules/fiscal/pages/MatrizFiscal';
 import PainelFaturamento from './modules/fiscal/pages/PainelFaturamento';
 import GestaoFiscal from './modules/fiscal/pages/GestaoFiscal';
 import FiscalConfiguracao from './modules/fiscal/pages/FiscalConfiguracao';
+import MonitorFiscal from './modules/fiscal/pages/MonitorFiscal';
 import Pdv from './modules/pdv/pages/Pdv';
+import ConfigCaixa from './modules/pdv/pages/ConfigCaixa';
 import Plataforma from './modules/plataforma/pages/Plataforma';
 
 function Guard({ children }: { children: React.ReactNode }) {
@@ -63,6 +65,7 @@ export default function App() {
           <Route path="/" element={<Guard><AppShell /></Guard>}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="pdv/config" element={<ConfigCaixa />} />
 
             {/* Cadastros */}
             <Route path="cadastros/clientes" element={<Clientes />} />
@@ -89,6 +92,7 @@ export default function App() {
             <Route path="fiscal/painel" element={<PainelFaturamento />} />
             <Route path="fiscal/matriz" element={<MatrizFiscal />} />
             <Route path="fiscal/gestao" element={<GestaoFiscal />} />
+            <Route path="fiscal/monitor" element={<MonitorFiscal />} />
             <Route path="fiscal/configuracao" element={<FiscalConfiguracao />} />
 
             {/* Financeiro */}

@@ -180,6 +180,7 @@ model Tenant {
   roles                Role[]
   certificados         CertificadoDigital[]
   configuracoesFiscais ConfiguracaoFiscal[]
+  configuracoesCaixa   ConfiguracaoCaixa[]
   transferencias       TransferenciaEstoque[]
   assinatura           Assinatura?
 
@@ -277,6 +278,7 @@ model Filial {
   usuarios              UsuarioFilial[]
   certificados          CertificadoDigital[]
   configuracaoFiscal    ConfiguracaoFiscal?
+  configuracaoCaixa     ConfiguracaoCaixa?
   transferenciasOrigem  TransferenciaEstoque[] @relation("TransferenciaOrigem")
   transferenciasDestino TransferenciaEstoque[] @relation("TransferenciaDestino")
 
@@ -308,6 +310,33 @@ model ConfiguracaoFiscal {
 
   @@unique([tenantId, filialId])
   @@index([tenantId, ativo])
+}
+
+// Configuração do CAIXA (PDV) por loja/filial. Guarda a SENHA GERENCIAL interna
+// (hash) usada para liberar operações sensíveis no caixa e as chaves que dizem,
+// por loja, QUAIS operações exigem essa senha. Simples e sem lookup externo —
+// pensado para mercadinho (o dono define e o operador só digita a senha).
+model ConfiguracaoCaixa {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  filialId           String   @unique
+  filial             Filial   @relation(fields: [filialId], references: [id], onDelete: Cascade)
+  // Senha gerencial interna (bcrypt). null = ainda não configurada.
+  senhaGerencialHash String?
+  // Chaves de exigência de senha por operação (true = pede senha gerencial).
+  senhaCancelarVenda Boolean  @default(true)
+  senhaRemoverItem   Boolean  @default(true)
+  senhaDesconto      Boolean  @default(true)
+  senhaSangria       Boolean  @default(true)
+  senhaSuprimento    Boolean  @default(false)
+  senhaFecharCaixa   Boolean  @default(true)
+  senhaEstorno       Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([tenantId, filialId])
+  @@index([tenantId])
 }
 
 // ─────────────────────────────────────────
@@ -1686,7 +1715,12 @@ model SessaoCaixa {
   // Fechamento
   saldoFinalCalculado   Decimal?          @db.Decimal(12, 2) // dinheiro esperado na gaveta
   saldoFinalInformado   Decimal?          @db.Decimal(12, 2) // dinheiro contado pelo operador
-  diferenca             Decimal?          @db.Decimal(12, 2) // informado - calculado
+  diferenca             Decimal?          @db.Decimal(12, 2) // informado - calculado (dinheiro)
+  // Conferência de cartão e PIX na maquininha (informado pelo operador ao fechar).
+  cartaoInformado       Decimal?          @db.Decimal(12, 2) // total de cartão conferido na máquina
+  pixInformado          Decimal?          @db.Decimal(12, 2) // total de PIX conferido na máquina
+  diferencaCartao       Decimal?          @db.Decimal(12, 2) // cartaoInformado - totalCartao
+  diferencaPix          Decimal?          @db.Decimal(12, 2) // pixInformado - totalPix
   observacoesAbertura   String?
   observacoesFechamento String?
   abertaEm              DateTime          @default(now())

@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import {
   NfeProvider, AutorizacaoResultado, AutorizacaoNfceResultado,
-  CancelamentoResultado, CartaCorrecaoResultado,
+  CancelamentoResultado, CartaCorrecaoResultado, ConsultaNfceResultado,
   InutilizacaoResultado,
 } from './nfe-provider.interface';
 import { ConfiguracaoFiscalService } from '../configuracao-fiscal.service';
@@ -110,6 +110,32 @@ export class RealNfeProvider implements NfeProvider {
       xml: await this.baixarXml(ctx, dados.caminho_xml_nota_fiscal || dados.caminho_xml),
       qrCode: dados.qrcode_url || dados.qrcode || '', urlConsulta: dados.url_consulta_nf || dados.url_consulta || '',
       danfeUrl: this.arquivoUrl(ctx, dados.caminho_danfe || dados.caminho_pdf), simulacao: false,
+    };
+  }
+
+  /** Consulta o status do documento no gateway/SEFAZ (não transmite nada). */
+  async consultarNfce(nfe: any): Promise<ConsultaNfceResultado> {
+    const ctx = await this.configuracaoFiscal.resolverCredencial(nfe?.tenantId, nfe?.filialId);
+    const documento: Documento = nfe.modelo === '65' ? 'nfce' : 'nfe';
+    const dados = await this.requisitar(
+      ctx,
+      `/v2/${documento}/${encodeURIComponent(this.referencia(nfe, documento))}?completa=1`,
+      { method: 'GET' },
+      [200, 201, 202, 404],
+    );
+    const status = String(dados?.status || '').toLowerCase();
+    const autorizado = status === 'autorizado';
+    return {
+      status: status || 'nao_encontrado',
+      autorizado,
+      motivo: dados?.mensagem_sefaz || dados?.mensagem || dados?.status || 'Sem retorno do provedor.',
+      protocolo: dados?.protocolo || dados?.numero_protocolo,
+      chaveAcesso: dados?.chave_nfe,
+      qrCode: dados?.qrcode_url || dados?.qrcode,
+      urlConsulta: dados?.url_consulta_nf || dados?.url_consulta,
+      danfeUrl: this.arquivoUrl(ctx, dados?.caminho_danfe || dados?.caminho_pdf),
+      xml: autorizado ? await this.baixarXml(ctx, dados?.caminho_xml_nota_fiscal || dados?.caminho_xml) : undefined,
+      simulacao: false,
     };
   }
 

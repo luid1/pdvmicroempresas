@@ -58,6 +58,30 @@ export const nfeApi = {
   cancelar: (id: string, motivo: string) => api.patch(`/nfe/${id}/cancelar`, { motivo }),
 };
 
+// NFC-e (modelo 65) — emissão do caixa + Monitor Fiscal
+export const nfceApi = {
+  // Está habilitada a emissão? Em qual modo (desligado/simulado/real)?
+  status: () => api.get('/nfce/status'),
+  // Monitor Fiscal: lista de documentos com status real e pendências.
+  monitor: (params?: { filialId?: string; status?: string; busca?: string; dias?: number }) =>
+    api.get('/nfce/monitor', { params }),
+  // Contadores por status para os cards do topo do Monitor.
+  resumo: (filialId?: string) => api.get('/nfce/monitor/resumo', { params: { filialId } }),
+  // Detalhe de um documento (com itens).
+  documento: (id: string) => api.get(`/nfce/documento/${id}`),
+  // Emite NFC-e a partir de uma venda do PDV (store-and-forward: nunca perde a venda).
+  emitirDePedido: (pedidoId: string, filialId: string, cpfNota?: string) =>
+    api.post(`/nfce/emitir-de-pedido/${pedidoId}`, { filialId, cpfNota }),
+  // Reenvia ao SEFAZ um documento pendente/contingência.
+  transmitir: (id: string) => api.post(`/nfce/documento/${id}/transmitir`),
+  // Cobra do SEFAZ o status real (aprovada? cancelada?) e reconcilia no sistema.
+  consultar: (id: string) => api.post(`/nfce/documento/${id}/consultar`),
+  // Cancela uma NFC-e autorizada.
+  cancelar: (id: string, motivo?: string) => api.post(`/nfce/documento/${id}/cancelar`, { motivo }),
+  // Fila de reenvio: reprocessa todos os pendentes/contingência.
+  reprocessar: (filialId?: string) => api.post('/nfce/reprocessar', { filialId }),
+};
+
 // Pedidos
 export const pedidosApi = {
   list: (filialId: string, params?: object) => api.get('/pedidos', { params: { filialId, ...params } }),
@@ -90,15 +114,39 @@ export const pdvApi = {
     desconto?: number;
     descontoTipo?: 'VALOR' | 'PERCENT';
     descontoPercent?: number;
+    cpfNota?: string;
   }) => api.post('/pdv/venda', data),
+  // Autorização de supervisor/fiscal p/ operações sensíveis (estorno, sangria, etc.)
+  autorizarSupervisor: (data: { email: string; senha: string; acao?: string }) =>
+    api.post('/pdv/autorizacao', data),
+  // Autorização por SENHA GERENCIAL interna da loja (modelo simples do mercadinho).
+  autorizarGerencial: (data: { filialId: string; senha: string; acao?: string }) =>
+    api.post('/pdv/autorizacao-gerencial', data),
+  // Configuração do caixa por loja: senha gerencial + quais operações exigem senha.
+  configCaixaGet: (filialId: string) => api.get('/pdv/config', { params: { filialId } }),
+  configCaixaSalvar: (data: {
+    filialId: string;
+    senhaGerencial?: string;
+    senhaCancelarVenda?: boolean;
+    senhaRemoverItem?: boolean;
+    senhaDesconto?: boolean;
+    senhaSangria?: boolean;
+    senhaSuprimento?: boolean;
+    senhaFecharCaixa?: boolean;
+    senhaEstorno?: boolean;
+  }) => api.put('/pdv/config', data),
   // Sessão / turno de caixa
   sessaoAtual: (filialId?: string) => api.get('/pdv/sessao/atual', { params: { filialId } }),
   abrirSessao: (data: { filialId: string; saldoInicial?: number; observacoes?: string }) =>
     api.post('/pdv/sessao/abrir', data),
   sangria: (data: { valor: number; descricao?: string }) => api.post('/pdv/sessao/sangria', data),
   suprimento: (data: { valor: number; descricao?: string }) => api.post('/pdv/sessao/suprimento', data),
-  fecharSessao: (data: { saldoFinalInformado: number; observacoes?: string }) =>
-    api.post('/pdv/sessao/fechar', data),
+  fecharSessao: (data: {
+    saldoFinalInformado: number;
+    cartaoInformado?: number;
+    pixInformado?: number;
+    observacoes?: string;
+  }) => api.post('/pdv/sessao/fechar', data),
   relatorio: (sessaoId: string) => api.get(`/pdv/sessao/${sessaoId}/relatorio`),
   // Vendas registradas (reimpressão / estorno)
   vendasRecentes: (filialId?: string, limite?: number) =>
