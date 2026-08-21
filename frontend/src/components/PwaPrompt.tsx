@@ -123,11 +123,11 @@ const wrap: React.CSSProperties = {
   maxWidth: 320,
 };
 const card: React.CSSProperties = {
-  background: 'rgba(17,24,39,0.92)',
+  background: 'rgba(17,18,20,0.92)',
   border: '1px solid rgba(255,255,255,0.10)',
   borderRadius: 16,
   padding: '16px 18px',
-  color: '#f8fafc',
+  color: '#F7F8FA',
   boxShadow: '0 20px 50px -20px rgba(0,0,0,0.7)',
   backdropFilter: 'blur(12px)',
   fontFamily: 'Inter, system-ui, sans-serif',
@@ -136,14 +136,14 @@ const dot: React.CSSProperties = {
   width: 9,
   height: 9,
   borderRadius: '50%',
-  background: '#34d399',
-  boxShadow: '0 0 12px #34d399',
+  background: '#01B8FA',
+  boxShadow: '0 0 12px rgba(1,184,250,0.8)',
   flex: 'none',
 };
-const msg: React.CSSProperties = { margin: '8px 0 0', fontSize: 13, lineHeight: 1.5, color: '#cbd5e1' };
+const msg: React.CSSProperties = { margin: '8px 0 0', fontSize: 13, lineHeight: 1.5, color: '#9BA1AD' };
 const btnSolid: React.CSSProperties = {
-  background: '#34d399',
-  color: '#06251a',
+  background: '#01B8FA',
+  color: '#062B38',
   border: 'none',
   borderRadius: 10,
   padding: '9px 16px',
@@ -153,7 +153,7 @@ const btnSolid: React.CSSProperties = {
 };
 const btnGhost: React.CSSProperties = {
   background: 'transparent',
-  color: '#e2e8f0',
+  color: '#C4C9D2',
   border: '1px solid rgba(255,255,255,0.14)',
   borderRadius: 10,
   padding: '9px 16px',
