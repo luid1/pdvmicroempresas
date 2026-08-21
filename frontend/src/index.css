@@ -320,6 +320,29 @@ option, optgroup { background-color: var(--panel) !important; color: var(--ink) 
 optgroup { color: var(--ink-3) !important; }
 
 /* ============================================================
+   LOGIN ESCURO — a tela de entrada segue o design do SITE
+   (luminmkt.shop): base escura #08090A + azul #01B8FA. Como o tema
+   global "Luz" força inputs claros e foco verde, estas regras têm
+   escopo em .login-dark e usam !important só aqui para blindar a tela.
+   (Site e app são repositórios SEPARADOS — ver docs/DESIGN-LOGIN.md.)
+   ============================================================ */
+.login-dark input:not([type="checkbox"]):not([type="radio"]),
+.login-dark select,
+.login-dark textarea {
+  background-color: #15171A !important;
+  color: #F7F8FA !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+.login-dark input::placeholder,
+.login-dark textarea::placeholder { color: #6E7480 !important; }
+.login-dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.login-dark select:focus,
+.login-dark textarea:focus {
+  border-color: rgba(1, 184, 250, 0.7) !important;
+  box-shadow: 0 0 0 3px rgba(1, 184, 250, 0.18) !important;
+}
+
+/* ============================================================
    TINTS SUAVES — mantidas claras, ajustadas à porcelana para não
    "estourar" branco puro. As telas usam essas tints como pílulas
    de status (âmbar/verde/vermelho/violeta).

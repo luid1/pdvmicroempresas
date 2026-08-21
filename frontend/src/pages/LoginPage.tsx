@@ -18,14 +18,18 @@ type Perfil = {
 const PAIR_KEY = 'wms_paired_tenant';
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://nimble-nasturtium.netlify.app';
 
-/** Aparência de cada perfil na tela de seleção (paleta sóbria do sistema). */
+/**
+ * Aparência de cada perfil na tela de seleção.
+ * Alinhada ao design do site (luminmkt.shop): base escura + azul #01B8FA.
+ * O ADMIN recebe o azul da marca; os demais, um tom neutro sobre o escuro.
+ */
 const ROLE_UI: Record<string, { label: string; Icon: typeof Shield; ring: string; bg: string; text: string }> = {
-  ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-[#0F8A72]/25', bg: 'bg-[#E4F3EF]', text: 'text-[#0B6F5C]' },
-  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
-  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
-  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-[#D8DADD]',     bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' },
+  ADMIN:          { label: 'Administrador', Icon: Crown,       ring: 'ring-[#01B8FA]/30', bg: 'bg-[#01B8FA]/15', text: 'text-[#3DC8FB]' },
+  GERENTE:        { label: 'Gerente',       Icon: Shield,      ring: 'ring-white/15',      bg: 'bg-white/[0.06]', text: 'text-[#C4C9D2]' },
+  OPERADOR_CAIXA: { label: 'Caixa',         Icon: ShoppingBag, ring: 'ring-white/15',      bg: 'bg-white/[0.06]', text: 'text-[#C4C9D2]' },
+  ESTOQUISTA:     { label: 'Estoque',       Icon: Boxes,       ring: 'ring-white/15',      bg: 'bg-white/[0.06]', text: 'text-[#C4C9D2]' },
 };
-const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-[#D8DADD]', bg: 'bg-[#F1F2F2]', text: 'text-[#5F6065]' };
+const roleUi = (nome: string) => ROLE_UI[nome] || { label: nome, Icon: UserIcon, ring: 'ring-white/15', bg: 'bg-white/[0.06]', text: 'text-[#C4C9D2]' };
 
 /**
  * "Setor" que agrupa os perfis na tela de seleção. Hoje o setor é o próprio
@@ -166,15 +170,38 @@ async function lerJson(res: Response): Promise<any> {
   return data;
 }
 
-/** Marca usada no login, alinhada à barra lateral do sistema. */
-function Brand({ size = 'md', inverted = false }: { size?: 'sm' | 'md'; inverted?: boolean }) {
+/**
+ * Wordmark "Lumin" idêntico ao do site (luminmkt.shop): lettering geométrico
+ * arredondado (Comfortaa via .font-logo), o "i" sem pingo (ı) e um ponto azul
+ * (#01B8FA) sobre a haste — o principal elemento de reconhecimento da marca.
+ */
+function Brand({ size = 'md' }: { size?: 'sm' | 'md'; inverted?: boolean }) {
+  const px = size === 'sm' ? 18 : 24;
+  const dot = Math.max(4, Math.round(px * 0.15));
   return (
     <div className="flex items-center gap-2.5">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#0F8A72] text-white shadow-[0_6px_18px_rgba(15,138,114,0.24)]">
-        <Store className="h-4 w-4" />
+      <span
+        className="font-logo inline-flex select-none items-baseline leading-none text-[#F7F8FA]"
+        style={{ fontSize: px, fontWeight: 700, letterSpacing: '0.005em' }}
+      >
+        Lum
+        <span className="relative inline-block">
+          <span>ı</span>
+          <span
+            className="absolute rounded-full bg-[#01B8FA]"
+            style={{
+              width: dot,
+              height: dot,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              top: `-${Math.round(px * 0.16)}px`,
+              boxShadow: '0 0 12px 1px rgba(1,184,250,0.55)',
+            }}
+          />
+        </span>
+        n
       </span>
-      <span className={`font-display font-bold ${inverted ? 'text-white' : 'text-[#202123]'} ${size === 'sm' ? 'text-sm' : 'text-lg'}`}>Lumin</span>
-      <span className="font-plex-mono text-[9px] text-[#13A184] tracking-[0.1em] uppercase">PDV & Gestão</span>
+      <span className="font-plex-mono text-[9px] text-[#3DC8FB] tracking-[0.1em] uppercase">PDV &amp; Gestão</span>
     </div>
   );
 }
@@ -259,23 +286,32 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex overflow-hidden bg-[#F7F7F8] text-[#202123]">
+    <div className="login-dark relative min-h-screen flex overflow-hidden bg-[#08090A] text-[#F7F8FA]">
+
+      {/* Aura azul sutil da marca, atrás de tudo (igual ao hero do site). */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(60% 60% at 50% 0%, rgba(1,184,250,0.14), transparent 70%), radial-gradient(40% 40% at 85% 10%, rgba(1,184,250,0.07), transparent 60%)',
+        }}
+      />
 
       {/* ═══════════ BANNER LATERAL ═══════════ */}
-      <aside className="hidden lg:flex w-[38%] max-w-[520px] relative z-10 flex-col justify-between overflow-hidden border-r border-black/10 bg-[#212121] p-10">
-        <Brand inverted />
+      <aside className="hidden lg:flex w-[38%] max-w-[520px] relative z-10 flex-col justify-between overflow-hidden border-r border-white/10 bg-[#0B0C0E] p-10">
+        <Brand />
 
         <div className="relative">
           <div className="inline-flex items-center gap-2 mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#39C5A5]" />
-            <span className="font-plex-mono text-[11px] font-medium text-[#39C5A5] uppercase tracking-[0.22em]">Ambiente seguro</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-[#01B8FA]" />
+            <span className="font-plex-mono text-[11px] font-medium text-[#3DC8FB] uppercase tracking-[0.22em]">Ambiente seguro</span>
           </div>
           <h1 className="font-display text-4xl xl:text-5xl font-bold text-white leading-[1.08]">
             Gestão simples<br />
             para quem precisa<br />
-            <span className="text-[#39C5A5]">fazer acontecer.</span>
+            <span className="text-[#01B8FA]">fazer acontecer.</span>
           </h1>
-          <p className="text-[#AEB0B8] text-base mt-5 max-w-md leading-relaxed">
+          <p className="text-[#9BA1AD] text-base mt-5 max-w-md leading-relaxed">
             PDV, estoque, compras, fiscal e financeiro reunidos em um ambiente consistente e preparado para a rotina da loja.
           </p>
         </div>
@@ -285,12 +321,12 @@ export default function LoginPage() {
             <p className="text-white text-3xl font-plex-mono font-medium tabular-nums leading-none">
               {hora.toLocaleTimeString('pt-BR')}
             </p>
-            <p className="text-[#777A80] text-sm mt-1.5 capitalize">
+            <p className="text-[#6E7480] text-sm mt-1.5 capitalize">
               {hora.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-[#777A80] text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#39C5A5]" />
+          <div className="flex items-center gap-2 text-[#6E7480] text-xs">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#01B8FA]" />
             Conexão protegida
           </div>
         </div>
@@ -303,8 +339,8 @@ export default function LoginPage() {
         </div>
 
         {serverStatus && (
-          <div role="status" className="mb-4 flex w-full max-w-sm items-center gap-3 rounded-xl border border-[#BFDCD5] bg-[#E8F5F1] px-4 py-3 text-sm text-[#0B6F5C]">
-            <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#13A184]/30 border-t-[#13A184]" />
+          <div role="status" className="mb-4 flex w-full max-w-sm items-center gap-3 rounded-xl border border-[#01B8FA]/30 bg-[#01B8FA]/10 px-4 py-3 text-sm text-[#3DC8FB]">
+            <span className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-[#01B8FA]/30 border-t-[#01B8FA]" />
             <span>{serverStatus}</span>
           </div>
         )}
@@ -383,7 +419,7 @@ export default function LoginPage() {
           />
         )}
 
-        <p className="lg:hidden absolute bottom-5 text-[#8E8F94] text-[11px]">
+        <p className="lg:hidden absolute bottom-5 text-[#6E7480] text-[11px]">
           Lumin PDV · Acesso restrito · v1.0.0
         </p>
       </div>
@@ -433,27 +469,27 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onDon
   return (
     <div className="w-full max-w-sm space-y-6">
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#E8F5F1] border border-[#CBE4DE] px-3 py-1 mb-3">
-          <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
-          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Liberar este computador</span>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#01B8FA]/10 border border-[#01B8FA]/25 px-3 py-1 mb-3">
+          <Store className="h-3.5 w-3.5 text-[#01B8FA]" />
+          <span className="font-plex-mono text-[11px] font-medium text-[#3DC8FB] uppercase tracking-wider">Liberar este computador</span>
         </div>
-        <h2 className="font-display text-2xl font-bold text-[#202123]">Acesse sua loja</h2>
-        <p className="text-[#6F7075] text-sm mt-1">
-          Informe o <b className="text-[#202123]">CNPJ</b> e a <b className="text-[#202123]">senha do administrador</b> <b className="text-[#202123]">uma vez</b>. Depois, cada pessoa entra pelo próprio perfil.
+        <h2 className="font-display text-2xl font-bold text-[#F7F8FA]">Acesse sua loja</h2>
+        <p className="text-[#9BA1AD] text-sm mt-1">
+          Informe o <b className="text-[#F7F8FA]">CNPJ</b> e a <b className="text-[#F7F8FA]">senha do administrador</b> <b className="text-[#F7F8FA]">uma vez</b>. Depois, cada pessoa entra pelo próprio perfil.
         </p>
       </div>
 
-      <div className="relative bg-white border border-[#E1E3E5] rounded-2xl p-6 space-y-4 shadow-[0_12px_36px_rgba(22,23,29,0.08)]">
+      <div className="relative bg-[#111214] border border-white/10 rounded-2xl p-6 space-y-4 shadow-[0_18px_48px_-24px_rgba(0,0,0,0.65)]">
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">CNPJ da loja</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#9BA1AD] uppercase tracking-[0.1em] mb-1.5">CNPJ da loja</label>
             <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E7480]" />
               <input
                 ref={cnpjRef}
                 inputMode="numeric"
                 maxLength={18}
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                className="w-full bg-[#15171A] border border-white/15 text-[#F7F8FA] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#6E7480] focus:outline-none focus:border-[#01B8FA] focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
                 placeholder="00.000.000/0001-00"
                 value={cnpj}
                 onChange={(e) => setCnpj(formatCnpj(e.target.value))}
@@ -464,26 +500,26 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onDon
           </div>
 
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha do administrador</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#9BA1AD] uppercase tracking-[0.1em] mb-1.5">Senha do administrador</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E7480]" />
               <input
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                className="w-full bg-[#15171A] border border-white/15 text-[#F7F8FA] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#6E7480] focus:outline-none focus:border-[#01B8FA] focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
                 placeholder="Senha do administrador..."
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
                 autoComplete="current-password"
               />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6E7480] hover:text-[#F7F8FA] transition-colors">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+            <div className="bg-red-500/10 border border-red-500/40 text-red-200 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
               <span>✕</span> {error}
             </div>
           )}
@@ -491,11 +527,11 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onDon
           <button
             type="submit"
             disabled={loading || !cnpj || !senha}
-            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
+            className="w-full bg-[#01B8FA] hover:bg-[#3DC8FB] active:bg-[#019BD3] text-[#062B38] font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_30px_-12px_rgba(1,184,250,0.65)]"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
+                <span className="animate-spin h-4 w-4 border-2 border-[#062B38]/30 border-t-[#062B38] rounded-full" />
                 Verificando...
               </span>
             ) : 'Liberar e ver perfis'}
@@ -504,12 +540,12 @@ function PairForm({ loading, setLoading, error, setError, setServerStatus, onDon
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <button onClick={onDono} className="text-[#7E7F84] hover:text-[#202123] text-xs inline-flex items-center gap-1.5 transition-colors">
+        <button onClick={onDono} className="text-[#9BA1AD] hover:text-[#F7F8FA] text-xs inline-flex items-center gap-1.5 transition-colors">
           <Crown className="h-3.5 w-3.5" /> Sou o dono da plataforma
         </button>
-        <p className="text-center text-[#7E7F84] text-xs">
+        <p className="text-center text-[#9BA1AD] text-xs">
           Ainda não tem uma conta?{' '}
-          <a href={`${SITE_URL}/assinar.html`} className="text-[#0F8A72] hover:text-[#0B6F5C] font-semibold">
+          <a href={`${SITE_URL}/assinar.html`} className="text-[#01B8FA] hover:text-[#3DC8FB] font-semibold">
             Comece agora
           </a>
         </p>
@@ -565,29 +601,29 @@ function OwnerForm({ loading, setLoading, error, setError, setServerStatus, onVo
 
   return (
     <div className="w-full max-w-sm space-y-6">
-      <button onClick={onVoltar} className="text-[#7E7F84] hover:text-[#202123] text-sm inline-flex items-center gap-1.5 transition-colors">
+      <button onClick={onVoltar} className="text-[#9BA1AD] hover:text-[#F7F8FA] text-sm inline-flex items-center gap-1.5 transition-colors">
         <ArrowLeft className="h-4 w-4" /> Voltar para o acesso da loja
       </button>
 
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#E4F3EF] border border-[#CBE4DE] px-3 py-1 mb-3">
-          <Crown className="h-3.5 w-3.5 text-[#0B6F5C]" />
-          <span className="font-plex-mono text-[11px] font-medium text-[#0B6F5C] uppercase tracking-wider">Dono da plataforma</span>
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#01B8FA]/10 border border-[#01B8FA]/25 px-3 py-1 mb-3">
+          <Crown className="h-3.5 w-3.5 text-[#01B8FA]" />
+          <span className="font-plex-mono text-[11px] font-medium text-[#3DC8FB] uppercase tracking-wider">Dono da plataforma</span>
         </div>
-        <h2 className="font-display text-2xl font-bold text-[#202123]">Painel da plataforma</h2>
-        <p className="text-[#6F7075] text-sm mt-1">Acesso do administrador do SaaS — entra direto no painel.</p>
+        <h2 className="font-display text-2xl font-bold text-[#F7F8FA]">Painel da plataforma</h2>
+        <p className="text-[#9BA1AD] text-sm mt-1">Acesso do administrador do SaaS — entra direto no painel.</p>
       </div>
 
-      <div className="relative bg-white border border-[#E1E3E5] rounded-2xl p-6 space-y-4 shadow-[0_12px_36px_rgba(22,23,29,0.08)]">
+      <div className="relative bg-[#111214] border border-white/10 rounded-2xl p-6 space-y-4 shadow-[0_18px_48px_-24px_rgba(0,0,0,0.65)]">
         <form onSubmit={submit} className="space-y-4">
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">E-mail</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#9BA1AD] uppercase tracking-[0.1em] mb-1.5">E-mail</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E7480]" />
               <input
                 ref={emailRef}
                 type="email"
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                className="w-full bg-[#15171A] border border-white/15 text-[#F7F8FA] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#6E7480] focus:outline-none focus:border-[#01B8FA] focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
                 placeholder="dono@empresa.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -598,26 +634,26 @@ function OwnerForm({ loading, setLoading, error, setError, setServerStatus, onVo
           </div>
 
           <div>
-            <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
+            <label className="block font-plex-mono text-[10px] font-medium text-[#9BA1AD] uppercase tracking-[0.1em] mb-1.5">Senha</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E7480]" />
               <input
                 type={showPwd ? 'text' : 'password'}
-                className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+                className="w-full bg-[#15171A] border border-white/15 text-[#F7F8FA] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#6E7480] focus:outline-none focus:border-[#01B8FA] focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
                 placeholder="Digite sua senha..."
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 autoComplete="current-password"
               />
-              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
+              <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6E7480] hover:text-[#F7F8FA] transition-colors">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+            <div className="bg-red-500/10 border border-red-500/40 text-red-200 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
               <span>✕</span> {error}
             </div>
           )}
@@ -625,11 +661,11 @@ function OwnerForm({ loading, setLoading, error, setError, setServerStatus, onVo
           <button
             type="submit"
             disabled={loading || !email || !password}
-            className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
+            className="w-full bg-[#01B8FA] hover:bg-[#3DC8FB] active:bg-[#019BD3] text-[#062B38] font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_30px_-12px_rgba(1,184,250,0.65)]"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" />
+                <span className="animate-spin h-4 w-4 border-2 border-[#062B38]/30 border-t-[#062B38] rounded-full" />
                 Verificando...
               </span>
             ) : 'Entrar no painel'}
@@ -664,27 +700,27 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
     <div className="w-full max-w-md space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full bg-white border border-[#E1E3E5] px-3 py-1 mb-3">
-            <Store className="h-3.5 w-3.5 text-[#0F8A72]" />
-            <span className="text-[11px] font-semibold text-[#5F6065] tracking-wide">{tenantNome}</span>
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#111214] border border-white/10 px-3 py-1 mb-3">
+            <Store className="h-3.5 w-3.5 text-[#01B8FA]" />
+            <span className="text-[11px] font-semibold text-[#C4C9D2] tracking-wide">{tenantNome}</span>
           </div>
-          <h2 className="font-display text-2xl font-bold text-[#202123]">Quem vai usar agora?</h2>
-          <p className="text-[#6F7075] text-sm mt-1">Selecione o seu perfil para entrar.</p>
+          <h2 className="font-display text-2xl font-bold text-[#F7F8FA]">Quem vai usar agora?</h2>
+          <p className="text-[#9BA1AD] text-sm mt-1">Selecione o seu perfil para entrar.</p>
         </div>
       </div>
 
       {error && (
-        <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/40 text-red-200 text-sm px-4 py-3 rounded-xl">{error}</div>
       )}
 
       {carregando ? (
         <div className="grid grid-cols-2 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-32 rounded-2xl bg-white border border-[#E1E3E5] animate-pulse" />
+            <div key={i} className="h-32 rounded-2xl bg-[#111214] border border-white/10 animate-pulse" />
           ))}
         </div>
       ) : perfis.length === 0 ? (
-        <div className="text-[#7E7F84] text-sm bg-white border border-[#E1E3E5] rounded-2xl p-6 text-center">
+        <div className="text-[#9BA1AD] text-sm bg-[#111214] border border-white/10 rounded-2xl p-6 text-center">
           Nenhum perfil ativo encontrado nesta loja.
         </div>
       ) : (
@@ -692,9 +728,9 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
           {grupos.map((g) => (
             <section key={g.label} className="space-y-2.5">
               <div className="flex items-center gap-2">
-                <span className="font-plex-mono text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.14em]">{g.label}</span>
-                <span className="h-px flex-1 bg-[#E7E9E9]" />
-                <span className="text-[10px] text-[#A7A8AC]">{g.itens.length}</span>
+                <span className="font-plex-mono text-[10px] font-semibold text-[#6E7480] uppercase tracking-[0.14em]">{g.label}</span>
+                <span className="h-px flex-1 bg-white/10" />
+                <span className="text-[10px] text-[#6E7480]">{g.itens.length}</span>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {g.itens.map((p) => {
@@ -703,13 +739,13 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
                     <button
                       key={p.id}
                       onClick={() => onSelecionar(p)}
-                      className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-white border border-[#E1E3E5] p-5 shadow-[0_8px_24px_rgba(22,23,29,0.05)] transition-all hover:-translate-y-0.5 hover:border-[#0F8A72]/35 hover:shadow-[0_12px_28px_rgba(22,23,29,0.08)] focus:outline-none focus:ring-2 ${ui.ring}`}
+                      className={`group relative flex flex-col items-center gap-3 rounded-2xl bg-[#111214] border border-white/10 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.35)] transition-all hover:-translate-y-0.5 hover:border-[#01B8FA]/40 hover:shadow-[0_12px_28px_rgba(0,0,0,0.5)] focus:outline-none focus:ring-2 ${ui.ring}`}
                     >
                       <div className={`flex h-14 w-14 items-center justify-center rounded-full ${ui.bg} ring-1 ${ui.ring}`}>
                         <span className={`font-display text-lg font-bold ${ui.text}`}>{iniciais(p.nome)}</span>
                       </div>
                       <div className="text-center">
-                        <p className="text-[#202123] text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
+                        <p className="text-[#F7F8FA] text-sm font-semibold leading-tight line-clamp-1">{p.nome}</p>
                         <span className={`inline-flex items-center gap-1 mt-1 text-[11px] font-medium ${ui.text}`}>
                           <ui.Icon className="h-3 w-3" /> {ui.label}
                         </span>
@@ -724,7 +760,7 @@ function ProfilePicker({ tenantNome, perfis, carregando, error, onSelecionar, on
       )}
 
       <div className="flex items-center justify-center pt-2">
-        <button onClick={onDesvincular} className="text-[#7E7F84] hover:text-[#202123] text-xs inline-flex items-center gap-1.5 transition-colors">
+        <button onClick={onDesvincular} className="text-[#9BA1AD] hover:text-[#F7F8FA] text-xs inline-flex items-center gap-1.5 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" /> Trocar de loja / desvincular este computador
         </button>
       </div>
@@ -752,7 +788,7 @@ function SenhaForm({ perfil, loading, error, setError, onVoltar, onEntrar }: {
 
   return (
     <div className="w-full max-w-sm space-y-6">
-      <button onClick={onVoltar} className="text-[#7E7F84] hover:text-[#202123] text-sm inline-flex items-center gap-1.5 transition-colors">
+      <button onClick={onVoltar} className="text-[#9BA1AD] hover:text-[#F7F8FA] text-sm inline-flex items-center gap-1.5 transition-colors">
         <ArrowLeft className="h-4 w-4" /> Trocar de perfil
       </button>
 
@@ -762,7 +798,7 @@ function SenhaForm({ perfil, loading, error, setError, onVoltar, onEntrar }: {
           <span className={`font-display text-xl font-bold ${ui.text}`}>{iniciais(perfil.nome)}</span>
         </div>
         <div>
-          <p className="text-[#202123] text-lg font-bold leading-tight">{perfil.nome}</p>
+          <p className="text-[#F7F8FA] text-lg font-bold leading-tight">{perfil.nome}</p>
           <span className={`inline-flex items-center gap-1 text-xs font-medium ${ui.text}`}>
             <ui.Icon className="h-3.5 w-3.5" /> {ui.label}
           </span>
@@ -774,26 +810,26 @@ function SenhaForm({ perfil, loading, error, setError, onVoltar, onEntrar }: {
         className="space-y-4"
       >
         <div>
-          <label className="block font-plex-mono text-[10px] font-medium text-[#6F7075] uppercase tracking-[0.1em] mb-1.5">Senha</label>
+          <label className="block font-plex-mono text-[10px] font-medium text-[#9BA1AD] uppercase tracking-[0.1em] mb-1.5">Senha</label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6E7480]" />
             <input
               autoFocus
               type={showPwd ? 'text' : 'password'}
-              className="w-full bg-white border border-[#D8DADD] text-[#202123] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#A7A8AC] focus:outline-none focus:border-[#0F8A72] focus:ring-2 focus:ring-[#0F8A72]/15 transition-all"
+              className="w-full bg-[#15171A] border border-white/15 text-[#F7F8FA] rounded-xl px-4 py-3 pl-9 text-sm placeholder:text-[#6E7480] focus:outline-none focus:border-[#01B8FA] focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
               placeholder="Digite sua senha..."
               value={senha}
               onChange={(e) => { setError(''); setSenha(e.target.value); }}
               required
             />
-            <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8E8F94] hover:text-[#202123] transition-colors">
+            <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6E7480] hover:text-[#F7F8FA] transition-colors">
               {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
         </div>
 
         {error && (
-          <div className="bg-[#FFF1F0] border border-[#F3C3BF] text-[#B63B32] text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+          <div className="bg-red-500/10 border border-red-500/40 text-red-200 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
             <span>✕</span> {error}
           </div>
         )}
@@ -801,11 +837,11 @@ function SenhaForm({ perfil, loading, error, setError, onVoltar, onEntrar }: {
         <button
           type="submit"
           disabled={loading || !senha}
-          className="w-full bg-[#0F8A72] hover:bg-[#0B6F5C] active:bg-[#095B4B] text-white font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_8px_20px_rgba(15,138,114,0.18)]"
+          className="w-full bg-[#01B8FA] hover:bg-[#3DC8FB] active:bg-[#019BD3] text-[#062B38] font-bold py-3 rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_10px_30px_-12px_rgba(1,184,250,0.65)]"
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="animate-spin h-4 w-4 border-2 border-white/30 border-t-white rounded-full" /> Entrando...
+              <span className="animate-spin h-4 w-4 border-2 border-[#062B38]/30 border-t-[#062B38] rounded-full" /> Entrando...
             </span>
           ) : 'Entrar no Sistema'}
         </button>
