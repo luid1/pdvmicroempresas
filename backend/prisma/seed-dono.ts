@@ -17,9 +17,28 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-const DONO_EMAIL = 'dono@mercado.com';
-const DONO_SENHA = 'dono123';
-const ADMIN_EMAIL = 'admin@mercado.com';
+/**
+ * Credenciais do dono vêm de VARIÁVEIS DE AMBIENTE — a senha NUNCA fica no
+ * código nem no Git. Você define DONO_EMAIL e DONO_SENHA só na hora de rodar,
+ * num lugar privado (o terminal / painel do servidor). Assim nem eu, nem
+ * ninguém que leia o repositório, conhece a sua senha.
+ *
+ * Rodar (exemplo):
+ *   DONO_EMAIL="voce@seuemail.com" DONO_SENHA="suaSenhaForte" npx ts-node prisma/seed-dono.ts
+ */
+const DONO_EMAIL = (process.env.DONO_EMAIL || 'dono@mercado.com').trim().toLowerCase();
+const DONO_SENHA = process.env.DONO_SENHA || '';
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@mercado.com').trim().toLowerCase();
+
+if (!DONO_SENHA || DONO_SENHA.length < 10) {
+  console.error(
+    '\n❌ Defina a senha do dono numa variável de ambiente antes de rodar.\n' +
+    '   Ela precisa ter ao menos 10 caracteres e NÃO fica salva no código.\n\n' +
+    '   Exemplo:\n' +
+    '   DONO_EMAIL="voce@seuemail.com" DONO_SENHA="SuaSenhaForte123!" npx ts-node prisma/seed-dono.ts\n',
+  );
+  process.exit(1);
+}
 
 async function main() {
   console.log('🌱 Seed do DONO DA PLATAFORMA...\n');
@@ -63,13 +82,13 @@ async function main() {
         filiais:      { create: filialIds.map((filialId) => ({ filialId })) },
       },
     });
-    console.log(`✅ Dono criado: ${dono.nome} (${DONO_EMAIL}) — senha: ${DONO_SENHA} · super-admin`);
+    console.log(`✅ Dono criado: ${dono.nome} (${DONO_EMAIL}) · super-admin · senha definida com segurança`);
   } else {
     await prisma.usuario.update({
       where: { id: existente.id },
       data: { passwordHash, isSuperAdmin: true, nome: 'Dono da Plataforma' },
     });
-    console.log(`ℹ️  Dono já existia: atualizado (${DONO_EMAIL}) — senha: ${DONO_SENHA} · super-admin`);
+    console.log(`ℹ️  Dono já existia: senha redefinida (${DONO_EMAIL}) · super-admin`);
   }
 
   // ── 5. Rebaixa o admin@mercado.com (mantém os conceitos limpos) ─
@@ -83,7 +102,7 @@ async function main() {
   console.log('\n🎉 Pronto!');
   console.log('─────────────────────────────────────');
   console.log('👑 Acesso do DONO DA PLATAFORMA:');
-  console.log(`   ${DONO_EMAIL}  /  ${DONO_SENHA}  →  vai direto para /plataforma`);
+  console.log(`   ${DONO_EMAIL}  /  (a senha que você definiu)  →  vai direto para /plataforma`);
   console.log('─────────────────────────────────────\n');
 }
 
