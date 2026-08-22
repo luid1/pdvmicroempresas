@@ -427,6 +427,67 @@ export const plataformaApi = {
     api.patch(`/plataforma/filiais/${filialId}/toggle`, { ativo }),
 };
 
+// Restaurante — mesas, comandas e KDS (modos Restaurante/Híbrido)
+export interface ItemComandaInput {
+  produtoId?: string;
+  descricao: string;
+  quantidade: number;
+  precoUnitario: number;
+  observacao?: string;
+}
+export const restauranteApi = {
+  // Mesas
+  listarMesas: (filialId?: string, incluirInativas?: boolean) =>
+    api.get('/restaurante/mesas', {
+      params: { filialId, incluirInativas: incluirInativas ? 'true' : undefined },
+    }),
+  criarMesa: (data: {
+    filialId: string;
+    numero: number;
+    apelido?: string;
+    lugares?: number;
+    posX?: number;
+    posY?: number;
+  }) => api.post('/restaurante/mesas', data),
+  atualizarMesa: (id: string, data: object) => api.patch(`/restaurante/mesas/${id}`, data),
+  removerMesa: (id: string) => api.delete(`/restaurante/mesas/${id}`),
+  // Comandas
+  listarComandas: (params?: { filialId?: string; status?: string; mesaId?: string }) =>
+    api.get('/restaurante/comandas', { params }),
+  getComanda: (id: string) => api.get(`/restaurante/comandas/${id}`),
+  abrirComanda: (data: {
+    filialId: string;
+    mesaId?: string;
+    origem?: 'MESA' | 'BALCAO' | 'DELIVERY';
+    clienteNome?: string;
+    pessoas?: number;
+    garcomId?: string;
+    garcomNome?: string;
+    itens?: ItemComandaInput[];
+  }) => api.post('/restaurante/comandas', data),
+  adicionarItens: (comandaId: string, itens: ItemComandaInput[]) =>
+    api.post(`/restaurante/comandas/${comandaId}/itens`, { itens }),
+  removerItem: (comandaId: string, itemId: string) =>
+    api.delete(`/restaurante/comandas/${comandaId}/itens/${itemId}`),
+  pedirConta: (comandaId: string) => api.post(`/restaurante/comandas/${comandaId}/pedir-conta`, {}),
+  fecharComanda: (
+    comandaId: string,
+    data: {
+      aplicarTaxa10?: boolean;
+      taxaServico?: number;
+      desconto?: number;
+      formaPagamento?: string;
+      observacoes?: string;
+    },
+  ) => api.post(`/restaurante/comandas/${comandaId}/fechar`, data),
+  cancelarComanda: (comandaId: string) =>
+    api.post(`/restaurante/comandas/${comandaId}/cancelar`, {}),
+  // KDS (cozinha)
+  listarKds: (filialId?: string) => api.get('/restaurante/kds', { params: { filialId } }),
+  moverEtapaKds: (itemId: string, etapa: 'FILA' | 'PREPARO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO') =>
+    api.patch(`/restaurante/kds/${itemId}`, { etapa }),
+};
+
 // Assinatura / capacidade (add-ons contratáveis no painel)
 export const assinaturaApi = {
   me: () => api.get('/assinaturas/me'),

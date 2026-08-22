@@ -1,39 +1,72 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   LayoutGrid, Users, Clock, Receipt, Plus, Search, CheckCircle2, X, Minus, Trash2,
+  RefreshCw, AlertCircle, Loader2,
 } from 'lucide-react';
+import { restauranteApi } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 /**
  * MAPA DE MESAS (modo Restaurante) — visão de salão em tempo real.
  *
- * Fase 5 (frontend-first): a comanda já é interativa dentro da tela. Abrir uma
- * mesa cria a comanda, o menu rápido lança itens, o consumo soma ao vivo e
- * "Fechar conta" libera a mesa. Tudo em estado local — quando o servidor entrar
- * (Fase 3), estas mesmas ações passam a gravar comandas de verdade.
+ * Agora ligado ao backend: mesas e comandas são de verdade. Abrir uma mesa
+ * cria a comanda no servidor, o menu rápido lança itens (grava), "Pedir a
+ * conta" e "Fechar conta" mudam o estado real e liberam a mesa. Cada ação
+ * recarrega o salão para refletir o estado autoritativo do servidor.
  */
 
 type StatusMesa = 'LIVRE' | 'OCUPADA' | 'CONTA' | 'RESERVADA';
 
-interface ItemComanda {
-  nome: string;
-  preco: number;
-  qtd: number;
-}
-
-interface Mesa {
-  id: number;
+// ── Formatos do backend (Decimals chegam como string no JSON) ──
+interface MesaApi {
+  id: string;
   numero: number;
   lugares: number;
   status: StatusMesa;
+  apelido?: string | null;
+}
+interface ItemComandaApi {
+  id: string;
+  descricao: string;
+  quantidade: string | number;
+  precoUnitario: string | number;
+  valorTotal: string | number;
+}
+interface ComandaApi {
+  id: string;
+  numero: number;
+  status: 'ABERTA' | 'FECHANDO' | 'FECHADA' | 'CANCELADA';
+  mesaId: string | null;
+  garcomNome?: string | null;
+  pessoas?: number | null;
+  abertaEm: string;
+  total: string | number;
+  itens: ItemComandaApi[];
+}
+
+// ── View-models (já normalizados p/ a tela) ──
+interface GrupoItem { descricao: string; preco: number; qtd: number; ids: string[] }
+interface ComandaVM {
+  id: string;
+  status: ComandaApi['status'];
   garcom?: string;
-  abertaHa?: number;   // minutos
-  consumo?: number;    // R$
+  abertaHa: number;   // minutos
+  total: number;
   pessoas?: number;
-  itens?: ItemComanda[];
+  itens: GrupoItem[];
+}
+interface MesaVM {
+  id: string;
+  numero: number;
+  lugares: number;
+  status: StatusMesa;
+  comanda?: ComandaVM;
 }
 
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const num = (v: string | number | null | undefined) => Number(v ?? 0);
 
 const STATUS_UI: Record<StatusMesa, { label: string; dot: string; card: string; chip: string }> = {
   LIVRE:     { label: 'Livre',     dot: 'bg-[#0b7d4e]',  card: 'border-[#E7E5DF] bg-white hover:border-[#01B8FA]/40', chip: 'bg-emerald-500/12 text-[#0b7d4e] border-emerald-400/25' },
@@ -54,33 +87,6 @@ const MENU_RAPIDO: { nome: string; preco: number }[] = [
   { nome: 'Sobremesa do dia', preco: 18.0 },
 ];
 
-const MESAS_INICIAIS: Mesa[] = [
-  { id: 1, numero: 1, lugares: 2, status: 'OCUPADA', garcom: 'João', abertaHa: 34, consumo: 88.5, pessoas: 2, itens: [
-    { nome: 'X-Bacon Artesanal', preco: 28.0, qtd: 2 }, { nome: 'Refrigerante Lata', preco: 7.0, qtd: 2 }, { nome: 'Sobremesa do dia', preco: 18.5, qtd: 1 },
-  ] },
-  { id: 2, numero: 2, lugares: 4, status: 'LIVRE' },
-  { id: 3, numero: 3, lugares: 4, status: 'CONTA', garcom: 'Maria', abertaHa: 72, consumo: 214.9, pessoas: 4, itens: [
-    { nome: 'Pizza Calabresa (G)', preco: 49.9, qtd: 2 }, { nome: 'Chopp 300ml', preco: 11.5, qtd: 8 }, { nome: 'Sobremesa do dia', preco: 18.0, qtd: 1 },
-  ] },
-  { id: 4, numero: 4, lugares: 2, status: 'LIVRE' },
-  { id: 5, numero: 5, lugares: 6, status: 'OCUPADA', garcom: 'João', abertaHa: 12, consumo: 46.0, pessoas: 5, itens: [
-    { nome: 'Refrigerante Lata', preco: 7.0, qtd: 2 }, { nome: 'Smash Duplo', preco: 32.0, qtd: 1 },
-  ] },
-  { id: 6, numero: 6, lugares: 4, status: 'RESERVADA' },
-  { id: 7, numero: 7, lugares: 2, status: 'OCUPADA', garcom: 'Ana', abertaHa: 58, consumo: 132.0, pessoas: 2, itens: [
-    { nome: 'Espaguete à Bolonhesa', preco: 39.9, qtd: 2 }, { nome: 'Suco Natural', preco: 12.0, qtd: 2 }, { nome: 'Chopp 300ml', preco: 11.5, qtd: 2 },
-  ] },
-  { id: 8, numero: 8, lugares: 8, status: 'LIVRE' },
-  { id: 9, numero: 9, lugares: 4, status: 'OCUPADA', garcom: 'Maria', abertaHa: 5, consumo: 21.5, pessoas: 3, itens: [
-    { nome: 'Refrigerante Lata', preco: 7.0, qtd: 1 }, { nome: 'Suco Natural', preco: 12.0, qtd: 1 },
-  ] },
-  { id: 10, numero: 10, lugares: 2, status: 'LIVRE' },
-  { id: 11, numero: 11, lugares: 4, status: 'CONTA', garcom: 'Ana', abertaHa: 95, consumo: 308.7, pessoas: 4, itens: [
-    { nome: 'Pizza Calabresa (G)', preco: 49.9, qtd: 4 }, { nome: 'Chopp 300ml', preco: 11.5, qtd: 8 }, { nome: 'Sobremesa do dia', preco: 18.0, qtd: 1 },
-  ] },
-  { id: 12, numero: 12, lugares: 6, status: 'LIVRE' },
-];
-
 const FILTROS: { id: StatusMesa | 'TODAS'; label: string }[] = [
   { id: 'TODAS', label: 'Todas' },
   { id: 'LIVRE', label: 'Livres' },
@@ -89,17 +95,79 @@ const FILTROS: { id: StatusMesa | 'TODAS'; label: string }[] = [
   { id: 'RESERVADA', label: 'Reservadas' },
 ];
 
-const somaItens = (itens?: ItemComanda[]) =>
-  (itens || []).reduce((s, i) => s + i.preco * i.qtd, 0);
+/** Agrupa os itens da comanda por descrição, somando quantidades e guardando os ids
+ *  (para "tirar" uma unidade removendo a linha mais recente daquele item). */
+function agruparItens(itens: ItemComandaApi[]): GrupoItem[] {
+  const mapa = new Map<string, GrupoItem>();
+  for (const it of itens) {
+    const g = mapa.get(it.descricao);
+    if (g) { g.qtd += num(it.quantidade); g.ids.push(it.id); }
+    else mapa.set(it.descricao, { descricao: it.descricao, preco: num(it.precoUnitario), qtd: num(it.quantidade), ids: [it.id] });
+  }
+  return [...mapa.values()];
+}
+
+function minutosDesde(iso: string): number {
+  const ms = Date.now() - new Date(iso).getTime();
+  return Math.max(0, Math.floor(ms / 60000));
+}
 
 export default function Mesas() {
-  const [mesas, setMesas] = useState<Mesa[]>(MESAS_INICIAIS);
+  const { filialAtiva } = useAuth();
+  const filialId = filialAtiva?.id;
+
+  const [mesasApi, setMesasApi] = useState<MesaApi[]>([]);
+  const [comandas, setComandas] = useState<ComandaApi[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
   const [filtro, setFiltro] = useState<StatusMesa | 'TODAS'>('TODAS');
   const [busca, setBusca] = useState('');
-  const [selId, setSelId] = useState<number | null>(null);
+  const [selId, setSelId] = useState<string | null>(null);
 
-  // A mesa selecionada é derivada do estado vivo, para o painel refletir os
-  // lançamentos em tempo real (ao adicionar item, o total já sobe na hora).
+  const carregar = useCallback(async () => {
+    if (!filialId) return;
+    setErro(null);
+    try {
+      const [rMesas, rAbertas, rFechando] = await Promise.all([
+        restauranteApi.listarMesas(filialId),
+        restauranteApi.listarComandas({ filialId, status: 'ABERTA' }),
+        restauranteApi.listarComandas({ filialId, status: 'FECHANDO' }),
+      ]);
+      setMesasApi(rMesas.data ?? []);
+      setComandas([...(rAbertas.data ?? []), ...(rFechando.data ?? [])]);
+    } catch {
+      setErro('Não consegui carregar o salão. Verifique a conexão e tente de novo.');
+    } finally {
+      setCarregando(false);
+    }
+  }, [filialId]);
+
+  useEffect(() => {
+    setCarregando(true);
+    void carregar();
+  }, [carregar]);
+
+  // Cruza mesa + comanda aberta (fonte da verdade do consumo/itens da mesa).
+  const mesas = useMemo<MesaVM[]>(() => {
+    const porMesa = new Map<string, ComandaApi>();
+    for (const c of comandas) if (c.mesaId) porMesa.set(c.mesaId, c);
+    return mesasApi.map((m) => {
+      const c = porMesa.get(m.id);
+      const comanda: ComandaVM | undefined = c && {
+        id: c.id,
+        status: c.status,
+        garcom: c.garcomNome ?? undefined,
+        abertaHa: minutosDesde(c.abertaEm),
+        total: num(c.total),
+        pessoas: c.pessoas ?? undefined,
+        itens: agruparItens(c.itens ?? []),
+      };
+      return { id: m.id, numero: m.numero, lugares: m.lugares, status: m.status, comanda };
+    });
+  }, [mesasApi, comandas]);
+
   const selecionada = useMemo(() => mesas.find((m) => m.id === selId) || null, [mesas, selId]);
 
   const visiveis = useMemo(() => {
@@ -112,8 +180,8 @@ export default function Mesas() {
 
   const resumo = useMemo(() => {
     const ocupadas = mesas.filter((m) => m.status === 'OCUPADA' || m.status === 'CONTA');
-    const consumo = ocupadas.reduce((s, m) => s + (m.consumo || 0), 0);
-    const pessoas = ocupadas.reduce((s, m) => s + (m.pessoas || 0), 0);
+    const consumo = ocupadas.reduce((s, m) => s + (m.comanda?.total || 0), 0);
+    const pessoas = ocupadas.reduce((s, m) => s + (m.comanda?.pessoas || 0), 0);
     return {
       livres: mesas.filter((m) => m.status === 'LIVRE').length,
       ocupadas: ocupadas.length,
@@ -122,38 +190,49 @@ export default function Mesas() {
     };
   }, [mesas]);
 
-  const patch = (id: number, muda: (m: Mesa) => Mesa) =>
-    setMesas((lista) => lista.map((m) => (m.id === id ? muda(m) : m)));
+  // Wrapper: executa uma ação no servidor e recarrega o salão.
+  const acao = useCallback(async (fn: () => Promise<unknown>) => {
+    if (busy) return;
+    setBusy(true);
+    setErro(null);
+    try {
+      await fn();
+      await carregar();
+    } catch {
+      setErro('Não consegui concluir a ação. Tente novamente.');
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, carregar]);
 
-  const abrirComanda = (id: number) =>
-    patch(id, (m) => ({
-      ...m, status: 'OCUPADA', garcom: 'Você', abertaHa: 0, pessoas: m.pessoas || 2, consumo: 0, itens: [],
-    }));
+  const abrirComanda = (mesaId: string) =>
+    acao(() => restauranteApi.abrirComanda({ filialId: filialId!, mesaId, origem: 'MESA' }));
 
-  const adicionarItem = (id: number, novo: { nome: string; preco: number }) =>
-    patch(id, (m) => {
-      const itens = [...(m.itens || [])];
-      const i = itens.findIndex((x) => x.nome === novo.nome);
-      if (i >= 0) itens[i] = { ...itens[i], qtd: itens[i].qtd + 1 };
-      else itens.push({ ...novo, qtd: 1 });
-      return { ...m, itens, consumo: somaItens(itens) };
+  const adicionarItem = (comandaId: string, novo: { nome: string; preco: number }) =>
+    acao(() => restauranteApi.adicionarItens(comandaId, [
+      { descricao: novo.nome, quantidade: 1, precoUnitario: novo.preco },
+    ]));
+
+  const tirarItem = (comandaId: string, itemId: string) =>
+    acao(() => restauranteApi.removerItem(comandaId, itemId));
+
+  const pedirConta = (comandaId: string) =>
+    acao(() => restauranteApi.pedirConta(comandaId));
+
+  const fecharConta = (comandaId: string) =>
+    acao(async () => { await restauranteApi.fecharComanda(comandaId, {}); setSelId(null); });
+
+  const criarMesas = (quantidade: number) =>
+    acao(async () => {
+      const base = mesasApi.reduce((mx, m) => Math.max(mx, m.numero), 0);
+      for (let i = 1; i <= quantidade; i++) {
+        await restauranteApi.criarMesa({ filialId: filialId!, numero: base + i, lugares: 4 });
+      }
     });
 
-  const tirarItem = (id: number, nome: string) =>
-    patch(id, (m) => {
-      const itens = (m.itens || [])
-        .map((x) => (x.nome === nome ? { ...x, qtd: x.qtd - 1 } : x))
-        .filter((x) => x.qtd > 0);
-      return { ...m, itens, consumo: somaItens(itens) };
-    });
-
-  const pedirConta = (id: number) => patch(id, (m) => ({ ...m, status: 'CONTA' }));
-
-  const fecharConta = (id: number) => {
-    patch(id, (m) => ({
-      id: m.id, numero: m.numero, lugares: m.lugares, status: 'LIVRE',
-    }));
-    setSelId(null);
+  const abrirPrimeiraLivre = () => {
+    const livre = mesas.find((m) => m.status === 'LIVRE');
+    if (livre) { void abrirComanda(livre.id); setSelId(livre.id); }
   };
 
   return (
@@ -170,6 +249,14 @@ export default function Mesas() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setCarregando(true); void carregar(); }}
+            disabled={busy || carregando}
+            title="Atualizar salão"
+            className="h-9 w-9 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
+          </button>
           <div className="relative">
             <Search className="h-3.5 w-3.5 text-[#A0A2AD] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
@@ -180,11 +267,9 @@ export default function Mesas() {
             />
           </div>
           <button
-            onClick={() => {
-              const livre = mesas.find((m) => m.status === 'LIVRE');
-              if (livre) { abrirComanda(livre.id); setSelId(livre.id); }
-            }}
-            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors"
+            onClick={abrirPrimeiraLivre}
+            disabled={busy || resumo.livres === 0}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Plus className="h-3.5 w-3.5" /> Abrir mesa
           </button>
@@ -219,56 +304,93 @@ export default function Mesas() {
         })}
       </div>
 
+      {erro && (
+        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" /> {erro}
+        </div>
+      )}
+
       {/* Grade de mesas */}
       <div className="flex-1 overflow-auto p-5">
-        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 max-w-[1400px]">
-          {visiveis.map((m) => {
-            const ui = STATUS_UI[m.status];
-            return (
+        {!filialId ? (
+          <div className="text-center py-16 text-[#A0A2AD] text-sm">Selecione uma filial para ver o salão.</div>
+        ) : carregando ? (
+          <div className="flex items-center justify-center py-20 text-[#8B8D98] text-sm gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando salão…
+          </div>
+        ) : mesasApi.length === 0 ? (
+          <div className="max-w-md mx-auto text-center py-16">
+            <LayoutGrid className="h-8 w-8 text-[#C7C9D2] mx-auto" />
+            <p className="text-[15px] font-semibold text-[#16171D] mt-3">Nenhuma mesa cadastrada ainda</p>
+            <p className="text-sm text-[#8B8D98] mt-1">Crie o salão para começar a lançar comandas. Você pode ajustar depois.</p>
+            <div className="flex items-center justify-center gap-2 mt-4">
               <button
-                key={m.id}
-                onClick={() => setSelId(m.id)}
-                className={`text-left rounded-2xl border p-4 transition-all hover:shadow-md ${ui.card}`}
+                onClick={() => criarMesas(8)}
+                disabled={busy}
+                className="text-sm font-bold px-4 py-2.5 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors disabled:opacity-50"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-black text-[#16171D] leading-none">{m.numero}</span>
-                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${ui.chip}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${ui.dot}`} /> {ui.label}
-                  </span>
-                </div>
-                <div className="mt-3 flex items-center gap-1 text-[11px] text-[#8B8D98]">
-                  <Users className="h-3.5 w-3.5" /> {m.lugares} lugares
-                </div>
-                {(m.status === 'OCUPADA' || m.status === 'CONTA') && (
-                  <div className="mt-2 pt-2 border-t border-[#E7E5DF] space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-[#8B8D98] flex items-center gap-1"><Clock className="h-3 w-3" /> {m.abertaHa} min</span>
-                      <span className="font-bold text-[#16171D]">{brl(m.consumo || 0)}</span>
-                    </div>
-                    {m.garcom && <p className="text-[10px] text-[#A0A2AD]">Garçom: {m.garcom}</p>}
-                  </div>
-                )}
+                Criar 8 mesas
               </button>
-            );
-          })}
-          {visiveis.length === 0 && (
-            <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
-              Nenhuma mesa neste filtro.
+              <button
+                onClick={() => criarMesas(1)}
+                disabled={busy}
+                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 transition-colors disabled:opacity-50"
+              >
+                + 1 mesa
+              </button>
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 max-w-[1400px]">
+            {visiveis.map((m) => {
+              const ui = STATUS_UI[m.status];
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => setSelId(m.id)}
+                  className={`text-left rounded-2xl border p-4 transition-all hover:shadow-md ${ui.card}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-black text-[#16171D] leading-none">{m.numero}</span>
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${ui.chip}`}>
+                      <span className={`h-1.5 w-1.5 rounded-full ${ui.dot}`} /> {ui.label}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-1 text-[11px] text-[#8B8D98]">
+                    <Users className="h-3.5 w-3.5" /> {m.lugares} lugares
+                  </div>
+                  {(m.status === 'OCUPADA' || m.status === 'CONTA') && m.comanda && (
+                    <div className="mt-2 pt-2 border-t border-[#E7E5DF] space-y-1">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-[#8B8D98] flex items-center gap-1"><Clock className="h-3 w-3" /> {m.comanda.abertaHa} min</span>
+                        <span className="font-bold text-[#16171D]">{brl(m.comanda.total)}</span>
+                      </div>
+                      {m.comanda.garcom && <p className="text-[10px] text-[#A0A2AD]">Garçom: {m.comanda.garcom}</p>}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+            {visiveis.length === 0 && (
+              <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
+                Nenhuma mesa neste filtro.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Painel lateral (comanda da mesa) */}
       {selecionada && (
         <DetalheMesa
           mesa={selecionada}
+          busy={busy}
           onFechar={() => setSelId(null)}
           onAbrir={() => abrirComanda(selecionada.id)}
-          onAddItem={(item) => adicionarItem(selecionada.id, item)}
-          onTirarItem={(nome) => tirarItem(selecionada.id, nome)}
-          onPedirConta={() => pedirConta(selecionada.id)}
-          onFecharConta={() => fecharConta(selecionada.id)}
+          onAddItem={(item) => selecionada.comanda && adicionarItem(selecionada.comanda.id, item)}
+          onTirarItem={(itemId) => selecionada.comanda && tirarItem(selecionada.comanda.id, itemId)}
+          onPedirConta={() => selecionada.comanda && pedirConta(selecionada.comanda.id)}
+          onFecharConta={() => selecionada.comanda && fecharConta(selecionada.comanda.id)}
         />
       )}
     </div>
@@ -290,19 +412,21 @@ function ResumoKpi({
 }
 
 function DetalheMesa({
-  mesa, onFechar, onAbrir, onAddItem, onTirarItem, onPedirConta, onFecharConta,
+  mesa, busy, onFechar, onAbrir, onAddItem, onTirarItem, onPedirConta, onFecharConta,
 }: {
-  mesa: Mesa;
+  mesa: MesaVM;
+  busy: boolean;
   onFechar: () => void;
   onAbrir: () => void;
   onAddItem: (item: { nome: string; preco: number }) => void;
-  onTirarItem: (nome: string) => void;
+  onTirarItem: (itemId: string) => void;
   onPedirConta: () => void;
   onFecharConta: () => void;
 }) {
   const ui = STATUS_UI[mesa.status];
   const aberta = mesa.status === 'OCUPADA' || mesa.status === 'CONTA';
-  const itens = mesa.itens || [];
+  const itens = mesa.comanda?.itens || [];
+  const total = mesa.comanda?.total || 0;
 
   return (
     <>
@@ -325,9 +449,9 @@ function DetalheMesa({
 
           <div className="grid grid-cols-2 gap-2.5">
             <MiniInfo titulo="Lugares" valor={`${mesa.lugares}`} />
-            <MiniInfo titulo="Pessoas" valor={mesa.pessoas ? String(mesa.pessoas) : '—'} />
-            <MiniInfo titulo="Aberta há" valor={mesa.abertaHa != null ? `${mesa.abertaHa} min` : '—'} />
-            <MiniInfo titulo="Garçom" valor={mesa.garcom || '—'} />
+            <MiniInfo titulo="Pessoas" valor={mesa.comanda?.pessoas ? String(mesa.comanda.pessoas) : '—'} />
+            <MiniInfo titulo="Aberta há" valor={mesa.comanda ? `${mesa.comanda.abertaHa} min` : '—'} />
+            <MiniInfo titulo="Garçom" valor={mesa.comanda?.garcom || '—'} />
           </div>
 
           {aberta ? (
@@ -343,20 +467,23 @@ function DetalheMesa({
                 ) : (
                   <ul className="divide-y divide-[#F1F1F3]">
                     {itens.map((i) => (
-                      <li key={i.nome} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
+                      <li key={i.descricao} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm text-[#16171D] font-medium truncate">{i.nome}</p>
+                          <p className="text-sm text-[#16171D] font-medium truncate">{i.descricao}</p>
                           <p className="text-[11px] text-[#8B8D98]">{i.qtd} × {brl(i.preco)}</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           <span className="text-sm font-bold text-[#16171D] w-16 text-right">{brl(i.preco * i.qtd)}</span>
-                          <button
-                            onClick={() => onTirarItem(i.nome)}
-                            className="h-6 w-6 rounded-md bg-[#F1F1F3] hover:bg-[#E7E5DF] text-[#8B8D98] flex items-center justify-center"
-                            title="Remover uma unidade"
-                          >
-                            {i.qtd > 1 ? <Minus className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
-                          </button>
+                          {mesa.status === 'OCUPADA' && (
+                            <button
+                              onClick={() => onTirarItem(i.ids[i.ids.length - 1])}
+                              disabled={busy}
+                              className="h-6 w-6 rounded-md bg-[#F1F1F3] hover:bg-[#E7E5DF] text-[#8B8D98] flex items-center justify-center disabled:opacity-50"
+                              title="Remover uma unidade"
+                            >
+                              {i.qtd > 1 ? <Minus className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
+                            </button>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -364,7 +491,7 @@ function DetalheMesa({
                 )}
                 <div className="px-3.5 py-2.5 border-t border-[#E7E5DF] flex items-center justify-between bg-[#FAFAF8]">
                   <span className="text-sm text-[#5B5D69]">Total</span>
-                  <span className="text-lg font-black text-[#16171D]">{brl(mesa.consumo || 0)}</span>
+                  <span className="text-lg font-black text-[#16171D]">{brl(total)}</span>
                 </div>
               </div>
 
@@ -377,7 +504,8 @@ function DetalheMesa({
                       <button
                         key={item.nome}
                         onClick={() => onAddItem(item)}
-                        className="text-left rounded-lg border border-[#E7E5DF] bg-white px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors"
+                        disabled={busy}
+                        className="text-left rounded-lg border border-[#E7E5DF] bg-white px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors disabled:opacity-50"
                       >
                         <p className="text-[12px] text-[#16171D] font-medium leading-tight truncate">{item.nome}</p>
                         <p className="text-[11px] text-[#8B8D98]">{brl(item.preco)}</p>
@@ -404,14 +532,15 @@ function DetalheMesa({
           {mesa.status === 'LIVRE' ? (
             <button
               onClick={onAbrir}
-              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors"
+              disabled={busy}
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors disabled:opacity-50"
             >
               Abrir comanda
             </button>
           ) : mesa.status === 'OCUPADA' ? (
             <button
               onClick={onPedirConta}
-              disabled={itens.length === 0}
+              disabled={busy || itens.length === 0}
               className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#E8A317] hover:bg-[#d6960f] text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Pedir a conta
@@ -419,9 +548,10 @@ function DetalheMesa({
           ) : mesa.status === 'CONTA' ? (
             <button
               onClick={onFecharConta}
-              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#0b7d4e] hover:bg-[#0a6b43] text-white transition-colors"
+              disabled={busy}
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#0b7d4e] hover:bg-[#0a6b43] text-white transition-colors disabled:opacity-50"
             >
-              Fechar conta • {brl(mesa.consumo || 0)}
+              Fechar conta • {brl(total)}
             </button>
           ) : (
             <button className="flex-1 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#F1F1F3] text-[#5B5D69]">
