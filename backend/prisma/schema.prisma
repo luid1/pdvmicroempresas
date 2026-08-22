@@ -1753,3 +1753,114 @@ model MovimentoSessao {
   @@index([sessaoId])
   @@index([tenantId])
 }
+
+// ─────────────────────────────────────────
+// MÓDULO R: OPERAÇÃO DE RESTAURANTE
+// (mesas, comandas e KDS/cozinha) — modo Restaurante/Híbrido.
+// Aditivo e desacoplado: usa tenantId/filialId como Strings soltos (mesmo
+// padrão de SessaoCaixa), sem relações reversas em Tenant/Filial/Produto, para
+// não impactar tabelas existentes. A migração é 100% CREATE.
+// ─────────────────────────────────────────
+
+enum StatusMesa {
+  LIVRE
+  OCUPADA
+  CONTA // conta pedida / fechando
+  RESERVADA
+}
+
+enum OrigemComanda {
+  MESA
+  BALCAO
+  DELIVERY
+}
+
+enum StatusComanda {
+  ABERTA
+  FECHANDO // conta pedida, aguardando pagamento
+  FECHADA
+  CANCELADA
+}
+
+// Etapa da comanda na cozinha (Kitchen Display System).
+enum EtapaKds {
+  FILA
+  PREPARO
+  PRONTO
+  ENTREGUE
+  CANCELADO
+}
+
+model Mesa {
+  id        String     @id @default(uuid())
+  tenantId  String
+  filialId  String
+  numero    Int
+  apelido   String? // ex.: "Varanda 1", "Balcão"
+  lugares   Int        @default(4)
+  status    StatusMesa @default(LIVRE)
+  posX      Int? // layout do salão (opcional)
+  posY      Int?
+  ativo     Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  comandas Comanda[]
+
+  @@unique([tenantId, filialId, numero])
+  @@index([tenantId, filialId, status])
+}
+
+model Comanda {
+  id             String        @id @default(uuid())
+  tenantId       String
+  filialId       String
+  mesaId         String?
+  mesa           Mesa?         @relation(fields: [mesaId], references: [id])
+  numero         Int // sequência por filial
+  origem         OrigemComanda @default(MESA)
+  status         StatusComanda @default(ABERTA)
+  clienteNome    String?
+  pessoas        Int           @default(1)
+  garcomId       String?
+  garcomNome     String?
+  // Totais (recalculados a cada item)
+  subtotal       Decimal       @default(0) @db.Decimal(12, 2)
+  taxaServico    Decimal       @default(0) @db.Decimal(12, 2) // 10% opcional
+  desconto       Decimal       @default(0) @db.Decimal(12, 2)
+  total          Decimal       @default(0) @db.Decimal(12, 2)
+  formaPagamento String? // DINHEIRO, PIX, CARTAO_CREDITO, CARTAO_DEBITO
+  observacoes    String?
+  abertaEm       DateTime      @default(now())
+  fechadaEm      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  itens ItemComanda[]
+
+  @@unique([tenantId, filialId, numero])
+  @@index([tenantId, filialId, status])
+  @@index([mesaId])
+}
+
+model ItemComanda {
+  id                String   @id @default(uuid())
+  tenantId          String
+  comandaId         String
+  comanda           Comanda  @relation(fields: [comandaId], references: [id], onDelete: Cascade)
+  produtoId         String? // solto: referência lógica ao Produto, sem FK
+  descricao         String
+  quantidade        Decimal  @db.Decimal(12, 3)
+  precoUnitario     Decimal  @db.Decimal(12, 2)
+  valorTotal        Decimal  @db.Decimal(12, 2)
+  observacao        String? // ex.: "sem cebola", "ponto da carne"
+  // KDS (cozinha)
+  etapaKds          EtapaKds @default(FILA)
+  enviadoEm         DateTime @default(now())
+  etapaAtualizadaEm DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([comandaId])
+  @@index([tenantId, etapaKds])
+}

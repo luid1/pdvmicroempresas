@@ -37,6 +37,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
 import { AssinaturasModule } from './modules/assinaturas/assinaturas.module';
 import { PlataformaModule } from './modules/plataforma/plataforma.module';
 import { IaModule } from './modules/ia/ia.module';
+import { RestauranteModule } from './modules/restaurante/restaurante.module';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -91,6 +92,7 @@ import { HealthController } from './health.controller';
     AssinaturasModule,
     PlataformaModule,
     IaModule,
+    RestauranteModule,
   ],
   controllers: [HealthController],
   providers: [
