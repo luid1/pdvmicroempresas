@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, TELAS, type TelaDef } from '../../config/telas';
+import { segmentoDasPreferencias } from '../../config/segmentos';
 import api, { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
 
 /**
@@ -51,7 +52,8 @@ function Digitando() {
 }
 
 export default function LuCommand() {
-  const { user, filialAtiva } = useAuth();
+  const { user, filialAtiva, preferencias } = useAuth();
+  const segmento = segmentoDasPreferencias(preferencias);
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
   const [texto, setTexto] = useState('');
@@ -180,6 +182,13 @@ export default function LuCommand() {
   );
 
   const semThread = mensagens.length === 0;
+
+  // Sugestões de partida adaptadas ao MODO DE OPERAÇÃO (mesmo motor da Lu; muda
+  // só o vocabulário exemplificado). Restaurante fala de CMV, pratos e mesas.
+  const ehRestaurante = segmento !== 'VAREJO';
+  const sugestoesIniciais = ehRestaurante
+    ? ['Qual meu prato mais vendido?', 'Qual prato está com o CMV mais alto?', 'Qual meu ticket médio?', 'Como está minha rentabilidade?']
+    : ['Como estão minhas vendas?', 'O que está acabando no estoque?', 'Qual produto mais vendeu?', 'Como está minha rentabilidade?'];
 
   return createPortal(
     <>
@@ -344,12 +353,7 @@ export default function LuCommand() {
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-[10px] font-semibold text-[#0B6F5C]"><ShieldCheck className="h-3 w-3" /> Somente consulta</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {[
-                          'Como estão minhas vendas?',
-                          'O que está acabando no estoque?',
-                          'Qual produto mais vendeu?',
-                          'Como está minha rentabilidade?',
-                        ].map((s) => (
+                        {sugestoesIniciais.map((s) => (
                           <button
                             key={s}
                             onClick={() => { setTexto(s); setTimeout(() => inputRef.current?.focus(), 0); }}

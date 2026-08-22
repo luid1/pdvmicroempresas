@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   Gauge, TrendingUp, Clock, Utensils, Percent, DollarSign, Trophy,
-  Bike, Store, ShoppingBag,
+  Bike, Store, ShoppingBag, Sparkles,
 } from 'lucide-react';
 
 /**
@@ -87,6 +87,42 @@ export default function DashboardRestaurante() {
   const ticketMedio = d.pedidos > 0 ? d.faturamento / d.pedidos : 0;
   const totalCanais = d.canais.reduce((s, c) => s + c.valor, 0);
   const maxReceita = useMemo(() => Math.max(...d.pratos.map((p) => p.receita)), [d.pratos]);
+
+  // Lu · Insights — dicas determinísticas derivadas dos números do período.
+  // Mesmo motor da Lu, mas sem servidor: são leituras diretas do painel, no
+  // vocabulário do restaurante (CMV, prato campeão, mix de canal, giro de mesa).
+  const insights = useMemo(() => {
+    const out: { tom: 'bom' | 'atencao' | 'neutro'; texto: string }[] = [];
+
+    // Prato campeão (maior receita) e prato de maior CMV (aperta a margem).
+    const campeao = [...d.pratos].sort((a, b) => b.receita - a.receita)[0];
+    const piorCmv = [...d.pratos].sort((a, b) => b.cmv - a.cmv)[0];
+    if (campeao) {
+      out.push({ tom: 'bom', texto: `Campeão de vendas: ${campeao.nome} (${campeao.vendas} un, ${brl(campeao.receita)}). Garanta insumo em estoque para não furar a venda.` });
+    }
+    if (piorCmv && piorCmv.cmv > 34) {
+      out.push({ tom: 'atencao', texto: `${piorCmv.nome} está com CMV de ${pct(piorCmv.cmv)} — o mais alto do cardápio. Reveja porção ou preço para proteger a margem.` });
+    }
+
+    // CMV consolidado.
+    if (d.cmv <= 30) out.push({ tom: 'bom', texto: `CMV consolidado em ${pct(d.cmv)}: saudável. Boa gestão de compras e ficha técnica.` });
+    else if (d.cmv > 38) out.push({ tom: 'atencao', texto: `CMV consolidado em ${pct(d.cmv)}: acima do ideal (25–38%). Renegocie insumos ou ajuste preços.` });
+
+    // Mix de canal — se delivery domina, olho na taxa das plataformas.
+    const canalTop = [...d.canais].sort((a, b) => b.valor - a.valor)[0];
+    if (canalTop && totalCanais > 0) {
+      const share = (canalTop.valor / totalCanais) * 100;
+      if (canalTop.id === 'delivery' && share >= 40) out.push({ tom: 'atencao', texto: `Delivery já é ${pct(share)} do faturamento. Confira a taxa das plataformas no CMV para não corroer a margem.` });
+      else out.push({ tom: 'neutro', texto: `${canalTop.label} lidera o mix com ${pct(share)} do faturamento.` });
+    }
+
+    // Giro de mesas e tempo médio.
+    if (d.giroMesas < 2.5) out.push({ tom: 'atencao', texto: `Giro de ${d.giroMesas.toFixed(1)}× por mesa está baixo. Agilizar o fechamento da conta libera mesa mais rápido.` });
+    if (d.tempoMedio >= 45) out.push({ tom: 'atencao', texto: `Tempo médio de ${d.tempoMedio} min: acima de 45 min tende a esfriar a experiência. Vale olhar o gargalo na cozinha.` });
+    else out.push({ tom: 'bom', texto: `Tempo médio de ${d.tempoMedio} min está dentro do esperado para o salão.` });
+
+    return out.slice(0, 4);
+  }, [d, totalCanais]);
 
   return (
     <div className="flex flex-col h-full bg-[#F4F5F7]">
@@ -186,6 +222,27 @@ export default function DashboardRestaurante() {
                 ))}
               </div>
             </div>
+          </div>
+
+          {/* Lu · Insights do restaurante */}
+          <div className="rounded-2xl border border-[#01B8FA]/25 bg-gradient-to-br from-[#01B8FA]/[0.06] to-transparent p-5">
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[#0678a0] mb-3 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" /> Lu · Insights do restaurante
+            </h2>
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {insights.map((i, idx) => {
+                const dot = i.tom === 'bom' ? '#0b7d4e' : i.tom === 'atencao' ? '#a9760a' : '#0678a0';
+                return (
+                  <div key={idx} className="flex items-start gap-2.5 rounded-xl border border-[#E7E5DF] bg-white px-3.5 py-2.5">
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: dot }} />
+                    <p className="text-[13px] leading-snug text-[#5B5D69]">{i.texto}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="mt-3 text-[11px] text-[#A0A2AD]">
+              Leituras automáticas do período. Pergunte mais à Lu com <kbd className="rounded bg-white px-1.5 py-0.5 text-[#5B5D69] ring-1 ring-[#E5E7EB]">Ctrl</kbd>+<kbd className="rounded bg-white px-1.5 py-0.5 text-[#5B5D69] ring-1 ring-[#E5E7EB]">K</kbd>.
+            </p>
           </div>
         </div>
       </div>
