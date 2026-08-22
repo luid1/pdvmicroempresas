@@ -8,7 +8,7 @@ import {
   Building2, AlertTriangle, Receipt, ShieldCheck,
   ShoppingCart, Coins, Landmark, Repeat,
   Tags, Undo2, Gauge, Store,
-  LayoutGrid, ChefHat, Bike, ClipboardCheck, QrCode,
+  LayoutGrid, ChefHat, Bike, ClipboardCheck, QrCode, SplitSquareHorizontal,
 } from 'lucide-react';
 import type { ElementType } from 'react';
 import { telaNoSegmento, type Segmento, type SegmentoTela } from './segmentos';
@@ -75,6 +75,8 @@ export const TELAS: TelaDef[] = [
   { key: '/restaurante/delivery', label: 'Delivery', grupo: 'Restaurante', icon: Bike, segmentos: ['RESTAURANTE'] },
   { key: '/restaurante/ficha-tecnica', label: 'Fichas Técnicas', grupo: 'Restaurante', icon: ChefHat, segmentos: ['RESTAURANTE'] },
   { key: '/restaurante/cardapio', label: 'Cardápio Digital (QR)', grupo: 'Restaurante', icon: QrCode, segmentos: ['RESTAURANTE'] },
+  { key: '/restaurante/divisao-conta', label: 'Divisão de Conta', grupo: 'Restaurante', icon: SplitSquareHorizontal, segmentos: ['RESTAURANTE'] },
+  { key: '/restaurante/dashboard', label: 'Dashboard do Restaurante', grupo: 'Restaurante', icon: Gauge, segmentos: ['RESTAURANTE'] },
 
   // ── Cadastros ─────────────────────────────────────────────────────────
   { key: '/cadastros/produtos', label: 'Produtos & Código de Barras', grupo: 'Cadastros', icon: Package },

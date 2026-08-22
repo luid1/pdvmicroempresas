@@ -1,0 +1,229 @@
+import { useMemo, useState } from 'react';
+import {
+  SplitSquareHorizontal, Users, Minus, Plus, Equal, ListChecks, Check, Percent,
+} from 'lucide-react';
+
+/**
+ * DIVISÃO DE CONTA (modo Restaurante) — fecha a mesa dividindo o total.
+ *
+ * Dois modos, os dois usados no dia a dia:
+ *   • IGUAL   → divide o total (com taxa) pelo nº de pessoas.
+ *   • POR ITEM → cada item é atribuído a uma ou mais pessoas; quem consumiu
+ *                paga a sua parte (rateio proporcional do item compartilhado).
+ *
+ * Fase 5: cálculo 100% frontend (mock). No servidor isso parte da comanda real
+ * da mesa e gera os recebimentos no financeiro.
+ */
+
+interface ItemComanda {
+  id: number;
+  nome: string;
+  qtd: number;
+  preco: number;   // unitário
+}
+
+const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const COMANDA: ItemComanda[] = [
+  { id: 1, nome: 'Pizza Calabresa (G)', qtd: 1, preco: 49.9 },
+  { id: 2, nome: 'Pizza 4 Queijos (G)', qtd: 1, preco: 54.9 },
+  { id: 3, nome: 'X-Bacon Artesanal', qtd: 2, preco: 28.0 },
+  { id: 4, nome: 'Refrigerante 2L', qtd: 2, preco: 12.0 },
+  { id: 5, nome: 'Petit Gâteau', qtd: 1, preco: 16.0 },
+];
+
+const NOMES = ['Pessoa 1', 'Pessoa 2', 'Pessoa 3', 'Pessoa 4', 'Pessoa 5', 'Pessoa 6'];
+const CORES = ['#01B8FA', '#0b7d4e', '#a9760a', '#c3352b', '#7c3aed', '#0678a0'];
+
+type Modo = 'IGUAL' | 'ITEM';
+
+export default function DivisaoConta() {
+  const [modo, setModo] = useState<Modo>('IGUAL');
+  const [pessoas, setPessoas] = useState(3);
+  const [taxa, setTaxa] = useState(true);
+  // Para o modo POR ITEM: mapa itemId -> conjunto de índices de pessoas.
+  const [atrib, setAtrib] = useState<Record<number, number[]>>({});
+
+  const subtotal = useMemo(() => COMANDA.reduce((s, i) => s + i.preco * i.qtd, 0), []);
+  const valorTaxa = taxa ? subtotal * 0.1 : 0;
+  const total = subtotal + valorTaxa;
+
+  const porPessoaIgual = total / pessoas;
+
+  // Modo POR ITEM: soma por pessoa (item compartilhado rateia igual entre os marcados).
+  const totaisPorItem = useMemo(() => {
+    const soma = Array(pessoas).fill(0) as number[];
+    let semDono = 0;
+    for (const item of COMANDA) {
+      const donos = (atrib[item.id] || []).filter((p) => p < pessoas);
+      const valorItem = item.preco * item.qtd;
+      if (donos.length === 0) { semDono += valorItem; continue; }
+      const cota = valorItem / donos.length;
+      donos.forEach((p) => { soma[p] += cota; });
+    }
+    // Taxa de serviço rateada proporcionalmente ao consumo de cada um.
+    const consumido = soma.reduce((a, b) => a + b, 0);
+    const comTaxa = soma.map((v) => v + (consumido > 0 ? (v / consumido) * valorTaxa : 0));
+    return { soma: comTaxa, semDono };
+  }, [atrib, pessoas, valorTaxa]);
+
+  const togglePessoaNoItem = (itemId: number, pessoaIdx: number) =>
+    setAtrib((prev) => {
+      const atual = prev[itemId] || [];
+      const novo = atual.includes(pessoaIdx)
+        ? atual.filter((p) => p !== pessoaIdx)
+        : [...atual, pessoaIdx];
+      return { ...prev, [itemId]: novo };
+    });
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Topbar */}
+      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-[#01B8FA]/12 border border-[#01B8FA]/30 flex items-center justify-center">
+            <SplitSquareHorizontal className="h-4 w-4 text-[#0678a0]" />
+          </div>
+          <div>
+            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Divisão de Conta — Mesa 7</h1>
+            <p className="text-[11px] text-[#8B8D98]">Total {brl(total)} · {COMANDA.length} itens</p>
+          </div>
+        </div>
+        {/* Alternância de modo */}
+        <div className="flex items-center gap-1 bg-[#F1F1F3] rounded-lg p-0.5">
+          <BotaoModo ativo={modo === 'IGUAL'} onClick={() => setModo('IGUAL')} icon={Equal} label="Por igual" />
+          <BotaoModo ativo={modo === 'ITEM'} onClick={() => setModo('ITEM')} icon={ListChecks} label="Por item" />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-auto p-5">
+        <div className="max-w-5xl mx-auto grid gap-5 lg:grid-cols-[1.3fr_1fr]">
+          {/* Coluna esquerda: itens da comanda */}
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[#8B8D98] mb-2">Itens da comanda</h2>
+            <div className="rounded-2xl border border-[#E7E5DF] bg-white overflow-hidden">
+              {COMANDA.map((i) => (
+                <div key={i.id} className="px-4 py-3 border-b border-[#EEEDE9] last:border-0">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-[#16171D] text-sm">{i.nome}</p>
+                      <p className="text-[11px] text-[#8B8D98]">{i.qtd}× {brl(i.preco)}</p>
+                    </div>
+                    <span className="font-bold text-[#16171D]">{brl(i.preco * i.qtd)}</span>
+                  </div>
+                  {modo === 'ITEM' && (
+                    <div className="flex flex-wrap gap-1.5 mt-2.5">
+                      {Array.from({ length: pessoas }).map((_, p) => {
+                        const sel = (atrib[i.id] || []).includes(p);
+                        return (
+                          <button
+                            key={p}
+                            onClick={() => togglePessoaNoItem(i.id, p)}
+                            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full border transition-all ${
+                              sel ? 'text-white border-transparent' : 'text-[#8B8D98] border-[#E7E5DF] hover:border-[#01B8FA]/40'
+                            }`}
+                            style={sel ? { backgroundColor: CORES[p % CORES.length] } : undefined}
+                          >
+                            {sel && <Check className="h-3 w-3" />} {NOMES[p]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div className="px-4 py-3 bg-[#F6F5F2] space-y-1.5">
+                <div className="flex items-center justify-between text-sm text-[#5B5D69]">
+                  <span>Subtotal</span><span>{brl(subtotal)}</span>
+                </div>
+                <button onClick={() => setTaxa(!taxa)} className="w-full flex items-center justify-between text-sm text-[#5B5D69]">
+                  <span className="flex items-center gap-2">
+                    <span className={`h-4 w-4 rounded border flex items-center justify-center ${taxa ? 'bg-[#01B8FA] border-[#01B8FA]' : 'border-[#C7C9D2]'}`}>
+                      {taxa && <Check className="h-3 w-3 text-white" />}
+                    </span>
+                    <Percent className="h-3.5 w-3.5" /> Taxa de serviço (10%)
+                  </span>
+                  <span>{brl(valorTaxa)}</span>
+                </button>
+                <div className="flex items-center justify-between text-base font-black text-[#16171D] pt-1.5 border-t border-[#E7E5DF]">
+                  <span>Total</span><span>{brl(total)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Coluna direita: resultado da divisão */}
+          <div>
+            <h2 className="text-xs font-bold uppercase tracking-wide text-[#8B8D98] mb-2">
+              {modo === 'IGUAL' ? 'Divisão por igual' : 'Quanto cada um paga'}
+            </h2>
+
+            {modo === 'IGUAL' ? (
+              <div className="rounded-2xl border border-[#E7E5DF] bg-white p-5">
+                <div className="flex items-center justify-between">
+                  <span className="flex items-center gap-2 text-sm text-[#5B5D69]"><Users className="h-4 w-4" /> Pessoas na mesa</span>
+                  <div className="flex items-center gap-2 rounded-lg border border-[#E7E5DF] px-1">
+                    <button onClick={() => setPessoas((n) => Math.max(1, n - 1))} className="h-8 w-8 flex items-center justify-center text-[#5B5D69] hover:text-[#16171D]"><Minus className="h-4 w-4" /></button>
+                    <span className="w-6 text-center font-bold text-[#16171D]">{pessoas}</span>
+                    <button onClick={() => setPessoas((n) => Math.min(6, n + 1))} className="h-8 w-8 flex items-center justify-center text-[#5B5D69] hover:text-[#16171D]"><Plus className="h-4 w-4" /></button>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-xl bg-[#01B8FA]/[0.06] border border-[#01B8FA]/25 p-5 text-center">
+                  <p className="text-[11px] text-[#0678a0] uppercase tracking-wide font-bold">Cada pessoa paga</p>
+                  <p className="text-4xl font-black text-[#16171D] mt-1">{brl(porPessoaIgual)}</p>
+                  <p className="text-[11px] text-[#8B8D98] mt-1">{brl(total)} ÷ {pessoas} pessoas</p>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[#E7E5DF] bg-white p-3">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <span className="flex items-center gap-2 text-sm text-[#5B5D69]"><Users className="h-4 w-4" /> Pessoas</span>
+                  <div className="flex items-center gap-2 rounded-lg border border-[#E7E5DF] px-1">
+                    <button onClick={() => setPessoas((n) => Math.max(1, n - 1))} className="h-7 w-7 flex items-center justify-center text-[#5B5D69]"><Minus className="h-3.5 w-3.5" /></button>
+                    <span className="w-5 text-center font-bold text-[#16171D]">{pessoas}</span>
+                    <button onClick={() => setPessoas((n) => Math.min(6, n + 1))} className="h-7 w-7 flex items-center justify-center text-[#5B5D69]"><Plus className="h-3.5 w-3.5" /></button>
+                  </div>
+                </div>
+                <div className="mt-1 space-y-1.5">
+                  {Array.from({ length: pessoas }).map((_, p) => (
+                    <div key={p} className="flex items-center justify-between px-3 py-2.5 rounded-xl border border-[#E7E5DF]">
+                      <span className="flex items-center gap-2 text-sm font-semibold text-[#16171D]">
+                        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: CORES[p % CORES.length] }} />
+                        {NOMES[p]}
+                      </span>
+                      <span className="font-black text-[#16171D]">{brl(totaisPorItem.soma[p] || 0)}</span>
+                    </div>
+                  ))}
+                </div>
+                {totaisPorItem.semDono > 0 && (
+                  <p className="text-[11px] text-[#c3352b] mt-2 px-2">
+                    {brl(totaisPorItem.semDono)} ainda sem dono — marque quem consumiu.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <button className="w-full mt-4 text-sm font-bold px-4 py-3 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors">
+              Fechar conta e receber
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BotaoModo({
+  ativo, onClick, icon: Icon, label,
+}: { ativo: boolean; onClick: () => void; icon: React.ElementType; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md transition-all ${
+        ativo ? 'bg-white text-[#0678a0] shadow-sm' : 'text-[#8B8D98] hover:text-[#16171D]'
+      }`}
+    >
+      <Icon className="h-3.5 w-3.5" /> {label}
+    </button>
+  );
+}
