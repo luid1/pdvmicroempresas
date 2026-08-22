@@ -73,6 +73,7 @@ export const TELAS: TelaDef[] = [
   { key: '/restaurante/comandas', label: 'Comandas', grupo: 'Restaurante', icon: ClipboardCheck, segmentos: ['RESTAURANTE'] },
   { key: '/restaurante/cozinha', label: 'Cozinha (KDS)', grupo: 'Restaurante', icon: ChefHat, segmentos: ['RESTAURANTE'] },
   { key: '/restaurante/delivery', label: 'Delivery', grupo: 'Restaurante', icon: Bike, segmentos: ['RESTAURANTE'] },
+  { key: '/restaurante/ficha-tecnica', label: 'Fichas Técnicas', grupo: 'Restaurante', icon: ChefHat, segmentos: ['RESTAURANTE'] },
 
   // ── Cadastros ─────────────────────────────────────────────────────────
   { key: '/cadastros/produtos', label: 'Produtos & Código de Barras', grupo: 'Cadastros', icon: Package },
