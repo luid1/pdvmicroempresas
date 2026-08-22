@@ -49,6 +49,7 @@ import Comandas from './modules/restaurante/pages/Comandas';
 import Cozinha from './modules/restaurante/pages/Cozinha';
 import Delivery from './modules/restaurante/pages/Delivery';
 import FichaTecnica from './modules/restaurante/pages/FichaTecnica';
+import CardapioDigital from './modules/restaurante/pages/CardapioDigital';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -118,6 +119,7 @@ export default function App() {
             <Route path="restaurante/cozinha" element={<Cozinha />} />
             <Route path="restaurante/delivery" element={<Delivery />} />
             <Route path="restaurante/ficha-tecnica" element={<FichaTecnica />} />
+            <Route path="restaurante/cardapio" element={<CardapioDigital />} />
 
             {/* Gerencial */}
             <Route path="gerencial/relatorios" element={<Relatorios />} />
