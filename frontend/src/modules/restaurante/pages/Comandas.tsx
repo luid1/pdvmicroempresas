@@ -1,29 +1,47 @@
-import { useMemo, useState } from 'react';
-import { ClipboardCheck, Search, Users, Clock, Plus } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ClipboardCheck, Search, Users, Clock, Plus, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+import { restauranteApi } from '../../../services/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 /**
  * COMANDAS (modo Restaurante) — lista de contas abertas no salão e balcão.
  *
- * Fase 1: mock frontend. Cada comanda reúne os itens consumidos por uma mesa
- * ou cliente de balcão. No servidor, a comanda vira a fonte que alimenta a
- * cozinha (KDS) e o fechamento de conta.
+ * Ligado ao backend: mostra as comandas ABERTA/FECHANDO da filial ativa, com
+ * consumo e tempo reais. "Nova comanda" abre uma comanda de balcão de verdade.
+ * A comanda é a fonte que alimenta a cozinha (KDS) e o fechamento de conta.
  */
 
 type Origem = 'MESA' | 'BALCAO' | 'DELIVERY';
 
-interface Comanda {
-  id: number;
+interface ComandaApi {
+  id: string;
+  numero: number;
+  origem: Origem;
+  status: 'ABERTA' | 'FECHANDO' | 'FECHADA' | 'CANCELADA';
+  clienteNome?: string | null;
+  garcomNome?: string | null;
+  pessoas?: number | null;
+  abertaEm: string;
+  total: string | number;
+  itens: { id: string }[];
+  mesa?: { numero: number; apelido?: string | null } | null;
+}
+
+interface ComandaVM {
+  id: string;
   codigo: string;
   origem: Origem;
-  referencia: string;   // "Mesa 3", "Cliente balcão", "Delivery #204"
+  referencia: string;
   garcom?: string;
   itens: number;
   pessoas?: number;
-  abertaHa: number;     // minutos
+  abertaHa: number;
   total: number;
 }
 
 const brl = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const num = (v: string | number | null | undefined) => Number(v ?? 0);
+const minutosDesde = (iso: string) => Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
 
 const ORIGEM_UI: Record<Origem, { label: string; chip: string }> = {
   MESA:     { label: 'Mesa',     chip: 'bg-[#01B8FA]/12 text-[#0678a0] border-[#01B8FA]/25' },
@@ -31,14 +49,11 @@ const ORIGEM_UI: Record<Origem, { label: string; chip: string }> = {
   DELIVERY: { label: 'Delivery', chip: 'bg-amber-500/12 text-[#a9760a] border-[#E8A317]/30' },
 };
 
-const COMANDAS_INICIAIS: Comanda[] = [
-  { id: 1, codigo: 'CMD-0031', origem: 'MESA', referencia: 'Mesa 3', garcom: 'Maria', itens: 8, pessoas: 4, abertaHa: 72, total: 214.9 },
-  { id: 2, codigo: 'CMD-0032', origem: 'MESA', referencia: 'Mesa 7', garcom: 'Ana', itens: 5, pessoas: 2, abertaHa: 58, total: 132.0 },
-  { id: 3, codigo: 'CMD-0033', origem: 'BALCAO', referencia: 'Cliente balcão', itens: 2, abertaHa: 6, total: 34.5 },
-  { id: 4, codigo: 'CMD-0034', origem: 'MESA', referencia: 'Mesa 1', garcom: 'João', itens: 3, pessoas: 2, abertaHa: 34, total: 88.5 },
-  { id: 5, codigo: 'CMD-0035', origem: 'DELIVERY', referencia: 'Delivery #204', itens: 3, abertaHa: 5, total: 61.9 },
-  { id: 6, codigo: 'CMD-0036', origem: 'MESA', referencia: 'Mesa 5', garcom: 'João', itens: 4, pessoas: 5, abertaHa: 12, total: 46.0 },
-];
+function referencia(c: ComandaApi): string {
+  if (c.origem === 'MESA') return c.mesa ? `Mesa ${c.mesa.numero}` : 'Mesa';
+  if (c.origem === 'DELIVERY') return c.clienteNome ? `Delivery · ${c.clienteNome}` : `Delivery #${c.numero}`;
+  return c.clienteNome || 'Cliente balcão';
+}
 
 const FILTROS: { id: Origem | 'TODAS'; label: string }[] = [
   { id: 'TODAS', label: 'Todas' },
@@ -48,9 +63,58 @@ const FILTROS: { id: Origem | 'TODAS'; label: string }[] = [
 ];
 
 export default function Comandas() {
-  const [comandas] = useState<Comanda[]>(COMANDAS_INICIAIS);
+  const { filialAtiva } = useAuth();
+  const filialId = filialAtiva?.id;
+
+  const [comandas, setComandas] = useState<ComandaVM[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const [filtro, setFiltro] = useState<Origem | 'TODAS'>('TODAS');
   const [busca, setBusca] = useState('');
+
+  const carregar = useCallback(async () => {
+    if (!filialId) return;
+    setErro(null);
+    try {
+      const [rAbertas, rFechando] = await Promise.all([
+        restauranteApi.listarComandas({ filialId, status: 'ABERTA' }),
+        restauranteApi.listarComandas({ filialId, status: 'FECHANDO' }),
+      ]);
+      const lista: ComandaApi[] = [...(rAbertas.data ?? []), ...(rFechando.data ?? [])];
+      setComandas(lista.map((c) => ({
+        id: c.id,
+        codigo: `CMD-${String(c.numero).padStart(4, '0')}`,
+        origem: c.origem,
+        referencia: referencia(c),
+        garcom: c.garcomNome ?? undefined,
+        itens: (c.itens ?? []).length,
+        pessoas: c.pessoas ?? undefined,
+        abertaHa: minutosDesde(c.abertaEm),
+        total: num(c.total),
+      })));
+    } catch {
+      setErro('Não consegui carregar as comandas. Verifique a conexão e tente de novo.');
+    } finally {
+      setCarregando(false);
+    }
+  }, [filialId]);
+
+  useEffect(() => { setCarregando(true); void carregar(); }, [carregar]);
+
+  const novaComandaBalcao = async () => {
+    if (!filialId || busy) return;
+    setBusy(true);
+    setErro(null);
+    try {
+      await restauranteApi.abrirComanda({ filialId, origem: 'BALCAO' });
+      await carregar();
+    } catch {
+      setErro('Não consegui abrir a comanda de balcão. Tente novamente.');
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const visiveis = useMemo(() => {
     const q = busca.trim().toLowerCase();
@@ -79,6 +143,14 @@ export default function Comandas() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => { setCarregando(true); void carregar(); }}
+            disabled={busy || carregando}
+            title="Atualizar"
+            className="h-9 w-9 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
+          </button>
           <div className="relative">
             <Search className="h-3.5 w-3.5 text-[#A0A2AD] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
@@ -88,7 +160,11 @@ export default function Comandas() {
               className="w-40 text-xs rounded-lg pl-8 pr-2 py-2 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#01B8FA]/50"
             />
           </div>
-          <button className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors">
+          <button
+            onClick={novaComandaBalcao}
+            disabled={busy || !filialId}
+            className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
             <Plus className="h-3.5 w-3.5" /> Nova comanda
           </button>
         </div>
@@ -114,47 +190,61 @@ export default function Comandas() {
         })}
       </div>
 
+      {erro && (
+        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+          <AlertCircle className="h-4 w-4 shrink-0" /> {erro}
+        </div>
+      )}
+
       {/* Lista */}
       <div className="flex-1 overflow-auto p-5">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 max-w-[1400px]">
-          {visiveis.map((c) => {
-            const ui = ORIGEM_UI[c.origem];
-            return (
-              <button
-                key={c.id}
-                className="text-left rounded-2xl border border-[#E7E5DF] bg-white p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] text-[#A0A2AD] font-mono">{c.codigo}</p>
-                    <h3 className="text-base font-black text-[#16171D] leading-tight">{c.referencia}</h3>
+        {!filialId ? (
+          <div className="text-center py-16 text-[#A0A2AD] text-sm">Selecione uma filial para ver as comandas.</div>
+        ) : carregando ? (
+          <div className="flex items-center justify-center py-20 text-[#8B8D98] text-sm gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Carregando comandas…
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 max-w-[1400px]">
+            {visiveis.map((c) => {
+              const ui = ORIGEM_UI[c.origem];
+              return (
+                <div
+                  key={c.id}
+                  className="text-left rounded-2xl border border-[#E7E5DF] bg-white p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] text-[#A0A2AD] font-mono">{c.codigo}</p>
+                      <h3 className="text-base font-black text-[#16171D] leading-tight">{c.referencia}</h3>
+                    </div>
+                    <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border ${ui.chip}`}>
+                      {ui.label}
+                    </span>
                   </div>
-                  <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border ${ui.chip}`}>
-                    {ui.label}
-                  </span>
-                </div>
 
-                <div className="mt-3 flex items-center gap-3 text-[11px] text-[#8B8D98]">
-                  <span className="flex items-center gap-1"><ClipboardCheck className="h-3.5 w-3.5" /> {c.itens} itens</span>
-                  {c.pessoas && <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.pessoas}</span>}
-                  <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {c.abertaHa} min</span>
-                </div>
+                  <div className="mt-3 flex items-center gap-3 text-[11px] text-[#8B8D98]">
+                    <span className="flex items-center gap-1"><ClipboardCheck className="h-3.5 w-3.5" /> {c.itens} itens</span>
+                    {c.pessoas ? <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.pessoas}</span> : null}
+                    <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {c.abertaHa} min</span>
+                  </div>
 
-                <div className="mt-3 pt-3 border-t border-[#E7E5DF] flex items-center justify-between">
-                  {c.garcom
-                    ? <span className="text-[11px] text-[#A0A2AD]">Garçom: {c.garcom}</span>
-                    : <span className="text-[11px] text-[#A0A2AD]">Balcão</span>}
-                  <span className="text-lg font-black text-[#16171D]">{brl(c.total)}</span>
+                  <div className="mt-3 pt-3 border-t border-[#E7E5DF] flex items-center justify-between">
+                    {c.garcom
+                      ? <span className="text-[11px] text-[#A0A2AD]">Garçom: {c.garcom}</span>
+                      : <span className="text-[11px] text-[#A0A2AD]">Balcão</span>}
+                    <span className="text-lg font-black text-[#16171D]">{brl(c.total)}</span>
+                  </div>
                 </div>
-              </button>
-            );
-          })}
-          {visiveis.length === 0 && (
-            <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
-              Nenhuma comanda neste filtro.
-            </div>
-          )}
-        </div>
+              );
+            })}
+            {visiveis.length === 0 && (
+              <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
+                Nenhuma comanda aberta{filtro !== 'TODAS' ? ' neste filtro' : ''}.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
