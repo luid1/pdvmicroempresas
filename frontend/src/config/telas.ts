@@ -8,8 +8,10 @@ import {
   Building2, AlertTriangle, Receipt, ShieldCheck,
   ShoppingCart, Coins, Landmark, Repeat,
   Tags, Undo2, Gauge, Store,
+  LayoutGrid, ChefHat, Bike, ClipboardCheck,
 } from 'lucide-react';
 import type { ElementType } from 'react';
+import { telaNoSegmento, type Segmento, type SegmentoTela } from './segmentos';
 
 /** Sub-item exibido no flyout (menu que abre ao passar o mouse no item pai). */
 export interface SubTela {
@@ -45,6 +47,12 @@ export interface TelaDef {
   pasta?: boolean;
   /** Sub-páginas exibidas num flyout ao passar o mouse (hover) sobre este item. */
   submenu?: SubTela[];
+  /**
+   * Modos de operação em que a tela aparece (multissegmento).
+   * Ausente/vazio = tela COMPARTILHADA (aparece em Varejo, Restaurante e Híbrido).
+   * Ex.: ['RESTAURANTE'] → só em Restaurante e Híbrido.
+   */
+  segmentos?: SegmentoTela[];
 }
 
 export const TELAS: TelaDef[] = [
@@ -57,6 +65,15 @@ export const TELAS: TelaDef[] = [
   { key: '/pdv/config', label: 'Segurança do Caixa', grupo: 'Operação', icon: ShieldCheck },
   { key: '/dashboard', label: 'Dashboard', grupo: 'Operação', icon: LayoutDashboard },
 
+  // ══════════════════════════════════════════════════════════════════════
+  //  MODO RESTAURANTE — salão, cozinha e delivery. Só aparece nos modos
+  //  Restaurante e Híbrido (invisível para um mercado puro).
+  // ══════════════════════════════════════════════════════════════════════
+  { key: '/restaurante/mesas', label: 'Mapa de Mesas', grupo: 'Restaurante', icon: LayoutGrid, segmentos: ['RESTAURANTE'], highlight: true },
+  { key: '/restaurante/comandas', label: 'Comandas', grupo: 'Restaurante', icon: ClipboardCheck, segmentos: ['RESTAURANTE'] },
+  { key: '/restaurante/cozinha', label: 'Cozinha (KDS)', grupo: 'Restaurante', icon: ChefHat, segmentos: ['RESTAURANTE'] },
+  { key: '/restaurante/delivery', label: 'Delivery', grupo: 'Restaurante', icon: Bike, segmentos: ['RESTAURANTE'] },
+
   // ── Cadastros ─────────────────────────────────────────────────────────
   { key: '/cadastros/produtos', label: 'Produtos & Código de Barras', grupo: 'Cadastros', icon: Package },
   { key: '/cadastros/tabelas-preco', label: 'Preços & Ofertas', grupo: 'Cadastros', icon: Tags },
@@ -67,7 +84,7 @@ export const TELAS: TelaDef[] = [
   // ── Estoque ───────────────────────────────────────────────────────────
   { key: '/wms/posicao', label: 'Posição de Estoque', grupo: 'Estoque', icon: Warehouse },
   { key: '/wms/inventario', label: 'Inventário', grupo: 'Estoque', icon: ClipboardList },
-  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500' },
+  { key: '/wms/pereciveis', label: 'Perecíveis / FLV', grupo: 'Estoque', icon: AlertTriangle, badge: '!', badgeColor: 'bg-red-500', segmentos: ['VAREJO'] },
   { key: 'grupo:gestao-estoque', label: 'Gestão de Estoque', grupo: 'Estoque', icon: BarChart3, pasta: true, submenu: [
     { key: '/wms/transferencias', label: 'Transferências entre Filiais', icon: Repeat, hint: 'Solicitação, trânsito e recebimento' },
     { key: '/wms/movimentacoes', label: 'Movimentações', icon: Warehouse, hint: 'Entradas e saídas detalhadas' },
@@ -114,6 +131,7 @@ export const TELAS: TelaDef[] = [
     { key: '/gerencial/configuracoes', label: 'Configurações', icon: Settings, hint: 'Parâmetros do sistema' },
     { key: '/gerencial/auditoria', label: 'Logs de Auditoria', icon: ShieldCheck, hint: 'Trilha de eventos' },
   ] },
+  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Gerência', icon: LayoutGrid },
   { key: '/gerencial/usuarios', label: 'Usuários & Acessos', grupo: 'Gerência', icon: Users, oculto: true },
   { key: '/gerencial/configuracoes', label: 'Configurações', grupo: 'Gerência', icon: Settings, oculto: true },
   { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'Gerência', icon: ShieldCheck, oculto: true },
@@ -158,6 +176,21 @@ export const TELAS_MENU = TELAS.filter((t) => !t.oculto);
 
 /** Telas do menu agrupadas — usado pela sidebar (AppShell). */
 export const TELAS_MENU_POR_GRUPO = agrupar(TELAS_MENU);
+
+/**
+ * Telas do menu FILTRADAS pelo modo de operação (multissegmento) e agrupadas.
+ * Um mercado (VAREJO) não vê Mesas/Comandas/Cozinha; um restaurante não vê
+ * Perecíveis/FLV; o modo Híbrido vê tudo. Telas sem etiqueta aparecem sempre.
+ */
+export function telasMenuPorGrupo(segmento: Segmento) {
+  return agrupar(TELAS_MENU.filter((t) => telaNoSegmento(t.segmentos, segmento)));
+}
+
+/** A tela `key` é visível no modo de operação atual? (para o guard de rotas) */
+export function telaVisivelNoSegmento(key: string, segmento: Segmento): boolean {
+  const def = TELAS.find((t) => t.key === key);
+  return telaNoSegmento(def?.segmentos, segmento);
+}
 
 /** Telas marcadas `soDono` — acessíveis SÓ pelo dono da plataforma (super-admin). */
 const TELAS_SO_DONO = new Set(TELAS.filter((t) => t.soDono).map((t) => t.key));

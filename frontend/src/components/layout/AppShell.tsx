@@ -2,7 +2,8 @@ import { useState, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Outlet, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { podeVerTela, rotaInicial, TELAS_MENU_POR_GRUPO, type SubTela } from '../../config/telas';
+import { podeVerTela, rotaInicial, telasMenuPorGrupo, type SubTela } from '../../config/telas';
+import { segmentoDasPreferencias, type Segmento } from '../../config/segmentos';
 import { FeedbackHost } from '../ui/feedback';
 import NotificacoesSino from './NotificacoesSino';
 import LuCommand from './LuCommand';
@@ -14,19 +15,22 @@ interface NavItem { to: string; icon: React.ElementType; label: string; badge?: 
 interface NavGroup { group: string; items: NavItem[] }
 
 // Menu derivado da FONTE ÚNICA (config/telas.ts) — sem lista paralela.
-const navigation: NavGroup[] = Object.entries(TELAS_MENU_POR_GRUPO).map(([group, items]) => ({
-  group,
-  items: items.map((t) => ({
-    to: t.key,
-    icon: t.icon || Circle,
-    label: t.label,
-    badge: t.badge,
-    badgeColor: t.badgeColor,
-    highlight: t.highlight,
-    pasta: t.pasta,
-    submenu: t.submenu,
-  })),
-}));
+// Filtrado pelo MODO DE OPERAÇÃO (varejo/restaurante/híbrido) da empresa.
+function montarNavegacao(segmento: Segmento): NavGroup[] {
+  return Object.entries(telasMenuPorGrupo(segmento)).map(([group, items]) => ({
+    group,
+    items: items.map((t) => ({
+      to: t.key,
+      icon: t.icon || Circle,
+      label: t.label,
+      badge: t.badge,
+      badgeColor: t.badgeColor,
+      highlight: t.highlight,
+      pasta: t.pasta,
+      submenu: t.submenu,
+    })),
+  }));
+}
 
 interface FlyoutState { label: string; items: SubTela[]; top: number; left: number }
 
@@ -36,7 +40,8 @@ export default function AppShell() {
   });
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [pastasAbertas, setPastasAbertas] = useState<Set<string>>(() => new Set());
-  const { user, logout } = useAuth();
+  const { user, logout, preferencias } = useAuth();
+  const segmento = segmentoDasPreferencias(preferencias);
   const navigate = useNavigate();
   const location = useLocation();
   const sw = collapsed ? 'w-14' : 'w-64';
@@ -52,7 +57,7 @@ export default function AppShell() {
 
   // Filtra o menu pelas telas que o perfil do usuário pode ver.
   // Também filtra os subitens do flyout pela permissão (herdam a permissão da própria rota).
-  const navVisivel = useMemo(() => navigation
+  const navVisivel = useMemo(() => montarNavegacao(segmento)
     .map((g) => ({
       ...g,
       items: g.items
@@ -66,7 +71,7 @@ export default function AppShell() {
           ? !!(i.submenu && i.submenu.length > 0)
           : podeVerTela(user?.telas, user?.role, i.to, user?.isSuperAdmin)),
     }))
-    .filter((g) => g.items.length > 0), [user?.telas, user?.role, user?.isSuperAdmin]);
+    .filter((g) => g.items.length > 0), [user?.telas, user?.role, user?.isSuperAdmin, segmento]);
 
   // Flyout (submenu que abre ao passar o mouse sobre o item pai)
   const [flyout, setFlyout] = useState<FlyoutState | null>(null);

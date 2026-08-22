@@ -43,6 +43,11 @@ import MonitorFiscal from './modules/fiscal/pages/MonitorFiscal';
 import Pdv from './modules/pdv/pages/Pdv';
 import ConfigCaixa from './modules/pdv/pages/ConfigCaixa';
 import Plataforma from './modules/plataforma/pages/Plataforma';
+import ModoOperacao from './modules/config/pages/ModoOperacao';
+import Mesas from './modules/restaurante/pages/Mesas';
+import Comandas from './modules/restaurante/pages/Comandas';
+import Cozinha from './modules/restaurante/pages/Cozinha';
+import Delivery from './modules/restaurante/pages/Delivery';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -106,8 +111,15 @@ export default function App() {
             <Route path="financeiro/recorrencias" element={<Recorrencias />} />
             <Route path="financeiro/custos" element={<Custos />} />
 
+            {/* Restaurante (modo Restaurante/Híbrido) */}
+            <Route path="restaurante/mesas" element={<Mesas />} />
+            <Route path="restaurante/comandas" element={<Comandas />} />
+            <Route path="restaurante/cozinha" element={<Cozinha />} />
+            <Route path="restaurante/delivery" element={<Delivery />} />
+
             {/* Gerencial */}
             <Route path="gerencial/relatorios" element={<Relatorios />} />
+            <Route path="gerencial/modo-operacao" element={<ModoOperacao />} />
             <Route path="gerencial/auditoria" element={<LogsAuditoria />} />
             <Route path="gerencial/usuarios" element={<UsuariosAcessos />} />
             <Route path="gerencial/configuracoes" element={<Configuracoes />} />
