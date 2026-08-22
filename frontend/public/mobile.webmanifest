@@ -1,0 +1,17 @@
+{
+  "name": "Lumin Acompanhe",
+  "short_name": "Lumin",
+  "description": "Acompanhe vendas, estoque e resultados da sua loja pelo celular.",
+  "lang": "pt-BR",
+  "theme_color": "#0A141D",
+  "background_color": "#071018",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/app",
+  "start_url": "/app",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

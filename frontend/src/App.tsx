@@ -52,6 +52,8 @@ import FichaTecnica from './modules/restaurante/pages/FichaTecnica';
 import CardapioDigital from './modules/restaurante/pages/CardapioDigital';
 import DivisaoConta from './modules/restaurante/pages/DivisaoConta';
 import DashboardRestaurante from './modules/restaurante/pages/DashboardRestaurante';
+import MobileLoginPage from './mobile/MobileLoginPage';
+import MobileAppPage from './mobile/MobileAppPage';
 
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -63,12 +65,25 @@ function Guard({ children }: { children: React.ReactNode }) {
   return user ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
+function MobileGuard({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return (
+    <div className="flex min-h-[100dvh] items-center justify-center bg-[#071018]">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#01B8FA] border-t-transparent" />
+    </div>
+  );
+  return user ? <>{children}</> : <Navigate to="/app/login" replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          {/* Aplicativo móvel de acompanhamento — separado do ERP e somente leitura. */}
+          <Route path="/app/login" element={<MobileLoginPage />} />
+          <Route path="/app" element={<MobileGuard><MobileAppPage /></MobileGuard>} />
           {/* PDV — tela cheia (sem AppShell), mas exige login (operador de caixa) */}
           <Route path="/pdv" element={<Guard><Pdv /></Guard>} />
           <Route path="/" element={<Guard><AppShell /></Guard>}>

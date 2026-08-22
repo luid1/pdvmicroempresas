@@ -12,7 +12,7 @@ interface AuthCtx {
   filialAtiva: Filial | null;
   setFilialAtiva: (f: Filial) => void;
   refreshFiliais: () => Promise<Filial[]>;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, cnpj?: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   pode: (rota: string, acao: AcaoTela) => boolean;
@@ -54,11 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (stored && localStorage.getItem('wms_token')) void refreshFiliais().catch(() => { /* mantem cache offline */ });
   }, [refreshFiliais]);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, cnpj?: string) => {
     const res = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, ...(cnpj?.trim() ? { cnpj: cnpj.trim() } : {}) }),
     });
     const texto = await res.text();
     let data: any = null;
