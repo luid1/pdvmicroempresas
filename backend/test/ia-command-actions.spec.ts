@@ -3,10 +3,16 @@ import { afterEach, describe, it } from 'node:test';
 import { IaService } from '../src/modules/ia/ia.service';
 
 const originalModo = process.env.IA_MODO;
-afterEach(() => { process.env.IA_MODO = originalModo; });
+const originalAcoes = process.env.IA_PERMITE_ACOES;
+afterEach(() => {
+  process.env.IA_MODO = originalModo;
+  if (originalAcoes === undefined) delete process.env.IA_PERMITE_ACOES;
+  else process.env.IA_PERMITE_ACOES = originalAcoes;
+});
 
 function service(prisma: any = {}) {
   process.env.IA_MODO = 'simulado';
+  process.env.IA_PERMITE_ACOES = 'true';
   return new IaService({} as any, {} as any, {} as any, prisma, {} as any);
 }
 

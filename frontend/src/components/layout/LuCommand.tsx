@@ -1,20 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, TELAS, type TelaDef } from '../../config/telas';
 import api, { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
 
 /**
- * "Lu Command" — barra de comando (spotlight) da assistente. Abre com ⌘/Ctrl+K
- * ou pelo gatilho flutuante. Faz três coisas numa só barra:
+ * "Lu Command" — consulta autenticada do ERP. Abre com ⌘/Ctrl+K ou pelo
+ * gatilho flutuante. Nesta fase faz duas coisas, sempre sem gravar dados:
  *   1. NAVEGAR   — casa a busca com as telas que o perfil pode ver (instantâneo,
  *                  sem IA). Enter numa sugestão abre a tela.
  *   2. PERGUNTAR — Enter no texto livre manda pra Lu, que responde sobre a loja.
- *   3. AGIR      — frases como "paguei 80 de luz" viram um rascunho de lançamento
- *                  que você confirma. A gravação passa pelo endpoint oficial de
- *                  tesouraria (mesmo guard) — a Lu só propõe.
  */
 
 type Msg = { autor: 'user' | 'lu'; texto: string };
@@ -61,7 +58,6 @@ export default function LuCommand() {
   const [mensagens, setMensagens] = useState<Msg[]>([]);
   const [carregando, setCarregando] = useState(false);
   const [sel, setSel] = useState(-1); // -1 = "perguntar à Lu"; >=0 = índice na lista de navegação
-  const [acao, setAcao] = useState<Extract<ComandoLuResp, { tipo: 'acao' }> | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -137,9 +133,7 @@ export default function LuCommand() {
       const { data } = await iaApi.comando(q, historico, filialAtiva?.id);
       const r = data as ComandoLuResp;
       if (r.tipo === 'acao') {
-        const objeto = r.acao === 'transferir-estoque' ? 'a transferência' : r.acao === 'cadastrar-produto' ? 'o cadastro do produto' : 'o lançamento';
-        setMensagens((m) => [...m, { autor: 'lu', texto: `Preparei ${objeto}. Confira, complete se quiser e confirme abaixo.` }]);
-        setAcao(r);
+        setMensagens((m) => [...m, { autor: 'lu', texto: 'Estou em modo somente consulta. Por enquanto não altero nem cadastro dados no ERP.' }]);
       } else {
         setMensagens((m) => [...m, { autor: 'lu', texto: r.texto || 'Não entendi dessa vez. Pode reformular?' }]);
       }
@@ -185,15 +179,6 @@ export default function LuCommand() {
     [navMatches.length],
   );
 
-  // Confirmação do lançamento gravou com sucesso → registra na conversa.
-  const aposLancar = useCallback((resumo: string) => {
-    setAcao(null);
-    setMensagens((m) => [...m, { autor: 'lu', texto: `Pronto! ${resumo}. ✔️` }]);
-  }, []);
-
-  const podeLancar = podeVerTela(user?.telas, user?.role, '/financeiro/tesouraria') || podeVerTela(user?.telas, user?.role, '/financeiro/fluxo-caixa');
-  const podeTransferir = podeVerTela(user?.telas, user?.role, '/wms/transferencias') || podeVerTela(user?.telas, user?.role, '/wms/posicao');
-  const podeCadastrarProduto = podeVerTela(user?.telas, user?.role, '/cadastros/produtos');
   const semThread = mensagens.length === 0;
 
   return createPortal(
@@ -218,7 +203,7 @@ export default function LuCommand() {
             ref={inputRef}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
-            placeholder="Converse com a Lu ou peça uma ação..."
+            placeholder="Consulte vendas, estoque e resultados..."
             className="min-w-0 flex-1 bg-transparent px-1.5 text-[14px] text-[#202123] outline-none placeholder:text-[#8E8F94]"
           />
           {!texto && (
@@ -270,7 +255,7 @@ export default function LuCommand() {
                     onChange={(e) => setTexto(e.target.value)}
                     onKeyDown={onKeyDown}
                     disabled={carregando}
-                    placeholder="Pergunte, lance ou encontre algo…"
+                    placeholder="Pergunte sobre os dados do ERP…"
                     className="flex-1 min-w-0 bg-transparent text-[18px] text-[#202123] placeholder:text-[#8E8F94] outline-none disabled:opacity-60"
                   />
                   {texto ? (
@@ -289,12 +274,7 @@ export default function LuCommand() {
             {/* Painel de resultados */}
             <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_24px_70px_-12px_rgba(22,23,29,0.28)]">
               <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0F8A72]/30 to-transparent" />
-              {acao ? (
-                acao.acao === 'transferir-estoque' ? <FormTransferencia acao={acao} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
-                : acao.acao === 'cadastrar-produto' ? <FormProduto acao={acao} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
-                : <FormLancamento acao={acao} filialId={filialAtiva?.id} onCancelar={() => setAcao(null)} onFeito={aposLancar} />
-              ) : (
-                <>
+              <>
                   {/* Sugestões de navegação (aparecem enquanto digita) */}
                   {texto && (
                     <div className="p-1.5">
@@ -359,14 +339,16 @@ export default function LuCommand() {
                   {/* Estado inicial — atalhos de partida */}
                   {semThread && !texto && (
                     <div className="p-4">
-                      <p className="mb-2.5 text-[11px] uppercase tracking-wide text-[#8E8F94]">Experimente</p>
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-[11px] uppercase tracking-wide text-[#8E8F94]">Experimente</p>
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-[10px] font-semibold text-[#0B6F5C]"><ShieldCheck className="h-3 w-3" /> Somente consulta</span>
+                      </div>
                       <div className="flex flex-wrap gap-1.5">
                         {[
                           'Como estão minhas vendas?',
                           'O que está acabando no estoque?',
-                          ...(podeLancar ? ['Paguei R$ 80 de conta de luz'] : []),
-                          ...(podeTransferir ? ['Transfira 10 un de arroz da Matriz para a Filial Centro'] : []),
-                          ...(podeCadastrarProduto ? ['Cadastre o produto Café 500g por R$ 18,90'] : []),
+                          'Qual produto mais vendeu?',
+                          'Como está minha rentabilidade?',
                         ].map((s) => (
                           <button
                             key={s}
@@ -384,8 +366,7 @@ export default function LuCommand() {
                       </div>
                     </div>
                   )}
-                </>
-              )}
+              </>
             </div>
           </div>
         </div>
