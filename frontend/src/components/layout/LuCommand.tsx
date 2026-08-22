@@ -155,19 +155,6 @@ export default function LuCommand() {
     [sel, navMatches, irPara, enviar],
   );
 
-  const enviarDaBarra = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-      if (!texto.trim()) {
-        abrir();
-        return;
-      }
-      setAberto(true);
-      void enviar();
-    },
-    [texto, abrir, enviar],
-  );
-
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
@@ -192,48 +179,18 @@ export default function LuCommand() {
 
   return createPortal(
     <>
-      {/* Barra persistente: permite conversar com a Lu sem procurar um botão. */}
+      {/* Ícone discreto: fica no canto e não cobre o sidebar. Abre a Lu (Ctrl+K). */}
       {!aberto && (
-        <form
-          onSubmit={enviarDaBarra}
-          aria-label="Conversar com a Lu"
-          className="group fixed bottom-3 left-1/2 z-[60] flex w-[min(calc(100vw-1.5rem),680px)] -translate-x-1/2 items-center gap-2 rounded-full border border-[#D9E4E1] bg-white/95 p-1.5 pl-2 shadow-[0_18px_56px_rgba(22,23,29,0.20)] backdrop-blur-xl transition-all focus-within:border-[#0F8A72]/55 focus-within:ring-4 focus-within:ring-[#0F8A72]/10 sm:bottom-4 sm:w-[min(calc(100vw-10rem),680px)]"
+        <button
+          type="button"
+          onClick={abrir}
+          aria-label="Abrir a Lu (Ctrl+K)"
+          title="Falar com a Lu — Ctrl+K"
+          className="group fixed bottom-4 right-4 z-[60] grid h-12 w-12 place-items-center rounded-full border border-[#D9E4E1] bg-white text-[#0F8A72] shadow-[0_12px_36px_rgba(22,23,29,0.20)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#0F8A72]/55 hover:text-[#0B6E5B] active:scale-95 sm:bottom-6 sm:right-6"
         >
-          <button
-            type="button"
-            onClick={abrir}
-            title="Abrir a Lu (Ctrl+K)"
-            className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#0F8A72]/10 text-[#0F8A72] transition-colors hover:bg-[#0F8A72]/15"
-          >
-            <Sparkles className="h-4 w-4" />
-            <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#39C5A5]" />
-          </button>
-          <input
-            ref={inputRef}
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="Consulte vendas, estoque e resultados..."
-            className="min-w-0 flex-1 bg-transparent px-1.5 text-[14px] text-[#202123] outline-none placeholder:text-[#8E8F94]"
-          />
-          {!texto && (
-            <button
-              type="button"
-              onClick={abrir}
-              className="hidden rounded-full bg-[#F3F5F4] px-2.5 py-1 font-mono text-[10px] text-[#8E8F94] transition-colors hover:text-[#202123] md:block"
-              title="Atalho de teclado"
-            >
-              Ctrl K
-            </button>
-          )}
-          <button
-            type="submit"
-            aria-label="Enviar para a Lu"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#202123] text-white transition-colors hover:bg-[#0F8A72] disabled:cursor-default disabled:bg-[#EDF1F0] disabled:text-[#A5AEAC]"
-            disabled={!texto.trim()}
-          >
-            <Send className="h-4 w-4" />
-          </button>
-        </form>
+          <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
+          <span className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#39C5A5]" />
+        </button>
       )}
 
       {/* Spotlight */}

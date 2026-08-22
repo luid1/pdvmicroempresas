@@ -63,7 +63,9 @@ export const TELAS: TelaDef[] = [
   // ── Operação ──────────────────────────────────────────────────────────
   { key: '/pdv', label: 'Caixa (PDV)', grupo: 'Operação', icon: ShoppingCart, highlight: true },
   { key: '/pdv/config', label: 'Segurança do Caixa', grupo: 'Operação', icon: ShieldCheck },
-  { key: '/dashboard', label: 'Dashboard', grupo: 'Operação', icon: LayoutDashboard },
+  // Dashboard "de mercado" só no Varejo — no Restaurante quem manda é o
+  // "Dashboard do Restaurante". No Híbrido os dois aparecem (visões distintas).
+  { key: '/dashboard', label: 'Dashboard', grupo: 'Operação', icon: LayoutDashboard, segmentos: ['VAREJO'] },
 
   // ══════════════════════════════════════════════════════════════════════
   //  MODO RESTAURANTE — salão, cozinha e delivery. Só aparece nos modos
@@ -135,7 +137,9 @@ export const TELAS: TelaDef[] = [
     { key: '/gerencial/configuracoes', label: 'Configurações', icon: Settings, hint: 'Parâmetros do sistema' },
     { key: '/gerencial/auditoria', label: 'Logs de Auditoria', icon: ShieldCheck, hint: 'Trilha de eventos' },
   ] },
-  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Gerência', icon: LayoutGrid },
+  // Modo de operação (Varejo/Restaurante/Híbrido) é decisão do DONO DO SaaS na
+  // criação do sistema — não do lojista. Só o super-admin enxerga/acessa.
+  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Gerência', icon: LayoutGrid, soDono: true },
   { key: '/gerencial/usuarios', label: 'Usuários & Acessos', grupo: 'Gerência', icon: Users, oculto: true },
   { key: '/gerencial/configuracoes', label: 'Configurações', grupo: 'Gerência', icon: Settings, oculto: true },
   { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'Gerência', icon: ShieldCheck, oculto: true },
