@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { Prisma, EtapaKds, OrigemComanda, StatusComanda } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SessaoCaixaService } from '../pdv/sessao-caixa.service';
 import { money, sumMoney } from '../../common/utils/money.util';
 import {
   CriarMesaDto,
@@ -28,7 +29,10 @@ export interface ListarComandasFiltro {
 
 @Injectable()
 export class RestauranteService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private sessaoCaixa: SessaoCaixaService,
+  ) {}
 
   // ───────────────────────────── MESAS ─────────────────────────────
 
@@ -205,8 +209,15 @@ export class RestauranteService {
     });
   }
 
-  /** Fecha a conta: aplica taxa/desconto, comanda → FECHADA e libera a mesa. */
-  async fecharComanda(tenantId: string, comandaId: string, dto: FecharComandaDto) {
+  /** Fecha a conta: aplica taxa/desconto, comanda → FECHADA e libera a mesa.
+   *  Se houver forma de pagamento, lança a venda no caixa aberto do operador
+   *  (segurança de caixa mantida: exige sessão/turno aberto). */
+  async fecharComanda(
+    tenantId: string,
+    user: UsuarioCtx,
+    comandaId: string,
+    dto: FecharComandaDto,
+  ) {
     const comanda = await this.getComanda(tenantId, comandaId);
     if (comanda.status === StatusComanda.FECHADA || comanda.status === StatusComanda.CANCELADA) {
       throw new BadRequestException('Comanda já finalizada.');
@@ -218,8 +229,15 @@ export class RestauranteService {
     const total = money(subtotal + taxa - desconto);
     if (total < 0) throw new BadRequestException('Desconto maior que o total da comanda.');
 
-    return this.prisma.$transaction(async (tx) => {
-      const fechada = await tx.comanda.update({
+    // Vai registrar dinheiro? Então exige caixa aberto ANTES de fechar a comanda,
+    // para não deixar a conta paga sem lançamento no caixa (consistência).
+    const registrarNoCaixa = !!dto.formaPagamento && total > 0;
+    if (registrarNoCaixa) {
+      await this.sessaoCaixa.exigirSessaoAberta(tenantId, user.id, comanda.filialId);
+    }
+
+    const fechada = await this.prisma.$transaction(async (tx) => {
+      const f = await tx.comanda.update({
         where: { id: comandaId },
         data: {
           status: StatusComanda.FECHADA,
@@ -236,8 +254,25 @@ export class RestauranteService {
       if (comanda.mesaId) {
         await tx.mesa.updateMany({ where: { id: comanda.mesaId, tenantId }, data: { status: 'LIVRE' } });
       }
-      return fechada;
+      return f;
     });
+
+    // Lança a venda no caixa/sessão (fora da transação da comanda — igual ao PDV).
+    if (registrarNoCaixa) {
+      const ref =
+        comanda.origem === OrigemComanda.MESA && comanda.mesa
+          ? `Mesa ${comanda.mesa.numero}`
+          : comanda.origem === OrigemComanda.DELIVERY
+            ? 'Delivery'
+            : 'Balcão';
+      await this.sessaoCaixa.registrarVendaAvulsaNaSessao(tenantId, user, comanda.filialId, {
+        valorTotal: total,
+        formaPagamento: dto.formaPagamento as string,
+        descricao: `Comanda #${comanda.numero} · ${ref}`,
+      });
+    }
+
+    return fechada;
   }
 
   async cancelarComanda(tenantId: string, comandaId: string) {

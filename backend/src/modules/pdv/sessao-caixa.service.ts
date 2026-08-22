@@ -11,6 +11,14 @@ interface UsuarioCtx {
 
 const round2 = (v: number) => Math.round(v * 100) / 100;
 
+/** Reduz uma forma detalhada (CARTAO_TEF, PIX_POS, ...) à categoria de dinheiro. */
+function categoriaPagamento(forma: string): 'DINHEIRO' | 'CARTAO' | 'PIX' {
+  const f = (forma || '').toUpperCase();
+  if (f.startsWith('DINHEIRO')) return 'DINHEIRO';
+  if (f.startsWith('PIX')) return 'PIX';
+  return 'CARTAO';
+}
+
 @Injectable()
 export class SessaoCaixaService {
   constructor(
@@ -141,6 +149,62 @@ export class SessaoCaixaService {
     );
 
     await this.prisma.$transaction(ops);
+  }
+
+  /** Lança uma venda avulsa (ex.: fechamento de comanda do restaurante) na sessão
+   *  aberta do operador. Não gera Pedido/ItemPedido — apenas o registro no caixa
+   *  (MovimentoSessao + entrada na conta/gaveta) para o relatório X/Z e o saldo.
+   *  Exige caixa aberto: mantém a segurança de caixa — todo dinheiro passa por uma
+   *  sessão/turno de um operador. */
+  async registrarVendaAvulsaNaSessao(
+    tenantId: string,
+    usuario: UsuarioCtx,
+    filialId: string,
+    p: { valorTotal: number; formaPagamento: string; descricao: string },
+  ) {
+    const sessao = await this.exigirSessaoAberta(tenantId, usuario.id, filialId);
+    const valor = round2(p.valorTotal);
+    if (!(valor > 0)) return sessao;
+
+    const categoria = categoriaPagamento(p.formaPagamento);
+    const campo =
+      categoria === 'DINHEIRO' ? 'totalDinheiro' : categoria === 'CARTAO' ? 'totalCartao' : 'totalPix';
+
+    // Lançamento na sessão/turno (para o X/Z) + incremento do total por categoria.
+    await this.prisma.$transaction([
+      this.prisma.movimentoSessao.create({
+        data: {
+          tenantId,
+          sessaoId: sessao.id,
+          tipo: 'VENDA',
+          formaPagamento: p.formaPagamento,
+          valor,
+          descricao: p.descricao,
+          usuarioId: usuario.id,
+          usuarioNome: usuario.nome || null,
+        },
+      }),
+      this.prisma.sessaoCaixa.update({
+        where: { id: sessao.id },
+        data: { [campo]: { increment: valor }, qtdVendas: { increment: 1 } },
+      }),
+    ]);
+
+    // Entrada real do dinheiro na conta financeira da sessão (gaveta/banco).
+    await this.prisma.$transaction((tx) =>
+      this.tesouraria.registrarMovimentoTx(tx, {
+        tenantId,
+        contaId: sessao.contaId,
+        filialId,
+        tipo: TipoMovimento.ENTRADA,
+        valor,
+        descricao: p.descricao,
+        origem: OrigemMovimento.AVULSO,
+        usuario: { id: usuario.id, nome: usuario.nome },
+      }),
+    );
+
+    return sessao;
   }
 
   private async movimentoManual(

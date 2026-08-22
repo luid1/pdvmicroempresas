@@ -142,10 +142,11 @@ export class RestauranteController {
   @ApiOperation({ summary: 'Fecha a conta (taxa/desconto), libera a mesa.' })
   fecharComanda(
     @CurrentTenant() tenantId: string,
+    @CurrentUser() user: ReqUser,
     @Param('id') id: string,
     @Body() dto: FecharComandaDto,
   ) {
-    return this.service.fecharComanda(tenantId, id, dto);
+    return this.service.fecharComanda(tenantId, { id: user.id, nome: user.nome }, id, dto);
   }
 
   @Post('comandas/:id/cancelar')
