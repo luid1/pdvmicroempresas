@@ -84,7 +84,7 @@ interface DreCompleto {
   periodo: { inicio: string; fim: string; label: string };
   linhas: DreLinha[];
   kpis: DreKpis;
-  cobertura: { nfesEmitidas: number; movimentacoesVenda: number; observacao: string };
+  cobertura: { nfesEmitidas: number; vendasSemNota?: number; movimentacoesVenda: number; observacao: string };
 }
 
 /* ── Títulos reais (Contas a Pagar/Receber, vindas da API) ──
@@ -304,7 +304,7 @@ function DashboardDRE() {
         <KpiGigante
           label="(=) Resultado Operacional"
           valor={k.resultado}
-          hint={`Margem bruta ${pct(k.margemBruta)} · ${dre.cobertura.nfesEmitidas} NF-e no período`}
+          hint={`Margem bruta ${pct(k.margemBruta)} · ${dre.cobertura.nfesEmitidas} NF-e${dre.cobertura.vendasSemNota ? ` + ${dre.cobertura.vendasSemNota} vendas sem nota` : ''}`}
           icon={TrendingUp}
           tom="lucro"
         />

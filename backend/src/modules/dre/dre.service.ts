@@ -18,7 +18,8 @@ export interface DreLinha {
  * DRE realizada (P0-5 → real). Monta a Demonstração de Resultado a partir dos
  * fatos já registrados no ERP, em regime de competência pela data do documento:
  *
- *  - Receita Bruta ....... NF-e EMITIDAS (valorProdutos) no período
+ *  - Receita Bruta ....... NF-e EMITIDAS (valorProdutos) + vendas sem nota
+ *                          (Pedidos faturados sem NF-e), sem dupla contagem
  *  - (-) Deduções ........ impostos sobre venda da NF-e (ICMS + ICMS-ST + PIS + COFINS)
  *  - (=) Receita Líquida
  *  - (-) CMV ............. custo das movimentações de SAÍDA por venda (custoUnitário × qtd)
@@ -61,10 +62,32 @@ export class DreService {
       },
     });
 
-    const receitaBruta = sumMoney(nfes.map((n) => n.valorProdutos));
+    const receitaNota = sumMoney(nfes.map((n) => n.valorProdutos));
     const deducoes = sumMoney(
       nfes.flatMap((n) => [n.valorIcms, n.valorIcmsSt, n.valorPis, n.valorCofins]),
     );
+
+    // 1b. Vendas realizadas SEM documento fiscal. O PDV pode operar sem NFC-e
+    //     (NFCE_MODO desligado / Central Fiscal inativa): a venda vira um Pedido
+    //     FATURADO com baixa de estoque — o CMV entra, mas não há NF-e. Sem isto
+    //     a receita ficaria zerada enquanto o custo aparece, gerando um DRE
+    //     negativo irreal. Somamos o valor de produtos (subtotal) desses pedidos,
+    //     EXCLUINDO os que já possuem NF-e/NFC-e EMITIDA (senão a mesma venda
+    //     seria contada duas vezes — a fiscal e a do pedido).
+    const vendasSemNota = await this.prisma.pedido.findMany({
+      where: {
+        tenantId,
+        ...(filialId ? { filialOrigemId: filialId } : {}),
+        tipo: 'VENDA',
+        status: { in: ['FATURADO', 'ENTREGUE'] },
+        dataEmissao: { gte: inicio, lte: fim },
+        nfes: { none: { status: StatusDFe.EMITIDO } },
+      },
+      select: { subtotal: true },
+    });
+    const receitaSemNota = sumMoney(vendasSemNota.map((p) => p.subtotal));
+
+    const receitaBruta = money(receitaNota + receitaSemNota);
     const receitaLiquida = money(receitaBruta - deducoes);
 
     // 2. CMV — custo das saídas por venda no período.
@@ -161,10 +184,12 @@ export class DreService {
       },
       cobertura: {
         nfesEmitidas: nfes.length,
+        vendasSemNota: vendasSemNota.length,
         movimentacoesVenda: saidas.length,
         observacao:
-          'DRE realizada: receita/impostos das NF-e, CMV/perdas das movimentações e ' +
-          'despesas operacionais/financeiras do Plano de Contas (lançamentos a partir das contas a pagar categorizadas).',
+          'DRE realizada: receita = NF-e emitidas + vendas realizadas sem nota (Pedidos ' +
+          'faturados sem NF-e), sem dupla contagem; impostos das NF-e; CMV/perdas das ' +
+          'movimentações; despesas do Plano de Contas (contas a pagar categorizadas).',
       },
     };
   }
