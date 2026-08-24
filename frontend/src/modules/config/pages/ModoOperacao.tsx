@@ -1,25 +1,35 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
-import {
-  SEGMENTOS, PREF_SEGMENTO, segmentoDasPreferencias, type Segmento,
-} from '../../../config/segmentos';
+import { SEGMENTOS, type Segmento } from '../../../config/segmentos';
 import { toast } from '../../../components/ui/feedback';
 
 /**
  * MODO DE OPERAÇÃO (multissegmento) — o dono escolhe o tipo principal do
  * negócio. Isso controla quais telas, atalhos e dashboards aparecem. Pode ser
- * alterado a qualquer momento. Fase 1: guardado nas preferências do usuário.
+ * alterado a qualquer momento. Persistido server-side (empresa/tenant); só ADMIN.
  */
 export default function ModoOperacao() {
-  const { preferencias, savePreferencias } = useAuth();
-  const atual = segmentoDasPreferencias(preferencias);
+  const { segmento: atual, setSegmento, user } = useAuth();
   const [escolhido, setEscolhido] = useState<Segmento>(atual);
+  const [salvando, setSalvando] = useState(false);
+  const ehAdmin = user?.role === 'ADMIN';
   const mudou = escolhido !== atual;
 
-  const salvar = () => {
-    savePreferencias({ [PREF_SEGMENTO]: escolhido });
-    toast('Modo de operação atualizado. O menu já se ajustou.', 'success');
+  const salvar = async () => {
+    if (!ehAdmin) {
+      toast('Só o ADMIN da empresa pode alterar o modo de operação.', 'error');
+      return;
+    }
+    setSalvando(true);
+    try {
+      await setSegmento(escolhido);
+      toast('Modo de operação atualizado. O menu já se ajustou.', 'success');
+    } catch (e: any) {
+      toast(e?.response?.data?.error?.message || 'Não foi possível salvar o modo agora.', 'error');
+    } finally {
+      setSalvando(false);
+    }
   };
 
   return (
@@ -72,10 +82,10 @@ export default function ModoOperacao() {
           <div className="mt-5 flex items-center gap-3">
             <button
               onClick={salvar}
-              disabled={!mudou}
+              disabled={!mudou || salvando || !ehAdmin}
               className="bg-[#01B8FA] hover:bg-[#3DC8FB] active:bg-[#019BD3] text-[#062B38] font-bold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {mudou ? 'Salvar modo de operação' : 'Modo atual'}
+              {salvando ? 'Salvando…' : mudou ? 'Salvar modo de operação' : 'Modo atual'}
             </button>
             {mudou && (
               <button

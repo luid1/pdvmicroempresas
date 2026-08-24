@@ -231,6 +231,7 @@ export class AuthService {
         id: usuario.tenant.id,
         razaoSocial: usuario.tenant.razaoSocial,
         nomeFantasia: usuario.tenant.nomeFantasia,
+        modo: usuario.tenant.modo,
       },
     };
   }

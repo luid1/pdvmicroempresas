@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Outlet, NavLink, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, rotaInicial, telasMenuPorGrupo, type SubTela } from '../../config/telas';
-import { segmentoDasPreferencias, type Segmento } from '../../config/segmentos';
+import { type Segmento } from '../../config/segmentos';
 import { FeedbackHost } from '../ui/feedback';
 import NotificacoesSino from './NotificacoesSino';
 import LuCommand from './LuCommand';
@@ -40,8 +40,7 @@ export default function AppShell() {
   });
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [pastasAbertas, setPastasAbertas] = useState<Set<string>>(() => new Set());
-  const { user, logout, preferencias } = useAuth();
-  const segmento = segmentoDasPreferencias(preferencias);
+  const { user, logout, segmento } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const sw = collapsed ? 'w-14' : 'w-64';

@@ -34,6 +34,13 @@ export const authApi = {
     api.put('/auth/me/preferencias', { preferencias }),
 };
 
+// Empresa (tenant) — inclui o MODO de operação, persistido server-side.
+export const empresaApi = {
+  get: () => api.get('/empresa'),
+  definirModo: (modo: 'VAREJO' | 'RESTAURANTE' | 'HIBRIDO') =>
+    api.put('/empresa/modo', { modo }),
+};
+
 // Estoque / WMS
 export const estoqueApi = {
   posicao: (filialId: string, alertaValidade?: boolean) =>

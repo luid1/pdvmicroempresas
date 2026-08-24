@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { podeAcao, AcaoTela } from '../config/telas';
-import { authApi } from '../services/api';
+import { authApi, empresaApi } from '../services/api';
+import { SEGMENTO_PADRAO, segmentoDasPreferencias, type Segmento } from '../config/segmentos';
 
 interface Filial { id: string; codigo: string; nome: string }
 type Preferencias = Record<string, unknown>;
@@ -18,6 +19,14 @@ interface AuthCtx {
   pode: (rota: string, acao: AcaoTela) => boolean;
   preferencias: Preferencias;
   savePreferencias: (patch: Preferencias) => void;
+  // Modo de operação (multissegmento), persistido no servidor (empresa/tenant).
+  segmento: Segmento;
+  setSegmento: (s: Segmento) => Promise<void>;
+}
+
+const CHAVE_SEGMENTO = 'wms_segmento';
+function ehSegmento(v: unknown): v is Segmento {
+  return v === 'VAREJO' || v === 'RESTAURANTE' || v === 'HIBRIDO';
 }
 
 const Ctx = createContext<AuthCtx>(null!);
@@ -27,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [filiais, setFiliais] = useState<Filial[]>([]);
   const [filialAtiva, setFilialAtivaState] = useState<Filial | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [segmento, setSegmentoState] = useState<Segmento>(SEGMENTO_PADRAO);
 
   const refreshFiliais = useCallback(async () => {
     if (!localStorage.getItem('wms_token')) return [];
@@ -50,6 +60,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (stored) setUser(JSON.parse(stored));
     if (storedFiliais) setFiliais(JSON.parse(storedFiliais));
     if (storedFilial) setFilialAtivaState(JSON.parse(storedFilial));
+    // Modo de operação: cache local (server-side é a fonte da verdade no login).
+    const seg = localStorage.getItem(CHAVE_SEGMENTO);
+    if (ehSegmento(seg)) setSegmentoState(seg);
+    else if (stored) setSegmentoState(segmentoDasPreferencias(JSON.parse(stored).preferencias));
     setIsLoading(false);
     if (stored && localStorage.getItem('wms_token')) void refreshFiliais().catch(() => { /* mantem cache offline */ });
   }, [refreshFiliais]);
@@ -77,16 +91,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('wms_filiais', JSON.stringify(userFiliais));
     if (primeiraFilial) localStorage.setItem('wms_filial', JSON.stringify(primeiraFilial));
 
+    // Modo de operação vem do servidor (tenant). Fallback: preferência do usuário.
+    const modo: Segmento = ehSegmento(data.tenant?.modo)
+      ? data.tenant.modo
+      : segmentoDasPreferencias(authUser.preferencias);
+    localStorage.setItem(CHAVE_SEGMENTO, modo);
+
     setUser(authUser);
     setFiliais(userFiliais);
     setFilialAtivaState(primeiraFilial);
+    setSegmentoState(modo);
   };
 
   const logout = () => {
-    ['wms_token', 'wms_user', 'wms_filial', 'wms_filiais'].forEach((k) => localStorage.removeItem(k));
+    ['wms_token', 'wms_user', 'wms_filial', 'wms_filiais', CHAVE_SEGMENTO].forEach((k) => localStorage.removeItem(k));
     setUser(null);
     setFiliais([]);
     setFilialAtivaState(null);
+    setSegmentoState(SEGMENTO_PADRAO);
+  };
+
+  // Define o modo de operação da empresa (persistido server-side; só ADMIN).
+  const setSegmento = async (s: Segmento) => {
+    await empresaApi.definirModo(s);
+    localStorage.setItem(CHAVE_SEGMENTO, s);
+    setSegmentoState(s);
   };
 
   const setFilialAtiva = (f: Filial) => {
@@ -114,7 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, refreshFiliais, login, logout, isLoading, pode, preferencias, savePreferencias }}>
+    <Ctx.Provider value={{ user, filiais, filialAtiva, setFilialAtiva, refreshFiliais, login, logout, isLoading, pode, preferencias, savePreferencias, segmento, setSegmento }}>
       {children}
     </Ctx.Provider>
   );

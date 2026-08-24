@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, TELAS, type TelaDef } from '../../config/telas';
-import { segmentoDasPreferencias } from '../../config/segmentos';
 import api, { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
 
 /**
@@ -52,8 +51,7 @@ function Digitando() {
 }
 
 export default function LuCommand() {
-  const { user, filialAtiva, preferencias } = useAuth();
-  const segmento = segmentoDasPreferencias(preferencias);
+  const { user, filialAtiva, segmento } = useAuth();
   const navigate = useNavigate();
   const [aberto, setAberto] = useState(false);
   const [texto, setTexto] = useState('');

@@ -39,6 +39,7 @@ import { PlataformaModule } from './modules/plataforma/plataforma.module';
 import { IaModule } from './modules/ia/ia.module';
 import { RestauranteModule } from './modules/restaurante/restaurante.module';
 import { DadosModule } from './modules/dados/dados.module';
+import { EmpresaModule } from './modules/empresa/empresa.module';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -95,6 +96,7 @@ import { HealthController } from './health.controller';
     IaModule,
     RestauranteModule,
     DadosModule,
+    EmpresaModule,
   ],
   controllers: [HealthController],
   providers: [

@@ -147,6 +147,14 @@ enum StatusOrdemCompra {
   CANCELADA
 }
 
+// Modo principal de operação da empresa (multissegmento). Controla, no frontend,
+// quais telas/atalhos/dashboards aparecem. HÍBRIDO habilita varejo + restaurante.
+enum ModoOperacao {
+  VAREJO
+  RESTAURANTE
+  HIBRIDO
+}
+
 // ─────────────────────────────────────────
 // MÓDULO 0: TENANT & INFRAESTRUTURA
 // ─────────────────────────────────────────
@@ -160,6 +168,8 @@ model Tenant {
   im               String?
   regimeTributario String   @default("SIMPLES_NACIONAL") // SIMPLES, LUCRO_PRESUMIDO, LUCRO_REAL
   crt              Int      @default(1) // Código de Regime Tributário (1,2,3)
+  // Modo de operação (multissegmento). Server-side, definido pelo ADMIN.
+  modo             ModoOperacao @default(VAREJO)
   emailNfe         String?
   webhookSecret    String?
   plano            String   @default("BASICO")
