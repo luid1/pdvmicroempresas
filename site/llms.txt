@@ -1,11 +1,12 @@
-# Lumin PDV
+# Lumin
 
-> Lumin PDV é uma frente de caixa (ponto de venda) para micro e pequenas empresas brasileiras que **continua vendendo mesmo sem internet**. Reúne venda, controle de estoque, emissão de NFC-e e financeiro na mesma tela. Ativação na hora, 7 dias grátis, sem instalação.
+> Lumin é um **ERP com IA** para micro e pequenas empresas brasileiras. O diferencial é a **Lu**, uma assistente com quem o dono conversa em linguagem natural: pergunta "quanto vendi hoje?", "qual a margem do mês?" ou "faz meu relatório" e recebe a resposta pronta. Inclui frente de caixa que **funciona offline**, controle de estoque, emissão de NFC-e e financeiro na mesma tela. 7 dias grátis, sem instalação.
 
-O Lumin PDV foi feito para mercadinhos, mercearias, adegas, padarias, lanchonetes, lojas de bairro e pequenos comércios que precisam de um caixa rápido e confiável, sem depender de conexão estável. Diferente de PDVs que travam quando cai a internet, o Lumin opera offline e sincroniza depois.
+O Lumin foi feito para mercadinhos, mercearias, adegas, padarias, lanchonetes, lojas de bairro e pequenos comércios que querem controle sem complicação. Em vez de aprender menus e montar planilhas, o dono pergunta para a Lu. E como a frente de caixa opera offline, a venda não para quando cai a internet — sincroniza depois. Lema: **o controle é seu, o trabalho é nosso**.
 
 ## O que o Lumin resolve
 
+- **Conversar com o próprio negócio (a Lu):** o dono pergunta em português — vendas do dia, margem, ruptura de estoque, relatório mensal, DRE — e a IA responde na hora, sem relatório manual nem planilha.
 - **Vender sem internet:** o caixa funciona offline e sincroniza automaticamente quando a conexão volta — a venda nunca para.
 - **Frente de caixa rápida:** leitura por código de barras, busca de produto, descontos, sangria/suprimento e fechamento de caixa.
 - **Estoque integrado:** cada venda baixa o estoque; entradas, perdas e transferências entre filiais.
