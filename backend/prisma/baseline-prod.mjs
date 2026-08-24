@@ -42,22 +42,44 @@ if (migrations.length === 0) {
 
 console.log(`→ Baseline de ${migrations.length} migrations no banco de produção...\n`);
 
+// Bancos serverless (ex.: Neon free tier) suspendem por ociosidade. A primeira
+// conexão pode falhar com P1001 enquanto o compute "acorda". Como abrimos uma
+// conexão nova por migration, esses cold-starts são comuns — então cada passo
+// tem retry com espera curta antes de desistir.
+const MAX_TENTATIVAS = 8;
+const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+// Transitório = vale a pena tentar de novo:
+//  • P1001 / "Can't reach" → compute do Neon acordando (cold-start).
+//  • P1002 / advisory lock → sessão zumbi ainda segurando o lock; o Neon libera
+//    em alguns segundos.
+const ehTransitorio = (s) =>
+  /P1001|P1002|Can't reach database server|ETIMEDOUT|ECONNRESET|Timed out|advisory lock/i.test(s);
+const ehJaRegistrada = (s) => /already recorded|already applied|P3008/i.test(s);
+
 let marcadas = 0;
 let puladas = 0;
 for (const nome of migrations) {
-  try {
-    execSync(`npx prisma migrate resolve --applied ${nome}`, { stdio: 'pipe' });
-    console.log(`  ✓ marcada como aplicada: ${nome}`);
-    marcadas++;
-  } catch (e) {
-    const saida = `${e.stdout || ''}${e.stderr || ''}`;
-    // Já registrada anteriormente → tudo certo, segue.
-    if (/already recorded|already applied|P3008/i.test(saida)) {
-      console.log(`  • já estava registrada: ${nome}`);
-      puladas++;
-    } else {
-      console.error(`  ✖ falhou em ${nome}:\n${saida}`);
-      process.exit(1);
+  let ok = false;
+  for (let tentativa = 1; tentativa <= MAX_TENTATIVAS && !ok; tentativa++) {
+    try {
+      execSync(`npx prisma migrate resolve --applied ${nome}`, { stdio: 'pipe' });
+      console.log(`  ✓ marcada como aplicada: ${nome}`);
+      marcadas++;
+      ok = true;
+    } catch (e) {
+      const saida = `${e.stdout || ''}${e.stderr || ''}`;
+      if (ehJaRegistrada(saida)) {
+        console.log(`  • já estava registrada: ${nome}`);
+        puladas++;
+        ok = true;
+      } else if (ehTransitorio(saida) && tentativa < MAX_TENTATIVAS) {
+        const s = Math.min(3000 * tentativa, 15000);
+        console.log(`  … banco indisponível/lock ocupado, tentando de novo em ${s / 1000}s [${tentativa}/${MAX_TENTATIVAS}]: ${nome}`);
+        await espera(s);
+      } else {
+        console.error(`  ✖ falhou em ${nome}:\n${saida}`);
+        process.exit(1);
+      }
     }
   }
 }
