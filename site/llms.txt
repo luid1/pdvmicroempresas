@@ -1,0 +1,39 @@
+# Lumin PDV
+
+> Lumin PDV é uma frente de caixa (ponto de venda) para micro e pequenas empresas brasileiras que **continua vendendo mesmo sem internet**. Reúne venda, controle de estoque, emissão de NFC-e e financeiro na mesma tela. Ativação na hora, 7 dias grátis, sem instalação.
+
+O Lumin PDV foi feito para mercadinhos, mercearias, adegas, padarias, lanchonetes, lojas de bairro e pequenos comércios que precisam de um caixa rápido e confiável, sem depender de conexão estável. Diferente de PDVs que travam quando cai a internet, o Lumin opera offline e sincroniza depois.
+
+## O que o Lumin resolve
+
+- **Vender sem internet:** o caixa funciona offline e sincroniza automaticamente quando a conexão volta — a venda nunca para.
+- **Frente de caixa rápida:** leitura por código de barras, busca de produto, descontos, sangria/suprimento e fechamento de caixa.
+- **Estoque integrado:** cada venda baixa o estoque; entradas, perdas e transferências entre filiais.
+- **NFC-e (nota fiscal do consumidor):** emissão fiscal integrada quando habilitada; opera também sem nota para quem ainda não emite.
+- **Financeiro e DRE:** contas a pagar/receber, fluxo de caixa e Demonstração de Resultado (DRE) com receita, CMV, margens e resultado.
+- **Multi-filial e multiusuário:** vários caixas, permissões por usuário e visão consolidada.
+
+## Para quem é
+
+Micro e pequenas empresas do varejo no Brasil: mercadinhos, mercearias, minimercados, adegas, padarias, lanchonetes, conveniências e lojas de bairro. Ideal para quem tem 1 a 5 caixas e quer um sistema simples, sem instalação e sem contrato longo.
+
+## Preço
+
+7 dias grátis, sem cartão e sem instalação. Assinatura mensal acessível para pequenos negócios. Detalhes e planos em https://luminmkt.shop/assinar.html
+
+## Diferenciais
+
+- Funciona **offline de verdade** (a venda não para quando cai a internet).
+- Tudo em uma tela: venda + estoque + financeiro + fiscal.
+- Ativação imediata, sem instalar programa (roda no navegador).
+- Assistente de IA embutido para ajudar na operação do dia a dia.
+
+## Links
+
+- Site oficial: https://luminmkt.shop/
+- Assinar / ver planos: https://luminmkt.shop/assinar.html
+- Aplicativo (login): https://app.luminmkt.shop/
+
+## Contato
+
+Para dúvidas, demonstração ou parceria, acesse https://luminmkt.shop/ e use o canal de contato indicado no site.

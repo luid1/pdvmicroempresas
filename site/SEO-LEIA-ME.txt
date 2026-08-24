@@ -1,0 +1,65 @@
+LUMIN PDV — SEO E GOOGLE SEARCH CONSOLE (passo a passo)
+=======================================================
+
+O QUE JÁ FOI CONFIGURADO NO SITE
+--------------------------------
+- Título e meta description otimizados (index.html e assinar.html).
+- Palavras-chave (meta keywords) focadas em: PDV, frente de caixa,
+  PDV offline, sistema de caixa, NFC-e, mercadinho, etc.
+- Canonical: o endereço oficial é https://luminmkt.shop/ (apex).
+  O www.luminmkt.shop redireciona 301 para o apex (via netlify.toml),
+  então o Google não vê o site "duplicado".
+- Open Graph + Twitter Card: prévia bonita ao compartilhar no
+  WhatsApp/Instagram/Facebook/LinkedIn (usa /assets/og-cover.png).
+- Dados estruturados schema.org (SoftwareApplication + Organization):
+  ajuda o Google e as IAs a entenderem o produto, público e preço.
+- robots.txt: libera buscadores e bots de IA, aponta o sitemap.
+- sitemap.xml: lista as páginas (/ e /assinar.html).
+- llms.txt: descrição do produto para IAs (ChatGPT, Claude, Perplexity)
+  recomendarem o Lumin. Fica em https://luminmkt.shop/llms.txt
+
+ANTES DE PUBLICAR — TROQUE A IMAGEM SOCIAL
+------------------------------------------
+Em assets/og-cover.png tem só um placeholder (cópia do favicon).
+Coloque uma arte 1200x630 px de verdade com esse mesmo nome.
+
+GOOGLE SEARCH CONSOLE — COMO VERIFICAR
+--------------------------------------
+1. Acesse https://search.google.com/search-console e faça login.
+2. "Adicionar propriedade". Você tem 2 opções:
+
+   OPÇÃO A (recomendada) — Domínio (verificação por DNS):
+     - Escolha "Domínio" e digite: luminmkt.shop
+     - O Google mostra um registro TXT. Adicione esse TXT no seu
+       provedor de domínio (onde você comprou/gerencia o luminmkt.shop).
+     - Clique em "Verificar". Cobre apex E www de uma vez.
+
+   OPÇÃO B — Prefixo de URL (verificação por tag HTML):
+     - Escolha "Prefixo do URL" e digite: https://luminmkt.shop
+     - Copie o código da "tag HTML" que o Google fornece
+       (algo como content="abc123...").
+     - Abra site/index.html, ache a linha comentada:
+         <!-- <meta name="google-site-verification" content="COLE_AQUI_O_CODIGO"> -->
+       Remova os <!-- --> e cole o código no lugar de COLE_AQUI_O_CODIGO.
+     - Publique o site e clique em "Verificar" no Search Console.
+
+3. Depois de verificado, vá em "Sitemaps" e envie:
+       sitemap.xml
+   (o Search Console completa a URL: https://luminmkt.shop/sitemap.xml)
+
+4. (Opcional) Peça indexação da home em "Inspeção de URL" > colar
+   https://luminmkt.shop/ > "Solicitar indexação".
+
+BING / OUTROS
+-------------
+O mesmo sitemap.xml e robots.txt funcionam no Bing Webmaster Tools
+(https://www.bing.com/webmasters) — mesma ideia de verificar e enviar o sitemap.
+
+DEPOIS DE MUDAR O DOMÍNIO?
+--------------------------
+Se um dia o domínio oficial mudar, troque "luminmkt.shop" em:
+  - index.html e assinar.html (canonical + og:url + twitter + JSON-LD)
+  - robots.txt (linha Sitemap:)
+  - sitemap.xml (as <loc>)
+  - llms.txt (os links)
+  - netlify.toml (o redirect do www)

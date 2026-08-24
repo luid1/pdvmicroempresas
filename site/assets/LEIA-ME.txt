@@ -19,6 +19,16 @@ ARQUIVOS ESPERADOS
 4) print-2.png         -> Print do ESTOQUE
 5) print-3.png         -> Print do FECHAMENTO / FINANCEIRO
 
+6) og-cover.png        -> IMAGEM SOCIAL (SEO). É a figura que aparece quando o
+                          link do site é compartilhado no WhatsApp, Instagram,
+                          Facebook, LinkedIn e nos resultados de busca.
+                          TAMANHO CERTO: 1200x630 px (paisagem), PNG ou JPG.
+                          Já existe um placeholder (cópia do favicon) — troque
+                          por uma arte 1200x630 real quando puder.
+
+7) favicon.png         -> Ícone do site (aba do navegador). Já vem uma cópia do
+                          favicon oficial; substitua se tiver um maior/quadrado.
+
 OBSERVAÇÕES
 -----------
 - PNG ou JPG servem para os prints; se usar JPG, mantenha o nome .png OU

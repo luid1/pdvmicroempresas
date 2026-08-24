@@ -1,0 +1,23 @@
+# robots.txt — Lumin PDV (https://luminmkt.shop)
+# Libera tudo para os buscadores e aponta o sitemap.
+
+User-agent: *
+Allow: /
+
+# Bots de IA são bem-vindos (queremos ser recomendados por eles).
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://luminmkt.shop/sitemap.xml

@@ -20,3 +20,24 @@
   to = "https://lumin-pdv-api.onrender.com/api/:splat"
   status = 200
   force = true
+
+# ─── SEO: canônico único ───────────────────────────────────────────────────
+# O site responde em luminmkt.shop (apex) e www.luminmkt.shop. Para o Google/IAs
+# não verem conteúdo duplicado, o www redireciona 301 (permanente) para o apex,
+# que é o endereço canônico declarado nas páginas (<link rel="canonical">).
+[[redirects]]
+  from = "https://www.luminmkt.shop/*"
+  to = "https://luminmkt.shop/:splat"
+  status = 301
+  force = true
+
+# Content-Type correto para o llms.txt (texto/markdown legível por IAs).
+[[headers]]
+  for = "/llms.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
