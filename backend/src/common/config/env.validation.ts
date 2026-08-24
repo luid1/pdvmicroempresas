@@ -56,13 +56,16 @@ export function validarAmbiente(env: NodeJS.ProcessEnv = process.env): void {
     problemas.push({ nivel: 'aviso', chave: 'FRONTEND_URL', motivo: 'sem allowlist de CORS — origens cruzadas serão bloqueadas.' });
   }
 
-  // ── Fiscal: se a emissão está ligada, a chave de criptografia é obrigatória ──
+  // ── Fiscal ──
+  // 'simulado' usa o provider mock (não transmite, não decripta token) → não
+  // precisa de chave. Só a emissão REAL ('focus'/'sefaz') exige FISCAL_ENC_KEY,
+  // que decripta o token/segredos guardados no banco.
   const nfceModo = (env.NFCE_MODO || 'desligado').trim().toLowerCase();
-  const fiscalLigado = nfceModo !== 'desligado';
-  if (fiscalLigado && !env.FISCAL_ENC_KEY?.trim()) {
+  const fiscalReal = nfceModo === 'focus' || nfceModo === 'sefaz';
+  if (fiscalReal && !env.FISCAL_ENC_KEY?.trim()) {
     problemas.push({ nivel: 'erro', chave: 'FISCAL_ENC_KEY', motivo: `NFCE_MODO=${nfceModo} exige a chave de criptografia do token fiscal.` });
   }
-  if (fiscalLigado && !env.CERT_ENC_KEY?.trim()) {
+  if (fiscalReal && !env.CERT_ENC_KEY?.trim()) {
     problemas.push({ nivel: 'aviso', chave: 'CERT_ENC_KEY', motivo: 'recomendada para proteger a senha do certificado A1 armazenado.' });
   }
 
