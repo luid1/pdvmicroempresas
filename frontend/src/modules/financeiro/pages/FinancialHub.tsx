@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { financeiroApi, custosApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -17,14 +17,16 @@ import {
   CheckCircle2,
   Clock,
   Search,
-  Download,
   Eye,
   Scale,
   Percent,
   DollarSign,
   ChevronRight,
+  Ban,
+  RefreshCw,
 } from 'lucide-react';
-import { PageHeader, btnGlass, btnPrimary } from '../../cadastros/ui';
+import { PageHeader, btnGlass } from '../../cadastros/ui';
+import { toast, confirmDialog } from '../../../components/ui/feedback';
 
 /* ══════════════════════════════════════════════════════════════════════════════
    MÓDULO FINANCEIRO & CONTROLADORIA — DRE & Rentabilidade · Mercado PDV
@@ -47,6 +49,7 @@ const pct = (v: number) => `${v.toLocaleString('pt-BR', { minimumFractionDigits:
 const kg = (v: number) => `${v.toLocaleString('pt-BR', { maximumFractionDigits: 0 })} kg`;
 const num = (v: number) => v.toLocaleString('pt-BR');
 const hojeISO = () => new Date().toISOString().slice(0, 10);
+const mesAtualLabel = () => { const s = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }); return s.charAt(0).toUpperCase() + s.slice(1); };
 const primeiroDiaMesISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`; };
 
 /* Classe semântica sutil para margem. */
@@ -84,30 +87,43 @@ interface DreCompleto {
   cobertura: { nfesEmitidas: number; movimentacoesVenda: number; observacao: string };
 }
 
-interface ContaResumo {
-  id: string;
-  parte: string;
-  categoria: string;
-  valor: number;
-  venc: string;
-  atrasoDias?: number;
+/* ── Títulos reais (Contas a Pagar/Receber, vindas da API) ──
+   Status do backend: ABERTO · PARCIAL · PAGO · VENCIDO · CANCELADO. */
+type StatusConta = 'ABERTO' | 'PARCIAL' | 'PAGO' | 'VENCIDO' | 'CANCELADO';
+type NatTitulo = 'RECEITA' | 'DESPESA';
+
+interface ContaApi {
+  id: string; descricao: string; numero?: string; status: StatusConta;
+  valorOriginal: number | string; valorPago: number | string; valorAberto: number | string;
+  dataVencimento: string; dataEmissao?: string; dataPagamento?: string;
+  cliente?: { razaoSocial?: string; nomeFantasia?: string };
+  fornecedor?: { razaoSocial?: string; nomeFantasia?: string };
 }
 
-const CONTAS_RECEBER: ContaResumo[] = [
-  { id: 'r1', parte: 'Rede Sabor & Cia Restaurantes', categoria: 'Venda Atacado', valor: 84_320, venc: '08/07' },
-  { id: 'r2', parte: 'Hotel Fasano Group', categoria: 'Venda Atacado', valor: 61_180, venc: '10/07' },
-  { id: 'r3', parte: 'Buffet Villa Gourmet', categoria: 'Venda Atacado', valor: 27_540, venc: '02/07', atrasoDias: 4 },
-  { id: 'r4', parte: 'Mercado do Zé — Pinheiros', categoria: 'Venda Varejo', valor: 18_970, venc: '29/06', atrasoDias: 7 },
-  { id: 'r5', parte: 'Cozinha Industrial GRSA', categoria: 'Venda Atacado', valor: 112_400, venc: '14/07' },
-];
+interface ResumoConta {
+  valorOriginalTotal: number; valorEmAberto: number; valorVencido: number;
+  valorPago?: number; valorRecebido?: number;
+}
 
-const CONTAS_PAGAR: ContaResumo[] = [
-  { id: 'p1', parte: 'Cooperativa Agrícola do Vale', categoria: 'Fornecedor FLV', valor: 96_720, venc: '07/07' },
-  { id: 'p2', parte: 'Folha de Pagamento — Julho', categoria: 'Folha de Pagamento', valor: 148_500, venc: '05/07' },
-  { id: 'p3', parte: 'Transportadora RápidoLog', categoria: 'Frete', valor: 34_180, venc: '09/07' },
-  { id: 'p4', parte: 'Energia Elétrica — CD Matriz', categoria: 'Utilidades', valor: 12_940, venc: '11/07' },
-  { id: 'p5', parte: 'Embalagens Vitória Ltda', categoria: 'Fornecedor Insumos', valor: 21_360, venc: '06/07' },
-];
+interface TituloReal {
+  id: string; natureza: NatTitulo; parte: string; descricao: string; numero?: string;
+  status: StatusConta; valorOriginal: number; valorAberto: number; dataVencimento: string;
+}
+
+const nomeParte = (c: ContaApi, nat: NatTitulo): string => {
+  const p = nat === 'RECEITA' ? c.cliente : c.fornecedor;
+  return p?.nomeFantasia || p?.razaoSocial || c.descricao || (nat === 'RECEITA' ? 'Cliente' : 'Fornecedor');
+};
+
+const normalizarConta = (c: ContaApi, nat: NatTitulo): TituloReal => ({
+  id: c.id, natureza: nat, parte: nomeParte(c, nat), descricao: c.descricao, numero: c.numero,
+  status: c.status, valorOriginal: Number(c.valorOriginal) || 0, valorAberto: Number(c.valorAberto) || 0,
+  dataVencimento: c.dataVencimento,
+});
+
+const emAberto = (t: { status: StatusConta }) => t.status !== 'PAGO' && t.status !== 'CANCELADO';
+const dataCurta = (iso: string) => { const d = new Date(iso); return isNaN(+d) ? '—' : d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); };
+const dataLonga = (iso: string) => { const d = new Date(iso); return isNaN(+d) ? '—' : d.toLocaleDateString('pt-BR'); };
 
 /* ── Rentabilidade por Cliente/Produto — dados reais (custosApi) ── */
 interface RentClienteReal {
@@ -140,33 +156,14 @@ function PeriodoBar({ ini, fim, onIni, onFim }: { ini: string; fim: string; onIn
   );
 }
 
-/* ── Títulos (Contas a Pagar/Receber mescladas) ── */
-type StatusTitulo = 'PAGO' | 'PENDENTE' | 'ATRASADO';
-type NatTitulo = 'RECEITA' | 'DESPESA';
-interface Titulo {
-  id: string;
-  venc: string;
-  parte: string;
-  categoria: string;
-  natureza: NatTitulo;
-  valor: number;
-  status: StatusTitulo;
-}
-
-const TITULOS: Titulo[] = [
-  { id: 't1', venc: '05/07/2026', parte: 'Folha de Pagamento — Julho', categoria: 'Folha de Pagamento', natureza: 'DESPESA', valor: 148_500, status: 'PENDENTE' },
-  { id: 't2', venc: '02/07/2026', parte: 'Buffet Villa Gourmet', categoria: 'Venda Atacado', natureza: 'RECEITA', valor: 27_540, status: 'ATRASADO' },
-  { id: 't3', venc: '06/07/2026', parte: 'Embalagens Vitória Ltda', categoria: 'Fornecedor Insumos', natureza: 'DESPESA', valor: 21_360, status: 'PENDENTE' },
-  { id: 't4', venc: '28/06/2026', parte: 'Cooperativa Agrícola do Vale', categoria: 'Fornecedor FLV', natureza: 'DESPESA', valor: 88_400, status: 'PAGO' },
-  { id: 't5', venc: '29/06/2026', parte: 'Mercado do Zé — Pinheiros', categoria: 'Venda Varejo', natureza: 'RECEITA', valor: 18_970, status: 'ATRASADO' },
-  { id: 't6', venc: '08/07/2026', parte: 'Rede Sabor & Cia Restaurantes', categoria: 'Venda Atacado', natureza: 'RECEITA', valor: 84_320, status: 'PENDENTE' },
-  { id: 't7', venc: '09/07/2026', parte: 'Transportadora RápidoLog', categoria: 'Frete', natureza: 'DESPESA', valor: 34_180, status: 'PENDENTE' },
-  { id: 't8', venc: '25/06/2026', parte: 'Hotel Fasano Group', categoria: 'Venda Atacado', natureza: 'RECEITA', valor: 61_180, status: 'PAGO' },
-  { id: 't9', venc: '11/07/2026', parte: 'Energia Elétrica — CD Matriz', categoria: 'Utilidades', natureza: 'DESPESA', valor: 12_940, status: 'PENDENTE' },
-  { id: 't10', venc: '14/07/2026', parte: 'Cozinha Industrial GRSA', categoria: 'Venda Atacado', natureza: 'RECEITA', valor: 112_400, status: 'PENDENTE' },
-  { id: 't11', venc: '24/06/2026', parte: 'Folha de Pagamento — Junho', categoria: 'Folha de Pagamento', natureza: 'DESPESA', valor: 145_200, status: 'PAGO' },
-  { id: 't12', venc: '01/07/2026', parte: 'Grupo Coco Bambu', categoria: 'Venda Atacado', natureza: 'RECEITA', valor: 97_600, status: 'ATRASADO' },
-];
+/* Metadados visuais por status real do backend. */
+const STATUS_META: Record<StatusConta, { label: string; cls: string; icon: React.ElementType }> = {
+  ABERTO: { label: 'Pendente', cls: 'bg-amber-50 text-amber-700 ring-amber-100', icon: Clock },
+  PARCIAL: { label: 'Parcial', cls: 'bg-sky-50 text-sky-700 ring-sky-100', icon: Clock },
+  PAGO: { label: 'Pago', cls: 'bg-emerald-50 text-emerald-700 ring-emerald-100', icon: CheckCircle2 },
+  VENCIDO: { label: 'Atrasado', cls: 'bg-rose-50 text-rose-700 ring-rose-100', icon: AlertTriangle },
+  CANCELADO: { label: 'Cancelado', cls: 'bg-neutral-100 text-neutral-500 ring-neutral-200', icon: Ban },
+};
 
 /* ══════════════════════════════════════════════════════════════════════════════
    COMPONENTE RAIZ
@@ -179,31 +176,16 @@ export default function FinancialHub() {
       <PageHeader
         icon={<Scale className="h-4 w-4" />}
         titulo="Financeiro & DRE"
-        subtitulo="Demonstrativo de Resultados, rentabilidade e gestão de títulos — Julho/2026"
+        subtitulo="Demonstrativo de Resultados, rentabilidade e gestão de títulos"
         actions={
-          <>
-            <button className={btnGlass}>
-              <CalendarClock className="h-3.5 w-3.5 text-slate-400" /> Julho / 2026
-            </button>
-            <button className={btnPrimary}>
-              <Download className="h-3.5 w-3.5" /> Exportar DRE
-            </button>
-          </>
+          <span className={btnGlass}>
+            <CalendarClock className="h-3.5 w-3.5 text-slate-400" /> {mesAtualLabel()}
+          </span>
         }
       />
 
       <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-[1400px] mx-auto">
-      {/* Aviso: dados de demonstração (ainda não conectado ao financeiro real) */}
-      <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800">
-        <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-        <div className="text-[13px] leading-snug">
-          <b>DRE e Rentabilidade por Cliente/Produto já são reais</b> — calculados das NF-e emitidas,
-          movimentações de estoque e custo composto do período (filtre por data em cada aba). Apenas a
-          aba <b>Contas a Pagar/Receber</b> desta tela ainda é ilustrativa; para gestão real de títulos,
-          use as telas dedicadas <b>Contas a Pagar</b> e <b>Contas a Receber</b> do menu.
-        </div>
-      </div>
       {/* Tabs */}
       <nav className="flex items-center gap-1 border-b border-neutral-200 mb-6 overflow-x-auto">
         <TabFin ativo={aba === 'dashboard'} icon={LayoutDashboard} label="Dashboard DRE & Caixa" onClick={() => setAba('dashboard')} />
@@ -229,6 +211,11 @@ function DashboardDRE() {
   const [dre, setDre] = useState<DreCompleto | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  // Contas a receber/pagar em aberto — dados reais para os painéis laterais.
+  const [receber, setReceber] = useState<TituloReal[]>([]);
+  const [pagar, setPagar] = useState<TituloReal[]>([]);
+  const [resReceber, setResReceber] = useState<ResumoConta | null>(null);
+  const [resPagar, setResPagar] = useState<ResumoConta | null>(null);
 
   useEffect(() => {
     let vivo = true;
@@ -238,6 +225,26 @@ function DashboardDRE() {
       .then((res) => { if (vivo) { setDre(res.data); setErro(null); } })
       .catch((e) => { if (vivo) setErro(e?.response?.data?.message || 'Falha ao carregar o DRE.'); })
       .finally(() => { if (vivo) setCarregando(false); });
+    return () => { vivo = false; };
+  }, []);
+
+  // Títulos em aberto (independente do DRE): os painéis mostram o que está por
+  // vencer/atrasado agora, não o recorte do período do DRE.
+  useEffect(() => {
+    let vivo = true;
+    const porVenc = (a: TituloReal, b: TituloReal) => +new Date(a.dataVencimento) - +new Date(b.dataVencimento);
+    Promise.all([
+      financeiroApi.receber().catch(() => ({ data: [] })),
+      financeiroApi.receberResumo().catch(() => ({ data: null })),
+      financeiroApi.pagar().catch(() => ({ data: [] })),
+      financeiroApi.pagarResumo().catch(() => ({ data: null })),
+    ]).then(([r, rr, p, rp]) => {
+      if (!vivo) return;
+      setReceber(((r.data as ContaApi[]) || []).map((c) => normalizarConta(c, 'RECEITA')).filter(emAberto).sort(porVenc));
+      setResReceber(rr.data as ResumoConta | null);
+      setPagar(((p.data as ContaApi[]) || []).map((c) => normalizarConta(c, 'DESPESA')).filter(emAberto).sort(porVenc));
+      setResPagar(rp.data as ResumoConta | null);
+    });
     return () => { vivo = false; };
   }, []);
 
@@ -331,93 +338,81 @@ function DashboardDRE() {
           </div>
         </section>
 
-        {/* Contas a Receber */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <ArrowUpRight className="h-4 w-4 text-emerald-500" /> Contas a Receber
-            </h2>
-            <span className="text-[11px] font-medium text-emerald-700 bg-emerald-50 rounded-full px-2.5 py-1">
-              {brlCompact(CONTAS_RECEBER.reduce((s, c) => s + c.valor, 0))}
-            </span>
-          </div>
-          <div className="space-y-2.5">
-            {CONTAS_RECEBER.map((c) => (
-              <div key={c.id} className="flex items-center gap-3">
-                <span
-                  className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${
-                    c.atrasoDias ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
-                  }`}
-                >
-                  {c.atrasoDias ? <AlertTriangle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-medium text-slate-800 truncate">{c.parte}</p>
-                  <p className="text-[11px] text-neutral-400">
-                    {c.categoria} · vence {c.venc}
-                    {c.atrasoDias ? <span className="text-rose-500 font-medium"> · {c.atrasoDias}d atraso</span> : ''}
-                  </p>
-                </div>
-                <p className="text-[13px] font-semibold text-slate-900 tabular-nums shrink-0">{brl(c.valor)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-[12px]">
-            <span className="text-neutral-500">
-              A vencer:{' '}
-              <strong className="text-slate-700">
-                {brlCompact(CONTAS_RECEBER.filter((c) => !c.atrasoDias).reduce((s, c) => s + c.valor, 0))}
-              </strong>
-            </span>
-            <span className="text-rose-600">
-              Atrasados:{' '}
-              <strong>{brlCompact(CONTAS_RECEBER.filter((c) => c.atrasoDias).reduce((s, c) => s + c.valor, 0))}</strong>
-            </span>
-          </div>
-        </section>
+        {/* Contas a Receber — em aberto (real) */}
+        <PainelContas
+          titulo="Contas a Receber"
+          icone={<ArrowUpRight className="h-4 w-4 text-emerald-500" />}
+          corTotal="text-emerald-700 bg-emerald-50"
+          titulos={receber}
+          totalAberto={resReceber?.valorEmAberto}
+          totalVencido={resReceber?.valorVencido}
+          vazio="Nenhum título a receber em aberto."
+        />
 
-        {/* Contas a Pagar */}
-        <section className="rounded-2xl border border-neutral-200 bg-white p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <ArrowDownRight className="h-4 w-4 text-rose-500" /> Contas a Pagar
-              <span className="text-neutral-400 font-normal">· 7 dias</span>
-            </h2>
-            <span className="text-[11px] font-medium text-rose-700 bg-rose-50 rounded-full px-2.5 py-1">
-              {brlCompact(CONTAS_PAGAR.reduce((s, c) => s + c.valor, 0))}
-            </span>
-          </div>
-          <div className="space-y-2.5">
-            {CONTAS_PAGAR.map((c) => (
-              <div key={c.id} className="flex items-center gap-3">
-                <span className="h-9 w-9 rounded-xl bg-neutral-100 text-neutral-500 flex items-center justify-center shrink-0">
-                  <CalendarClock className="h-4 w-4" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-medium text-slate-800 truncate">{c.parte}</p>
-                  <p className="text-[11px] text-neutral-400">
-                    {c.categoria} · vence {c.venc}
-                  </p>
-                </div>
-                <p className="text-[13px] font-semibold text-slate-900 tabular-nums shrink-0">{brl(c.valor)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-[12px]">
-            <span className="text-neutral-500">Saldo projetado (7d)</span>
-            <strong
-              className={corResultado(
-                CONTAS_RECEBER.reduce((s, c) => s + c.valor, 0) - CONTAS_PAGAR.reduce((s, c) => s + c.valor, 0),
-              )}
-            >
-              {brlCompact(
-                CONTAS_RECEBER.reduce((s, c) => s + c.valor, 0) - CONTAS_PAGAR.reduce((s, c) => s + c.valor, 0),
-              )}
-            </strong>
-          </div>
-        </section>
+        {/* Contas a Pagar — em aberto (real) */}
+        <PainelContas
+          titulo="Contas a Pagar"
+          icone={<ArrowDownRight className="h-4 w-4 text-rose-500" />}
+          corTotal="text-rose-700 bg-rose-50"
+          titulos={pagar}
+          totalAberto={resPagar?.valorEmAberto}
+          totalVencido={resPagar?.valorVencido}
+          vazio="Nenhum título a pagar em aberto."
+        />
       </div>
     </div>
+  );
+}
+
+/* Painel lateral de títulos em aberto (receber ou pagar) — lista os próximos a
+   vencer e resume total em aberto / atrasado a partir do resumo do backend. */
+function PainelContas({
+  titulo, icone, corTotal, titulos, totalAberto, totalVencido, vazio,
+}: {
+  titulo: string; icone: React.ReactNode; corTotal: string; titulos: TituloReal[];
+  totalAberto?: number; totalVencido?: number; vazio: string;
+}) {
+  const topo = titulos.slice(0, 6);
+  const totalLista = titulos.reduce((s, t) => s + t.valorAberto, 0);
+  return (
+    <section className="rounded-2xl border border-neutral-200 bg-white p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">{icone} {titulo}</h2>
+        <span className={`text-[11px] font-medium rounded-full px-2.5 py-1 ${corTotal}`}>
+          {brlCompact(totalAberto ?? totalLista)}
+        </span>
+      </div>
+      {topo.length === 0 ? (
+        <div className="py-8 text-center text-[12px] text-neutral-400">{vazio}</div>
+      ) : (
+        <div className="space-y-2.5">
+          {topo.map((t) => {
+            const atrasado = t.status === 'VENCIDO';
+            return (
+              <div key={t.id} className="flex items-center gap-3">
+                <span className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${atrasado ? 'bg-rose-50 text-rose-600' : 'bg-neutral-100 text-neutral-500'}`}>
+                  {atrasado ? <AlertTriangle className="h-4 w-4" /> : <CalendarClock className="h-4 w-4" />}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-medium text-slate-800 truncate">{t.parte}</p>
+                  <p className="text-[11px] text-neutral-400">
+                    vence {dataCurta(t.dataVencimento)}
+                    {atrasado ? <span className="text-rose-500 font-medium"> · em atraso</span> : ''}
+                  </p>
+                </div>
+                <p className="text-[13px] font-semibold text-slate-900 tabular-nums shrink-0">{brl(t.valorAberto)}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {(totalVencido ?? 0) > 0 && (
+        <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-[12px]">
+          <span className="text-neutral-500">{titulos.length} em aberto</span>
+          <span className="text-rose-600">Atrasados: <strong>{brlCompact(totalVencido ?? 0)}</strong></span>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -750,28 +745,68 @@ function RentabilidadeProdutos() {
    ABA 4 — CONTAS A PAGAR / RECEBER (Gestão de Títulos)
    ════════════════════════════════════════════════════════════════════════════ */
 function GestaoTitulos() {
-  const [titulos, setTitulos] = useState<Titulo[]>(TITULOS);
+  const [titulos, setTitulos] = useState<TituloReal[]>([]);
+  const [resReceber, setResReceber] = useState<ResumoConta | null>(null);
+  const [resPagar, setResPagar] = useState<ResumoConta | null>(null);
+  const [carregando, setCarregando] = useState(true);
   const [filtroNat, setFiltroNat] = useState<'TODOS' | NatTitulo>('TODOS');
-  const [filtroStatus, setFiltroStatus] = useState<'TODOS' | StatusTitulo>('TODOS');
+  const [filtroStatus, setFiltroStatus] = useState<'TODOS' | 'ABERTO' | 'VENCIDO' | 'PAGO'>('TODOS');
   const [busca, setBusca] = useState('');
-  const [detalhe, setDetalhe] = useState<Titulo | null>(null);
+  const [detalhe, setDetalhe] = useState<TituloReal | null>(null);
+  const [baixandoId, setBaixandoId] = useState<string | null>(null);
+
+  const carregar = useCallback(() => {
+    setCarregando(true);
+    Promise.all([
+      financeiroApi.receber().catch(() => ({ data: [] })),
+      financeiroApi.receberResumo().catch(() => ({ data: null })),
+      financeiroApi.pagar().catch(() => ({ data: [] })),
+      financeiroApi.pagarResumo().catch(() => ({ data: null })),
+    ]).then(([r, rr, p, rp]) => {
+      const rec = ((r.data as ContaApi[]) || []).map((c) => normalizarConta(c, 'RECEITA'));
+      const pag = ((p.data as ContaApi[]) || []).map((c) => normalizarConta(c, 'DESPESA'));
+      setTitulos([...rec, ...pag].sort((a, b) => +new Date(a.dataVencimento) - +new Date(b.dataVencimento)));
+      setResReceber(rr.data as ResumoConta | null);
+      setResPagar(rp.data as ResumoConta | null);
+    }).finally(() => setCarregando(false));
+  }, []);
+  useEffect(() => { carregar(); }, [carregar]);
+
+  const casaStatus = (t: TituloReal) =>
+    filtroStatus === 'TODOS' ? true
+    : filtroStatus === 'ABERTO' ? (t.status === 'ABERTO' || t.status === 'PARCIAL')
+    : filtroStatus === 'VENCIDO' ? t.status === 'VENCIDO'
+    : t.status === 'PAGO';
 
   const filtrados = useMemo(() => {
     const q = busca.trim().toLowerCase();
     return titulos.filter(
       (t) =>
         (filtroNat === 'TODOS' || t.natureza === filtroNat) &&
-        (filtroStatus === 'TODOS' || t.status === filtroStatus) &&
-        (!q || t.parte.toLowerCase().includes(q) || t.categoria.toLowerCase().includes(q)),
+        casaStatus(t) &&
+        (!q || t.parte.toLowerCase().includes(q) || t.descricao.toLowerCase().includes(q)),
     );
   }, [titulos, filtroNat, filtroStatus, busca]);
 
-  const totReceber = filtrados.filter((t) => t.natureza === 'RECEITA' && t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const totPagar = filtrados.filter((t) => t.natureza === 'DESPESA' && t.status !== 'PAGO').reduce((s, t) => s + t.valor, 0);
-  const totAtrasado = filtrados.filter((t) => t.status === 'ATRASADO').reduce((s, t) => s + t.valor, 0);
+  const totReceber = resReceber?.valorEmAberto ?? 0;
+  const totPagar = resPagar?.valorEmAberto ?? 0;
+  const totAtrasado = (resReceber?.valorVencido ?? 0) + (resPagar?.valorVencido ?? 0);
 
-  const baixar = (id: string) =>
-    setTitulos((prev) => prev.map((t) => (t.id === id ? { ...t, status: 'PAGO' } : t)));
+  const baixar = async (t: TituloReal) => {
+    if (!(await confirmDialog(`Baixar "${t.parte}" pelo valor em aberto de ${brl(t.valorAberto)}?`, { okLabel: 'Baixar título' }))) return;
+    setBaixandoId(t.id);
+    try {
+      if (t.natureza === 'RECEITA') await financeiroApi.baixarReceber(t.id, { valor: t.valorAberto });
+      else await financeiroApi.baixarPagar(t.id, { valor: t.valorAberto });
+      toast('Título baixado.', 'success');
+      setDetalhe(null);
+      carregar();
+    } catch (e: any) {
+      toast(e?.response?.data?.message || 'Falha ao baixar o título.', 'error');
+    } finally {
+      setBaixandoId(null);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -822,7 +857,7 @@ function GestaoTitulos() {
           ))}
         </div>
         <div className="flex items-center gap-1.5">
-          {(['TODOS', 'PENDENTE', 'ATRASADO', 'PAGO'] as const).map((s) => (
+          {([['TODOS', 'Todos status'], ['ABERTO', 'Pendente'], ['VENCIDO', 'Atrasado'], ['PAGO', 'Pago']] as const).map(([s, rot]) => (
             <button
               key={s}
               onClick={() => setFiltroStatus(s)}
@@ -830,10 +865,16 @@ function GestaoTitulos() {
                 filtroStatus === s ? 'bg-amber-400 text-neutral-900' : 'bg-white border border-neutral-200 text-slate-600 hover:bg-neutral-50'
               }`}
             >
-              {s === 'TODOS' ? 'Todos status' : s.charAt(0) + s.slice(1).toLowerCase()}
+              {rot}
             </button>
           ))}
         </div>
+        <button
+          onClick={carregar}
+          className="flex items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-[13px] font-medium text-slate-600 hover:bg-neutral-50"
+        >
+          <RefreshCw className={`h-4 w-4 ${carregando ? 'animate-spin' : ''}`} /> Atualizar
+        </button>
       </div>
 
       {/* Tabela de títulos */}
@@ -844,30 +885,30 @@ function GestaoTitulos() {
               <tr className="bg-neutral-50 text-neutral-500 text-[11px] uppercase tracking-wide">
                 <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">Vencimento</th>
                 <th className="text-left font-semibold px-4 py-3 min-w-[220px]">Fornecedor / Cliente</th>
-                <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">Categoria</th>
+                <th className="text-left font-semibold px-4 py-3">Descrição</th>
                 <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">Natureza</th>
                 <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Valor</th>
+                <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Em aberto</th>
                 <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">Status</th>
                 <th className="text-right font-semibold px-4 py-3 whitespace-nowrap">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
-              {filtrados.length === 0 && (
+              {carregando ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-neutral-400 text-sm">
+                  <td colSpan={8} className="px-4 py-12 text-center text-neutral-400 text-sm">Carregando títulos…</td>
+                </tr>
+              ) : filtrados.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-4 py-12 text-center text-neutral-400 text-sm">
                     Nenhum título encontrado para os filtros selecionados.
                   </td>
                 </tr>
-              )}
-              {filtrados.map((t) => (
+              ) : filtrados.map((t) => (
                 <tr key={t.id} className="hover:bg-neutral-50/70 transition-colors">
-                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 tabular-nums">{t.venc}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-slate-600 tabular-nums">{dataLonga(t.dataVencimento)}</td>
                   <td className="px-4 py-3 font-medium text-slate-900">{t.parte}</td>
-                  <td className="px-4 py-3 text-slate-600">
-                    <span className="inline-block rounded-md bg-neutral-100 text-neutral-600 px-2 py-0.5 text-[12px]">
-                      {t.categoria}
-                    </span>
-                  </td>
+                  <td className="px-4 py-3 text-slate-600 truncate max-w-[240px]">{t.descricao || '—'}</td>
                   <td className="px-4 py-3 text-center">
                     <span
                       className={`inline-flex items-center gap-1 text-[12px] font-medium ${
@@ -879,23 +920,29 @@ function GestaoTitulos() {
                     </span>
                   </td>
                   <td className={`px-4 py-3 text-right tabular-nums font-semibold ${t.natureza === 'RECEITA' ? 'text-emerald-700' : 'text-slate-900'}`}>
-                    {brl(t.valor)}
+                    {brl(t.valorOriginal)}
                   </td>
+                  <td className="px-4 py-3 text-right tabular-nums text-slate-600">{brl(t.valorAberto)}</td>
                   <td className="px-4 py-3 text-center">
                     <TagStatus status={t.status} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-2">
-                      {t.status !== 'PAGO' ? (
+                      {emAberto(t) ? (
                         <button
-                          onClick={() => baixar(t.id)}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 text-neutral-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300"
+                          onClick={() => baixar(t)}
+                          disabled={baixandoId === t.id}
+                          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 text-neutral-900 px-3 py-1.5 text-[12px] font-semibold hover:bg-amber-300 disabled:opacity-40"
                         >
-                          <CheckCircle2 className="h-3.5 w-3.5" /> Baixar Título
+                          <CheckCircle2 className="h-3.5 w-3.5" /> {baixandoId === t.id ? 'Baixando…' : 'Baixar Título'}
                         </button>
-                      ) : (
+                      ) : t.status === 'PAGO' ? (
                         <span className="inline-flex items-center gap-1.5 text-[12px] text-emerald-600 font-medium px-3 py-1.5">
                           <CheckCircle2 className="h-3.5 w-3.5" /> Baixado
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[12px] text-neutral-400 font-medium px-3 py-1.5">
+                          <Ban className="h-3.5 w-3.5" /> Cancelado
                         </span>
                       )}
                       <button
@@ -914,18 +961,13 @@ function GestaoTitulos() {
       </div>
 
       {/* Drawer de detalhes */}
-      {detalhe && <DetalheTitulo titulo={detalhe} onClose={() => setDetalhe(null)} onBaixar={() => { baixar(detalhe.id); setDetalhe(null); }} />}
+      {detalhe && <DetalheTitulo titulo={detalhe} onClose={() => setDetalhe(null)} onBaixar={() => baixar(detalhe)} />}
     </div>
   );
 }
 
-function TagStatus({ status }: { status: StatusTitulo }) {
-  const cfg =
-    status === 'PAGO'
-      ? { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-100', icon: CheckCircle2, label: 'Pago' }
-      : status === 'ATRASADO'
-        ? { cls: 'bg-rose-50 text-rose-700 ring-rose-100', icon: AlertTriangle, label: 'Atrasado' }
-        : { cls: 'bg-amber-50 text-amber-700 ring-amber-100', icon: Clock, label: 'Pendente' };
+function TagStatus({ status }: { status: StatusConta }) {
+  const cfg = STATUS_META[status] || STATUS_META.ABERTO;
   const Icon = cfg.icon;
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium ring-1 ${cfg.cls}`}>
@@ -934,7 +976,7 @@ function TagStatus({ status }: { status: StatusTitulo }) {
   );
 }
 
-function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose: () => void; onBaixar: () => void }) {
+function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: TituloReal; onClose: () => void; onBaixar: () => void }) {
   return createPortal((
     <div className="fixed inset-0 z-[70]">
       <div className="absolute inset-0 bg-white/60 animate-backdrop" onClick={onClose} />
@@ -950,16 +992,17 @@ function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose:
           <div className="rounded-2xl bg-[#F6F5F2] border border-neutral-200 p-5">
             <p className="text-[12px] uppercase tracking-wider font-semibold text-neutral-500">Valor do título</p>
             <p className={`text-4xl font-semibold tabular-nums mt-1 ${titulo.natureza === 'RECEITA' ? 'text-emerald-700' : 'text-slate-900'}`}>
-              {brl(titulo.valor)}
+              {brl(titulo.valorOriginal)}
             </p>
           </div>
           <dl className="space-y-3 text-[13px]">
             <LinhaDet termo="Natureza" valor={titulo.natureza === 'RECEITA' ? 'Receita (a receber)' : 'Despesa (a pagar)'} />
-            <LinhaDet termo="Categoria" valor={titulo.categoria} />
-            <LinhaDet termo="Vencimento" valor={titulo.venc} />
-            <LinhaDet termo="Situação" valor={titulo.status.charAt(0) + titulo.status.slice(1).toLowerCase()} />
-            <LinhaDet termo="Centro de custo" valor={titulo.natureza === 'RECEITA' ? 'Comercial' : 'Suprimentos / Operação'} />
-            <LinhaDet termo="Forma prevista" valor="Boleto bancário · D+0" />
+            <LinhaDet termo={titulo.natureza === 'RECEITA' ? 'Cliente' : 'Fornecedor'} valor={titulo.parte} />
+            <LinhaDet termo="Descrição" valor={titulo.descricao || '—'} />
+            {titulo.numero && <LinhaDet termo="Número" valor={titulo.numero} />}
+            <LinhaDet termo="Vencimento" valor={dataLonga(titulo.dataVencimento)} />
+            <LinhaDet termo="Situação" valor={(STATUS_META[titulo.status] || STATUS_META.ABERTO).label} />
+            <LinhaDet termo="Em aberto" valor={brl(titulo.valorAberto)} />
           </dl>
         </div>
         <div className="border-t border-neutral-200 p-4 flex items-center gap-3">
@@ -969,7 +1012,7 @@ function DetalheTitulo({ titulo, onClose, onBaixar }: { titulo: Titulo; onClose:
           >
             Fechar
           </button>
-          {titulo.status !== 'PAGO' && (
+          {emAberto(titulo) && (
             <button
               onClick={onBaixar}
               className="flex-1 rounded-xl bg-amber-400 text-neutral-900 py-3 text-sm font-semibold hover:bg-amber-300 flex items-center justify-center gap-2"
