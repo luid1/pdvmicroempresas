@@ -22,9 +22,12 @@ services:
     region: virginia            # mais perto do Brasil dentre as regiões free
     rootDir: backend
     # --include=dev garante nest/prisma/typescript (devDependencies) no build,
-    # mesmo com NODE_ENV=production. O db push sincroniza o banco com o schema.
-    buildCommand: npm install --include=dev && npx prisma generate && npm run build && npx prisma db push --accept-data-loss
-    startCommand: node dist/src/main
+    # mesmo com NODE_ENV=production. NÃO usamos mais `db push --accept-data-loss`
+    # (destrutivo): o banco de produção já foi baselineado, então as migrations
+    # são aplicadas de forma controlada no start via `prisma migrate deploy`
+    # (start:deploy), que só aplica migrations NOVAS e nunca apaga dados.
+    buildCommand: npm install --include=dev && npx prisma generate && npm run build
+    startCommand: npm run start:deploy
     healthCheckPath: /api/v1/health/ready
     autoDeploy: true
     envVars:
