@@ -2078,7 +2078,17 @@ function ModalSenhaGerencial({
               onChange={(e) => setSenha(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && validar()}
               placeholder="••••••••"
-              type="password"
+              // NÃO usar type="password": isso faz o Chrome/gerenciadores oferecerem
+              // "salvar senha" toda vez, pois tratam como login de conta. Isto é só
+              // uma autorização de ação da loja. Mascaramos com CSS (text-security)
+              // e sinalizamos aos gerenciadores para ignorar o campo.
+              type="text"
+              name="lumin-autorizacao-gerencial"
+              autoComplete="off"
+              data-1p-ignore
+              data-lpignore="true"
+              data-form-type="other"
+              style={{ WebkitTextSecurity: 'disc' } as any}
               className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-center text-lg tracking-[0.3em] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
             />
           </div>
