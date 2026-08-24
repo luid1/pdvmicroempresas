@@ -90,6 +90,20 @@ export class ProvisionamentoService {
         },
       });
 
+      // Conta de CAIXA padrão — para o dono já abrir o caixa e vender no 1º acesso,
+      // sem precisar configurar nada. (O PDV também a cria sob demanda, mas criar
+      // aqui deixa o ambiente 100% pronto após o provisionamento.)
+      await tx.contaFinanceira.create({
+        data: {
+          tenantId: tenant.id,
+          filialId: filial.id,
+          nome: 'Caixa da Loja',
+          tipo: 'CAIXA',
+          padrao: true,
+          ativo: true,
+        },
+      });
+
       let adminRoleId = '';
       for (const rd of rolesDefs) {
         const role = await tx.role.create({
