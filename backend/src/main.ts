@@ -1,12 +1,31 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from 'helmet';
+import compression from 'compression';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
-import { AuditInterceptor } from './common/interceptors/audit.interceptor';
+import { validarAmbiente } from './common/config/env.validation';
+import { initObservabilidade } from './common/observability/sentry';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  // 1) Falha rápido se o ambiente estiver mal configurado (antes de abrir porta).
+  validarAmbiente();
+  // 2) Observabilidade opcional (só liga se houver SENTRY_DSN).
+  await initObservabilidade();
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { rawBody: true });
+
+  // Cabeçalhos de segurança (HSTS, noSniff, frameguard, etc.). CSP desligada para
+  // não quebrar o Swagger UI (/api/docs), que carrega assets inline.
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false }));
+  app.use(compression());
+
+  // Limite de tamanho do corpo — barra payloads gigantes (DoS). Uploads de arquivo
+  // passam pelo multer, então 2mb cobre JSON/urlencoded com folga.
+  app.useBodyParser('json', { limit: '2mb' });
+  app.useBodyParser('urlencoded', { extended: true, limit: '2mb' });
 
   // CORS:
   // - FRONTEND_URL definido  -> restringe à lista (separada por vírgula). Recomendado em produção.

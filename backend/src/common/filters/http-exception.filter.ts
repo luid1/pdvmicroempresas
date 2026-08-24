@@ -1,5 +1,6 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Response } from 'express';
+import { capturarExcecao } from '../observability/sentry';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -20,6 +21,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(`${req.method} ${req.url}`, exception instanceof Error ? exception.stack : String(exception));
+      // Reporta ao Sentry (no-op se SENTRY_DSN não estiver definido).
+      capturarExcecao(exception, {
+        method: req.method,
+        path: req.url,
+        tenantId: req.user?.tenantId,
+        userId: req.user?.id,
+      });
     }
 
     res.status(status).json({
