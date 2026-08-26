@@ -53,9 +53,9 @@ function referenciaPedido(c: ItemKdsApi['comanda']): string {
 }
 
 const COLUNAS: { etapa: Etapa; label: string; icon: React.ElementType; cor: string; dot: string }[] = [
-  { etapa: 'FILA',    label: 'Na fila',    icon: Clock,        cor: 'text-[#8B8D98]', dot: 'bg-[#8B8D98]' },
-  { etapa: 'PREPARO', label: 'Em preparo', icon: Flame,        cor: 'text-[#a9760a]', dot: 'bg-[#E8A317]' },
-  { etapa: 'PRONTO',  label: 'Pronto',     icon: CheckCircle2, cor: 'text-[#0b7d4e]', dot: 'bg-[#0b7d4e]' },
+  { etapa: 'FILA',    label: 'Na fila',    icon: Clock,        cor: 'text-[#8A90A0]', dot: 'bg-[#8A90A0]' },
+  { etapa: 'PREPARO', label: 'Em preparo', icon: Flame,        cor: 'text-[#0E86D4]', dot: 'bg-[#01B8FA]' },
+  { etapa: 'PRONTO',  label: 'Pronto',     icon: CheckCircle2, cor: 'text-[#2DD4A7]', dot: 'bg-[#2DD4A7]' },
 ];
 
 const PROXIMA: Record<Etapa, 'PREPARO' | 'PRONTO' | 'ENTREGUE'> = { FILA: 'PREPARO', PREPARO: 'PRONTO', PRONTO: 'ENTREGUE' };
@@ -139,30 +139,30 @@ export default function Cozinha() {
   }), [kds]);
 
   return (
-    <div className="flex flex-col h-full bg-[#F4F5F7]">
+    <div className="flex flex-col h-full bg-[#0C0D10]">
       {/* Topbar */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0 flex items-center justify-between gap-2.5">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 shrink-0 flex items-center justify-between gap-2.5">
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-[#01B8FA]/12 border border-[#01B8FA]/30 flex items-center justify-center">
-            <ChefHat className="h-4 w-4 text-[#0678a0]" />
+            <ChefHat className="h-4 w-4 text-[#01B8FA]" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Cozinha — Painel de Produção (KDS)</h1>
-            <p className="text-[11px] text-[#8B8D98]">Os pedidos entram pela esquerda e avançam até ficarem prontos</p>
+            <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Cozinha — Painel de Produção (KDS)</h1>
+            <p className="text-[11px] text-[#8A90A0]">Os pedidos entram pela esquerda e avançam até ficarem prontos</p>
           </div>
         </div>
         <button
           onClick={() => { setCarregando(true); void carregar(); }}
           disabled={busy || carregando}
           title="Atualizar cozinha"
-          className="h-9 w-9 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
+          className="h-9 w-9 rounded-lg bg-[#0C0D10] border border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {erro && (
-        <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+        <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-[#FF6B7A]/25 bg-[#FF6B7A]/12 px-3 py-2 text-[12px] text-[#FF6B7A]">
           <AlertCircle className="h-4 w-4 shrink-0" /> {erro}
         </div>
       )}
@@ -170,9 +170,9 @@ export default function Cozinha() {
       {/* Colunas */}
       <div className="flex-1 overflow-auto p-4">
         {!filialId ? (
-          <div className="text-center py-16 text-[#A0A2AD] text-sm">Selecione uma filial para ver a cozinha.</div>
+          <div className="text-center py-16 text-[#8A90A0] text-sm">Selecione uma filial para ver a cozinha.</div>
         ) : carregando ? (
-          <div className="flex items-center justify-center py-20 text-[#8B8D98] text-sm gap-2">
+          <div className="flex items-center justify-center py-20 text-[#8A90A0] text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando cozinha…
           </div>
         ) : (
@@ -186,33 +186,33 @@ export default function Cozinha() {
                       <span className={`h-2 w-2 rounded-full ${col.dot}`} />
                       <h2 className={`text-xs font-bold uppercase tracking-wide ${col.cor}`}>{col.label}</h2>
                     </div>
-                    <span className="text-[11px] font-bold text-[#8B8D98] bg-white border border-[#E7E5DF] rounded-full px-2 py-0.5">
+                    <span className="text-[11px] font-bold text-[#8A90A0] bg-[#101216] border border-[#23262F] rounded-full px-2 py-0.5">
                       {desta.length}
                     </span>
                   </div>
 
                   <div className="space-y-3">
                     {desta.map((p) => (
-                      <div key={p.chave} className="rounded-2xl border border-[#E7E5DF] bg-white p-3.5 shadow-sm">
+                      <div key={p.chave} className="rounded-2xl border border-[#23262F] bg-[#101216] p-3.5 shadow-sm">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-black text-[#16171D]">{p.origem}</span>
+                          <span className="text-sm font-black text-[#F7F8FA]">{p.origem}</span>
                           <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
-                            p.minutos >= 12 ? 'bg-rose-500/12 text-[#c3352b] border-rose-400/25' : 'bg-slate-500/10 text-[#5B5D69] border-[#E7E5DF]'
+                            p.minutos >= 12 ? 'bg-[#FF6B7A]/12 text-[#FF6B7A] border-[#FF6B7A]/25' : 'bg-[#16181F]/10 text-[#8A90A0] border-[#23262F]'
                           }`}>
                             <Timer className="h-3 w-3" /> {p.minutos} min
                           </span>
                         </div>
-                        <p className="text-[10px] text-[#A0A2AD] mt-0.5">
+                        <p className="text-[10px] text-[#8A90A0] mt-0.5">
                           Comanda #{p.numero} · entrou {primeiraHora[p.itemIds[0]] ?? ''}
                         </p>
 
                         <ul className="mt-2.5 space-y-1.5">
                           {p.itens.map((it) => (
                             <li key={it.id} className="flex items-start gap-2 text-[13px]">
-                              <span className="font-bold text-[#0678a0] shrink-0">{it.qtd}×</span>
-                              <span className="text-[#16171D]">
+                              <span className="font-bold text-[#01B8FA] shrink-0">{it.qtd}×</span>
+                              <span className="text-[#F7F8FA]">
                                 {it.descricao}
-                                {it.obs && <span className="block text-[11px] text-[#c3352b] font-medium">↳ {it.obs}</span>}
+                                {it.obs && <span className="block text-[11px] text-[#FF6B7A] font-medium">↳ {it.obs}</span>}
                               </span>
                             </li>
                           ))}
@@ -223,7 +223,7 @@ export default function Cozinha() {
                           disabled={busy}
                           className={`w-full mt-3 text-xs font-bold px-3 py-2 rounded-lg transition-colors disabled:opacity-50 ${
                             col.etapa === 'PRONTO'
-                              ? 'bg-emerald-500/12 text-[#0b7d4e] hover:bg-emerald-500/20'
+                              ? 'bg-[#2DD4A7]/12 text-[#2DD4A7] hover:bg-[#2DD4A7]/20'
                               : 'bg-[#01B8FA] text-[#062B38] hover:bg-[#3DC8FB]'
                           }`}
                         >
@@ -232,7 +232,7 @@ export default function Cozinha() {
                       </div>
                     ))}
                     {desta.length === 0 && (
-                      <div className="rounded-2xl border border-dashed border-[#E7E5DF] bg-white/50 py-8 text-center text-[11px] text-[#A0A2AD]">
+                      <div className="rounded-2xl border border-dashed border-[#23262F] bg-[#101216]/50 py-8 text-center text-[11px] text-[#8A90A0]">
                         Nada aqui.
                       </div>
                     )}

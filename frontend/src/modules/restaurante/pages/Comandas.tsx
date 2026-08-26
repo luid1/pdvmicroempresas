@@ -44,9 +44,9 @@ const num = (v: string | number | null | undefined) => Number(v ?? 0);
 const minutosDesde = (iso: string) => Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
 
 const ORIGEM_UI: Record<Origem, { label: string; chip: string }> = {
-  MESA:     { label: 'Mesa',     chip: 'bg-[#01B8FA]/12 text-[#0678a0] border-[#01B8FA]/25' },
-  BALCAO:   { label: 'Balcão',   chip: 'bg-emerald-500/12 text-[#0b7d4e] border-emerald-400/25' },
-  DELIVERY: { label: 'Delivery', chip: 'bg-amber-500/12 text-[#a9760a] border-[#E8A317]/30' },
+  MESA:     { label: 'Mesa',     chip: 'bg-[#01B8FA]/12 text-[#01B8FA] border-[#01B8FA]/25' },
+  BALCAO:   { label: 'Balcão',   chip: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/25' },
+  DELIVERY: { label: 'Delivery', chip: 'bg-[#01B8FA]/12 text-[#0E86D4] border-[#01B8FA]/30' },
 };
 
 function referencia(c: ComandaApi): string {
@@ -130,14 +130,14 @@ export default function Comandas() {
   return (
     <div className="flex flex-col h-full">
       {/* Topbar */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 shrink-0 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-[#01B8FA]/12 border border-[#01B8FA]/30 flex items-center justify-center">
-            <ClipboardCheck className="h-4 w-4 text-[#0678a0]" />
+            <ClipboardCheck className="h-4 w-4 text-[#01B8FA]" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Comandas abertas</h1>
-            <p className="text-[11px] text-[#8B8D98]">
+            <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Comandas abertas</h1>
+            <p className="text-[11px] text-[#8A90A0]">
               {comandas.length} abertas · {brl(totalAberto)} em consumo
             </p>
           </div>
@@ -147,17 +147,17 @@ export default function Comandas() {
             onClick={() => { setCarregando(true); void carregar(); }}
             disabled={busy || carregando}
             title="Atualizar"
-            className="h-9 w-9 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
+            className="h-9 w-9 rounded-lg bg-[#0C0D10] border border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
           </button>
           <div className="relative">
-            <Search className="h-3.5 w-3.5 text-[#A0A2AD] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="h-3.5 w-3.5 text-[#8A90A0] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Código ou mesa"
-              className="w-40 text-xs rounded-lg pl-8 pr-2 py-2 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#01B8FA]/50"
+              className="w-40 text-xs rounded-lg pl-8 pr-2 py-2 text-[#8A90A0] bg-[#0C0D10] border border-[#23262F] focus:outline-none focus:border-[#01B8FA]/50"
             />
           </div>
           <button
@@ -171,7 +171,7 @@ export default function Comandas() {
       </div>
 
       {/* Filtros */}
-      <div className="bg-[#FAFAF8] border-b border-[#E5E7EB] px-5 py-2 shrink-0 flex flex-wrap gap-1.5">
+      <div className="bg-[#0C0D10] border-b border-[#23262F] px-5 py-2 shrink-0 flex flex-wrap gap-1.5">
         {FILTROS.map((f) => {
           const ativo = filtro === f.id;
           return (
@@ -180,8 +180,8 @@ export default function Comandas() {
               onClick={() => setFiltro(f.id)}
               className={`text-[11px] px-3 py-1.5 rounded-lg border transition-all ${
                 ativo
-                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#0678a0] font-semibold'
-                  : 'bg-white border-[#E7E5DF] text-[#8B8D98] hover:border-[#01B8FA]/30'
+                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#01B8FA] font-semibold'
+                  : 'bg-[#101216] border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/30'
               }`}
             >
               {f.label}
@@ -191,7 +191,7 @@ export default function Comandas() {
       </div>
 
       {erro && (
-        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-[#FF6B7A]/25 bg-[#FF6B7A]/12 px-3 py-2 text-[12px] text-[#FF6B7A]">
           <AlertCircle className="h-4 w-4 shrink-0" /> {erro}
         </div>
       )}
@@ -199,9 +199,9 @@ export default function Comandas() {
       {/* Lista */}
       <div className="flex-1 overflow-auto p-5">
         {!filialId ? (
-          <div className="text-center py-16 text-[#A0A2AD] text-sm">Selecione uma filial para ver as comandas.</div>
+          <div className="text-center py-16 text-[#8A90A0] text-sm">Selecione uma filial para ver as comandas.</div>
         ) : carregando ? (
-          <div className="flex items-center justify-center py-20 text-[#8B8D98] text-sm gap-2">
+          <div className="flex items-center justify-center py-20 text-[#8A90A0] text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando comandas…
           </div>
         ) : (
@@ -211,35 +211,35 @@ export default function Comandas() {
               return (
                 <div
                   key={c.id}
-                  className="text-left rounded-2xl border border-[#E7E5DF] bg-white p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all"
+                  className="text-left rounded-2xl border border-[#23262F] bg-[#101216] p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-[11px] text-[#A0A2AD] font-mono">{c.codigo}</p>
-                      <h3 className="text-base font-black text-[#16171D] leading-tight">{c.referencia}</h3>
+                      <p className="text-[11px] text-[#8A90A0] font-num">{c.codigo}</p>
+                      <h3 className="text-base font-black text-[#F7F8FA] leading-tight">{c.referencia}</h3>
                     </div>
                     <span className={`inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border ${ui.chip}`}>
                       {ui.label}
                     </span>
                   </div>
 
-                  <div className="mt-3 flex items-center gap-3 text-[11px] text-[#8B8D98]">
+                  <div className="mt-3 flex items-center gap-3 text-[11px] text-[#8A90A0]">
                     <span className="flex items-center gap-1"><ClipboardCheck className="h-3.5 w-3.5" /> {c.itens} itens</span>
                     {c.pessoas ? <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" /> {c.pessoas}</span> : null}
                     <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> {c.abertaHa} min</span>
                   </div>
 
-                  <div className="mt-3 pt-3 border-t border-[#E7E5DF] flex items-center justify-between">
+                  <div className="mt-3 pt-3 border-t border-[#23262F] flex items-center justify-between">
                     {c.garcom
-                      ? <span className="text-[11px] text-[#A0A2AD]">Garçom: {c.garcom}</span>
-                      : <span className="text-[11px] text-[#A0A2AD]">Balcão</span>}
-                    <span className="text-lg font-black text-[#16171D]">{brl(c.total)}</span>
+                      ? <span className="text-[11px] text-[#8A90A0]">Garçom: {c.garcom}</span>
+                      : <span className="text-[11px] text-[#8A90A0]">Balcão</span>}
+                    <span className="text-lg font-black text-[#F7F8FA]">{brl(c.total)}</span>
                   </div>
                 </div>
               );
             })}
             {visiveis.length === 0 && (
-              <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
+              <div className="col-span-full text-center py-16 text-[#8A90A0] text-sm">
                 Nenhuma comanda aberta{filtro !== 'TODAS' ? ' neste filtro' : ''}.
               </div>
             )}

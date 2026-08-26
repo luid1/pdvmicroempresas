@@ -110,16 +110,16 @@ export default function CardapioDigital() {
   const remover = (u: string) => setCarrinho((p) => p.filter((c) => c.uid !== u));
 
   return (
-    <div className="flex flex-col h-full bg-[#F4F5F7]">
+    <div className="flex flex-col h-full bg-[#0C0D10]">
       {/* Cabeçalho estilo cliente */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0 flex items-center justify-between gap-3">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 shrink-0 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-[#01B8FA]/12 border border-[#01B8FA]/30 flex items-center justify-center">
-            <QrCode className="h-4 w-4 text-[#0678a0]" />
+            <QrCode className="h-4 w-4 text-[#01B8FA]" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Cardápio Digital</h1>
-            <p className="text-[11px] text-[#8B8D98]">Prévia do que o cliente vê ao ler o QR — Mesa 7</p>
+            <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Cardápio Digital</h1>
+            <p className="text-[11px] text-[#8A90A0]">Prévia do que o cliente vê ao ler o QR — Mesa 7</p>
           </div>
         </div>
         <button
@@ -136,7 +136,7 @@ export default function CardapioDigital() {
       </div>
 
       {/* Categorias */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-2 shrink-0 flex gap-1.5 overflow-x-auto">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-2 shrink-0 flex gap-1.5 overflow-x-auto">
         {CATEGORIAS.map((c) => {
           const Icon = c.icon;
           const ativo = cat === c.id;
@@ -146,8 +146,8 @@ export default function CardapioDigital() {
               onClick={() => setCat(c.id)}
               className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border whitespace-nowrap transition-all ${
                 ativo
-                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#0678a0]'
-                  : 'bg-white border-[#E7E5DF] text-[#8B8D98] hover:border-[#01B8FA]/30'
+                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#01B8FA]'
+                  : 'bg-[#101216] border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/30'
               }`}
             >
               <Icon className="h-3.5 w-3.5" /> {c.label}
@@ -163,22 +163,22 @@ export default function CardapioDigital() {
             <button
               key={i.id}
               onClick={() => setAberto(i)}
-              className="text-left rounded-2xl border border-[#E7E5DF] bg-white p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all flex gap-3"
+              className="text-left rounded-2xl border border-[#23262F] bg-[#101216] p-4 hover:border-[#01B8FA]/40 hover:shadow-md transition-all flex gap-3"
             >
-              <div className="h-14 w-14 rounded-xl bg-[#F6F5F2] flex items-center justify-center text-3xl shrink-0">
+              <div className="h-14 w-14 rounded-xl bg-[#0C0D10] flex items-center justify-center text-3xl shrink-0">
                 {i.emoji}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <h3 className="font-bold text-[#16171D] truncate">{i.nome}</h3>
+                  <h3 className="font-bold text-[#F7F8FA] truncate">{i.nome}</h3>
                   {i.meioAMeio && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#01B8FA]/12 text-[#0678a0] shrink-0">½+½</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#01B8FA]/12 text-[#01B8FA] shrink-0">½+½</span>
                   )}
                 </div>
-                <p className="text-[11px] text-[#8B8D98] leading-snug mt-0.5 line-clamp-2">{i.descricao}</p>
+                <p className="text-[11px] text-[#8A90A0] leading-snug mt-0.5 line-clamp-2">{i.descricao}</p>
                 <div className="flex items-center justify-between mt-2">
-                  <span className="text-sm font-black text-[#16171D]">{brl(i.preco)}</span>
-                  <span className="flex items-center gap-0.5 text-[11px] font-bold text-[#0678a0]">
+                  <span className="text-sm font-black text-[#F7F8FA]">{brl(i.preco)}</span>
+                  <span className="flex items-center gap-0.5 text-[11px] font-bold text-[#01B8FA]">
                     Personalizar <ChevronRight className="h-3.5 w-3.5" />
                   </span>
                 </div>
@@ -234,16 +234,16 @@ function ModalItem({
   return (
     <>
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onFechar} />
-      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-white z-50 shadow-xl flex flex-col">
-        <div className="px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-[#101216] z-50 shadow-xl flex flex-col">
+        <div className="px-5 py-4 border-b border-[#23262F] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-3xl">{item.emoji}</span>
             <div>
-              <h2 className="text-lg font-black text-[#16171D] leading-tight">{item.nome}</h2>
-              <p className="text-[11px] text-[#8B8D98]">{item.descricao}</p>
+              <h2 className="text-lg font-black text-[#F7F8FA] leading-tight">{item.nome}</h2>
+              <p className="text-[11px] text-[#8A90A0]">{item.descricao}</p>
             </div>
           </div>
-          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#F1F1F3] flex items-center justify-center text-[#8B8D98] shrink-0">
+          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#0C0D10] flex items-center justify-center text-[#8A90A0] shrink-0">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -252,15 +252,15 @@ function ModalItem({
           {/* Meio a meio */}
           {item.meioAMeio && (
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-[#8B8D98] mb-2">
+              <h3 className="text-xs font-bold uppercase tracking-wide text-[#8A90A0] mb-2">
                 Segundo sabor (meio a meio)
               </h3>
-              <p className="text-[11px] text-[#A0A2AD] mb-2">Opcional — cobramos o sabor mais caro.</p>
+              <p className="text-[11px] text-[#8A90A0] mb-2">Opcional — cobramos o sabor mais caro.</p>
               <div className="grid grid-cols-1 gap-1.5">
                 <button
                   onClick={() => setSegundo(undefined)}
                   className={`flex items-center justify-between text-sm px-3 py-2 rounded-lg border transition-all ${
-                    !segundo ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06] text-[#16171D] font-semibold' : 'border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40'
+                    !segundo ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06] text-[#F7F8FA] font-semibold' : 'border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40'
                   }`}
                 >
                   Inteira ({item.nome})
@@ -273,11 +273,11 @@ function ModalItem({
                       key={p.id}
                       onClick={() => setSegundo(p)}
                       className={`flex items-center justify-between text-sm px-3 py-2 rounded-lg border transition-all ${
-                        sel ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06] text-[#16171D] font-semibold' : 'border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40'
+                        sel ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06] text-[#F7F8FA] font-semibold' : 'border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40'
                       }`}
                     >
                       <span>½ {p.nome}</span>
-                      <span className="flex items-center gap-2 text-[11px] text-[#8B8D98]">
+                      <span className="flex items-center gap-2 text-[11px] text-[#8A90A0]">
                         {brl(p.preco)} {sel && <Check className="h-4 w-4 text-[#01B8FA]" />}
                       </span>
                     </button>
@@ -290,7 +290,7 @@ function ModalItem({
           {/* Adicionais */}
           {item.adicionais && item.adicionais.length > 0 && (
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-[#8B8D98] mb-2">Adicionais</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wide text-[#8A90A0] mb-2">Adicionais</h3>
               <div className="space-y-1.5">
                 {item.adicionais.map((a) => {
                   const sel = adic.some((x) => x.id === a.id);
@@ -299,16 +299,16 @@ function ModalItem({
                       key={a.id}
                       onClick={() => toggleAdic(a)}
                       className={`w-full flex items-center justify-between text-sm px-3 py-2 rounded-lg border transition-all ${
-                        sel ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06]' : 'border-[#E7E5DF] hover:border-[#01B8FA]/40'
+                        sel ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06]' : 'border-[#23262F] hover:border-[#01B8FA]/40'
                       }`}
                     >
-                      <span className={`flex items-center gap-2 ${sel ? 'text-[#16171D] font-semibold' : 'text-[#5B5D69]'}`}>
-                        <span className={`h-4 w-4 rounded border flex items-center justify-center ${sel ? 'bg-[#01B8FA] border-[#01B8FA]' : 'border-[#C7C9D2]'}`}>
+                      <span className={`flex items-center gap-2 ${sel ? 'text-[#F7F8FA] font-semibold' : 'text-[#8A90A0]'}`}>
+                        <span className={`h-4 w-4 rounded border flex items-center justify-center ${sel ? 'bg-[#01B8FA] border-[#01B8FA]' : 'border-[#5E6472]'}`}>
                           {sel && <Check className="h-3 w-3 text-white" />}
                         </span>
                         {a.nome}
                       </span>
-                      <span className="text-[11px] font-bold text-[#0678a0]">+ {brl(a.preco)}</span>
+                      <span className="text-[11px] font-bold text-[#01B8FA]">+ {brl(a.preco)}</span>
                     </button>
                   );
                 })}
@@ -318,25 +318,25 @@ function ModalItem({
 
           {/* Observação */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wide text-[#8B8D98] mb-2">Observação</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wide text-[#8A90A0] mb-2">Observação</h3>
             <textarea
               value={obs}
               onChange={(e) => setObs(e.target.value)}
               placeholder="Ex.: sem cebola, ponto da carne, etc."
               rows={2}
-              className="w-full text-sm rounded-lg px-3 py-2 text-[#16171D] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#01B8FA]/50 resize-none"
+              className="w-full text-sm rounded-lg px-3 py-2 text-[#F7F8FA] bg-[#0C0D10] border border-[#23262F] focus:outline-none focus:border-[#01B8FA]/50 resize-none"
             />
           </div>
         </div>
 
         {/* Rodapé: quantidade + adicionar */}
-        <div className="px-5 py-4 border-t border-[#E5E7EB] flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-[#E7E5DF] px-1">
-            <button onClick={() => setQtd((q) => Math.max(1, q - 1))} className="h-8 w-8 flex items-center justify-center text-[#5B5D69] hover:text-[#16171D]">
+        <div className="px-5 py-4 border-t border-[#23262F] flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-lg border border-[#23262F] px-1">
+            <button onClick={() => setQtd((q) => Math.max(1, q - 1))} className="h-8 w-8 flex items-center justify-center text-[#8A90A0] hover:text-[#F7F8FA]">
               <Minus className="h-4 w-4" />
             </button>
-            <span className="w-6 text-center font-bold text-[#16171D]">{qtd}</span>
-            <button onClick={() => setQtd((q) => q + 1)} className="h-8 w-8 flex items-center justify-center text-[#5B5D69] hover:text-[#16171D]">
+            <span className="w-6 text-center font-bold text-[#F7F8FA]">{qtd}</span>
+            <button onClick={() => setQtd((q) => q + 1)} className="h-8 w-8 flex items-center justify-center text-[#8A90A0] hover:text-[#F7F8FA]">
               <Plus className="h-4 w-4" />
             </button>
           </div>
@@ -369,12 +369,12 @@ function Carrinho({
   return (
     <>
       <div className="fixed inset-0 bg-black/30 z-40" onClick={onFechar} />
-      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-white z-50 shadow-xl flex flex-col">
-        <div className="px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
-          <h2 className="text-lg font-black text-[#16171D] flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5 text-[#0678a0]" /> Seu pedido
+      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[420px] bg-[#101216] z-50 shadow-xl flex flex-col">
+        <div className="px-5 py-4 border-b border-[#23262F] flex items-center justify-between">
+          <h2 className="text-lg font-black text-[#F7F8FA] flex items-center gap-2">
+            <ShoppingBag className="h-5 w-5 text-[#01B8FA]" /> Seu pedido
           </h2>
-          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#F1F1F3] flex items-center justify-center text-[#8B8D98]">
+          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#0C0D10] flex items-center justify-center text-[#8A90A0]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -382,62 +382,62 @@ function Carrinho({
         <div className="flex-1 overflow-auto px-5 py-4 space-y-3">
           {itens.length === 0 && (
             <div className="h-full flex flex-col items-center justify-center text-center py-16">
-              <ShoppingBag className="h-10 w-10 text-[#D7D8DE]" />
-              <p className="text-sm text-[#A0A2AD] mt-3">Seu carrinho está vazio.</p>
+              <ShoppingBag className="h-10 w-10 text-[#5E6472]" />
+              <p className="text-sm text-[#8A90A0] mt-3">Seu carrinho está vazio.</p>
             </div>
           )}
           {itens.map((c) => (
-            <div key={c.uid} className="rounded-xl border border-[#E7E5DF] bg-white p-3">
+            <div key={c.uid} className="rounded-xl border border-[#23262F] bg-[#101216] p-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="font-bold text-[#16171D] text-sm">
+                  <p className="font-bold text-[#F7F8FA] text-sm">
                     {c.segundoSabor ? `½ ${c.base.nome} + ½ ${c.segundoSabor.nome}` : c.base.nome}
                   </p>
                   {c.adicionais.length > 0 && (
-                    <p className="text-[11px] text-[#8B8D98]">+ {c.adicionais.map((a) => a.nome).join(', ')}</p>
+                    <p className="text-[11px] text-[#8A90A0]">+ {c.adicionais.map((a) => a.nome).join(', ')}</p>
                   )}
-                  {c.obs && <p className="text-[11px] text-[#c3352b]">↳ {c.obs}</p>}
+                  {c.obs && <p className="text-[11px] text-[#FF6B7A]">↳ {c.obs}</p>}
                 </div>
-                <button onClick={() => onRemover(c.uid)} className="text-[#C7C9D2] hover:text-[#c3352b] shrink-0">
+                <button onClick={() => onRemover(c.uid)} className="text-[#5E6472] hover:text-[#FF6B7A] shrink-0">
                   <X className="h-4 w-4" />
                 </button>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-1.5 rounded-lg border border-[#E7E5DF] px-1">
-                  <button onClick={() => onQtd(c.uid, -1)} className="h-7 w-7 flex items-center justify-center text-[#5B5D69]"><Minus className="h-3.5 w-3.5" /></button>
-                  <span className="w-5 text-center text-sm font-bold text-[#16171D]">{c.qtd}</span>
-                  <button onClick={() => onQtd(c.uid, 1)} className="h-7 w-7 flex items-center justify-center text-[#5B5D69]"><Plus className="h-3.5 w-3.5" /></button>
+                <div className="flex items-center gap-1.5 rounded-lg border border-[#23262F] px-1">
+                  <button onClick={() => onQtd(c.uid, -1)} className="h-7 w-7 flex items-center justify-center text-[#8A90A0]"><Minus className="h-3.5 w-3.5" /></button>
+                  <span className="w-5 text-center text-sm font-bold text-[#F7F8FA]">{c.qtd}</span>
+                  <button onClick={() => onQtd(c.uid, 1)} className="h-7 w-7 flex items-center justify-center text-[#8A90A0]"><Plus className="h-3.5 w-3.5" /></button>
                 </div>
-                <span className="font-black text-[#16171D]">{brl(c.unit * c.qtd)}</span>
+                <span className="font-black text-[#F7F8FA]">{brl(c.unit * c.qtd)}</span>
               </div>
             </div>
           ))}
         </div>
 
         {itens.length > 0 && (
-          <div className="border-t border-[#E5E7EB] px-5 py-4 space-y-2">
-            <div className="flex items-center justify-between text-sm text-[#5B5D69]">
+          <div className="border-t border-[#23262F] px-5 py-4 space-y-2">
+            <div className="flex items-center justify-between text-sm text-[#8A90A0]">
               <span>Subtotal</span><span>{brl(subtotal)}</span>
             </div>
             <button
               onClick={() => onTaxa(!taxaServico)}
-              className="w-full flex items-center justify-between text-sm text-[#5B5D69]"
+              className="w-full flex items-center justify-between text-sm text-[#8A90A0]"
             >
               <span className="flex items-center gap-2">
-                <span className={`h-4 w-4 rounded border flex items-center justify-center ${taxaServico ? 'bg-[#01B8FA] border-[#01B8FA]' : 'border-[#C7C9D2]'}`}>
+                <span className={`h-4 w-4 rounded border flex items-center justify-center ${taxaServico ? 'bg-[#01B8FA] border-[#01B8FA]' : 'border-[#5E6472]'}`}>
                   {taxaServico && <Check className="h-3 w-3 text-white" />}
                 </span>
                 Taxa de serviço (10%)
               </span>
               <span>{brl(taxa)}</span>
             </button>
-            <div className="flex items-center justify-between text-lg font-black text-[#16171D] pt-2 border-t border-[#E7E5DF]">
+            <div className="flex items-center justify-between text-lg font-black text-[#F7F8FA] pt-2 border-t border-[#23262F]">
               <span>Total</span><span>{brl(total)}</span>
             </div>
             <button className="w-full mt-2 text-sm font-bold px-4 py-3 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors">
               Enviar pedido para a cozinha
             </button>
-            <p className="text-center text-[10px] text-[#A0A2AD]">
+            <p className="text-center text-[10px] text-[#8A90A0]">
               Prévia — no ar, o pedido cai na comanda da mesa e no painel da cozinha.
             </p>
           </div>

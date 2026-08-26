@@ -69,10 +69,10 @@ const brl = (v: number) =>
 const num = (v: string | number | null | undefined) => Number(v ?? 0);
 
 const STATUS_UI: Record<StatusMesa, { label: string; dot: string; card: string; chip: string }> = {
-  LIVRE:     { label: 'Livre',     dot: 'bg-[#0b7d4e]',  card: 'border-[#E7E5DF] bg-white hover:border-[#01B8FA]/40', chip: 'bg-emerald-500/12 text-[#0b7d4e] border-emerald-400/25' },
-  OCUPADA:   { label: 'Ocupada',   dot: 'bg-[#01B8FA]',  card: 'border-[#01B8FA]/30 bg-[#01B8FA]/[0.05]',            chip: 'bg-[#01B8FA]/12 text-[#0678a0] border-[#01B8FA]/25' },
-  CONTA:     { label: 'Fechando',  dot: 'bg-[#E8A317]',  card: 'border-[#E8A317]/40 bg-amber-400/[0.06]',            chip: 'bg-amber-500/12 text-[#a9760a] border-[#E8A317]/30' },
-  RESERVADA: { label: 'Reservada', dot: 'bg-[#8B8D98]',  card: 'border-[#E7E5DF] bg-[#F6F5F2]',                      chip: 'bg-slate-500/10 text-[#5B5D69] border-[#E7E5DF]' },
+  LIVRE:     { label: 'Livre',     dot: 'bg-[#2DD4A7]',  card: 'border-[#23262F] bg-[#101216] hover:border-[#01B8FA]/40', chip: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/25' },
+  OCUPADA:   { label: 'Ocupada',   dot: 'bg-[#01B8FA]',  card: 'border-[#01B8FA]/30 bg-[#01B8FA]/[0.05]',            chip: 'bg-[#01B8FA]/12 text-[#01B8FA] border-[#01B8FA]/25' },
+  CONTA:     { label: 'Fechando',  dot: 'bg-[#FF9F45]',  card: 'border-[#FF9F45]/40 bg-[#FF9F45]/[0.06]',            chip: 'bg-[#FF9F45]/12 text-[#FF9F45] border-[#FF9F45]/30' },
+  RESERVADA: { label: 'Reservada', dot: 'bg-[#8A90A0]',  card: 'border-[#23262F] bg-[#0C0D10]',                      chip: 'bg-[#16181F] text-[#8A90A0] border-[#23262F]' },
 };
 
 /** Menu rápido do garçom — os itens mais lançados, para bater na comanda num toque. */
@@ -238,14 +238,14 @@ export default function Mesas() {
   return (
     <div className="flex flex-col h-full">
       {/* Topbar */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0 flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 shrink-0 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="h-9 w-9 rounded-xl bg-[#01B8FA]/12 border border-[#01B8FA]/30 flex items-center justify-center">
-            <LayoutGrid className="h-4 w-4 text-[#0678a0]" />
+            <LayoutGrid className="h-4 w-4 text-[#01B8FA]" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Mapa de Mesas</h1>
-            <p className="text-[11px] text-[#8B8D98]">Salão em tempo real — toque numa mesa para abrir a comanda</p>
+            <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Mapa de Mesas</h1>
+            <p className="text-[11px] text-[#8A90A0]">Salão em tempo real — toque numa mesa para abrir a comanda</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -253,17 +253,17 @@ export default function Mesas() {
             onClick={() => { setCarregando(true); void carregar(); }}
             disabled={busy || carregando}
             title="Atualizar salão"
-            className="h-9 w-9 rounded-lg bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
+            className="h-9 w-9 rounded-lg bg-[#0C0D10] border border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40 flex items-center justify-center disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${carregando ? 'animate-spin' : ''}`} />
           </button>
           <div className="relative">
-            <Search className="h-3.5 w-3.5 text-[#A0A2AD] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <Search className="h-3.5 w-3.5 text-[#8A90A0] absolute left-2.5 top-1/2 -translate-y-1/2" />
             <input
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Nº da mesa"
-              className="w-28 text-xs rounded-lg pl-8 pr-2 py-2 text-[#5B5D69] bg-[#F6F5F2] border border-[#E7E5DF] focus:outline-none focus:border-[#01B8FA]/50"
+              className="w-28 text-xs rounded-lg pl-8 pr-2 py-2 text-[#8A90A0] bg-[#0C0D10] border border-[#23262F] focus:outline-none focus:border-[#01B8FA]/50"
             />
           </div>
           <button
@@ -277,15 +277,15 @@ export default function Mesas() {
       </div>
 
       {/* Resumo */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-2.5 shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <ResumoKpi icon={CheckCircle2} cor="text-[#0b7d4e]" titulo="Mesas livres" valor={String(resumo.livres)} />
-        <ResumoKpi icon={LayoutGrid} cor="text-[#0678a0]" titulo="Mesas ocupadas" valor={String(resumo.ocupadas)} />
-        <ResumoKpi icon={Users} cor="text-[#5B5D69]" titulo="Pessoas no salão" valor={String(resumo.pessoas)} />
-        <ResumoKpi icon={Receipt} cor="text-[#a9760a]" titulo="Consumo aberto" valor={brl(resumo.consumo)} />
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-2.5 shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <ResumoKpi icon={CheckCircle2} cor="text-[#2DD4A7]" titulo="Mesas livres" valor={String(resumo.livres)} />
+        <ResumoKpi icon={LayoutGrid} cor="text-[#01B8FA]" titulo="Mesas ocupadas" valor={String(resumo.ocupadas)} />
+        <ResumoKpi icon={Users} cor="text-[#8A90A0]" titulo="Pessoas no salão" valor={String(resumo.pessoas)} />
+        <ResumoKpi icon={Receipt} cor="text-[#0E86D4]" titulo="Consumo aberto" valor={brl(resumo.consumo)} />
       </div>
 
       {/* Filtros */}
-      <div className="bg-[#FAFAF8] border-b border-[#E5E7EB] px-5 py-2 shrink-0 flex flex-wrap gap-1.5">
+      <div className="bg-[#0C0D10] border-b border-[#23262F] px-5 py-2 shrink-0 flex flex-wrap gap-1.5">
         {FILTROS.map((f) => {
           const ativo = filtro === f.id;
           return (
@@ -294,8 +294,8 @@ export default function Mesas() {
               onClick={() => setFiltro(f.id)}
               className={`text-[11px] px-3 py-1.5 rounded-lg border transition-all ${
                 ativo
-                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#0678a0] font-semibold'
-                  : 'bg-white border-[#E7E5DF] text-[#8B8D98] hover:border-[#01B8FA]/30'
+                  ? 'bg-[#01B8FA]/[0.14] border-[#01B8FA]/40 text-[#01B8FA] font-semibold'
+                  : 'bg-[#101216] border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/30'
               }`}
             >
               {f.label}
@@ -305,7 +305,7 @@ export default function Mesas() {
       </div>
 
       {erro && (
-        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-[12px] text-red-700">
+        <div className="mx-5 mt-3 flex items-center gap-2 rounded-lg border border-[#FF6B7A]/25 bg-[#FF6B7A]/12 px-3 py-2 text-[12px] text-[#FF6B7A]">
           <AlertCircle className="h-4 w-4 shrink-0" /> {erro}
         </div>
       )}
@@ -313,16 +313,16 @@ export default function Mesas() {
       {/* Grade de mesas */}
       <div className="flex-1 overflow-auto p-5">
         {!filialId ? (
-          <div className="text-center py-16 text-[#A0A2AD] text-sm">Selecione uma filial para ver o salão.</div>
+          <div className="text-center py-16 text-[#8A90A0] text-sm">Selecione uma filial para ver o salão.</div>
         ) : carregando ? (
-          <div className="flex items-center justify-center py-20 text-[#8B8D98] text-sm gap-2">
+          <div className="flex items-center justify-center py-20 text-[#8A90A0] text-sm gap-2">
             <Loader2 className="h-4 w-4 animate-spin" /> Carregando salão…
           </div>
         ) : mesasApi.length === 0 ? (
           <div className="max-w-md mx-auto text-center py-16">
-            <LayoutGrid className="h-8 w-8 text-[#C7C9D2] mx-auto" />
-            <p className="text-[15px] font-semibold text-[#16171D] mt-3">Nenhuma mesa cadastrada ainda</p>
-            <p className="text-sm text-[#8B8D98] mt-1">Crie o salão para começar a lançar comandas. Você pode ajustar depois.</p>
+            <LayoutGrid className="h-8 w-8 text-[#5E6472] mx-auto" />
+            <p className="text-[15px] font-semibold text-[#F7F8FA] mt-3">Nenhuma mesa cadastrada ainda</p>
+            <p className="text-sm text-[#8A90A0] mt-1">Crie o salão para começar a lançar comandas. Você pode ajustar depois.</p>
             <div className="flex items-center justify-center gap-2 mt-4">
               <button
                 onClick={() => criarMesas(8)}
@@ -334,7 +334,7 @@ export default function Mesas() {
               <button
                 onClick={() => criarMesas(1)}
                 disabled={busy}
-                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#F6F5F2] border border-[#E7E5DF] text-[#5B5D69] hover:border-[#01B8FA]/40 transition-colors disabled:opacity-50"
+                className="text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#0C0D10] border border-[#23262F] text-[#8A90A0] hover:border-[#01B8FA]/40 transition-colors disabled:opacity-50"
               >
                 + 1 mesa
               </button>
@@ -351,28 +351,28 @@ export default function Mesas() {
                   className={`text-left rounded-2xl border p-4 transition-all hover:shadow-md ${ui.card}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-black text-[#16171D] leading-none">{m.numero}</span>
+                    <span className="text-2xl font-black text-[#F7F8FA] leading-none">{m.numero}</span>
                     <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${ui.chip}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${ui.dot}`} /> {ui.label}
                     </span>
                   </div>
-                  <div className="mt-3 flex items-center gap-1 text-[11px] text-[#8B8D98]">
+                  <div className="mt-3 flex items-center gap-1 text-[11px] text-[#8A90A0]">
                     <Users className="h-3.5 w-3.5" /> {m.lugares} lugares
                   </div>
                   {(m.status === 'OCUPADA' || m.status === 'CONTA') && m.comanda && (
-                    <div className="mt-2 pt-2 border-t border-[#E7E5DF] space-y-1">
+                    <div className="mt-2 pt-2 border-t border-[#23262F] space-y-1">
                       <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-[#8B8D98] flex items-center gap-1"><Clock className="h-3 w-3" /> {m.comanda.abertaHa} min</span>
-                        <span className="font-bold text-[#16171D]">{brl(m.comanda.total)}</span>
+                        <span className="text-[#8A90A0] flex items-center gap-1"><Clock className="h-3 w-3" /> {m.comanda.abertaHa} min</span>
+                        <span className="font-bold text-[#F7F8FA]">{brl(m.comanda.total)}</span>
                       </div>
-                      {m.comanda.garcom && <p className="text-[10px] text-[#A0A2AD]">Garçom: {m.comanda.garcom}</p>}
+                      {m.comanda.garcom && <p className="text-[10px] text-[#8A90A0]">Garçom: {m.comanda.garcom}</p>}
                     </div>
                   )}
                 </button>
               );
             })}
             {visiveis.length === 0 && (
-              <div className="col-span-full text-center py-16 text-[#A0A2AD] text-sm">
+              <div className="col-span-full text-center py-16 text-[#8A90A0] text-sm">
                 Nenhuma mesa neste filtro.
               </div>
             )}
@@ -401,11 +401,11 @@ function ResumoKpi({
   icon: Icon, cor, titulo, valor,
 }: { icon: React.ElementType; cor: string; titulo: string; valor: string }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl bg-[#F6F5F2] border border-[#E7E5DF] px-3 py-2">
+    <div className="flex items-center gap-2.5 rounded-xl bg-[#0C0D10] border border-[#23262F] px-3 py-2">
       <Icon className={`h-4 w-4 ${cor}`} />
       <div>
-        <p className="text-[10px] text-[#8B8D98] uppercase tracking-wide leading-none">{titulo}</p>
-        <p className="text-sm font-bold text-[#16171D] mt-0.5">{valor}</p>
+        <p className="text-[10px] text-[#8A90A0] uppercase tracking-wide leading-none">{titulo}</p>
+        <p className="text-sm font-bold text-[#F7F8FA] mt-0.5">{valor}</p>
       </div>
     </div>
   );
@@ -431,13 +431,13 @@ function DetalheMesa({
   return (
     <>
       <div className="fixed inset-0 bg-black/20 z-40" onClick={onFechar} />
-      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-white border-l border-[#E5E7EB] z-50 shadow-xl flex flex-col">
-        <div className="px-5 py-4 border-b border-[#E5E7EB] flex items-center justify-between">
+      <aside className="fixed right-0 top-0 bottom-0 w-full sm:w-[400px] bg-[#101216] border-l border-[#23262F] z-50 shadow-xl flex flex-col">
+        <div className="px-5 py-4 border-b border-[#23262F] flex items-center justify-between">
           <div>
-            <p className="text-[11px] text-[#8B8D98]">Mesa</p>
-            <h2 className="text-xl font-black text-[#16171D] leading-none">Nº {mesa.numero}</h2>
+            <p className="text-[11px] text-[#8A90A0]">Mesa</p>
+            <h2 className="text-xl font-black text-[#F7F8FA] leading-none">Nº {mesa.numero}</h2>
           </div>
-          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#F1F1F3] flex items-center justify-center text-[#8B8D98]">
+          <button onClick={onFechar} className="h-8 w-8 rounded-lg hover:bg-[#0C0D10] flex items-center justify-center text-[#8A90A0]">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -457,28 +457,28 @@ function DetalheMesa({
           {aberta ? (
             <>
               {/* Itens já lançados */}
-              <div className="rounded-xl border border-[#E7E5DF] bg-white overflow-hidden">
-                <div className="px-3.5 py-2 bg-[#F6F5F2] border-b border-[#E7E5DF] flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wide text-[#8B8D98]">Comanda</span>
-                  <span className="text-[11px] text-[#A0A2AD]">{itens.reduce((s, i) => s + i.qtd, 0)} itens</span>
+              <div className="rounded-xl border border-[#23262F] bg-[#101216] overflow-hidden">
+                <div className="px-3.5 py-2 bg-[#0C0D10] border-b border-[#23262F] flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-[#8A90A0]">Comanda</span>
+                  <span className="text-[11px] text-[#8A90A0]">{itens.reduce((s, i) => s + i.qtd, 0)} itens</span>
                 </div>
                 {itens.length === 0 ? (
-                  <p className="px-3.5 py-6 text-center text-sm text-[#A0A2AD]">Nenhum item ainda. Use o menu rápido abaixo.</p>
+                  <p className="px-3.5 py-6 text-center text-sm text-[#8A90A0]">Nenhum item ainda. Use o menu rápido abaixo.</p>
                 ) : (
-                  <ul className="divide-y divide-[#F1F1F3]">
+                  <ul className="divide-y divide-[#23262F]">
                     {itens.map((i) => (
                       <li key={i.descricao} className="px-3.5 py-2.5 flex items-center justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-sm text-[#16171D] font-medium truncate">{i.descricao}</p>
-                          <p className="text-[11px] text-[#8B8D98]">{i.qtd} × {brl(i.preco)}</p>
+                          <p className="text-sm text-[#F7F8FA] font-medium truncate">{i.descricao}</p>
+                          <p className="text-[11px] text-[#8A90A0]">{i.qtd} × {brl(i.preco)}</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <span className="text-sm font-bold text-[#16171D] w-16 text-right">{brl(i.preco * i.qtd)}</span>
+                          <span className="text-sm font-bold text-[#F7F8FA] w-16 text-right">{brl(i.preco * i.qtd)}</span>
                           {mesa.status === 'OCUPADA' && (
                             <button
                               onClick={() => onTirarItem(i.ids[i.ids.length - 1])}
                               disabled={busy}
-                              className="h-6 w-6 rounded-md bg-[#F1F1F3] hover:bg-[#E7E5DF] text-[#8B8D98] flex items-center justify-center disabled:opacity-50"
+                              className="h-6 w-6 rounded-md bg-[#0C0D10] hover:bg-[#23262F] text-[#8A90A0] flex items-center justify-center disabled:opacity-50"
                               title="Remover uma unidade"
                             >
                               {i.qtd > 1 ? <Minus className="h-3 w-3" /> : <Trash2 className="h-3 w-3" />}
@@ -489,26 +489,26 @@ function DetalheMesa({
                     ))}
                   </ul>
                 )}
-                <div className="px-3.5 py-2.5 border-t border-[#E7E5DF] flex items-center justify-between bg-[#FAFAF8]">
-                  <span className="text-sm text-[#5B5D69]">Total</span>
-                  <span className="text-lg font-black text-[#16171D]">{brl(total)}</span>
+                <div className="px-3.5 py-2.5 border-t border-[#23262F] flex items-center justify-between bg-[#0C0D10]">
+                  <span className="text-sm text-[#8A90A0]">Total</span>
+                  <span className="text-lg font-black text-[#F7F8FA]">{brl(total)}</span>
                 </div>
               </div>
 
               {/* Menu rápido */}
               {mesa.status === 'OCUPADA' && (
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-[#8B8D98] mb-1.5">Menu rápido</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-[#8A90A0] mb-1.5">Menu rápido</p>
                   <div className="grid grid-cols-2 gap-1.5">
                     {MENU_RAPIDO.map((item) => (
                       <button
                         key={item.nome}
                         onClick={() => onAddItem(item)}
                         disabled={busy}
-                        className="text-left rounded-lg border border-[#E7E5DF] bg-white px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors disabled:opacity-50"
+                        className="text-left rounded-lg border border-[#23262F] bg-[#101216] px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors disabled:opacity-50"
                       >
-                        <p className="text-[12px] text-[#16171D] font-medium leading-tight truncate">{item.nome}</p>
-                        <p className="text-[11px] text-[#8B8D98]">{brl(item.preco)}</p>
+                        <p className="text-[12px] text-[#F7F8FA] font-medium leading-tight truncate">{item.nome}</p>
+                        <p className="text-[11px] text-[#8A90A0]">{brl(item.preco)}</p>
                       </button>
                     ))}
                   </div>
@@ -516,19 +516,19 @@ function DetalheMesa({
               )}
             </>
           ) : mesa.status === 'RESERVADA' ? (
-            <div className="rounded-xl border border-dashed border-[#E7E5DF] bg-[#FAFAF8] p-6 text-center">
-              <LayoutGrid className="h-6 w-6 text-[#C7C9D2] mx-auto" />
-              <p className="text-sm text-[#8B8D98] mt-2">Mesa reservada.</p>
+            <div className="rounded-xl border border-dashed border-[#23262F] bg-[#0C0D10] p-6 text-center">
+              <LayoutGrid className="h-6 w-6 text-[#5E6472] mx-auto" />
+              <p className="text-sm text-[#8A90A0] mt-2">Mesa reservada.</p>
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-[#E7E5DF] bg-[#FAFAF8] p-6 text-center">
-              <LayoutGrid className="h-6 w-6 text-[#C7C9D2] mx-auto" />
-              <p className="text-sm text-[#8B8D98] mt-2">Mesa livre — abra a comanda para começar a lançar.</p>
+            <div className="rounded-xl border border-dashed border-[#23262F] bg-[#0C0D10] p-6 text-center">
+              <LayoutGrid className="h-6 w-6 text-[#5E6472] mx-auto" />
+              <p className="text-sm text-[#8A90A0] mt-2">Mesa livre — abra a comanda para começar a lançar.</p>
             </div>
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-[#E5E7EB] flex gap-2">
+        <div className="px-5 py-4 border-t border-[#23262F] flex gap-2">
           {mesa.status === 'LIVRE' ? (
             <button
               onClick={onAbrir}
@@ -541,7 +541,7 @@ function DetalheMesa({
             <button
               onClick={onPedirConta}
               disabled={busy || itens.length === 0}
-              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#E8A317] hover:bg-[#d6960f] text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#062B38] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Pedir a conta
             </button>
@@ -549,12 +549,12 @@ function DetalheMesa({
             <button
               onClick={onFecharConta}
               disabled={busy}
-              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#0b7d4e] hover:bg-[#0a6b43] text-white transition-colors disabled:opacity-50"
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#2DD4A7] hover:bg-[#0a6b43] text-white transition-colors disabled:opacity-50"
             >
               Fechar conta • {brl(total)}
             </button>
           ) : (
-            <button className="flex-1 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#F1F1F3] text-[#5B5D69]">
+            <button className="flex-1 text-sm font-semibold px-4 py-2.5 rounded-xl bg-[#0C0D10] text-[#8A90A0]">
               —
             </button>
           )}
@@ -566,9 +566,9 @@ function DetalheMesa({
 
 function MiniInfo({ titulo, valor }: { titulo: string; valor: string }) {
   return (
-    <div className="rounded-lg border border-[#E7E5DF] bg-white px-3 py-2">
-      <p className="text-[10px] text-[#8B8D98] uppercase tracking-wide leading-none">{titulo}</p>
-      <p className="text-sm font-bold text-[#16171D] mt-1">{valor}</p>
+    <div className="rounded-lg border border-[#23262F] bg-[#101216] px-3 py-2">
+      <p className="text-[10px] text-[#8A90A0] uppercase tracking-wide leading-none">{titulo}</p>
+      <p className="text-sm font-bold text-[#F7F8FA] mt-1">{valor}</p>
     </div>
   );
 }
