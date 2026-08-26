@@ -38,28 +38,28 @@ export default function FluxoCaixa() {
   const maxBar = Math.max(1, ...periodos.map(p => Math.max(p.entradas, p.saidas)));
 
   return (
-    <div className="flex flex-col h-full bg-white text-[#16171D]">
+    <div className="flex flex-col h-full bg-[#0C0D10] text-[#F7F8FA]">
       <PageHeader
         icon={<Landmark className="h-4 w-4" />}
         titulo="Fluxo de Caixa"
         subtitulo="Caixa realizado · entradas pagas − saídas pagas por competência, com saldo acumulado"
         actions={
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-white border border-[#E7E5DF] rounded-lg overflow-hidden">
+            <div className="flex items-center bg-[#0C0D10] border border-[#23262F] rounded-lg overflow-hidden">
               {(['mes', 'dia'] as const).map(a => (
                 <button key={a} onClick={() => setAgrupamento(a)}
-                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${agrupamento === a ? 'bg-amber-500/20 text-[#a9760a]' : 'text-slate-400 hover:text-[#5B5D69]'}`}>
+                  className={`px-3 py-1.5 text-xs font-semibold transition-colors ${agrupamento === a ? 'bg-[#01B8FA]/16 text-[#01B8FA]' : 'text-[#8A90A0] hover:text-[#F7F8FA]'}`}>
                   {a === 'mes' ? 'Mensal' : 'Diário'}
                 </button>
               ))}
             </div>
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">De
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-[#0C0D10] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA] outline-none [color-scheme:dark] focus:border-[#01B8FA]/60" />
             </label>
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">Até
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-[#0C0D10] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA] outline-none [color-scheme:dark] focus:border-[#01B8FA]/60" />
             </label>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#E7E5DF]">
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-[#101216] hover:bg-[#16181F] text-[#8A90A0] hover:text-[#F7F8FA] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#23262F]">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
           </div>
@@ -73,19 +73,19 @@ export default function FluxoCaixa() {
           <Kpi icon={<Scale className="h-4 w-4" />} cor={Number(k?.saldoLiquido) < 0 ? 'rose' : 'sky'} label="Saldo líquido" valor={loading ? null : R$(k?.saldoLiquido)} destaque />
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
-          <h3 className="font-semibold text-sm text-[#5B5D69] px-5 py-3 border-b border-[#E7E5DF] flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-[#a9760a]" /> Movimento por {agrupamento === 'mes' ? 'mês' : 'dia'}
+        <div className="bg-[#101216] rounded-2xl border border-[#23262F] overflow-hidden">
+          <h3 className="font-semibold text-sm text-[#F7F8FA] px-5 py-3 border-b border-[#23262F] flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-[#01B8FA]" /> Movimento por {agrupamento === 'mes' ? 'mês' : 'dia'}
           </h3>
           {loading ? (
             <div className="p-5 space-y-3">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-8 bg-[#F0EEE9] rounded animate-pulse" />)}
+              {[...Array(6)].map((_, i) => <div key={i} className="h-8 bg-[#16181F] rounded animate-pulse" />)}
             </div>
           ) : periodos.length === 0 ? (
-            <p className="text-sm text-slate-500 py-16 text-center">Sem movimentação de caixa no período.</p>
+            <p className="text-sm text-[#5E6472] py-16 text-center">Sem movimentação de caixa no período.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-white text-xs text-slate-400">
+              <thead className="bg-[#0C0D10] text-xs text-[#8A90A0] border-b border-[#23262F]">
                 <tr>
                   <th className="px-4 py-2.5 text-left font-semibold">Competência</th>
                   <th className="px-4 py-2.5 text-left font-semibold w-2/5">Fluxo</th>
@@ -97,18 +97,18 @@ export default function FluxoCaixa() {
               </thead>
               <tbody>
                 {periodos.map(p => (
-                  <tr key={p.periodo} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7]">
-                    <td className="px-4 py-2.5 font-semibold text-[#16171D]">{rotularPeriodo(p.periodo, dados.agrupamento)}</td>
+                  <tr key={p.periodo} className="border-t border-[#23262F] hover:bg-[#16181F]">
+                    <td className="px-4 py-2.5 font-semibold text-[#F7F8FA]">{rotularPeriodo(p.periodo, dados.agrupamento)}</td>
                     <td className="px-4 py-2.5">
                       <div className="flex flex-col gap-1">
-                        <div className="h-1.5 rounded-full bg-emerald-400/70" style={{ width: `${(p.entradas / maxBar) * 100}%`, minWidth: p.entradas > 0 ? '4px' : '0' }} />
-                        <div className="h-1.5 rounded-full bg-rose-400/70" style={{ width: `${(p.saidas / maxBar) * 100}%`, minWidth: p.saidas > 0 ? '4px' : '0' }} />
+                        <div className="h-1.5 rounded-full bg-[#2DD4A7]/70" style={{ width: `${(p.entradas / maxBar) * 100}%`, minWidth: p.entradas > 0 ? '4px' : '0' }} />
+                        <div className="h-1.5 rounded-full bg-[#FF6B7A]/70" style={{ width: `${(p.saidas / maxBar) * 100}%`, minWidth: p.saidas > 0 ? '4px' : '0' }} />
                       </div>
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[#0b7d4e]">{R$(p.entradas)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[#c3352b]">{R$(p.saidas)}</td>
-                    <td className={`px-4 py-2.5 text-right font-mono font-bold ${p.saldoPeriodo < 0 ? 'text-[#c3352b]' : 'text-[#16171D]'}`}>{R$(p.saldoPeriodo)}</td>
-                    <td className={`px-4 py-2.5 text-right font-mono font-extrabold ${p.saldoAcumulado < 0 ? 'text-[#c3352b]' : 'text-[#0b7d4e]'}`}>{R$(p.saldoAcumulado)}</td>
+                    <td className="px-4 py-2.5 text-right font-num text-[#2DD4A7]">{R$(p.entradas)}</td>
+                    <td className="px-4 py-2.5 text-right font-num text-[#FF6B7A]">{R$(p.saidas)}</td>
+                    <td className={`px-4 py-2.5 text-right font-num font-bold ${p.saldoPeriodo < 0 ? 'text-[#FF6B7A]' : 'text-[#F7F8FA]'}`}>{R$(p.saldoPeriodo)}</td>
+                    <td className={`px-4 py-2.5 text-right font-num font-extrabold ${p.saldoAcumulado < 0 ? 'text-[#FF6B7A]' : 'text-[#2DD4A7]'}`}>{R$(p.saldoAcumulado)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -121,21 +121,21 @@ export default function FluxoCaixa() {
 }
 
 const CORES: Record<string, string> = {
-  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
-  sky: 'bg-[#E8A317]/12 text-[#a9760a]',
-  rose: 'bg-rose-400/10 text-[#c3352b]',
-  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
+  amber: 'bg-[#FF9F45]/12 text-[#FF9F45]',
+  sky: 'bg-[#01B8FA]/12 text-[#01B8FA]',
+  rose: 'bg-[#FF6B7A]/12 text-[#FF6B7A]',
+  emerald: 'bg-[#2DD4A7]/12 text-[#2DD4A7]',
 };
 function Kpi({ icon, label, valor, cor, destaque }: { icon: any; label: string; valor: string | null; cor: string; destaque?: boolean }) {
   return (
-    <div className={`bg-white rounded-2xl border p-5 ${destaque ? 'border-[#E8A317]/30' : 'border-[#E7E5DF]'}`}>
+    <div className={`bg-[#101216] rounded-2xl border p-5 ${destaque ? 'border-[#01B8FA]/30' : 'border-[#23262F]'}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
-        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
+        <p className="text-[10px] text-[#8A90A0] font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
       {valor === null
-        ? <div className="h-7 w-32 bg-[#F0EEE9] rounded animate-pulse" />
-        : <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>}
+        ? <div className="h-7 w-32 bg-[#16181F] rounded animate-pulse" />
+        : <p className="font-num text-2xl font-extrabold text-[#F7F8FA] tracking-tight truncate">{valor}</p>}
     </div>
   );
 }

@@ -19,8 +19,8 @@ interface Conta {
 }
 
 const TIPO_META: Record<string, { label: string; cls: string }> = {
-  DEBITO: { label: 'Débito', cls: 'bg-rose-400/10 text-[#c3352b] border-rose-400/20' },
-  CREDITO: { label: 'Crédito', cls: 'bg-emerald-400/10 text-[#0b7d4e] border-emerald-400/20' },
+  DEBITO: { label: 'Débito', cls: 'bg-[#FF6B7A]/12 text-[#FF6B7A] border-[#FF6B7A]/30' },
+  CREDITO: { label: 'Crédito', cls: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/30' },
 };
 
 export default function PlanoContas() {
@@ -77,20 +77,20 @@ export default function PlanoContas() {
     <div className="p-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-[#E8A317]/12 text-[#a9760a] flex items-center justify-center">
+          <span className="h-11 w-11 rounded-2xl bg-[#01B8FA]/12 text-[#01B8FA] flex items-center justify-center">
             <Landmark className="h-5 w-5" />
           </span>
           <div>
-            <h1 className="text-xl font-bold text-[#16171D]">Plano de Contas</h1>
-            <p className="text-[13px] text-slate-400">Categorias contábeis que classificam despesas e receitas no DRE.</p>
+            <h1 className="text-xl font-bold text-[#F7F8FA]">Plano de Contas</h1>
+            <p className="text-[13px] text-[#8A90A0]">Categorias contábeis que classificam despesas e receitas no DRE.</p>
           </div>
         </div>
         {podeConfigurar && (
           <div className="flex items-center gap-2">
-            <button onClick={semear} disabled={semeando} className="flex items-center gap-2 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-2 rounded-lg disabled:opacity-40">
+            <button onClick={semear} disabled={semeando} className="flex items-center gap-2 bg-[#101216] border border-[#23262F] hover:bg-[#16181F] text-[#8A90A0] hover:text-[#F7F8FA] text-sm font-semibold px-3 py-2 rounded-lg disabled:opacity-40">
               <Sprout className="h-4 w-4" /> Semear padrão
             </button>
-            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
+            <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-[#01B8FA] hover:bg-[#22D3EE] text-[#04121A] text-sm font-bold px-3 py-2 rounded-lg shadow-[0_6px_18px_rgba(1,184,250,0.28)]">
               <Plus className="h-4 w-4" /> Nova conta
             </button>
           </div>
@@ -99,22 +99,22 @@ export default function PlanoContas() {
 
       <div className="flex items-center gap-3 mb-4">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5E6472]" />
           <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por código ou descrição…"
-            className="w-full bg-white border border-[#E7E5DF] rounded-lg pl-9 pr-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+            className="w-full bg-[#101216] border border-[#23262F] rounded-lg pl-9 pr-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60" />
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+        <label className="flex items-center gap-2 text-xs text-[#8A90A0] cursor-pointer">
           <input type="checkbox" checked={incluirInativas} onChange={(e) => setIncluirInativas(e.target.checked)} />
           Incluir inativas
         </label>
-        <button onClick={carregar} className="h-9 w-9 rounded-lg bg-white hover:bg-[#EFEDE7] text-[#8B8D98] flex items-center justify-center">
+        <button onClick={carregar} className="h-9 w-9 rounded-lg bg-[#101216] hover:bg-[#16181F] text-[#8A90A0] flex items-center justify-center">
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[#E7E5DF] overflow-hidden">
+      <div className="rounded-2xl border border-[#23262F] bg-[#101216] overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-[#FBFAF7] text-[11px] uppercase tracking-wider text-slate-500">
+          <thead className="bg-[#0C0D10] text-[11px] uppercase tracking-wider text-[#8A90A0] border-b border-[#23262F]">
             <tr>
               <th className="text-left px-4 py-3 font-semibold">Código</th>
               <th className="text-left px-4 py-3 font-semibold">Descrição</th>
@@ -125,25 +125,25 @@ export default function PlanoContas() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Carregando…</td></tr>
+              <tr><td colSpan={5} className="px-4 py-10 text-center text-[#5E6472]">Carregando…</td></tr>
             ) : filtradas.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-10 text-center text-slate-500">Nenhuma conta. Use “Semear padrão” para começar.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-10 text-center text-[#5E6472]">Nenhuma conta. Use “Semear padrão” para começar.</td></tr>
             ) : filtradas.map((c) => (
-              <tr key={c.id} className={`border-t border-[#E7E5DF] ${c.ativo ? '' : 'opacity-50'}`}>
-                <td className="px-4 py-3 font-mono text-[#8B8D98]" style={{ paddingLeft: `${16 + (c.nivel - 1) * 16}px` }}>
-                  {!c.analitica && <ChevronRight className="inline h-3 w-3 text-slate-600 mr-1" />}
+              <tr key={c.id} className={`border-t border-[#23262F] ${c.ativo ? '' : 'opacity-50'}`}>
+                <td className="px-4 py-3 font-num text-[#8A90A0]" style={{ paddingLeft: `${16 + (c.nivel - 1) * 16}px` }}>
+                  {!c.analitica && <ChevronRight className="inline h-3 w-3 text-[#5E6472] mr-1" />}
                   {c.codigo}
                 </td>
-                <td className={`px-4 py-3 ${c.analitica ? 'text-[#5B5D69]' : 'text-[#16171D] font-semibold'}`}>{c.descricao}</td>
+                <td className={`px-4 py-3 ${c.analitica ? 'text-[#8A90A0]' : 'text-[#F7F8FA] font-semibold'}`}>{c.descricao}</td>
                 <td className="px-4 py-3">
                   <span className={`text-[11px] px-2 py-0.5 rounded-full border ${TIPO_META[c.tipo].cls}`}>{TIPO_META[c.tipo].label}</span>
                 </td>
-                <td className="px-4 py-3 text-center text-slate-400">{c.analitica ? 'Sim' : '—'}</td>
+                <td className="px-4 py-3 text-center text-[#8A90A0]">{c.analitica ? 'Sim' : '—'}</td>
                 <td className="px-4 py-3 text-right">
                   {podeConfigurar && (
                     <div className="flex items-center justify-end gap-1">
-                      <button onClick={() => setEditando(c)} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><Pencil className="h-3.5 w-3.5" /></button>
-                      {c.ativo && <button onClick={() => remover(c)} className="h-8 w-8 rounded-lg hover:bg-rose-500/10 text-[#c3352b] flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>}
+                      <button onClick={() => setEditando(c)} className="h-8 w-8 rounded-lg hover:bg-[#16181F] text-[#8A90A0] flex items-center justify-center"><Pencil className="h-3.5 w-3.5" /></button>
+                      {c.ativo && <button onClick={() => remover(c)} className="h-8 w-8 rounded-lg hover:bg-rose-500/10 text-[#FF6B7A] flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   )}
                 </td>
@@ -186,43 +186,43 @@ function ModalConta({ conta, onClose, onDone }: { conta?: Conta; onClose: () => 
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-[#16171D]">{edicao ? 'Editar conta' : 'Nova conta'}</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#F7F8FA]">{edicao ? 'Editar conta' : 'Nova conta'}</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#16181F] text-[#8A90A0] flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
-            <span className="text-xs text-slate-400">Código {edicao && <span className="text-slate-600">(não editável)</span>}</span>
+            <span className="text-xs text-[#8A90A0]">Código {edicao && <span className="text-[#5E6472]">(não editável)</span>}</span>
             <input value={codigo} onChange={e => setCodigo(e.target.value)} disabled={edicao} placeholder="ex.: 3.4.08"
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] font-mono disabled:opacity-50 focus:outline-none focus:border-[#E8A317]" />
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] font-num disabled:opacity-50 focus:outline-none focus:border-[#01B8FA]/60" />
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400">Descrição</span>
+            <span className="text-xs text-[#8A90A0]">Descrição</span>
             <input value={descricao} onChange={e => setDescricao(e.target.value)}
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60" />
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400">Natureza</span>
+            <span className="text-xs text-[#8A90A0]">Natureza</span>
             <select value={tipo} onChange={e => setTipo(e.target.value as 'DEBITO' | 'CREDITO')}
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60">
               <option value="DEBITO">Débito (despesa/custo)</option>
               <option value="CREDITO">Crédito (receita)</option>
             </select>
           </label>
-          <label className="flex items-center gap-2 text-sm text-[#8B8D98] cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-[#8A90A0] cursor-pointer">
             <input type="checkbox" checked={analitica} onChange={e => setAnalitica(e.target.checked)} />
             Analítica (recebe lançamentos)
           </label>
           {edicao && (
-            <label className="flex items-center gap-2 text-sm text-[#8B8D98] cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-[#8A90A0] cursor-pointer">
               <input type="checkbox" checked={ativo} onChange={e => setAtivo(e.target.checked)} />
               Ativa
             </label>
           )}
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-[#01B8FA] hover:bg-[#22D3EE] text-[#04121A] font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> {edicao ? 'Salvar' : 'Criar'}
         </button>
       </div>

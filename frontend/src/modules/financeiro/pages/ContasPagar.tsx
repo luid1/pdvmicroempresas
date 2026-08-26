@@ -16,11 +16,11 @@ const numBR = (v: string) => v === '' ? 0 : parseFloat(String(v).replace(',', '.
 const dataBR = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  ABERTO: { label: 'Pendente', cls: 'bg-slate-400/10 text-[#8B8D98] border-slate-400/20' },
-  PARCIAL: { label: 'Parcial', cls: 'bg-[#E8A317]/12 text-[#a9760a] border-[#E8A317]/40' },
-  PAGO: { label: 'Pago', cls: 'bg-emerald-400/10 text-[#0b7d4e] border-emerald-400/20' },
-  VENCIDO: { label: 'Atrasado', cls: 'bg-rose-400/10 text-[#c3352b] border-rose-400/20' },
-  CANCELADO: { label: 'Cancelado', cls: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
+  ABERTO: { label: 'Pendente', cls: 'bg-[#8A90A0]/10 text-[#8A90A0] border-[#8A90A0]/25' },
+  PARCIAL: { label: 'Parcial', cls: 'bg-[#FF9F45]/12 text-[#FF9F45] border-[#FF9F45]/30' },
+  PAGO: { label: 'Pago', cls: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/30' },
+  VENCIDO: { label: 'Atrasado', cls: 'bg-[#FF6B7A]/12 text-[#FF6B7A] border-[#FF6B7A]/30' },
+  CANCELADO: { label: 'Cancelado', cls: 'bg-[#5E6472]/10 text-[#5E6472] border-[#5E6472]/25' },
 };
 
 interface Conta {
@@ -80,24 +80,24 @@ export default function ContasPagar() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white text-[#16171D]">
+    <div className="flex flex-col h-full bg-[#0C0D10] text-[#F7F8FA]">
       <PageHeader
         icon={<ArrowUpCircle className="h-4 w-4" />}
         titulo="Contas a Pagar"
         subtitulo="Despesas e compras de fornecedores · status, parcelamento e baixa com trilha de auditoria"
         actions={
           <>
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">De
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-[#101216] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA]" />
             </label>
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">Até
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-[#101216] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA]" />
             </label>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#E7E5DF]">
+            <button onClick={carregar} className="flex items-center gap-1.5 bg-[#101216] hover:bg-[#16181F] text-[#8A90A0] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#23262F]">
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
             {podeOperar && (
-              <button onClick={() => setCriando(true)} className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-1.5 rounded-lg shadow-lg shadow-amber-500/20">
+              <button onClick={() => setCriando(true)} className="flex items-center gap-1.5 bg-[#01B8FA] hover:bg-[#22D3EE] text-[#04121A] text-sm font-bold px-3 py-1.5 rounded-lg shadow-[0_6px_18px_rgba(1,184,250,0.28)]">
                 <Plus className="h-4 w-4" /> Nova despesa
               </button>
             )}
@@ -115,22 +115,22 @@ export default function ContasPagar() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por fornecedor, descrição ou nº..." className="bg-white border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-2 text-sm text-[#16171D] w-80 focus:outline-none focus:border-[#E8A317]" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#5E6472]" />
+            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Buscar por fornecedor, descrição ou nº..." className="bg-[#101216] border border-[#23262F] rounded-lg pl-8 pr-3 py-2 text-sm text-[#F7F8FA] w-80 focus:outline-none focus:border-[#01B8FA]/60" />
           </div>
           <div className="flex items-center gap-1 ml-auto">
             {['', 'ABERTO', 'PARCIAL', 'PAGO', 'VENCIDO'].map(s => (
               <button key={s || 'todos'} onClick={() => setStatus(s)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/40' : 'bg-white text-slate-400 border-[#E7E5DF] hover:text-[#5B5D69]'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${status === s ? 'bg-[#01B8FA]/15 text-[#01B8FA] border-[#01B8FA]/40' : 'bg-[#101216] text-[#8A90A0] border-[#23262F] hover:text-[#F7F8FA]'}`}>
                 {s === '' ? 'Todos' : STATUS_META[s].label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
+        <div className="bg-[#101216] rounded-2xl border border-[#23262F] overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-white text-xs text-slate-400">
+            <thead className="bg-[#0C0D10] text-xs text-[#8A90A0] border-b border-[#23262F]">
               <tr>
                 {['Fornecedor / Descrição', 'Nº', 'Vencimento', 'Valor', 'Pago', 'Em aberto', 'Status', ''].map((h, i) => (
                   <th key={h || i} className={`px-4 py-2.5 font-semibold ${i >= 3 && i <= 5 ? 'text-right' : i === 6 || i === 7 ? 'text-center' : 'text-left'}`}>{h}</th>
@@ -140,37 +140,37 @@ export default function ContasPagar() {
             <tbody>
               {loading ? (
                 [...Array(6)].map((_, i) => (
-                  <tr key={i} className="border-t border-[#E7E5DF]">
-                    <td colSpan={8} className="px-4 py-3"><div className="h-5 bg-[#F0EEE9] rounded animate-pulse" /></td>
+                  <tr key={i} className="border-t border-[#23262F]">
+                    <td colSpan={8} className="px-4 py-3"><div className="h-5 bg-[#16181F] rounded animate-pulse" /></td>
                   </tr>
                 ))
               ) : filtradas.length === 0 ? (
-                <tr><td colSpan={8} className="text-center text-slate-500 py-16">Nenhum título no período.</td></tr>
+                <tr><td colSpan={8} className="text-center text-[#5E6472] py-16">Nenhum título no período.</td></tr>
               ) : (
                 filtradas.map(c => {
                   const meta = STATUS_META[c.status] || STATUS_META.ABERTO;
                   const quitavel = c.status !== 'PAGO' && c.status !== 'CANCELADO';
                   return (
-                    <tr key={c.id} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7]">
+                    <tr key={c.id} className="border-t border-[#23262F] hover:bg-[#16181F]">
                       <td className="px-4 py-2.5">
-                        <div className="font-semibold text-[#16171D]">{c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial || c.descricao}</div>
-                        {(c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial) && <div className="text-xs text-slate-500">{c.descricao}</div>}
+                        <div className="font-semibold text-[#F7F8FA]">{c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial || c.descricao}</div>
+                        {(c.fornecedor?.nomeFantasia || c.fornecedor?.razaoSocial) && <div className="text-xs text-[#5E6472]">{c.descricao}</div>}
                       </td>
-                      <td className="px-4 py-2.5 text-slate-400 font-mono text-xs">{c.numero || '—'}</td>
-                      <td className="px-4 py-2.5 text-[#8B8D98]">{dataBR(c.dataVencimento)}</td>
-                      <td className="px-4 py-2.5 text-right font-mono text-[#5B5D69]">{R$(c.valorOriginal)}</td>
-                      <td className="px-4 py-2.5 text-right font-mono text-[#0b7d4e]">{R$(c.valorPago)}</td>
-                      <td className="px-4 py-2.5 text-right font-mono font-bold text-[#16171D]">{R$(c.valorAberto)}</td>
+                      <td className="px-4 py-2.5 text-[#8A90A0] font-num text-xs">{c.numero || '—'}</td>
+                      <td className="px-4 py-2.5 text-[#8A90A0]">{dataBR(c.dataVencimento)}</td>
+                      <td className="px-4 py-2.5 text-right font-num text-[#8A90A0]">{R$(c.valorOriginal)}</td>
+                      <td className="px-4 py-2.5 text-right font-num text-[#2DD4A7]">{R$(c.valorPago)}</td>
+                      <td className="px-4 py-2.5 text-right font-num font-bold text-[#F7F8FA]">{R$(c.valorAberto)}</td>
                       <td className="px-4 py-2.5 text-center">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${meta.cls}`}>{meta.label}</span>
                       </td>
                       <td className="px-4 py-2.5 text-center whitespace-nowrap">
                         {podeOperar && quitavel && (
                           <>
-                            <button onClick={() => setBaixando(c)} title="Dar baixa" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#a9760a] hover:bg-amber-500/15">
+                            <button onClick={() => setBaixando(c)} title="Dar baixa" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#01B8FA] hover:bg-[#01B8FA]/15">
                               <CheckCircle2 className="h-4 w-4" />
                             </button>
-                            <button onClick={() => cancelar(c)} title="Cancelar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#c3352b] hover:bg-rose-500/15">
+                            <button onClick={() => cancelar(c)} title="Cancelar" className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-[#FF6B7A] hover:bg-rose-500/15">
                               <Ban className="h-4 w-4" />
                             </button>
                           </>
@@ -221,34 +221,34 @@ function ModalBaixa({ conta, onClose, onDone }: { conta: Conta; onClose: () => v
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h2 className="font-bold text-[#16171D]">Baixar pagamento</h2>
-            <p className="text-xs text-slate-500 mt-0.5">{conta.descricao} · em aberto {R$(conta.valorAberto)}</p>
+            <h2 className="font-bold text-[#F7F8FA]">Baixar pagamento</h2>
+            <p className="text-xs text-[#5E6472] mt-0.5">{conta.descricao} · em aberto {R$(conta.valorAberto)}</p>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#16181F] text-[#8A90A0] flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <label className="block mb-3">
-          <span className="text-xs text-slate-400">Valor pago</span>
-          <div className="mt-1 flex items-center bg-white border border-[#E7E5DF] rounded-lg overflow-hidden focus-within:border-emerald-400">
-            <span className="px-2 text-slate-500 text-sm">R$</span>
-            <input type="number" step="0.01" autoFocus value={valor} onChange={e => setValor(e.target.value)} className="flex-1 bg-transparent px-2 py-2.5 text-lg text-[#16171D] text-right font-mono focus:outline-none" />
+          <span className="text-xs text-[#8A90A0]">Valor pago</span>
+          <div className="mt-1 flex items-center bg-[#0C0D10] border border-[#23262F] rounded-lg overflow-hidden focus-within:border-[#01B8FA]/60">
+            <span className="px-2 text-[#5E6472] text-sm">R$</span>
+            <input type="number" step="0.01" autoFocus value={valor} onChange={e => setValor(e.target.value)} className="flex-1 bg-transparent px-2 py-2.5 text-lg text-[#F7F8FA] text-right font-num focus:outline-none" />
           </div>
         </label>
         <label className="block mb-3">
-          <span className="text-xs text-slate-400">Forma de pagamento (opcional)</span>
-          <input value={forma} onChange={e => setForma(e.target.value)} placeholder="PIX, Dinheiro, Boleto..." className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+          <span className="text-xs text-[#8A90A0]">Forma de pagamento (opcional)</span>
+          <input value={forma} onChange={e => setForma(e.target.value)} placeholder="PIX, Dinheiro, Boleto..." className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60" />
         </label>
         <label className="block mb-4">
-          <span className="text-xs text-slate-400">Conta de origem (tesouraria)</span>
-          <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+          <span className="text-xs text-[#8A90A0]">Conta de origem (tesouraria)</span>
+          <select value={contaId} onChange={e => setContaId(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60">
             <option value="">Não movimentar caixa</option>
             {contasFin.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
         </label>
-        <button onClick={confirmar} disabled={salvando} className="w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-slate-900 font-bold py-2.5 rounded-lg">
+        <button onClick={confirmar} disabled={salvando} className="w-full flex items-center justify-center gap-2 bg-[#01B8FA] hover:bg-[#22D3EE] disabled:opacity-40 text-[#04121A] font-bold py-2.5 rounded-lg">
           <CheckCircle2 className="h-4 w-4" /> Confirmar baixa
         </button>
       </div>
@@ -292,34 +292,34 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop" onClick={onClose}>
-      <div className="relative w-full max-w-sm bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 animate-backdrop" onClick={onClose}>
+      <div className="relative w-full max-w-sm bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.7)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-[#16171D]">Nova despesa a pagar</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#F7F8FA]">Nova despesa a pagar</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#16181F] text-[#8A90A0] flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
         <div className="space-y-3">
           <label className="block">
-            <span className="text-xs text-slate-400">Descrição</span>
-            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+            <span className="text-xs text-[#8A90A0]">Descrição</span>
+            <input value={descricao} onChange={e => setDescricao(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60" />
           </label>
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-xs text-slate-400">Valor total</span>
-              <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] text-right font-mono focus:outline-none focus:border-[#E8A317]" />
+              <span className="text-xs text-[#8A90A0]">Valor total</span>
+              <input type="number" step="0.01" value={valor} onChange={e => setValor(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] text-right font-num focus:outline-none focus:border-[#01B8FA]/60" />
             </label>
             <label className="block">
-              <span className="text-xs text-slate-400">Parcelas</span>
-              <input type="number" min="1" value={parcelas} onChange={e => setParcelas(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] text-right font-mono focus:outline-none focus:border-[#E8A317]" />
+              <span className="text-xs text-[#8A90A0]">Parcelas</span>
+              <input type="number" min="1" value={parcelas} onChange={e => setParcelas(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] text-right font-num focus:outline-none focus:border-[#01B8FA]/60" />
             </label>
           </div>
           <label className="block">
-            <span className="text-xs text-slate-400">1º vencimento</span>
-            <input type="date" value={vencimento} onChange={e => setVencimento(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+            <span className="text-xs text-[#8A90A0]">1º vencimento</span>
+            <input type="date" value={vencimento} onChange={e => setVencimento(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60" />
           </label>
           <label className="block">
-            <span className="text-xs text-slate-400">Categoria (Plano de Contas)</span>
-            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+            <span className="text-xs text-[#8A90A0]">Categoria (Plano de Contas)</span>
+            <select value={categoria} onChange={e => setCategoria(e.target.value)} className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]/60">
               <option value="">Sem categoria (não classificar no DRE)</option>
               {contas.map((c) => (
                 <option key={c.id} value={c.codigo}>{c.codigo} · {c.descricao}</option>
@@ -327,7 +327,7 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
             </select>
           </label>
         </div>
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-[#01B8FA] hover:bg-[#22D3EE] text-[#04121A] font-bold py-2.5 rounded-lg disabled:opacity-40">
           <Plus className="h-4 w-4" /> Criar
         </button>
       </div>
@@ -336,21 +336,21 @@ function ModalNovo({ onClose, onDone }: { onClose: () => void; onDone: () => voi
 }
 
 const CORES: Record<string, string> = {
-  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
-  sky: 'bg-[#E8A317]/12 text-[#a9760a]',
-  rose: 'bg-rose-400/10 text-[#c3352b]',
-  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
+  amber: 'bg-[#FF9F45]/12 text-[#FF9F45]',
+  sky: 'bg-[#01B8FA]/12 text-[#01B8FA]',
+  rose: 'bg-[#FF6B7A]/12 text-[#FF6B7A]',
+  emerald: 'bg-[#2DD4A7]/12 text-[#2DD4A7]',
 };
 function Kpi({ icon, label, valor, cor }: { icon: any; label: string; valor: string | null; cor: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
+    <div className="bg-[#101216] rounded-2xl border border-[#23262F] p-5">
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
-        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
+        <p className="text-[10px] text-[#5E6472] font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
       {valor === null
-        ? <div className="h-7 w-28 bg-[#F0EEE9] rounded animate-pulse" />
-        : <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>}
+        ? <div className="h-7 w-28 bg-[#16181F] rounded animate-pulse" />
+        : <p className="text-2xl font-extrabold text-[#F7F8FA] tracking-tight truncate">{valor}</p>}
     </div>
   );
 }
