@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
-import { Package, Search, AlertTriangle, Filter, RefreshCw, ArrowUpDown } from 'lucide-react';
+import { Package, AlertTriangle, RefreshCw } from 'lucide-react';
 import { estoqueApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useFetch } from '../../../hooks/useFetch';
-import { PageHeader, btnGlass } from '../../cadastros/ui';
+import { CadastroShell, PageHeader, FilterBar, TableCard, Th, Loader, Vazio, btnGlass } from '../../cadastros/ui';
 
 const R$ = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 const N = (v: any) => Number(v || 0);
@@ -57,16 +57,10 @@ export default function PosicaoEstoque() {
     valorTotal: saldos.reduce((acc, s) => acc + N(s.quantidade) * N(s.custoMedio), 0),
   }), [saldos]);
 
-  const Sort = ({ field }: { field: typeof sortField }) => (
-    <button onClick={() => setSortField(field)} className={`inline-flex items-center gap-1 hover:text-[#a9760a] ${sortField === field ? 'text-[#a9760a]' : ''}`}>
-      <ArrowUpDown className="h-3 w-3" />
-    </button>
-  );
-
   return (
-    <div className="flex flex-col h-full">
+    <CadastroShell>
       <PageHeader
-        icon={<Package className="h-4 w-4" />}
+        icon={<Package className="h-5 w-5" />}
         titulo="Posição de Estoque"
         subtitulo={filialAtiva ? `${filialAtiva.codigo} — ${filialAtiva.nome}` : 'Selecione uma filial'}
         actions={
@@ -76,157 +70,126 @@ export default function PosicaoEstoque() {
         }
       />
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-5">
+      <FilterBar busca={search} onBusca={setSearch} placeholder="Buscar produto ou código...">
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setFiltroAlerta(!filtroAlerta)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-300 active:scale-[0.98] ${
+              filtroAlerta ? 'bg-[#FF6B7A]/12 border-[#FF6B7A]/45 text-[#FF6B7A]' : 'bg-[#101216] border-[#23262F] text-[#8A90A0] hover:text-[#F7F8FA] hover:bg-[#0C0D10]'
+            }`}
+          >
+            <AlertTriangle className="h-3.5 w-3.5" />
+            {filtroAlerta ? 'Mostrando alertas' : 'Somente alertas'}
+          </button>
+          <select
+            value={sortField}
+            onChange={(e) => setSortField(e.target.value as any)}
+            className="bg-[#101216] border border-[#23262F] rounded-lg px-3 py-1.5 text-xs font-semibold text-[#8A90A0] focus:outline-none focus:border-[#01B8FA]/60 focus:ring-2 focus:ring-[#01B8FA]/20 transition-all"
+          >
+            <option value="descricao">Ordenar: A-Z</option>
+            <option value="quantidade">Ordenar: Quantidade</option>
+            <option value="diasAteVencer">Ordenar: Validade</option>
+          </select>
+        </div>
+      </FilterBar>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card p-4">
-          <p className="text-xs text-gray-500">Itens em estoque</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{totais.produtos}</p>
+      <div className="flex-1 overflow-auto p-4 space-y-4">
+        {/* KPIs */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <KpiCard label="Itens em estoque" valor={String(totais.produtos)} tom="ink" />
+          <KpiCard label="Alerta validade" valor={String(totais.alertasValidade)} tom={totais.alertasValidade > 0 ? 'rose' : 'ink'} />
+          <KpiCard label="Abaixo do mínimo" valor={String(totais.abaixoMinimo)} tom={totais.abaixoMinimo > 0 ? 'orange' : 'ink'} />
+          <KpiCard label="Valor total (CMV)" valor={R$(totais.valorTotal)} tom="ink" />
         </div>
-        <div className={`card p-4 ${totais.alertasValidade > 0 ? 'border-red-300 bg-red-50' : ''}`}>
-          <p className="text-xs text-gray-500">⚠ Alerta Validade</p>
-          <p className={`text-2xl font-bold mt-1 ${totais.alertasValidade > 0 ? 'text-red-600' : 'text-gray-900'}`}>
-            {totais.alertasValidade}
-          </p>
-        </div>
-        <div className={`card p-4 ${totais.abaixoMinimo > 0 ? 'border-amber-300 bg-amber-50' : ''}`}>
-          <p className="text-xs text-gray-500">Abaixo do mínimo</p>
-          <p className={`text-2xl font-bold mt-1 ${totais.abaixoMinimo > 0 ? 'text-amber-600' : 'text-gray-900'}`}>
-            {totais.abaixoMinimo}
-          </p>
-        </div>
-        <div className="card p-4">
-          <p className="text-xs text-gray-500">Valor total (CMV)</p>
-          <p className="text-xl font-bold text-gray-900 mt-1">{R$(totais.valorTotal)}</p>
-        </div>
-      </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <input
-            className="input pl-9 w-64 text-sm"
-            placeholder="Buscar produto ou código..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <button
-          onClick={() => setFiltroAlerta(!filtroAlerta)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
-            filtroAlerta ? 'bg-red-50 border-red-300 text-red-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-          }`}
-        >
-          <AlertTriangle className="h-3.5 w-3.5" />
-          {filtroAlerta ? 'Mostrando alertas' : 'Somente alertas'}
-        </button>
-        <select
-          className="input text-sm w-44"
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value as any)}
-        >
-          <option value="descricao">Ordenar: A-Z</option>
-          <option value="quantidade">Ordenar: Quantidade</option>
-          <option value="diasAteVencer">Ordenar: Validade</option>
-        </select>
-      </div>
-
-      {/* Tabela */}
-      <div className="card overflow-hidden">
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin h-8 w-8 border-2 border-[#E8A317] border-t-transparent rounded-full" />
-          </div>
+        {/* Tabela */}
+        {loading ? <Loader /> : saldos.length === 0 ? (
+          <Vazio icon={<Package className="h-10 w-10" />} texto="Nenhum saldo encontrado para esta filial" />
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100 sticky top-0">
-                <tr>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Código</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Lote</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Localização</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Qtd</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Disponível</th>
-                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">CMV Unit.</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Validade</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {saldos.map((s) => {
-                  const rowAlert = s.alertaValidade ? 'bg-red-50/60' : s.abaixoMinimo ? 'bg-amber-50/40' : '';
-                  return (
-                    <tr key={s.id} className={`hover:brightness-[0.98] transition-all ${rowAlert}`}>
-                      <td className="px-4 py-3 font-mono text-xs text-gray-500">{s.produto.codigo}</td>
-                      <td className="px-4 py-3">
-                        <p className="font-medium text-gray-900">{s.produto.descricao}</p>
-                        <p className="text-xs text-gray-400">{s.produto.categoria}</p>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-gray-500 font-mono">{s.lote?.numero || '—'}</td>
-                      <td className="px-4 py-3 text-xs text-gray-500">
-                        {s.localizacao ? `${s.localizacao.rua}-${s.localizacao.prateleira}` : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className="font-bold text-gray-900">{N(s.quantidade).toFixed(2)}</span>
-                        <span className="text-xs text-gray-400 ml-1">{s.produto.unidadeMedida.sigla}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <span className={`font-medium ${N(s.quantidadeDisponivel) <= 0 ? 'text-red-600' : 'text-emerald-700'}`}>
-                          {N(s.quantidadeDisponivel).toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-gray-600">{R$(N(s.custoMedio))}</td>
-                      <td className="px-4 py-3">
-                        {s.lote?.dataValidade ? (
-                          <div>
-                            <p className={`text-xs font-medium ${s.alertaValidade ? 'text-red-600' : 'text-gray-600'}`}>
-                              {new Date(s.lote.dataValidade).toLocaleDateString('pt-BR')}
+          <TableCard>
+            <thead>
+              <tr>
+                <Th>Código</Th>
+                <Th>Produto</Th>
+                <Th>Lote</Th>
+                <Th>Localização</Th>
+                <Th className="text-right">Qtd</Th>
+                <Th className="text-right">Disponível</Th>
+                <Th className="text-right">CMV Unit.</Th>
+                <Th>Validade</Th>
+                <Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {saldos.map((s) => {
+                const rowTint = s.alertaValidade ? 'bg-[#FF6B7A]/[0.05]' : s.abaixoMinimo ? 'bg-[#FF9F45]/[0.04]' : '';
+                return (
+                  <tr key={s.id} className={`border-t border-[#23262F] hover:bg-white/[0.03] ${rowTint}`}>
+                    <td className="px-3 py-1 font-mono text-xs text-slate-500">{s.produto.codigo}</td>
+                    <td className="px-3 py-1">
+                      <p className="font-semibold text-[12.5px] leading-tight text-[#F7F8FA] truncate max-w-[240px]">{s.produto.descricao}</p>
+                      <p className="text-slate-500 text-[10.5px] leading-tight">{s.produto.categoria}</p>
+                    </td>
+                    <td className="px-3 py-1 text-xs text-slate-400 font-mono">{s.lote?.numero || '—'}</td>
+                    <td className="px-3 py-1 text-xs text-[#8A90A0]">{s.localizacao ? `${s.localizacao.rua}-${s.localizacao.prateleira}` : '—'}</td>
+                    <td className="px-3 py-1 text-right">
+                      <span className="font-bold text-[#F7F8FA] font-mono tabular-nums">{N(s.quantidade).toFixed(2)}</span>
+                      <span className="text-xs text-[#8A90A0] ml-1">{s.produto.unidadeMedida.sigla}</span>
+                    </td>
+                    <td className="px-3 py-1 text-right font-mono tabular-nums">
+                      <span className={N(s.quantidadeDisponivel) <= 0 ? 'text-[#FF6B7A] font-semibold' : 'text-[#2DD4A7] font-semibold'}>
+                        {N(s.quantidadeDisponivel).toFixed(2)}
+                      </span>
+                    </td>
+                    <td className="px-3 py-1 text-right font-mono tabular-nums text-[#8A90A0]">{R$(N(s.custoMedio))}</td>
+                    <td className="px-3 py-1">
+                      {s.lote?.dataValidade ? (
+                        <div>
+                          <p className={`text-xs font-medium ${s.alertaValidade ? 'text-[#FF6B7A]' : 'text-[#8A90A0]'}`}>
+                            {new Date(s.lote.dataValidade).toLocaleDateString('pt-BR')}
+                          </p>
+                          {s.diasAteVencer !== null && (
+                            <p className={`text-[10px] ${s.diasAteVencer <= 0 ? 'text-[#FF6B7A] font-bold' : s.alertaValidade ? 'text-[#FF9F45]' : 'text-slate-500'}`}>
+                              {s.diasAteVencer <= 0 ? 'VENCIDO' : `${s.diasAteVencer}d restantes`}
                             </p>
-                            {s.diasAteVencer !== null && (
-                              <p className={`text-[10px] ${s.diasAteVencer <= 0 ? 'text-red-500 font-bold' : s.alertaValidade ? 'text-orange-500' : 'text-gray-400'}`}>
-                                {s.diasAteVencer <= 0 ? 'VENCIDO' : `${s.diasAteVencer}d restantes`}
-                              </p>
-                            )}
-                          </div>
-                        ) : <span className="text-gray-300 text-xs">—</span>}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col gap-1">
-                          {s.alertaValidade && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-red-700 bg-red-100 px-1.5 py-0.5 rounded">
-                              <AlertTriangle className="h-2.5 w-2.5" /> VENCENDO
-                            </span>
-                          )}
-                          {s.abaixoMinimo && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
-                              ↓ MÍNIMO
-                            </span>
-                          )}
-                          {!s.alertaValidade && !s.abaixoMinimo && (
-                            <span className="text-[10px] text-emerald-600 font-medium">OK</span>
                           )}
                         </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {saldos.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="px-6 py-16 text-center">
-                      <Package className="h-10 w-10 text-gray-200 mx-auto mb-3" />
-                      <p className="text-sm text-gray-400">Nenhum saldo encontrado para esta filial.</p>
+                      ) : <span className="text-slate-600 text-xs">—</span>}
+                    </td>
+                    <td className="px-3 py-1">
+                      <div className="flex flex-col gap-1 items-start">
+                        {s.alertaValidade && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FF6B7A] bg-[#FF6B7A]/12 px-1.5 py-0.5 rounded">
+                            <AlertTriangle className="h-2.5 w-2.5" /> VENCENDO
+                          </span>
+                        )}
+                        {s.abaixoMinimo && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#FF9F45] bg-[#FF9F45]/12 px-1.5 py-0.5 rounded">
+                            ↓ MÍNIMO
+                          </span>
+                        )}
+                        {!s.alertaValidade && !s.abaixoMinimo && (
+                          <span className="text-[10px] text-[#2DD4A7] font-semibold">OK</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                );
+              })}
+            </tbody>
+          </TableCard>
         )}
       </div>
-      </div>
+    </CadastroShell>
+  );
+}
+
+function KpiCard({ label, valor, tom }: { label: string; valor: string; tom: 'ink' | 'rose' | 'orange' }) {
+  const cor = tom === 'rose' ? 'text-[#FF6B7A]' : tom === 'orange' ? 'text-[#FF9F45]' : 'text-[#F7F8FA]';
+  return (
+    <div className="bg-[#16181F] border border-[#23262F] rounded-2xl p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
+      <p className="text-[10px] uppercase tracking-[0.08em] text-[#8A90A0] font-semibold">{label}</p>
+      <p className={`text-[23px] font-bold mt-1 font-mono tabular-nums ${cor}`}>{valor}</p>
     </div>
   );
 }

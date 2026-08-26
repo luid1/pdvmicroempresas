@@ -85,6 +85,10 @@ export const nfceApi = {
   consultar: (id: string) => api.post(`/nfce/documento/${id}/consultar`),
   // Cancela uma NFC-e autorizada.
   cancelar: (id: string, motivo?: string) => api.post(`/nfce/documento/${id}/cancelar`, { motivo }),
+  // Devolve (estorno fiscal) uma NFC-e autorizada — gera + emite a NF-e de devolução.
+  // Sem `itens` = devolução total; com `itens` = devolução parcial.
+  devolver: (id: string, itens?: { itemNfeId: string; quantidade: number }[]) =>
+    api.post(`/nfce/documento/${id}/devolver`, { itens }),
   // Fila de reenvio: reprocessa todos os pendentes/contingência.
   reprocessar: (filialId?: string) => api.post('/nfce/reprocessar', { filialId }),
 };

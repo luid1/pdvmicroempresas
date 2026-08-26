@@ -211,7 +211,7 @@ function Kpi({ titulo, valor, cor }: { titulo: string; valor: string; cor?: stri
 }
 
 const CLASSE_COR: Record<string, string> = {
-  A: 'text-[#0b7d4e] bg-emerald-500/15 border-emerald-400/25',
+  A: 'text-[#2DD4A7] bg-emerald-500/15 border-emerald-400/25',
   B: 'text-[#a9760a] bg-amber-500/15 border-[#E8A317]/40',
   C: 'text-slate-400 bg-[#F6F5F2] border-[#E7E5DF]',
 };
@@ -236,7 +236,7 @@ function PainelABC({ dados, tipo }: { dados: any; tipo: string }) {
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <Kpi titulo="Faturamento total" valor={brl(dados.total)} cor="text-[#a9760a]" />
-        <Kpi titulo="Classe A" valor={`${dados.resumo.A.itens} • ${brl(dados.resumo.A.valor)}`} cor="text-[#0b7d4e]" />
+        <Kpi titulo="Classe A" valor={`${dados.resumo.A.itens} • ${brl(dados.resumo.A.valor)}`} cor="text-[#2DD4A7]" />
         <Kpi titulo="Classe B" valor={`${dados.resumo.B.itens} • ${brl(dados.resumo.B.valor)}`} cor="text-[#a9760a]" />
         <Kpi titulo="Classe C" valor={`${dados.resumo.C.itens} • ${brl(dados.resumo.C.valor)}`} cor="text-[#8B8D98]" />
       </div>
@@ -299,7 +299,7 @@ function PainelGiro({ dados }: { dados: any }) {
     <div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
         <Kpi titulo="Itens analisados" valor={num(dados.resumo.totalItens)} />
-        <Kpi titulo="Itens parados" valor={num(dados.resumo.parados)} cor="text-[#c3352b]" />
+        <Kpi titulo="Itens parados" valor={num(dados.resumo.parados)} cor="text-[#FF6B7A]" />
         <Kpi titulo="Período (dias)" valor={num(dados.dias)} />
       </div>
       <BotaoExportar onClick={exportar} />
@@ -325,9 +325,9 @@ function PainelGiro({ dados }: { dados: any }) {
                 <td className="px-3 py-1.5 text-right text-slate-400">{i.coberturaDias === null ? '∞' : `${i.coberturaDias} d`}</td>
                 <td className="px-3 py-1.5 text-center">
                   {i.parado ? (
-                    <span className="inline-block px-1.5 py-0.5 rounded border border-rose-400/25 bg-rose-500/15 text-[#c3352b] text-[10px] font-bold">Parado</span>
+                    <span className="inline-block px-1.5 py-0.5 rounded border border-rose-400/25 bg-rose-500/15 text-[#FF6B7A] text-[10px] font-bold">Parado</span>
                   ) : (
-                    <span className="inline-block px-1.5 py-0.5 rounded border border-emerald-400/25 bg-emerald-500/15 text-[#0b7d4e] text-[10px] font-bold">Ativo</span>
+                    <span className="inline-block px-1.5 py-0.5 rounded border border-emerald-400/25 bg-emerald-500/15 text-[#2DD4A7] text-[10px] font-bold">Ativo</span>
                   )}
                 </td>
               </tr>
@@ -425,9 +425,9 @@ function PainelAging({ dados }: { dados: any }) {
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
-        <Kpi titulo="Total a receber" valor={brl(dados.aReceber.total)} cor="text-[#0b7d4e]" />
-        <Kpi titulo="Total a pagar" valor={brl(dados.aPagar.total)} cor="text-[#c3352b]" />
-        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-[#0b7d4e]' : 'text-[#c3352b]'} />
+        <Kpi titulo="Total a receber" valor={brl(dados.aReceber.total)} cor="text-[#2DD4A7]" />
+        <Kpi titulo="Total a pagar" valor={brl(dados.aPagar.total)} cor="text-[#FF6B7A]" />
+        <Kpi titulo="Saldo líquido" valor={brl(dados.saldoLiquido)} cor={dados.saldoLiquido >= 0 ? 'text-[#2DD4A7]' : 'text-[#FF6B7A]'} />
       </div>
       <BotaoExportar onClick={exportar} />
       <div className="overflow-x-auto rounded-xl border border-[#E7E5DF]">
@@ -443,14 +443,14 @@ function PainelAging({ dados }: { dados: any }) {
             {faixas.map((f) => (
               <tr key={f.chave} className="border-t border-[#E7E5DF] hover:bg-[#F6F5F2]">
                 <td className="px-3 py-1.5 text-[#8B8D98]">{f.label}</td>
-                <td className="px-3 py-1.5 text-right text-[#0b7d4e]/90">{brl(dados.aReceber[f.chave])}</td>
-                <td className="px-3 py-1.5 text-right text-[#c3352b]/90">{brl(dados.aPagar[f.chave])}</td>
+                <td className="px-3 py-1.5 text-right text-[#2DD4A7]/90">{brl(dados.aReceber[f.chave])}</td>
+                <td className="px-3 py-1.5 text-right text-[#FF6B7A]/90">{brl(dados.aPagar[f.chave])}</td>
               </tr>
             ))}
             <tr className="border-t border-[#E7E5DF] font-bold bg-[#F6F5F2]">
               <td className="px-3 py-2 text-[#5B5D69]">Total</td>
-              <td className="px-3 py-2 text-right text-[#0b7d4e]">{brl(dados.aReceber.total)}</td>
-              <td className="px-3 py-2 text-right text-[#c3352b]">{brl(dados.aPagar.total)}</td>
+              <td className="px-3 py-2 text-right text-[#2DD4A7]">{brl(dados.aReceber.total)}</td>
+              <td className="px-3 py-2 text-right text-[#FF6B7A]">{brl(dados.aPagar.total)}</td>
             </tr>
           </tbody>
         </table>

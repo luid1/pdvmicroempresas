@@ -35,7 +35,7 @@ export default function ModoOperacao() {
   return (
     <div className="flex flex-col h-full">
       {/* Topbar */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 shrink-0">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 shrink-0">
         <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Modo de Operação</h1>
         <p className="text-xs text-[#8B8D98]">
           Escolha o tipo principal do seu negócio. O Lumin adapta menus e recursos automaticamente.
@@ -56,7 +56,7 @@ export default function ModoOperacao() {
                   className={`text-left rounded-2xl border p-5 transition-all ${
                     ativo
                       ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06] shadow-[0_10px_30px_-16px_rgba(1,184,250,0.6)]'
-                      : 'border-[#E7E5DF] bg-white hover:border-[#01B8FA]/40 hover:shadow-md'
+                      : 'border-[#E7E5DF] bg-[#101216] hover:border-[#01B8FA]/40 hover:shadow-md'
                   }`}
                 >
                   <div className="flex items-center justify-between">

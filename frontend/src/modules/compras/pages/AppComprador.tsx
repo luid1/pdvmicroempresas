@@ -303,10 +303,10 @@ export default function AppComprador() {
     <div className="hetros-comprador min-h-full w-full flex items-center justify-center bg-neutral-200/60 py-6 px-4">
       {/* Escapa do tema dark global: dentro do celular o app é claro (iOS-like) */}
       <style>{`
-        .hetros-comprador .bg-white { background-color: #ffffff !important; }
+        .hetros-comprador .bg-[#101216] { background-color: #ffffff !important; }
         .hetros-comprador input:not([type="checkbox"]):not([type="radio"]),
         .hetros-comprador select,
-        .hetros-comprador textarea { background-color: #ffffff !important; color: #262626 !important; }
+        .hetros-comprador textarea { background-color: #ffffff !important; color: #101216 !important; }
         .hetros-comprador input::placeholder,
         .hetros-comprador textarea::placeholder { color: #9ca3af !important; }
       `}</style>
@@ -355,7 +355,7 @@ export default function AppComprador() {
         </div>
 
         {/* Bottom tabs */}
-        <nav className="shrink-0 bg-white/90 backdrop-blur border-t border-neutral-200 px-3 pt-2 pb-5 grid grid-cols-2 gap-1">
+        <nav className="shrink-0 bg-[#101216]/90 backdrop-blur border-t border-neutral-200 px-3 pt-2 pb-5 grid grid-cols-2 gap-1">
           <TabButton ativo={aba === 'aprovacoes'} icon={ClipboardCheck} label="Aprovações" onClick={() => setAba('aprovacoes')} badge={pendentes.length} />
           <TabButton ativo={aba === 'reposicao'} icon={PackageSearch} label="Reposição" onClick={() => setAba('reposicao')} badge={aComprar.length} />
         </nav>
@@ -497,7 +497,7 @@ function AprovacoesTab({
             </button>
           </div>
         ) : pendentes.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-neutral-300 bg-white/60 py-14 text-center">
+          <div className="rounded-3xl border border-dashed border-neutral-300 bg-[#101216]/60 py-14 text-center">
             <BadgeCheck className="h-9 w-9 mx-auto text-emerald-500 mb-2" />
             <p className="text-neutral-700 font-medium">Tudo em dia</p>
             <p className="text-[13px] text-neutral-400 mt-1">Nenhuma OC aguardando aprovação.</p>
@@ -519,7 +519,7 @@ function AprovacoesTab({
           </h3>
           <div className="space-y-2">
             {resolvidas.map((oc) => (
-              <div key={oc.id} className="flex items-center gap-3 rounded-2xl bg-white border border-neutral-200 px-4 py-3">
+              <div key={oc.id} className="flex items-center gap-3 rounded-2xl bg-[#101216] border border-neutral-200 px-4 py-3">
                 <span
                   className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                     oc.status === 'CANCELADA' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'
@@ -615,7 +615,7 @@ function OCCard({ oc, onAprovar, onReprovar, onEditar }: { oc: OrdemCompra; onAp
 
       {/* Card */}
       <div
-        className={`relative rounded-3xl bg-white border border-neutral-200 p-4 shadow-sm cursor-grab active:cursor-grabbing ${
+        className={`relative rounded-3xl bg-[#101216] border border-neutral-200 p-4 shadow-sm cursor-grab active:cursor-grabbing ${
           dragging ? '' : 'transition-transform duration-200'
         }`}
         style={{
@@ -735,7 +735,7 @@ function ReposicaoTab({
       <header className="px-6 pt-4 pb-3 bg-gradient-to-b from-[#EFEBE4] to-[#FAFAFA]">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">Reposição</h1>
-          <button onClick={onAtualizar} className="h-9 w-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center active:scale-95 transition">
+          <button onClick={onAtualizar} className="h-9 w-9 rounded-full bg-[#101216] border border-neutral-200 flex items-center justify-center active:scale-95 transition">
             <RefreshCw className={`h-4 w-4 text-neutral-600 ${carregando ? 'animate-spin' : ''}`} />
           </button>
         </div>
@@ -748,13 +748,13 @@ function ReposicaoTab({
         <div className="mt-4 grid grid-cols-2 gap-1 bg-neutral-200/70 rounded-2xl p-1">
           <button
             onClick={() => setSub('repor')}
-            className={`py-2 rounded-xl text-[13px] font-semibold transition ${sub === 'repor' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
+            className={`py-2 rounded-xl text-[13px] font-semibold transition ${sub === 'repor' ? 'bg-[#101216] text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
           >
             A repor · {itens.length}
           </button>
           <button
             onClick={() => setSub('cis')}
-            className={`py-2 rounded-xl text-[13px] font-semibold transition ${sub === 'cis' ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
+            className={`py-2 rounded-xl text-[13px] font-semibold transition ${sub === 'cis' ? 'bg-[#101216] text-neutral-900 shadow-sm' : 'text-neutral-500'}`}
           >
             Últimas CIs · {cis.length}
           </button>
@@ -768,14 +768,14 @@ function ReposicaoTab({
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
               placeholder="Buscar produto ou código…"
-              className="w-full rounded-2xl border border-neutral-200 bg-white pl-11 pr-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
+              className="w-full rounded-2xl border border-neutral-200 bg-[#101216] pl-11 pr-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
             />
           ) : (
             <input
               value={buscaCI}
               onChange={(e) => setBuscaCI(e.target.value)}
               placeholder="Buscar por nº da CI ou fornecedor…"
-              className="w-full rounded-2xl border border-neutral-200 bg-white pl-11 pr-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
+              className="w-full rounded-2xl border border-neutral-200 bg-[#101216] pl-11 pr-4 py-3 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400"
             />
           )}
         </div>
@@ -810,7 +810,7 @@ function ReposicaoTab({
                 <button
                   key={p.produtoId}
                   onClick={() => onAbrirProduto(p)}
-                  className="w-full text-left rounded-xl bg-white border border-neutral-200 pl-3 pr-2 py-2 flex items-center gap-2.5 active:scale-[0.99] hover:border-neutral-300 transition"
+                  className="w-full text-left rounded-xl bg-[#101216] border border-neutral-200 pl-3 pr-2 py-2 flex items-center gap-2.5 active:scale-[0.99] hover:border-neutral-300 transition"
                 >
                   <span className={`h-2 w-2 rounded-full shrink-0 ${zerado ? 'bg-rose-500' : critico ? 'bg-rose-400' : 'bg-amber-400'}`} />
                   <div className="min-w-0 flex-1">
@@ -843,7 +843,7 @@ function ReposicaoTab({
             cisFiltradas.map((oc) => {
               const st = STATUS_CI[oc.status] ?? STATUS_CI.PENDENTE;
               return (
-                <div key={oc.id} className="rounded-xl bg-white border border-neutral-200 px-3 py-2.5 flex items-center gap-3">
+                <div key={oc.id} className="rounded-xl bg-[#101216] border border-neutral-200 px-3 py-2.5 flex items-center gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-medium text-neutral-800 truncate leading-tight">
                       CI #{oc.numero} · {nomeForn(oc.fornecedor)}
@@ -865,7 +865,7 @@ function ReposicaoTab({
       <div className="px-4 mt-5">
         <button
           onClick={onNovaOC}
-          className="w-full rounded-2xl border border-dashed border-neutral-300 bg-white/60 text-neutral-700 py-3 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-white active:scale-[0.99] transition"
+          className="w-full rounded-2xl border border-dashed border-neutral-300 bg-[#101216]/60 text-neutral-700 py-3 text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#101216] active:scale-[0.99] transition"
         >
           <Plus className="h-4 w-4" /> Nova CI / Ordem de compra
         </button>
@@ -948,13 +948,13 @@ function ProdutoSheet({
         <div className="px-6 pb-8 space-y-5">
           {/* Situação de estoque */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white border border-neutral-200 p-3.5">
+            <div className="rounded-2xl bg-[#101216] border border-neutral-200 p-3.5">
               <p className="text-[11px] uppercase tracking-wide text-neutral-400 font-semibold">Disponível</p>
               <p className={`text-2xl font-semibold tabular-nums mt-0.5 ${zerado ? 'text-rose-600' : 'text-neutral-900'}`}>
                 {num(item.disponivel)} <span className="text-sm text-neutral-400">{item.unidade || 'un'}</span>
               </p>
             </div>
-            <div className="rounded-2xl bg-white border border-neutral-200 p-3.5">
+            <div className="rounded-2xl bg-[#101216] border border-neutral-200 p-3.5">
               <p className="text-[11px] uppercase tracking-wide text-neutral-400 font-semibold">Estoque mínimo</p>
               <p className="text-2xl font-semibold tabular-nums mt-0.5 text-neutral-900">
                 {num(item.estoqueMinimo)} <span className="text-sm text-neutral-400">{item.unidade || 'un'}</span>
@@ -981,7 +981,7 @@ function ProdutoSheet({
                 {hist.map((h) => {
                   const st = STATUS_CI[h.status] ?? STATUS_CI.PENDENTE;
                   return (
-                    <div key={h.ordemId} className="rounded-2xl bg-white border border-neutral-200 px-3.5 py-2.5 flex items-center gap-3">
+                    <div key={h.ordemId} className="rounded-2xl bg-[#101216] border border-neutral-200 px-3.5 py-2.5 flex items-center gap-3">
                       <div className="min-w-0 flex-1">
                         <p className="text-[13px] font-medium text-neutral-800 truncate leading-tight">{h.fornecedor}</p>
                         <p className="text-[10px] text-neutral-400 flex items-center gap-1 mt-0.5">
@@ -1006,7 +1006,7 @@ function ProdutoSheet({
               <Store className="h-4 w-4 text-neutral-500" />
               <span className="text-[12px] font-semibold text-neutral-500 uppercase tracking-wide">Quem está pedindo</span>
             </div>
-            <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 py-5 px-4 text-center">
+            <div className="rounded-2xl border border-dashed border-neutral-300 bg-[#101216]/60 py-5 px-4 text-center">
               <p className="text-[13px] text-neutral-500 font-medium">Pedidos internos das lojas/setores</p>
               <p className="text-[11.5px] text-neutral-400 mt-1">Cadastro ainda não disponível — será a próxima etapa.</p>
             </div>
@@ -1224,7 +1224,7 @@ function NovaOCModal({
               </div>
               <div className="space-y-3">
                 {itens.map((it, i) => (
-                  <div key={i} className="rounded-2xl border border-neutral-200 bg-white p-3">
+                  <div key={i} className="rounded-2xl border border-neutral-200 bg-[#101216] p-3">
                     <div className="flex items-center gap-2">
                       <select value={it.produtoId} onChange={(e) => escolherProduto(i, e.target.value)} className="campo flex-1">
                         <option value="">Selecione o produto</option>
@@ -1316,7 +1316,7 @@ function NovaOCModal({
           background: #fff;
           padding: 0.7rem 0.9rem;
           font-size: 0.92rem;
-          color: #262626;
+          color: #101216;
           outline: none;
         }
         .campo:focus { border-color: #a3a3a3; box-shadow: 0 0 0 3px rgba(0,0,0,0.05); }

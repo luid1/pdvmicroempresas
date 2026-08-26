@@ -8,11 +8,11 @@ import { CadastroShell, TopBar, FilterBar, Chips, TableCard, Th, Modal, Secao, C
 
 const dt = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 const STATUS: Record<string, { label: string; cor: string }> = {
-  PENDENTE: { label: 'Pendente', cor: 'bg-amber-500/15 text-[#a9760a]' },
-  APROVADA: { label: 'Aprovada', cor: 'bg-[#F6F5F2] text-[#8B8D98]' },
-  PARCIAL: { label: 'Parcial', cor: 'bg-[#F0EEE9] text-[#5B5D69]' },
-  ENTREGUE: { label: 'Entregue', cor: 'bg-emerald-500/15 text-[#0b7d4e]' },
-  CANCELADA: { label: 'Cancelada', cor: 'bg-rose-500/15 text-[#c3352b]' },
+  PENDENTE: { label: 'Pendente', cor: 'bg-[#FF9F45]/12 text-[#FF9F45]' },
+  APROVADA: { label: 'Aprovada', cor: 'bg-[#3B9EFF]/12 text-[#3B9EFF]' },
+  PARCIAL: { label: 'Parcial', cor: 'bg-[#22D3EE]/12 text-[#22D3EE]' },
+  ENTREGUE: { label: 'Entregue', cor: 'bg-[#2DD4A7]/12 text-[#2DD4A7]' },
+  CANCELADA: { label: 'Cancelada', cor: 'bg-[#FF6B7A]/12 text-[#FF6B7A]' },
 };
 const CONDICOES = ['A_VISTA', '7_DIAS', '15_DIAS', '30_DIAS', '30_60', '30_60_90'];
 const CONatoLabel: Record<string, string> = { A_VISTA: 'À vista', '7_DIAS': '7 dias', '15_DIAS': '15 dias', '30_DIAS': '30 dias', '30_60': '30/60', '30_60_90': '30/60/90' };
@@ -50,7 +50,7 @@ export default function Compras() {
     <CadastroShell>
       <TopBar icon={<ShoppingCart className="h-5 w-5" />} titulo="Ordens de Compra" subtitulo={`${lista.length} OC(s) — compras e suprimentos`}
         novoLabel="Nova OC" onNovo={() => setCriar(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-white border border-[#E7E5DF] hover:bg-[#EFEDE7] px-3 py-2 rounded-lg text-[#5B5D69] text-sm"><RefreshCw className="h-4 w-4 text-[#a9760a]" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-[#101216] border border-[#23262F] hover:bg-[#0C0D10] px-3 py-2 rounded-lg text-[#8A90A0] text-sm"><RefreshCw className="h-4 w-4 text-[#01B8FA]" /> Atualizar</button>} />
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por nº ou fornecedor...">
         <Chips value={status} onChange={setStatus} options={[{ value: '', label: 'Todas' }, ...Object.keys(STATUS).map(s => ({ value: s, label: STATUS[s].label }))]} />
       </FilterBar>
@@ -61,22 +61,22 @@ export default function Compras() {
             <thead><tr>{['OC', 'Fornecedor', 'Emissão', 'Entrega prev.', 'Pagamento', 'Itens', 'Total', 'Status', 'Ações'].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(oc => (
-                <tr key={oc.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
-                  <td className="px-3 py-2.5 font-bold text-[#16171D]">#{oc.numero}</td>
-                  <td className="px-3 py-2.5 text-[#5B5D69]">{oc.fornecedor?.nomeFantasia || oc.fornecedor?.razaoSocial}</td>
-                  <td className="px-3 py-2.5 text-slate-400">{dt(oc.dataEmissao)}</td>
-                  <td className="px-3 py-2.5 text-slate-400">{dt(oc.dataEntregaPrevista)}</td>
-                  <td className="px-3 py-2.5 text-slate-400 text-xs">{CONatoLabel[oc.condicaoPagamento] || oc.condicaoPagamento || '—'}</td>
-                  <td className="px-3 py-2.5 text-center text-[#8B8D98]">{oc._count?.itens ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[#5B5D69]">{R$(oc.valorTotal)}</td>
-                  <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS[oc.status]?.cor}`}>{STATUS[oc.status]?.label || oc.status}</span></td>
-                  <td className="px-3 py-2.5 whitespace-nowrap">
+                <tr key={oc.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                  <td className="px-3 py-1 font-bold text-[#F7F8FA] font-mono">#{oc.numero}</td>
+                  <td className="px-3 py-1 text-[#F7F8FA]">{oc.fornecedor?.nomeFantasia || oc.fornecedor?.razaoSocial}</td>
+                  <td className="px-3 py-1 text-slate-400">{dt(oc.dataEmissao)}</td>
+                  <td className="px-3 py-1 text-slate-400">{dt(oc.dataEntregaPrevista)}</td>
+                  <td className="px-3 py-1 text-slate-400 text-xs">{CONatoLabel[oc.condicaoPagamento] || oc.condicaoPagamento || '—'}</td>
+                  <td className="px-3 py-1 text-center text-[#8A90A0]">{oc._count?.itens ?? '—'}</td>
+                  <td className="px-3 py-1 text-right font-mono text-[#F7F8FA]">{R$(oc.valorTotal)}</td>
+                  <td className="px-3 py-1"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS[oc.status]?.cor}`}>{STATUS[oc.status]?.label || oc.status}</span></td>
+                  <td className="px-3 py-1 whitespace-nowrap">
                     <div className="flex items-center gap-1">
-                      {oc.status === 'PENDENTE' && <button onClick={() => acao(oc, 'APROVADA')} className="text-[11px] bg-[#E8A317]/12 text-[#a9760a] border border-[#E8A317]/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Check className="h-3 w-3" /> Aprovar</button>}
-                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA' || oc.status === 'PARCIAL') && <button onClick={() => navigate(`/wms/entradas?oc=${oc.id}`)} className="text-[11px] bg-emerald-500/10 text-[#0b7d4e] border border-emerald-500/30 px-2 py-1 rounded font-semibold hover:bg-emerald-500/20 flex items-center gap-1" title="Receber via Entrada de mercadoria"><PackageCheck className="h-3 w-3" /> Receber</button>}
-                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA') && <button onClick={() => abrirEditar(oc)} className="text-slate-400 hover:text-[#a9760a] p-1" title="Editar"><Pencil className="h-3.5 w-3.5" /></button>}
-                      {oc.status !== 'ENTREGUE' && oc.status !== 'CANCELADA' && <button onClick={() => acao(oc, 'CANCELADA', `Cancelar a OC #${oc.numero}?`)} className="text-slate-400 hover:text-[#c3352b] p-1" title="Cancelar"><Ban className="h-3.5 w-3.5" /></button>}
-                      {oc.status === 'PENDENTE' && <button onClick={() => excluir(oc)} className="text-slate-400 hover:text-[#c3352b] p-1" title="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>}
+                      {oc.status === 'PENDENTE' && <button onClick={() => acao(oc, 'APROVADA')} className="text-[11px] bg-[#01B8FA]/12 text-[#01B8FA] border border-[#01B8FA]/30 px-2 py-1 rounded font-semibold hover:bg-[#01B8FA]/20 flex items-center gap-1"><Check className="h-3 w-3" /> Aprovar</button>}
+                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA' || oc.status === 'PARCIAL') && <button onClick={() => navigate(`/wms/entradas?oc=${oc.id}`)} className="text-[11px] bg-[#2DD4A7]/12 text-[#2DD4A7] border border-[#2DD4A7]/30 px-2 py-1 rounded font-semibold hover:bg-[#2DD4A7]/20 flex items-center gap-1" title="Receber via Entrada de mercadoria"><PackageCheck className="h-3 w-3" /> Receber</button>}
+                      {(oc.status === 'PENDENTE' || oc.status === 'APROVADA') && <button onClick={() => abrirEditar(oc)} className="text-slate-400 hover:text-[#01B8FA] p-1" title="Editar"><Pencil className="h-3.5 w-3.5" /></button>}
+                      {oc.status !== 'ENTREGUE' && oc.status !== 'CANCELADA' && <button onClick={() => acao(oc, 'CANCELADA', `Cancelar a OC #${oc.numero}?`)} className="text-slate-400 hover:text-[#FF6B7A] p-1" title="Cancelar"><Ban className="h-3.5 w-3.5" /></button>}
+                      {oc.status === 'PENDENTE' && <button onClick={() => excluir(oc)} className="text-slate-400 hover:text-[#FF6B7A] p-1" title="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   </td>
                 </tr>
@@ -142,8 +142,8 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
     finally { setSalvando(false); }
   };
 
-  const fld = 'w-full bg-white border border-[#E7E5DF] rounded px-2 py-1.5 text-xs text-[#16171D] focus:outline-none focus:border-[#E8A317]';
-  const lb = 'block text-[9px] font-bold text-slate-500 uppercase mb-0.5';
+  const fld = 'w-full bg-[#101216] border border-[#23262F] rounded px-2 py-1.5 text-xs text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]';
+  const lb = 'block text-[9px] font-bold text-[#8A90A0] uppercase mb-0.5';
 
   return (
     <Modal titulo={oc ? `Editar OC #${oc.numero}` : 'Nova Ordem de Compra'} onClose={onClose} onSalvar={salvar} salvando={salvando} salvarLabel={oc ? 'Salvar' : 'Criar OC'} wide>
@@ -156,40 +156,40 @@ function ModalOC({ oc, filialId, onClose, onSalvo }: { oc: any | null; filialId?
           </select>
         </Campo>
         <Campo label="Condição de pagamento"><select value={condicao} onChange={e => setCondicao(e.target.value)} className={inp}>{CONDICOES.map(c => <option key={c} value={c}>{CONatoLabel[c]}</option>)}</select></Campo>
-        <Campo label="Entrega prevista"><input type="date" value={entrega} onChange={e => setEntrega(e.target.value)} className={inp} /></Campo>
+        <Campo label="Entrega prevista"><input type="date" value={entrega} onChange={e => setEntrega(e.target.value)} className={`${inp} [color-scheme:dark]`} /></Campo>
       </div>
 
       <Secao titulo="Itens" />
       <div className="space-y-2">
         {itens.map((it, i) => (
-          <div key={i} className="border border-[#E7E5DF] rounded-lg p-3 bg-[#F6F5F2]">
+          <div key={i} className="border border-[#23262F] rounded-lg p-3 bg-[#0C0D10]">
             <div className="grid grid-cols-12 gap-2">
               <div className="col-span-6 sm:col-span-5"><label className={lb}>Produto (vínculo)</label>
                 <select value={it.produtoId} onChange={e => escolherProduto(i, e.target.value)} className={fld}><option value="">Sem vínculo</option>{produtos.map(p => <option key={p.id} value={p.id}>{p.descricao}</option>)}</select>
               </div>
               <div className="col-span-6"><label className={lb}>Descrição *</label><input value={it.descricao} onChange={e => setItem(i, 'descricao', e.target.value)} className={`${fld} ${!it.descricao.trim() ? 'border-rose-500/40' : ''}`} placeholder="nome do item" /></div>
               <div className="col-span-12 sm:col-span-1 flex sm:justify-center sm:items-end">
-                {itens.length > 1 && <button onClick={() => delItem(i)} className="text-slate-500 hover:text-[#c3352b] flex items-center gap-1 text-[11px] pb-1.5"><Trash2 className="h-4 w-4" /><span className="sm:hidden">remover</span></button>}
+                {itens.length > 1 && <button onClick={() => delItem(i)} className="text-slate-500 hover:text-[#FF6B7A] flex items-center gap-1 text-[11px] pb-1.5"><Trash2 className="h-4 w-4" /><span className="sm:hidden">remover</span></button>}
               </div>
             </div>
             <div className="grid grid-cols-12 gap-2 mt-2">
               <div className="col-span-4 sm:col-span-3"><label className={lb}>Qtd *</label><input type="number" inputMode="decimal" min="0" step="0.001" value={it.quantidade} onChange={e => setItem(i, 'quantidade', e.target.value)} className={`${fld} text-right ${!(Number(it.quantidade) > 0) ? 'border-rose-500/40' : ''}`} /></div>
               <div className="col-span-3 sm:col-span-2"><label className={lb}>Un</label><select value={it.unidade} onChange={e => setItem(i, 'unidade', e.target.value)} className={fld}>{[...new Set([it.unidade, ...UNIDADES])].map(u => <option key={u}>{u}</option>)}</select></div>
               <div className="col-span-5 sm:col-span-3"><label className={lb}>Preço Unit. (R$)</label><input type="number" inputMode="decimal" min="0" step="0.01" value={it.precoUnitario} onChange={e => setItem(i, 'precoUnitario', e.target.value)} className={`${fld} text-right`} placeholder="0,00" /></div>
-              <div className="col-span-12 sm:col-span-4 flex items-end justify-end"><span className="text-[11px] text-slate-500">Subtotal: <b className="text-[#8B8D98]">{R$((Number(it.quantidade) || 0) * (Number(it.precoUnitario) || 0))}</b></span></div>
+              <div className="col-span-12 sm:col-span-4 flex items-end justify-end"><span className="text-[11px] text-slate-500">Subtotal: <b className="text-[#F7F8FA] font-mono">{R$((Number(it.quantidade) || 0) * (Number(it.precoUnitario) || 0))}</b></span></div>
             </div>
           </div>
         ))}
       </div>
       <div className="flex items-center justify-between">
-        <button onClick={addItem} className="flex items-center gap-1 text-xs text-[#a9760a] hover:text-[#a9760a] font-semibold"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
-        <span className="text-sm text-[#8B8D98]">Total da OC: <b className="text-[#16171D] text-base">{R$(total)}</b></span>
+        <button onClick={addItem} className="flex items-center gap-1 text-xs text-[#01B8FA] hover:text-[#22D3EE] font-semibold transition-colors"><Plus className="h-3.5 w-3.5" /> Adicionar item</button>
+        <span className="text-sm text-[#8A90A0]">Total da OC: <b className="text-[#F7F8FA] text-base font-mono">{R$(total)}</b></span>
       </div>
 
       <Campo label="Observações"><textarea value={obs} onChange={e => setObs(e.target.value)} rows={2} className={`${inp} resize-none`} /></Campo>
       <p className="text-[11px] text-slate-500">Ao <b>Receber</b>, os itens vinculados a um produto dão entrada no estoque e é gerado o Contas a Pagar pela condição de pagamento.</p>
 
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
     </Modal>
   );
 }

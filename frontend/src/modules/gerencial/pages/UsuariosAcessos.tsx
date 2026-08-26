@@ -38,7 +38,7 @@ export default function UsuariosAcessos() {
   return (
     <div className="flex flex-col h-full bg-gray-50">
       {/* Header + abas (compacto, uma linha) */}
-      <div className="bg-white border-b border-gray-200 px-5 py-1.5 shrink-0 flex items-center gap-4">
+      <div className="bg-[#101216] border-b border-gray-200 px-5 py-1.5 shrink-0 flex items-center gap-4">
         <h1 className="text-sm font-bold text-gray-900 flex items-center gap-2 shrink-0">
           <Users className="h-4 w-4 text-amber-500" /> Usuários & Acessos
         </h1>
@@ -55,7 +55,7 @@ export default function UsuariosAcessos() {
       <div className="flex-1 overflow-auto p-5">
         {aba === 'usuarios' ? (
           <>
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+            <div className="bg-[#101216] rounded-xl border border-gray-200 overflow-hidden">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100 text-xs text-gray-600">
                   <tr>{['Nome', 'E-mail', 'Perfil', 'Filiais', 'Último acesso', 'Status', ''].map(h => <th key={h} className="px-3 py-1.5 text-left font-semibold">{h}</th>)}</tr>
@@ -84,7 +84,7 @@ export default function UsuariosAcessos() {
               {roles.map(r => {
                 const todas = r.telas.includes('*');
                 return (
-                  <div key={r.id} className="bg-white rounded-xl border border-gray-200 p-4">
+                  <div key={r.id} className="bg-[#101216] rounded-xl border border-gray-200 p-4">
                     <div className="flex items-start justify-between">
                       <div>
                         <p className="font-bold text-gray-900 flex items-center gap-1.5"><ShieldCheck className="h-4 w-4 text-amber-500" /> {r.nome}</p>
@@ -158,7 +158,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
 
   return createPortal((
     <div className="fixed inset-0 bg-[#16171D]/40 z-[70] flex items-center justify-center p-4 animate-backdrop">
-      <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-modal">
+      <div className="bg-[#101216] backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-modal">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
           <h2 className="font-bold text-[#16171D]">{novo ? 'Novo Usuário' : 'Editar Usuário'}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
@@ -181,7 +181,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
             <div className="flex flex-wrap gap-1.5">
               {filiais.map(f => (
                 <button key={f.id} onClick={() => toggleFilial(f.id)} type="button"
-                  className={`px-2.5 py-1 rounded-full text-xs font-medium border ${filialIds.includes(f.id) ? 'bg-amber-400 text-slate-900 border-amber-400' : 'bg-white border-gray-300 text-gray-600'}`}>
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium border ${filialIds.includes(f.id) ? 'bg-amber-400 text-slate-900 border-amber-400' : 'bg-[#101216] border-gray-300 text-gray-600'}`}>
                   {f.codigo} — {f.nome}
                 </button>
               ))}
@@ -199,7 +199,7 @@ function ModalUsuario({ alvo, roles, filiais, onClose, onSalvo }: {
             {!novo && u?.ativo && <button onClick={inativar} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Power className="h-3.5 w-3.5" /> Inativar</button>}
           </div>
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+            <button onClick={onClose} className="px-4 py-2 bg-[#101216]/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-[#101216]/10">Cancelar</button>
             <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>
@@ -234,11 +234,11 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
     } finally { setSalvando(false); }
   };
 
-  const pinInp = 'w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-[#16171D] focus:outline-none focus:border-[#E8A317]';
+  const pinInp = 'w-full bg-[#101216] border border-[#E7E5DF] rounded-lg px-3 py-2.5 text-center text-lg font-mono tracking-[0.5em] text-[#16171D] focus:outline-none focus:border-[#E8A317]';
 
   return createPortal((
     <div className="fixed inset-0 bg-[#16171D]/40 z-[80] flex items-center justify-center p-4 animate-backdrop" onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
+      <div onClick={e => e.stopPropagation()} className="bg-[#101216] backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-sm flex flex-col overflow-hidden animate-modal">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
           <h2 className="font-bold text-[#16171D] flex items-center gap-2"><Hash className="h-4 w-4 text-[#a9760a]" /> Definir PIN</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
@@ -264,10 +264,10 @@ function ModalPin({ usuario, onClose }: { usuario: Usuario; onClose: () => void 
           <button type="button" onClick={() => setMostrar(m => !m)} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-[#5B5D69]">
             {mostrar ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />} {mostrar ? 'Ocultar' : 'Mostrar'} dígitos
           </button>
-          {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">{erro}</p>}
+          {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-lg">{erro}</p>}
         </div>
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[#E7E5DF]">
-          <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+          <button onClick={onClose} className="px-4 py-2 bg-[#101216]/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-[#101216]/10">Cancelar</button>
           <button onClick={salvar} disabled={!podeSalvar} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar PIN</button>
         </div>
       </div>
@@ -325,7 +325,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
 
   return createPortal((
     <div className="fixed inset-0 bg-[#16171D]/40 z-[70] flex items-center justify-center p-4 animate-backdrop">
-      <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-modal">
+      <div className="bg-[#101216] backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden animate-modal">
         <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF]">
           <h2 className="font-bold text-[#16171D]">{novo ? 'Novo Perfil' : `Perfil — ${r?.nome}`}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
@@ -401,7 +401,7 @@ function ModalPerfil({ alvo, onClose, onSalvo }: { alvo: Role | 'novo'; onClose:
             ? <button onClick={excluir} className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 px-2 py-1.5 rounded border border-red-200"><Trash2 className="h-3.5 w-3.5" /> Excluir</button>
             : <span />}
           <div className="flex gap-2">
-            <button onClick={onClose} className="px-4 py-2 bg-white/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-white/10">Cancelar</button>
+            <button onClick={onClose} className="px-4 py-2 bg-[#101216]/5 border border-[#E7E5DF] text-[#8B8D98] rounded-lg text-sm hover:bg-[#101216]/10">Cancelar</button>
             <button onClick={salvar} disabled={salvando} className="px-5 py-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg text-sm font-bold disabled:opacity-40 flex items-center gap-1.5"><Check className="h-4 w-4" /> Salvar</button>
           </div>
         </div>

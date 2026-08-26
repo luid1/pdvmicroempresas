@@ -640,7 +640,7 @@ export default function Pdv() {
   if (carregandoSessao) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#F4F5F7]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#0F8A72]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#01B8FA]" />
       </div>
     );
   }
@@ -656,30 +656,30 @@ export default function Pdv() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[#F4F5F7] text-[#202123]">
+    <div className="flex h-screen flex-col bg-[#F4F5F7] text-[#F7F8FA]">
       {/* Topo */}
-      <header className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-6 py-3 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
+      <header className="flex items-center justify-between border-b border-[#23262F] bg-[#101216] px-6 py-3 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/20">
-            <ShoppingCart className="h-5 w-5 text-[#0F8A72]" />
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-[#01B8FA]/10 ring-1 ring-inset ring-[#01B8FA]/20">
+            <ShoppingCart className="h-5 w-5 text-[#01B8FA]" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-[15px] font-semibold tracking-tight">Frente de Caixa</span>
-            <span className="mt-0.5 text-[11px] text-[#8E8F94]">Lumin PDV</span>
+            <span className="mt-0.5 text-[11px] text-[#8A90A0]">Lumin PDV</span>
           </div>
-          <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-medium text-[#0b7d4e] ring-1 ring-inset ring-[#0F8A72]/20">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#0FA968]" />
+          <span className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-[#01B8FA]/10 px-2.5 py-1 text-xs font-medium text-[#2DD4A7] ring-1 ring-inset ring-[#01B8FA]/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#2DD4A7]" />
             {filialAtiva?.nome || 'Sem filial'}
           </span>
         </div>
-        <div className="flex items-center gap-3 text-sm text-[#5F6065]">
-          <span className="flex items-center gap-2 rounded-full bg-[#F7F7F8] px-3 py-1.5 ring-1 ring-inset ring-[#E5E7EB]">
-            <UserIcon className="h-3.5 w-3.5 text-[#0F8A72]" />
+        <div className="flex items-center gap-3 text-sm text-[#8A90A0]">
+          <span className="flex items-center gap-2 rounded-full bg-[#0C0D10] px-3 py-1.5 ring-1 ring-inset ring-[#23262F]">
+            <UserIcon className="h-3.5 w-3.5 text-[#01B8FA]" />
             {user?.nome || 'Operador'}
           </span>
           <button
             onClick={logout}
-            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[#5F6065] transition-colors hover:bg-rose-50 hover:text-rose-600"
+            className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-[#8A90A0] transition-colors hover:bg-rose-50 hover:text-rose-600"
             title="Sair"
           >
             <LogOut className="h-4 w-4" /> Sair
@@ -691,7 +691,7 @@ export default function Pdv() {
         {/* Lista de itens */}
         <main className="flex min-w-0 flex-1 flex-col">
           {/* Campo de leitura */}
-          <div className="border-b border-[#E5E7EB] bg-white p-4">
+          <div className="border-b border-[#23262F] bg-[#101216] p-4">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -699,11 +699,11 @@ export default function Pdv() {
               }}
             >
               <div className="relative">
-                <div className="flex items-center gap-3 rounded-2xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3.5 transition-all focus-within:border-[#0F8A72]/60 focus-within:bg-white focus-within:ring-4 focus-within:ring-[#0F8A72]/15">
+                <div className="flex items-center gap-3 rounded-2xl border border-[#23262F] bg-[#0C0D10] px-4 py-3.5 transition-all focus-within:border-[#01B8FA]/60 focus-within:bg-[#101216] focus-within:ring-4 focus-within:ring-[#01B8FA]/15">
                   {buscando ? (
-                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-[#0F8A72]" />
+                    <Loader2 className="h-6 w-6 shrink-0 animate-spin text-[#01B8FA]" />
                   ) : (
-                    <ScanLine className="h-6 w-6 shrink-0 text-[#0F8A72]" />
+                    <ScanLine className="h-6 w-6 shrink-0 text-[#01B8FA]" />
                   )}
                   <input
                     ref={inputRef}
@@ -749,21 +749,21 @@ export default function Pdv() {
 
                 {/* Sugestões por nome/código */}
                 {sugestoes.length > 0 && (
-                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-xl border border-[#E5E7EB] bg-white shadow-[0_8px_24px_rgba(22,23,29,0.12)]">
+                  <ul className="absolute left-0 right-0 top-full z-30 mt-1 max-h-72 overflow-auto rounded-xl border border-[#23262F] bg-[#101216] shadow-[0_8px_24px_rgba(22,23,29,0.12)]">
                     {sugestoes.map((p, idx) => (
                       <li
                         key={p.id}
                         onMouseDown={(e) => { e.preventDefault(); selecionarSugestao(p); }}
                         onMouseEnter={() => setSugIdx(idx)}
                         className={`flex cursor-pointer items-center justify-between gap-3 px-4 py-2 ${
-                          idx === sugIdx ? 'bg-[#0F8A72]/10' : 'hover:bg-[#F7F7F8]'
+                          idx === sugIdx ? 'bg-[#01B8FA]/10' : 'hover:bg-[#0C0D10]'
                         }`}
                       >
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-medium text-[#202123]">{p.descricao}</div>
-                          <div className="truncate text-xs text-[#8E8F94]">
+                          <div className="truncate text-sm font-medium text-[#F7F8FA]">{p.descricao}</div>
+                          <div className="truncate text-xs text-[#8A90A0]">
                             {p.codigoBarras || p.codigo}
-                            <span className={p.estoqueDisponivel > 0 ? 'text-[#8E8F94]' : 'text-rose-500'}>
+                            <span className={p.estoqueDisponivel > 0 ? 'text-[#8A90A0]' : 'text-rose-500'}>
                               {' · '}
                               {p.vendidoPorPeso
                                 ? `${p.estoqueDisponivel.toLocaleString('pt-BR', { maximumFractionDigits: 3 })} kg`
@@ -771,9 +771,9 @@ export default function Pdv() {
                             </span>
                           </div>
                         </div>
-                        <div className="shrink-0 tabular-nums text-sm font-semibold text-[#0F8A72]">
+                        <div className="shrink-0 tabular-nums text-sm font-semibold text-[#01B8FA]">
                           {brl(p.precoVenda)}
-                          {p.vendidoPorPeso && <span className="text-xs text-[#8E8F94]">/kg</span>}
+                          {p.vendidoPorPeso && <span className="text-xs text-[#8A90A0]">/kg</span>}
                         </div>
                       </li>
                     ))}
@@ -784,7 +784,7 @@ export default function Pdv() {
             {/* Multiplicador de quantidade — arma o PRÓXIMO item bipado.
                 Clique um ×N ou digite "2*" antes do nome/código. */}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-xs uppercase tracking-wide text-[#8E8F94]">
+              <span className="text-xs uppercase tracking-wide text-[#8A90A0]">
                 Multiplicar ×
               </span>
               {[2, 3, 4, 5, 6, 10, 12].map((n) => (
@@ -793,8 +793,8 @@ export default function Pdv() {
                   onClick={() => aplicarMultiplicador(n)}
                   className={`min-w-[2.75rem] rounded-xl border px-3 py-1.5 text-sm font-semibold tabular-nums transition ${
                     mult === n
-                      ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e]'
-                      : 'border-[#E5E7EB] bg-white text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
+                      ? 'border-[#01B8FA] bg-[#01B8FA]/10 text-[#2DD4A7]'
+                      : 'border-[#23262F] bg-[#101216] text-[#8A90A0] hover:border-[#D1D5DB] hover:bg-[#0C0D10]'
                   }`}
                   title={`Próximo item entra com ${n} unidades`}
                 >
@@ -804,7 +804,7 @@ export default function Pdv() {
               {mult > 1 && (
                 <button
                   onClick={() => { setMult(1); focar(); }}
-                  className="ml-1 flex items-center gap-1 rounded-xl bg-[#0F8A72]/10 px-3 py-1.5 text-sm font-semibold text-[#0b7d4e] ring-1 ring-inset ring-[#0F8A72]/30"
+                  className="ml-1 flex items-center gap-1 rounded-xl bg-[#01B8FA]/10 px-3 py-1.5 text-sm font-semibold text-[#2DD4A7] ring-1 ring-inset ring-[#01B8FA]/30"
                   title="Próximo item terá esta quantidade. Clique para limpar."
                 >
                   Próximo item × {mult} <X className="h-3.5 w-3.5" />
@@ -819,16 +819,16 @@ export default function Pdv() {
           {/* Itens */}
           <div className="min-h-0 flex-1 overflow-auto">
             {itens.length === 0 ? (
-              <div className="flex h-full flex-col items-center justify-center text-[#8E8F94]">
+              <div className="flex h-full flex-col items-center justify-center text-[#8A90A0]">
                 {ultimoCupom ? (
                   <div className="flex flex-col items-center text-center">
-                    <div className="mb-3 grid h-16 w-16 place-items-center rounded-full bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/25">
-                      <Check className="h-9 w-9 text-[#0F8A72]" />
+                    <div className="mb-3 grid h-16 w-16 place-items-center rounded-full bg-[#01B8FA]/10 ring-1 ring-inset ring-[#01B8FA]/25">
+                      <Check className="h-9 w-9 text-[#01B8FA]" />
                     </div>
-                    <p className="text-lg font-semibold text-[#0b7d4e]">
+                    <p className="text-lg font-semibold text-[#2DD4A7]">
                       Venda #{ultimoCupom.numero} registrada
                     </p>
-                    <p className="mt-1 text-sm text-[#5F6065]">
+                    <p className="mt-1 text-sm text-[#8A90A0]">
                       {brl(ultimoCupom.valorTotal)} · {ultimoCupom.formaPagamento}
                       {ultimoCupom.troco > 0 && ` · Troco ${brl(ultimoCupom.troco)}`}
                     </p>
@@ -840,12 +840,12 @@ export default function Pdv() {
 
                     <button
                       onClick={() => imprimirCupom(ultimoCupom)}
-                      className="mt-4 flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm text-[#202123] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.98]"
+                      className="mt-4 flex items-center gap-2 rounded-xl bg-[#101216] px-4 py-2.5 text-sm text-[#F7F8FA] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.98]"
                     >
                       <Printer className="h-4 w-4" /> Reimprimir cupom
                     </button>
                     <label
-                      className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-[#5F6065] select-none"
+                      className="mt-3 flex cursor-pointer items-center gap-2 text-sm text-[#8A90A0] select-none"
                       title="Ligue apenas se este caixa tem impressora térmica. Sem térmica, isto abre o diálogo de impressão do Chrome a cada venda."
                     >
                       <input
@@ -855,15 +855,15 @@ export default function Pdv() {
                           setCupomAuto(e.target.checked);
                           setCupomAutoState(e.target.checked);
                         }}
-                        className="h-4 w-4 accent-[#0F8A72]"
+                        className="h-4 w-4 accent-[#01B8FA]"
                       />
                       Imprimir cupom automaticamente
                     </label>
-                    <p className="mt-3 text-sm text-[#8E8F94]">Bipe uma mercadoria para a próxima venda.</p>
+                    <p className="mt-3 text-sm text-[#8A90A0]">Bipe uma mercadoria para a próxima venda.</p>
                   </div>
                 ) : (
                   <>
-                    <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-white ring-1 ring-inset ring-[#E5E7EB]">
+                    <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-[#101216] ring-1 ring-inset ring-[#23262F]">
                       <Barcode className="h-8 w-8 text-[#C4C6CB]" />
                     </div>
                     <p className="text-sm">Nenhum item. Bipe uma mercadoria para começar.</p>
@@ -873,8 +873,8 @@ export default function Pdv() {
               </div>
             ) : (
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-[#F7F7F8]/95 text-left text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94] backdrop-blur">
-                  <tr className="border-b border-[#E5E7EB]">
+                <thead className="sticky top-0 z-10 bg-[#0C0D10]/95 text-left text-[11px] font-semibold uppercase tracking-wide text-[#8A90A0] backdrop-blur">
+                  <tr className="border-b border-[#23262F]">
                     <th className="px-4 py-2.5">Produto</th>
                     <th className="px-4 py-2.5 text-right">Preço</th>
                     <th className="px-4 py-2.5 text-center">Qtd</th>
@@ -888,12 +888,12 @@ export default function Pdv() {
                       key={i.produtoId}
                       onClick={() => setSelecionadoId(i.produtoId)}
                       className={`cursor-pointer border-b border-[#EEF0F2] transition-colors ${
-                        selecionadoId === i.produtoId ? 'bg-[#0F8A72]/[0.08] ring-1 ring-inset ring-[#0F8A72]/30' : 'hover:bg-[#F7F7F8]'
+                        selecionadoId === i.produtoId ? 'bg-[#01B8FA]/[0.08] ring-1 ring-inset ring-[#01B8FA]/30' : 'hover:bg-[#0C0D10]'
                       }`}
                     >
                       <td className="px-4 py-3">
                         <div className="font-medium">{i.descricao}</div>
-                        <div className="text-xs text-[#8E8F94]">{i.codigoBarras}</div>
+                        <div className="text-xs text-[#8A90A0]">{i.codigoBarras}</div>
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums">
                         {brl(i.precoUnit)}
@@ -903,7 +903,7 @@ export default function Pdv() {
                             Não se altera depois — anti-fraude. Para corrigir, remove
                             o item (com senha) e bipa de novo. */}
                         <div className="text-center">
-                          <span className="inline-block min-w-[3.5rem] rounded-lg bg-[#F7F7F8] px-3 py-1.5 text-center font-semibold tabular-nums text-[#202123] ring-1 ring-inset ring-[#E5E7EB]">
+                          <span className="inline-block min-w-[3.5rem] rounded-lg bg-[#0C0D10] px-3 py-1.5 text-center font-semibold tabular-nums text-[#F7F8FA] ring-1 ring-inset ring-[#23262F]">
                             {i.unidade === 'KG'
                               ? `${i.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`
                               : i.quantidade}
@@ -916,7 +916,7 @@ export default function Pdv() {
                       <td className="px-4 py-3 text-right">
                         <button
                           onClick={() => pedirGerencial('remover', 'Remover item da venda', () => remover(i.produtoId))}
-                          className="rounded p-1 text-[#8E8F94] hover:bg-rose-50 hover:text-rose-600"
+                          className="rounded p-1 text-[#8A90A0] hover:bg-rose-50 hover:text-rose-600"
                           title="Remover item (pode exigir senha gerencial)"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -931,32 +931,32 @@ export default function Pdv() {
         </main>
 
         {/* Painel lateral — total e ações */}
-        <aside className="flex w-80 shrink-0 flex-col border-l border-[#E5E7EB] bg-white">
+        <aside className="flex w-80 shrink-0 flex-col border-l border-[#23262F] bg-[#101216]">
           <div className="flex-1 p-5">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-[#5F6065]">Itens</span>
-              <span className="rounded-full bg-[#F7F7F8] px-2.5 py-0.5 text-xs font-semibold tabular-nums text-[#202123] ring-1 ring-inset ring-[#E5E7EB]">{totalItens}</span>
+              <span className="text-[#8A90A0]">Itens</span>
+              <span className="rounded-full bg-[#0C0D10] px-2.5 py-0.5 text-xs font-semibold tabular-nums text-[#F7F8FA] ring-1 ring-inset ring-[#23262F]">{totalItens}</span>
             </div>
             {descontoValor > 0 && (
               <>
                 <div className="mt-3 flex justify-between text-sm">
-                  <span className="text-[#8E8F94]">Subtotal</span>
-                  <span className="tabular-nums text-[#8E8F94] line-through">{brl(total)}</span>
+                  <span className="text-[#8A90A0]">Subtotal</span>
+                  <span className="tabular-nums text-[#8A90A0] line-through">{brl(total)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-[#0F8A72]">
+                  <span className="text-[#01B8FA]">
                     Desconto{desconto.tipo === 'PERCENT' ? ` (${desconto.valor}%)` : ''}
                   </span>
-                  <span className="tabular-nums text-[#0F8A72]">- {brl(descontoValor)}</span>
+                  <span className="tabular-nums text-[#01B8FA]">- {brl(descontoValor)}</span>
                 </div>
               </>
             )}
             {/* Hero do total a pagar */}
-            <div className="mt-4 rounded-2xl border border-[#0F8A72]/20 bg-[#0F8A72]/[0.06] p-4">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#0F8A72]">
+            <div className="mt-4 rounded-2xl border border-[#01B8FA]/20 bg-[#01B8FA]/[0.06] p-4">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#01B8FA]">
                 Total a pagar
               </div>
-              <div className="mt-1 text-[2.75rem] font-bold leading-none tabular-nums text-[#0F8A72]">
+              <div className="mt-1 text-[2.75rem] font-bold leading-none tabular-nums text-[#01B8FA]">
                 {brl(totalFinal)}
               </div>
             </div>
@@ -965,7 +965,7 @@ export default function Pdv() {
             <button
               onClick={() => setPagando(true)}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#01B8FA] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#23262F] disabled:text-[#B0B2B7] disabled:shadow-none"
             >
               <Check className="h-5 w-5" />
               Finalizar (F2)
@@ -973,80 +973,80 @@ export default function Pdv() {
             <button
               onClick={() => pedirGerencial('desconto', 'Aplicar desconto', () => setModalDesconto(true))}
               disabled={itens.length === 0}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99] disabled:opacity-40"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#101216] py-2.5 text-sm text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.99] disabled:opacity-40"
             >
-              <Percent className="h-4 w-4 text-[#0F8A72]" />
+              <Percent className="h-4 w-4 text-[#01B8FA]" />
               {descontoValor > 0 ? 'Alterar desconto' : 'Desconto'} (F4)
             </button>
             <button
               onClick={() => pedirGerencial('cancelar', 'Cancelar venda', limpar)}
               disabled={itens.length === 0}
-              className="w-full rounded-xl bg-transparent py-2 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 active:scale-[0.99] disabled:opacity-40"
+              className="w-full rounded-xl bg-transparent py-2 text-sm text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-rose-50 hover:text-rose-600 hover:ring-rose-200 active:scale-[0.99] disabled:opacity-40"
             >
               Cancelar venda
             </button>
 
             {/* Barra do caixa (turno) */}
-            <div className="mt-2 border-t border-[#E5E7EB] pt-3">
+            <div className="mt-2 border-t border-[#23262F] pt-3">
               {/* Identificação do caixa aberto — cada operador tem o SEU caixa. */}
-              <div className="mb-3 rounded-xl border border-[#0F8A72]/20 bg-[#0F8A72]/[0.06] px-3.5 py-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-[#0b7d4e]">
-                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#0F8A72]/15 ring-1 ring-inset ring-[#0F8A72]/25">
+              <div className="mb-3 rounded-xl border border-[#01B8FA]/20 bg-[#01B8FA]/[0.06] px-3.5 py-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-[#2DD4A7]">
+                  <span className="grid h-6 w-6 place-items-center rounded-lg bg-[#01B8FA]/15 ring-1 ring-inset ring-[#01B8FA]/25">
                     <Lock className="h-3.5 w-3.5" />
                   </span>
                   Caixa aberto às {horaHM(sessao.abertaEm)}
                 </div>
                 <div className="mt-2.5 flex items-center justify-between text-xs">
-                  <span className="text-[#8E8F94]">Saldo inicial</span>
-                  <span className="tabular-nums font-semibold text-[#202123]">{brl(sessao.saldoInicial)}</span>
+                  <span className="text-[#8A90A0]">Saldo inicial</span>
+                  <span className="tabular-nums font-semibold text-[#F7F8FA]">{brl(sessao.saldoInicial)}</span>
                 </div>
                 <div className="mt-1.5 flex items-center justify-between text-xs">
-                  <span className="text-[#8E8F94]">Operador</span>
-                  <span className="flex items-center gap-1.5 font-semibold text-[#202123]">
-                    <UserIcon className="h-3.5 w-3.5 text-[#0F8A72]" />
+                  <span className="text-[#8A90A0]">Operador</span>
+                  <span className="flex items-center gap-1.5 font-semibold text-[#F7F8FA]">
+                    <UserIcon className="h-3.5 w-3.5 text-[#01B8FA]" />
                     {sessao.operador || user?.nome || 'Operador'}
                   </span>
                 </div>
               </div>
-              <div className="mb-2 flex justify-between px-0.5 text-xs text-[#8E8F94]">
+              <div className="mb-2 flex justify-between px-0.5 text-xs text-[#8A90A0]">
                 <span>Turno · {sessao.qtdVendas} venda(s)</span>
                 <span>Gaveta: {brl(sessao.dinheiroEsperadoGaveta)}</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   onClick={() => pedirGerencial('sangria', 'Sangria (retirada de caixa)', () => setModalCaixa('SANGRIA'))}
-                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
+                  className="flex flex-col items-center gap-1 rounded-xl bg-[#101216] py-2.5 text-xs text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.97]"
                 >
                   <ArrowDownCircle className="h-4 w-4 text-rose-500" /> Sangria
-                  <span className="text-[10px] text-[#8E8F94]">F7</span>
+                  <span className="text-[10px] text-[#8A90A0]">F7</span>
                 </button>
                 <button
                   onClick={() => pedirGerencial('suprimento', 'Suprimento (reforço de troco)', () => setModalCaixa('SUPRIMENTO'))}
-                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
+                  className="flex flex-col items-center gap-1 rounded-xl bg-[#101216] py-2.5 text-xs text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.97]"
                 >
-                  <ArrowUpCircle className="h-4 w-4 text-[#0F8A72]" /> Suprim.
-                  <span className="text-[10px] text-[#8E8F94]">F8</span>
+                  <ArrowUpCircle className="h-4 w-4 text-[#01B8FA]" /> Suprim.
+                  <span className="text-[10px] text-[#8A90A0]">F8</span>
                 </button>
                 <button
                   onClick={() => pedirGerencial('fechar', 'Fechar caixa', () => setModalCaixa('FECHAR'))}
-                  className="flex flex-col items-center gap-1 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.97]"
+                  className="flex flex-col items-center gap-1 rounded-xl bg-[#101216] py-2.5 text-xs text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.97]"
                 >
-                  <Lock className="h-4 w-4 text-[#0F8A72]" /> Fechar
-                  <span className="text-[10px] text-[#8E8F94]">F9</span>
+                  <Lock className="h-4 w-4 text-[#01B8FA]" /> Fechar
+                  <span className="text-[10px] text-[#8A90A0]">F9</span>
                 </button>
               </div>
               <button
                 onClick={() => setModalVendas(true)}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#101216] py-2.5 text-xs text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.99]"
               >
-                <Printer className="h-4 w-4 text-[#0F8A72]" /> Vendas / Reimprimir / Estorno
-                <span className="text-[10px] text-[#8E8F94]">F10</span>
+                <Printer className="h-4 w-4 text-[#01B8FA]" /> Vendas / Reimprimir / Estorno
+                <span className="text-[10px] text-[#8A90A0]">F10</span>
               </button>
               <button
                 onClick={handleAbrirGaveta}
-                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-2.5 text-xs text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#F7F7F8] active:scale-[0.99]"
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-[#101216] py-2.5 text-xs text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#0C0D10] active:scale-[0.99]"
               >
-                <Coins className="h-4 w-4 text-[#0F8A72]" /> Abrir gaveta
+                <Coins className="h-4 w-4 text-[#01B8FA]" /> Abrir gaveta
               </button>
             </div>
           </div>
@@ -1102,8 +1102,8 @@ export default function Pdv() {
       {modalCaixa === 'SUPRIMENTO' && (
         <ModalValor
           titulo="Suprimento (reforço)"
-          cor="bg-[#0F8A72] hover:bg-[#0d7a64]"
-          icon={<ArrowUpCircle className="h-5 w-5 text-[#0F8A72]" />}
+          cor="bg-[#01B8FA] hover:bg-[#0d7a64]"
+          icon={<ArrowUpCircle className="h-5 w-5 text-[#01B8FA]" />}
           onFechar={() => setModalCaixa(null)}
           onConfirmar={handleSuprimento}
         />
@@ -1287,24 +1287,24 @@ function ModalPagamento({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+      <div className="w-full max-w-md rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#23262F] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <CreditCard className="h-5 w-5 text-[#0F8A72]" /> Pagamento
+            <CreditCard className="h-5 w-5 text-[#01B8FA]" /> Pagamento
           </h2>
-          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8A90A0] transition-colors hover:bg-[#0C0D10] hover:text-[#F7F8FA]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <div className="flex items-end justify-between rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-4 py-3">
+          <div className="flex items-end justify-between rounded-xl border border-[#23262F] bg-[#0C0D10] px-4 py-3">
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">Total</div>
-              <div className="text-3xl font-bold tabular-nums text-[#202123]">{brl(total)}</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8A90A0]">Total</div>
+              <div className="text-3xl font-bold tabular-nums text-[#F7F8FA]">{brl(total)}</div>
             </div>
             <div className="text-right">
-              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">Restante</div>
-              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-[#202123]' : 'text-[#0F8A72]'}`}>
+              <div className="text-[11px] font-semibold uppercase tracking-wide text-[#8A90A0]">Restante</div>
+              <div className={`text-3xl font-bold tabular-nums ${restante > 0.005 ? 'text-[#F7F8FA]' : 'text-[#01B8FA]'}`}>
                 {brl(Math.max(0, restante))}
               </div>
             </div>
@@ -1314,19 +1314,19 @@ function ModalPagamento({
           {pagamentos.length > 0 && (
             <div className="mt-4 space-y-1">
               {pagamentos.map((p, idx) => (
-                <div key={idx} className="flex items-center justify-between rounded-lg bg-[#F7F7F8] px-3 py-2 text-sm">
+                <div key={idx} className="flex items-center justify-between rounded-lg bg-[#0C0D10] px-3 py-2 text-sm">
                   <span className="flex items-center gap-2">
-                    <span className="font-medium text-[#202123]">
+                    <span className="font-medium text-[#F7F8FA]">
                       {p.forma.replace('_TEF', '').replace('_POS', '').replace('CARTAO', 'Cartão').replace('DINHEIRO', 'Dinheiro')}
                     </span>
                     {rotuloCanal(p.forma) && (
-                      <span className="rounded bg-[#F7F7F8] px-1.5 py-0.5 text-[10px] text-[#5F6065]">{rotuloCanal(p.forma)}</span>
+                      <span className="rounded bg-[#0C0D10] px-1.5 py-0.5 text-[10px] text-[#8A90A0]">{rotuloCanal(p.forma)}</span>
                     )}
-                    {p.nsu && <span className="text-[10px] text-[#8E8F94]">NSU {p.nsu}</span>}
+                    {p.nsu && <span className="text-[10px] text-[#8A90A0]">NSU {p.nsu}</span>}
                   </span>
                   <span className="flex items-center gap-3">
-                    <span className="tabular-nums text-[#5F6065]">{brl(p.valor)}</span>
-                    <button onClick={() => removerPagamento(idx)} className="text-[#8E8F94] hover:text-rose-600">
+                    <span className="tabular-nums text-[#8A90A0]">{brl(p.valor)}</span>
+                    <button onClick={() => removerPagamento(idx)} className="text-[#8A90A0] hover:text-rose-600">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </span>
@@ -1343,13 +1343,13 @@ function ModalPagamento({
                 onClick={() => setForma(f.id)}
                 className={`flex flex-col items-center gap-1 rounded-xl border py-3 text-sm transition-all active:scale-[0.97] ${
                   forma === f.id
-                    ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
-                    : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
+                    ? 'border-[#01B8FA] bg-[#01B8FA]/10 text-[#2DD4A7] ring-2 ring-inset ring-[#01B8FA]/30'
+                    : 'border-[#23262F] text-[#8A90A0] hover:border-[#D1D5DB] hover:bg-[#0C0D10]'
                 }`}
               >
                 {f.icon}
                 {f.label}
-                <span className="text-[10px] text-[#8E8F94]">{f.tecla}</span>
+                <span className="text-[10px] text-[#8A90A0]">{f.tecla}</span>
               </button>
             ))}
           </div>
@@ -1357,18 +1357,18 @@ function ModalPagamento({
           {/* Canal TEF x POS (cartão/PIX) */}
           {forma !== 'DINHEIRO' && (
             <div className="mt-3 flex items-center gap-2 text-sm">
-              <span className="text-[#8E8F94]">Máquina:</span>
+              <span className="text-[#8A90A0]">Máquina:</span>
               <button
                 onClick={() => setCanal('TEF')}
                 disabled={!temTef}
-                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-[#0F8A72] text-white' : 'bg-[#F7F7F8] text-[#5F6065]'} disabled:opacity-40`}
+                className={`rounded-md px-3 py-1 ${canal === 'TEF' ? 'bg-[#01B8FA] text-white' : 'bg-[#0C0D10] text-[#8A90A0]'} disabled:opacity-40`}
                 title={temTef ? 'Máquina integrada (TEF) — F6' : 'Nenhum TEF configurado'}
               >
                 Integrada (TEF)
               </button>
               <button
                 onClick={() => setCanal('POS')}
-                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-[#0F8A72] text-white' : 'bg-[#F7F7F8] text-[#5F6065]'}`}
+                className={`rounded-md px-3 py-1 ${canal === 'POS' ? 'bg-[#01B8FA] text-white' : 'bg-[#0C0D10] text-[#8A90A0]'}`}
                 title="Maquininha avulsa — operar na mão (F6)"
               >
                 Avulsa (POS)
@@ -1377,11 +1377,11 @@ function ModalPagamento({
                 <span className="ml-auto flex gap-1">
                   <button
                     onClick={() => setTipoCartao('CREDITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-[#0F8A72]/10 text-[#0b7d4e]' : 'bg-[#F7F7F8] text-[#8E8F94]'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'CREDITO' ? 'bg-[#01B8FA]/10 text-[#2DD4A7]' : 'bg-[#0C0D10] text-[#8A90A0]'}`}
                   >Crédito</button>
                   <button
                     onClick={() => setTipoCartao('DEBITO')}
-                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-[#0F8A72]/10 text-[#0b7d4e]' : 'bg-[#F7F7F8] text-[#8E8F94]'}`}
+                    className={`rounded px-2 py-1 text-xs ${tipoCartao === 'DEBITO' ? 'bg-[#01B8FA]/10 text-[#2DD4A7]' : 'bg-[#0C0D10] text-[#8A90A0]'}`}
                   >Débito</button>
                 </span>
               )}
@@ -1391,7 +1391,7 @@ function ModalPagamento({
           {/* Valor da parcela + (dinheiro) valor recebido */}
           <div className="mt-4 grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-[#5F6065]">Valor {pagamentos.length > 0 || valorStr ? 'a lançar' : '(total)'}</label>
+              <label className="text-xs text-[#8A90A0]">Valor {pagamentos.length > 0 || valorStr ? 'a lançar' : '(total)'}</label>
               <input
                 ref={valorRef}
                 autoFocus={forma !== 'DINHEIRO'}
@@ -1399,19 +1399,19 @@ function ModalPagamento({
                 onChange={(e) => setValorStr(e.target.value)}
                 placeholder={brl(restante).replace('R$', '').trim()}
                 inputMode="decimal"
-                className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                className="mt-1 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
               />
             </div>
             {forma === 'DINHEIRO' && (
               <div>
-                <label className="text-xs text-[#5F6065]">Valor recebido</label>
+                <label className="text-xs text-[#8A90A0]">Valor recebido</label>
                 <input
                   autoFocus
                   value={recebidoStr}
                   onChange={(e) => setRecebidoStr(e.target.value)}
                   placeholder="0,00"
                   inputMode="decimal"
-                  className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                  className="mt-1 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
                 />
               </div>
             )}
@@ -1422,14 +1422,14 @@ function ModalPagamento({
               {dinheiroInsuficiente ? (
                 <span className="text-rose-600">Recebido menor que o valor</span>
               ) : (
-                <span className="text-[#8E8F94]">&nbsp;</span>
+                <span className="text-[#8A90A0]">&nbsp;</span>
               )}
-              <span className="text-[#0F8A72]">Troco: {brl(round2(trocoAtual + trocoAcum))}</span>
+              <span className="text-[#01B8FA]">Troco: {brl(round2(trocoAtual + trocoAcum))}</span>
             </div>
           )}
 
           {processando && (
-            <div className="mt-4 flex items-center gap-2 rounded-lg bg-[#0F8A72]/10 px-3 py-2 text-sm text-[#0b7d4e]">
+            <div className="mt-4 flex items-center gap-2 rounded-lg bg-[#01B8FA]/10 px-3 py-2 text-sm text-[#2DD4A7]">
               <Loader2 className="h-4 w-4 animate-spin" /> {processando}
             </div>
           )}
@@ -1442,13 +1442,13 @@ function ModalPagamento({
             {!pedirCpf ? (
               <button
                 onClick={() => setPedirCpf(true)}
-                className="flex items-center gap-2 text-sm text-[#5F6065] hover:text-[#0F8A72]"
+                className="flex items-center gap-2 text-sm text-[#8A90A0] hover:text-[#01B8FA]"
               >
                 <UserIcon className="h-4 w-4" /> Incluir CPF/CNPJ na nota
               </button>
             ) : (
               <div>
-                <label className="flex items-center gap-2 text-xs text-[#5F6065]">
+                <label className="flex items-center gap-2 text-xs text-[#8A90A0]">
                   <UserIcon className="h-4 w-4" /> CPF/CNPJ do consumidor (opcional)
                 </label>
                 <input
@@ -1457,7 +1457,7 @@ function ModalPagamento({
                   onChange={(e) => setCpfNota(e.target.value)}
                   placeholder="000.000.000-00"
                   inputMode="numeric"
-                  className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2 text-base outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                  className="mt-1 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2 text-base outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
                 />
               </div>
             )}
@@ -1466,7 +1466,7 @@ function ModalPagamento({
           <button
             onClick={adicionar}
             disabled={salvando || !!processando || restante <= 0.005 || valorAplicado <= 0 || dinheiroInsuficiente}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#01B8FA] py-4 text-lg font-semibold text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#23262F] disabled:text-[#B0B2B7] disabled:shadow-none"
           >
             {salvando || processando ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -1536,19 +1536,19 @@ function ModalDesconto({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+      <div className="w-full max-w-sm rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#23262F] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Percent className="h-5 w-5 text-[#0F8A72]" /> Desconto na venda
+            <Percent className="h-5 w-5 text-[#01B8FA]" /> Desconto na venda
           </h2>
-          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8A90A0] transition-colors hover:bg-[#0C0D10] hover:text-[#F7F8FA]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
           <div className="mb-4 flex justify-between text-sm">
-            <span className="text-[#8E8F94]">Total atual</span>
-            <span className="tabular-nums text-[#5F6065]">{brl(total)}</span>
+            <span className="text-[#8A90A0]">Total atual</span>
+            <span className="tabular-nums text-[#8A90A0]">{brl(total)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -1556,8 +1556,8 @@ function ModalDesconto({
               onClick={() => setTipo('PERCENT')}
               className={`rounded-xl border py-2 text-sm transition-all active:scale-[0.97] ${
                 tipo === 'PERCENT'
-                  ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
-                  : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
+                  ? 'border-[#01B8FA] bg-[#01B8FA]/10 text-[#2DD4A7] ring-2 ring-inset ring-[#01B8FA]/30'
+                  : 'border-[#23262F] text-[#8A90A0] hover:border-[#D1D5DB] hover:bg-[#0C0D10]'
               }`}
             >
               Percentual (%)
@@ -1566,8 +1566,8 @@ function ModalDesconto({
               onClick={() => setTipo('VALOR')}
               className={`rounded-xl border py-2 text-sm transition-all active:scale-[0.97] ${
                 tipo === 'VALOR'
-                  ? 'border-[#0F8A72] bg-[#0F8A72]/10 text-[#0b7d4e] ring-2 ring-inset ring-[#0F8A72]/30'
-                  : 'border-[#E5E7EB] text-[#5F6065] hover:border-[#D1D5DB] hover:bg-[#F7F7F8]'
+                  ? 'border-[#01B8FA] bg-[#01B8FA]/10 text-[#2DD4A7] ring-2 ring-inset ring-[#01B8FA]/30'
+                  : 'border-[#23262F] text-[#8A90A0] hover:border-[#D1D5DB] hover:bg-[#0C0D10]'
               }`}
             >
               Valor (R$)
@@ -1580,17 +1580,17 @@ function ModalDesconto({
             onChange={(e) => setValorStr(e.target.value)}
             placeholder={tipo === 'PERCENT' ? '0%' : '0,00'}
             inputMode="decimal"
-            className="mt-4 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+            className="mt-4 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
           />
 
           <div className="mt-4 space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-[#8E8F94]">Desconto</span>
-              <span className="tabular-nums text-[#0F8A72]">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
+              <span className="text-[#8A90A0]">Desconto</span>
+              <span className="tabular-nums text-[#01B8FA]">- {brl(descontoValor)} ({pct.toFixed(1)}%)</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#8E8F94]">Novo total</span>
-              <span className="tabular-nums font-semibold text-[#0F8A72]">{brl(totalFinal)}</span>
+              <span className="text-[#8A90A0]">Novo total</span>
+              <span className="tabular-nums font-semibold text-[#01B8FA]">{brl(totalFinal)}</span>
             </div>
           </div>
 
@@ -1603,14 +1603,14 @@ function ModalDesconto({
           <div className="mt-5 flex gap-2">
             <button
               onClick={() => onConfirmar({ tipo: 'VALOR', valor: 0 })}
-              className="flex-1 rounded-xl bg-[#F7F7F8] py-3 text-sm text-[#5F6065] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#EEF0F2] active:scale-[0.98]"
+              className="flex-1 rounded-xl bg-[#0C0D10] py-3 text-sm text-[#8A90A0] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#EEF0F2] active:scale-[0.98]"
             >
               Remover
             </button>
             <button
               onClick={confirmar}
               disabled={excede}
-              className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
+              className="flex-[2] flex items-center justify-center gap-2 rounded-xl bg-[#01B8FA] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#23262F] disabled:text-[#B0B2B7] disabled:shadow-none"
             >
               <Check className="h-5 w-5" /> Aplicar (Enter)
             </button>
@@ -1662,25 +1662,25 @@ function ModalPeso({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+      <div className="w-full max-w-sm rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#23262F] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Scale className="h-5 w-5 text-[#0F8A72]" /> Pesar produto
+            <Scale className="h-5 w-5 text-[#01B8FA]" /> Pesar produto
           </h2>
-          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8A90A0] transition-colors hover:bg-[#0C0D10] hover:text-[#F7F8FA]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <div className="mb-1 text-sm font-medium text-[#202123]">{descricao}</div>
-          <div className="mb-4 text-sm text-[#8E8F94]">
+          <div className="mb-1 text-sm font-medium text-[#F7F8FA]">{descricao}</div>
+          <div className="mb-4 text-sm text-[#8A90A0]">
             {brl(precoUnit)} / {unidade || 'KG'}
           </div>
 
-          <label className="flex items-center justify-between text-xs uppercase tracking-wide text-[#8E8F94]">
+          <label className="flex items-center justify-between text-xs uppercase tracking-wide text-[#8A90A0]">
             <span>Peso ({unidade || 'KG'})</span>
             {multQtd > 1 && (
-              <span className="rounded bg-[#0F8A72]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#0b7d4e]">
+              <span className="rounded bg-[#01B8FA]/10 px-1.5 py-0.5 text-[11px] font-semibold text-[#2DD4A7]">
                 × {multQtd}
               </span>
             )}
@@ -1691,20 +1691,20 @@ function ModalPeso({
             onChange={(e) => setPesoStr(e.target.value)}
             placeholder="0,000"
             inputMode="decimal"
-            className="mt-1 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+            className="mt-1 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2.5 text-lg outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
           />
 
           <div className="mt-4 flex justify-between text-sm">
-            <span className="text-[#8E8F94]">
+            <span className="text-[#8A90A0]">
               Subtotal{multQtd > 1 ? ` (${kg > 0 ? kg.toLocaleString('pt-BR', { maximumFractionDigits: 3 }) : 0} kg × ${multQtd})` : ''}
             </span>
-            <span className="tabular-nums font-semibold text-[#0F8A72]">{brl(subtotal)}</span>
+            <span className="tabular-nums font-semibold text-[#01B8FA]">{brl(subtotal)}</span>
           </div>
 
           <button
             onClick={confirmar}
             disabled={!(kg > 0)}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7] disabled:shadow-none"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#01B8FA] py-3 font-semibold text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-[#23262F] disabled:text-[#B0B2B7] disabled:shadow-none"
           >
             <Check className="h-5 w-5" /> Adicionar (Enter)
           </button>
@@ -1818,12 +1818,12 @@ function ModalVendas({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#23262F] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <Printer className="h-5 w-5 text-[#0F8A72]" /> Vendas recentes
+            <Printer className="h-5 w-5 text-[#01B8FA]" /> Vendas recentes
           </h2>
-          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8A90A0] transition-colors hover:bg-[#0C0D10] hover:text-[#F7F8FA]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -1833,14 +1833,14 @@ function ModalVendas({
           )}
           {carregando ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="h-6 w-6 animate-spin text-[#0F8A72]" />
+              <Loader2 className="h-6 w-6 animate-spin text-[#01B8FA]" />
             </div>
           ) : vendas.length === 0 ? (
-            <p className="py-10 text-center text-sm text-[#8E8F94]">Nenhuma venda registrada.</p>
+            <p className="py-10 text-center text-sm text-[#8A90A0]">Nenhuma venda registrada.</p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">
-                <tr className="border-b border-[#E5E7EB]">
+              <thead className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#8A90A0]">
+                <tr className="border-b border-[#23262F]">
                   <th className="px-2 py-2">Nº</th>
                   <th className="px-2 py-2">Data</th>
                   <th className="px-2 py-2">Forma</th>
@@ -1850,12 +1850,12 @@ function ModalVendas({
               </thead>
               <tbody>
                 {vendas.map((v) => (
-                  <tr key={v.pedidoId} className="border-b border-[#EEF0F2] transition-colors hover:bg-[#F7F7F8]">
+                  <tr key={v.pedidoId} className="border-b border-[#EEF0F2] transition-colors hover:bg-[#0C0D10]">
                     <td className="px-2 py-2 font-medium">#{v.numero}</td>
-                    <td className="px-2 py-2 text-[#5F6065]">
+                    <td className="px-2 py-2 text-[#8A90A0]">
                       {new Date(v.dataEmissao).toLocaleString('pt-BR')}
                     </td>
-                    <td className="px-2 py-2 text-[#5F6065]">{v.formaPagamento || '—'}</td>
+                    <td className="px-2 py-2 text-[#8A90A0]">{v.formaPagamento || '—'}</td>
                     <td className="px-2 py-2 text-right tabular-nums">
                       {brl(v.valorTotal)}
                       {v.estornada && (
@@ -1869,7 +1869,7 @@ function ModalVendas({
                         <button
                           onClick={() => reimprimir(v)}
                           disabled={busy === v.pedidoId}
-                          className="flex items-center gap-1 rounded-lg bg-[#F7F7F8] px-2.5 py-1.5 text-xs text-[#202123] ring-1 ring-inset ring-[#E5E7EB] transition-all hover:bg-[#EEF0F2] active:scale-[0.97] disabled:opacity-40"
+                          className="flex items-center gap-1 rounded-lg bg-[#0C0D10] px-2.5 py-1.5 text-xs text-[#F7F8FA] ring-1 ring-inset ring-[#23262F] transition-all hover:bg-[#EEF0F2] active:scale-[0.97] disabled:opacity-40"
                         >
                           <Printer className="h-3.5 w-3.5" /> Reimprimir
                         </button>
@@ -1919,7 +1919,7 @@ function QRImg({ texto, size = 132 }: { texto: string; size?: number }) {
       width={size}
       height={size}
       alt="QR Code NFC-e"
-      className="rounded-lg bg-white p-1.5 ring-1 ring-inset ring-[#E5E7EB]"
+      className="rounded-lg bg-[#101216] p-1.5 ring-1 ring-inset ring-[#23262F]"
     />
   );
 }
@@ -1945,8 +1945,8 @@ function FiscalVendaStatus({
 
   if (emitido) {
     return (
-      <div className="mt-4 w-full max-w-sm rounded-2xl border border-[#0F8A72]/25 bg-[#0F8A72]/[0.06] p-4 text-center">
-        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-[#0b7d4e]">
+      <div className="mt-4 w-full max-w-sm rounded-2xl border border-[#01B8FA]/25 bg-[#01B8FA]/[0.06] p-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-sm font-semibold text-[#2DD4A7]">
           <ShieldCheck className="h-4 w-4" /> NFC-e autorizada
           {fiscal.simulacao && (
             <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
@@ -1955,12 +1955,12 @@ function FiscalVendaStatus({
           )}
         </div>
         {(fiscal.numero || fiscal.serie) && (
-          <div className="mt-1 text-xs text-[#5F6065]">
+          <div className="mt-1 text-xs text-[#8A90A0]">
             Nº {fiscal.numero ?? '—'} · Série {fiscal.serie ?? '—'}
           </div>
         )}
         {fiscal.chaveAcesso && (
-          <div className="mt-2 break-all px-2 font-mono text-[11px] leading-tight text-[#5F6065]">
+          <div className="mt-2 break-all px-2 font-mono text-[11px] leading-tight text-[#8A90A0]">
             {fmtChave(fiscal.chaveAcesso)}
           </div>
         )}
@@ -1972,7 +1972,7 @@ function FiscalVendaStatus({
         {cupomFiscal && (
           <button
             onClick={() => void imprimirCupomFiscal(cupomFiscal)}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99]"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#01B8FA] px-4 py-2.5 text-sm font-medium text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99]"
           >
             <FileText className="h-4 w-4" /> Imprimir cupom fiscal (NFC-e)
           </button>
@@ -1987,7 +1987,7 @@ function FiscalVendaStatus({
         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-amber-700">
           <AlertTriangle className="h-4 w-4" /> NFC-e pendente de envio
         </div>
-        <p className="mt-1 text-xs text-[#5F6065]">
+        <p className="mt-1 text-xs text-[#8A90A0]">
           A venda foi registrada e a nota ficou salva para reenvio automático ao SEFAZ.
           Acompanhe no Monitor Fiscal.
         </p>
@@ -2002,7 +2002,7 @@ function FiscalVendaStatus({
         <div className="flex items-center justify-center gap-2 text-sm font-semibold text-rose-700">
           <AlertTriangle className="h-4 w-4" /> NFC-e não emitida
         </div>
-        <p className="mt-1 text-xs text-[#5F6065]">
+        <p className="mt-1 text-xs text-[#8A90A0]">
           A venda está salva. Tente reemitir pelo Monitor Fiscal.
         </p>
         {fiscal.erro && <p className="mt-2 text-[11px] text-rose-600">{fiscal.erro}</p>}
@@ -2056,22 +2056,22 @@ function ModalSenhaGerencial({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
-        <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
+      <div className="w-full max-w-sm rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_20px_60px_-20px_rgba(22,23,29,0.25)]">
+        <div className="flex items-center justify-between border-b border-[#23262F] px-6 py-4">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <ShieldCheck className="h-5 w-5 text-[#0F8A72]" /> Senha gerencial
+            <ShieldCheck className="h-5 w-5 text-[#01B8FA]" /> Senha gerencial
           </h2>
-          <button onClick={onFechar} className="rounded-lg p-1 text-[#8E8F94] transition-colors hover:bg-[#F7F7F8] hover:text-[#202123]" title="Fechar (Esc)">
+          <button onClick={onFechar} className="rounded-lg p-1 text-[#8A90A0] transition-colors hover:bg-[#0C0D10] hover:text-[#F7F8FA]" title="Fechar (Esc)">
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="p-6">
-          <p className="text-sm text-[#5F6065]">
-            Operação sensível: <span className="font-medium text-[#202123]">{acao}</span>.
+          <p className="text-sm text-[#8A90A0]">
+            Operação sensível: <span className="font-medium text-[#F7F8FA]">{acao}</span>.
             Peça ao responsável a senha gerencial da loja para continuar.
           </p>
           <div className="mt-4">
-            <label className="text-xs font-semibold uppercase tracking-wide text-[#8E8F94]">Senha gerencial</label>
+            <label className="text-xs font-semibold uppercase tracking-wide text-[#8A90A0]">Senha gerencial</label>
             <input
               autoFocus
               value={senha}
@@ -2089,7 +2089,7 @@ function ModalSenhaGerencial({
               data-lpignore="true"
               data-form-type="other"
               style={{ WebkitTextSecurity: 'disc' } as any}
-              className="mt-1.5 w-full rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-2.5 text-center text-lg tracking-[0.3em] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+              className="mt-1.5 w-full rounded-xl border border-[#23262F] bg-[#0C0D10] px-3 py-2.5 text-center text-lg tracking-[0.3em] outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
             />
           </div>
           {erro && (
@@ -2098,7 +2098,7 @@ function ModalSenhaGerencial({
           <button
             onClick={validar}
             disabled={validando}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#0F8A72] py-3 text-base font-semibold text-white shadow-[0_10px_24px_-12px_rgba(15,138,114,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:opacity-50"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#01B8FA] py-3 text-base font-semibold text-white shadow-[0_10px_24px_-12px_rgba(47,95,224,0.6)] transition-all hover:bg-[#0d7a64] active:scale-[0.99] disabled:opacity-50"
           >
             {validando ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
             {validando ? 'Validando...' : 'Liberar'}

@@ -34,11 +34,9 @@ import PlanoContas from './modules/financeiro/pages/PlanoContas';
 import Tesouraria from './modules/financeiro/pages/Tesouraria';
 import Recorrencias from './modules/financeiro/pages/Recorrencias';
 import Faturamento from './modules/fiscal/pages/Faturamento';
-import NotasEmitidas from './modules/fiscal/pages/NotasEmitidas';
-import MatrizFiscal from './modules/fiscal/pages/MatrizFiscal';
 import PainelFaturamento from './modules/fiscal/pages/PainelFaturamento';
 import GestaoFiscal from './modules/fiscal/pages/GestaoFiscal';
-import FiscalConfiguracao from './modules/fiscal/pages/FiscalConfiguracao';
+import ConfiguracaoFiscal from './modules/fiscal/pages/ConfiguracaoFiscal';
 import MonitorFiscal from './modules/fiscal/pages/MonitorFiscal';
 import Pdv from './modules/pdv/pages/Pdv';
 import ConfigCaixa from './modules/pdv/pages/ConfigCaixa';
@@ -55,23 +53,43 @@ import DashboardRestaurante from './modules/restaurante/pages/DashboardRestauran
 import MobileLoginPage from './mobile/MobileLoginPage';
 import MobileAppPage from './mobile/MobileAppPage';
 
-function Guard({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
-  if (isLoading) return (
-    <div className="flex h-screen items-center justify-center bg-gray-950">
-      <div className="animate-spin h-8 w-8 border-2 border-amber-500 border-t-transparent rounded-full" />
+/**
+ * Tela de carregamento da marca. Trocadilho com a logo "Lumin" (luz):
+ * o ponto de luz azul sobre o "ı" — a assinatura do wordmark — acende e
+ * respira, um halo pulsa atrás e uma varredura de luz cruza as letras.
+ */
+function LuminBoot({ mobile = false }: { mobile?: boolean }) {
+  return (
+    <div className={`flex items-center justify-center overflow-hidden ${mobile ? 'min-h-[100dvh] bg-[#071018]' : 'h-screen bg-[#08090A]'}`}>
+      <div className="lu-rise flex flex-col items-center gap-5">
+        <div className="relative flex items-baseline leading-none">
+          <span className="lumin-halo" aria-hidden />
+          <span className="font-logo relative z-10 inline-flex select-none items-baseline text-[#F7F8FA]" style={{ fontSize: 44, fontWeight: 700, letterSpacing: '0.005em' }}>
+            Lum
+            <span className="relative inline-block">
+              <span>ı</span>
+              <span className="lumin-spark absolute rounded-full bg-[#01B8FA]" style={{ width: 7, height: 7, left: '50%', transform: 'translateX(-50%)', top: '-7px' }} />
+            </span>
+            n
+          </span>
+        </div>
+        <p className="font-plex-mono text-[10px] uppercase tracking-[0.32em] text-[#3DC8FB]/70">
+          Acendendo as luzes<span className="lumin-dot-1">.</span><span className="lumin-dot-2">.</span><span className="lumin-dot-3">.</span>
+        </p>
+      </div>
     </div>
   );
+}
+
+function Guard({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  if (isLoading) return <LuminBoot />;
   return user ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 function MobileGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
-  if (isLoading) return (
-    <div className="flex min-h-[100dvh] items-center justify-center bg-[#071018]">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#01B8FA] border-t-transparent" />
-    </div>
-  );
+  if (isLoading) return <LuminBoot mobile />;
   return user ? <>{children}</> : <Navigate to="/app/login" replace />;
 }
 
@@ -111,13 +129,13 @@ export default function App() {
             <Route path="wms/transferencias" element={<Transferencias />} />
 
             {/* Fiscal */}
-            <Route path="fiscal/nfe" element={<NotasEmitidas />} />
+            <Route path="fiscal/nfe" element={<GestaoFiscal />} />
             <Route path="fiscal/emitir" element={<Faturamento />} />
             <Route path="fiscal/painel" element={<PainelFaturamento />} />
-            <Route path="fiscal/matriz" element={<MatrizFiscal />} />
+            <Route path="fiscal/matriz" element={<ConfiguracaoFiscal />} />
             <Route path="fiscal/gestao" element={<GestaoFiscal />} />
             <Route path="fiscal/monitor" element={<MonitorFiscal />} />
-            <Route path="fiscal/configuracao" element={<FiscalConfiguracao />} />
+            <Route path="fiscal/configuracao" element={<ConfiguracaoFiscal />} />
 
             {/* Financeiro */}
             <Route path="financeiro/fluxo-caixa" element={<FluxoCaixa />} />

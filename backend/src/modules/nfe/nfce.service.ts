@@ -17,6 +17,28 @@ const PENDENTES: StatusDFe[] = [
   StatusDFe.RASCUNHO,
 ];
 
+/** Devoluções EMITIDAS (finalidade 4) que referenciam uma nota — base do status derivado. */
+const DEVOLUCOES_INCLUDE = {
+  where: { status: StatusDFe.EMITIDO },
+  select: {
+    id: true,
+    numero: true,
+    serie: true,
+    modelo: true,
+    valorProdutos: true,
+    valorNfe: true,
+    chaveAcesso: true,
+    dataEmissao: true,
+    motivoCancelamento: true,
+  },
+  orderBy: { dataEmissao: 'asc' as const },
+} as const;
+
+/** Nota de origem que uma devolução estorna (para exibir o vínculo). */
+const REFERENCIADA_SELECT = {
+  select: { id: true, numero: true, serie: true, modelo: true, chaveAcesso: true },
+} as const;
+
 /**
  * Emissão de NFC-e (modelo 65) — cupom fiscal eletrônico do consumidor, emitido no PDV.
  *
@@ -421,7 +443,16 @@ export class NfceService {
   ) {
     const where: any = { tenantId };
     if (filtros.filialId) where.filialId = filtros.filialId;
-    if (filtros.status) where.status = filtros.status as StatusDFe;
+    // "DEVOLVIDA" é um status DERIVADO do Lumin (NÃO existe no SEFAZ): a nota está
+    // autorizada (EMITIDO) mas possui ao menos uma NF-e de devolução emitida que a
+    // referencia. O status fiscal real continua intacto em `status` (auditoria).
+    if (filtros.status === 'DEVOLVIDA') {
+      where.status = StatusDFe.EMITIDO;
+      where.finalidade = { not: '4' };
+      where.devolucoes = { some: { status: StatusDFe.EMITIDO } };
+    } else if (filtros.status) {
+      where.status = filtros.status as StatusDFe;
+    }
     if (filtros.dias) where.createdAt = { gte: new Date(Date.now() - filtros.dias * 86400000) };
     if (filtros.busca) {
       const n = Number(filtros.busca);
@@ -436,16 +467,72 @@ export class NfceService {
       where,
       orderBy: { createdAt: 'desc' },
       take: 200,
-      include: { pedido: { select: { numero: true, status: true, valorTotal: true } } },
+      include: {
+        pedido: { select: { numero: true, status: true, valorTotal: true } },
+        // Devoluções EMITIDAS que referenciam esta nota (finalidade 4). Base do
+        // status derivado "Devolvida"/"Devolução parcial" e do valor devolvido.
+        devolucoes: DEVOLUCOES_INCLUDE,
+        // Se ESTA nota for uma devolução, expõe a nota de origem que ela estorna.
+        nfeReferenciada: REFERENCIADA_SELECT,
+      },
     });
 
-    return docs.map((d) => ({
+    return docs.map((d) => this.mapMonitorDoc(d));
+  }
+
+  /**
+   * Deriva a situação de devolução de uma NF-e — status INTERNO do Lumin, separado
+   * do status fiscal real (SEFAZ). Uma nota autorizada (EMITIDO) com ao menos uma
+   * devolução emitida é "Devolvida" (total) ou "Devolução parcial" (o valor devolvido
+   * ainda não cobre o valor dos produtos). Suporta múltiplas devoluções parciais.
+   */
+  private derivarDevolucao(d: any) {
+    const ehDevolucao = d.finalidade === '4' || d.tipoOperacao === 'ENTRADA';
+    const devs: any[] = Array.isArray(d.devolucoes) ? d.devolucoes : [];
+    const valorDevolvido = r2(devs.reduce((s, x) => s + Number(x.valorProdutos ?? x.valorNfe ?? 0), 0));
+    const valorNota = Number(d.valorNfe) || 0;
+    const valorProdutos = Number(d.valorProdutos) || valorNota;
+    // Só notas AUTORIZADAS (e que não sejam a própria devolução) podem estar devolvidas.
+    const devolvida = d.status === StatusDFe.EMITIDO && !ehDevolucao && devs.length > 0;
+    const totalmenteDevolvida = devolvida && valorDevolvido >= valorProdutos - 0.01;
+    const situacao: 'DEVOLVIDA' | 'DEVOLUCAO_PARCIAL' | 'DEVOLUCAO' | null = ehDevolucao
+      ? 'DEVOLUCAO'
+      : devolvida
+        ? totalmenteDevolvida
+          ? 'DEVOLVIDA'
+          : 'DEVOLUCAO_PARCIAL'
+        : null;
+    return {
+      ehDevolucao,
+      situacao,
+      valorDevolvido,
+      // Faturamento líquido desta nota = valor da nota − o que já foi devolvido.
+      valorLiquido: r2(Math.max(0, valorNota - (devolvida ? valorDevolvido : 0))),
+      devolucoes: devs.map((x) => ({
+        id: x.id,
+        numero: x.numero,
+        serie: x.serie,
+        modelo: x.modelo,
+        valor: r2(Number(x.valorProdutos ?? x.valorNfe ?? 0)),
+        chaveAcesso: x.chaveAcesso,
+        dataEmissao: x.dataEmissao,
+        motivo: x.motivoCancelamento ?? null,
+      })),
+    };
+  }
+
+  /** Serializa uma NF-e do monitor incluindo o status derivado de devolução. */
+  private mapMonitorDoc(d: any) {
+    const dev = this.derivarDevolucao(d);
+    return {
       id: d.id,
       modelo: d.modelo,
       tipo: d.tipo,
       serie: d.serie,
       numero: d.numero,
       status: d.status,
+      finalidade: d.finalidade,
+      tipoOperacao: d.tipoOperacao,
       chaveAcesso: d.chaveAcesso,
       protocolo: d.protocolo,
       destCnpjCpf: d.destCnpjCpf,
@@ -462,37 +549,80 @@ export class NfceService {
       pedidoNumero: d.pedido?.numero ?? null,
       pedidoStatus: d.pedido?.status ?? null,
       pedidoEstornado: d.pedido?.status === 'CANCELADO',
-    }));
+      // Devolução — status DERIVADO interno (o status fiscal real continua em `status`).
+      situacao: dev.situacao, // 'DEVOLVIDA' | 'DEVOLUCAO_PARCIAL' | 'DEVOLUCAO' | null
+      devolvida: dev.situacao === 'DEVOLVIDA' || dev.situacao === 'DEVOLUCAO_PARCIAL',
+      valorDevolvido: dev.valorDevolvido,
+      valorLiquido: dev.valorLiquido,
+      devolucoes: dev.devolucoes,
+      nfeReferenciada: d.nfeReferenciada
+        ? {
+            id: d.nfeReferenciada.id,
+            numero: d.nfeReferenciada.numero,
+            serie: d.nfeReferenciada.serie,
+            modelo: d.nfeReferenciada.modelo,
+            chaveAcesso: d.nfeReferenciada.chaveAcesso,
+          }
+        : null,
+    };
   }
 
   /** Resumo por status (cartões do topo do Monitor Fiscal). */
   async resumoMonitor(tenantId: string, filialId?: string) {
-    const grupos = await this.prisma.nFe.groupBy({
-      by: ['status'],
-      where: { tenantId, modelo: '65', ...(filialId && { filialId }) },
-      _count: { _all: true },
-    });
+    const base = { tenantId, modelo: '65', ...(filialId && { filialId }) };
+    const [grupos, devolvidas] = await Promise.all([
+      this.prisma.nFe.groupBy({
+        by: ['status'],
+        where: base,
+        _count: { _all: true },
+      }),
+      // Notas AUTORIZADAS que já têm devolução emitida (status derivado do Lumin).
+      this.prisma.nFe.count({
+        where: {
+          ...base,
+          status: StatusDFe.EMITIDO,
+          finalidade: { not: '4' },
+          devolucoes: { some: { status: StatusDFe.EMITIDO } },
+        },
+      }),
+    ]);
     const map: Record<string, number> = {};
     for (const g of grupos) map[g.status] = g._count._all;
     return {
-      emitidas: map[StatusDFe.EMITIDO] || 0,
+      // "Autorizadas" mostra só as que efetivamente compõem o faturamento — as
+      // devolvidas saem para o próprio cartão, evitando dupla contagem.
+      emitidas: Math.max(0, (map[StatusDFe.EMITIDO] || 0) - devolvidas),
       pendentes:
         (map[StatusDFe.PENDENTE_EMISSAO] || 0) +
         (map[StatusDFe.CONTINGENCIA] || 0) +
         (map[StatusDFe.RASCUNHO] || 0),
       canceladas: map[StatusDFe.CANCELADO] || 0,
       denegadas: map[StatusDFe.DENEGADO] || 0,
+      devolvidas,
       porStatus: map,
     };
   }
 
   async findOne(tenantId: string, id: string) {
-    return this.prisma.nFe.findFirst({
+    const nfe = await this.prisma.nFe.findFirst({
       where: { id, tenantId, modelo: '65' },
       include: {
         itens: { include: { produto: { select: { codigo: true, descricao: true } } } },
         cliente: true,
+        devolucoes: DEVOLUCOES_INCLUDE,
+        nfeReferenciada: REFERENCIADA_SELECT,
       },
     });
+    if (!nfe) return null;
+    // Anexa o status derivado de devolução sem descaracterizar o objeto fiscal.
+    const dev = this.derivarDevolucao(nfe);
+    return {
+      ...nfe,
+      situacao: dev.situacao,
+      devolvida: dev.situacao === 'DEVOLVIDA' || dev.situacao === 'DEVOLUCAO_PARCIAL',
+      valorDevolvido: dev.valorDevolvido,
+      valorLiquido: dev.valorLiquido,
+      devolucoesInfo: dev.devolucoes,
+    };
   }
 }

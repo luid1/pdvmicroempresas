@@ -48,21 +48,21 @@ export default function Clientes() {
             </tr></thead>
             <tbody>
               {clientes.map(c => (
-                <tr key={c.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
-                  <td className="px-3 py-1.5">
-                    <p className="font-semibold text-[#16171D] truncate max-w-[240px]">{c.nomeFantasia || c.razaoSocial}</p>
+                <tr key={c.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                  <td className="px-3 py-1">
+                    <p className="font-semibold text-[#F7F8FA] truncate max-w-[240px]">{c.nomeFantasia || c.razaoSocial}</p>
                     {c.nomeFantasia && <p className="text-slate-500 text-xs truncate max-w-[240px]">{c.razaoSocial}</p>}
                   </td>
-                  <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{c.cnpjCpf}</td>
-                  <td className="px-3 py-1.5 text-[#8B8D98]">{c.enderecoJson?.cidade ? `${c.enderecoJson.cidade}/${c.enderecoJson.uf || ''}` : '—'}</td>
-                  <td className="px-3 py-1.5 text-right font-mono text-[#8B8D98]">{R$(c.limiteCredito)}</td>
-                  <td className="px-3 py-1.5 text-center text-slate-400">{c.prazoMedio}d</td>
-                  <td className="px-3 py-1.5 text-center">{c.exigeRastreabilidade ? <QrCode className="h-4 w-4 text-[#0b7d4e] mx-auto" /> : <span className="text-slate-600">—</span>}</td>
-                  <td className="px-3 py-1.5"><StatusBadge ativo={c.ativo} inativoLabel="BLOQUEADO" /></td>
-                  <td className="px-3 py-1.5">
+                  <td className="px-3 py-1 font-mono text-slate-400 text-xs">{c.cnpjCpf}</td>
+                  <td className="px-3 py-1 text-[#8B8D98]">{c.enderecoJson?.cidade ? `${c.enderecoJson.cidade}/${c.enderecoJson.uf || ''}` : '—'}</td>
+                  <td className="px-3 py-1 text-right font-mono text-[#8B8D98]">{R$(c.limiteCredito)}</td>
+                  <td className="px-3 py-1 text-center text-slate-400">{c.prazoMedio}d</td>
+                  <td className="px-3 py-1 text-center">{c.exigeRastreabilidade ? <QrCode className="h-4 w-4 text-[#2DD4A7] mx-auto" /> : <span className="text-slate-600">—</span>}</td>
+                  <td className="px-3 py-1"><StatusBadge ativo={c.ativo} inativoLabel="BLOQUEADO" /></td>
+                  <td className="px-3 py-1">
                     <div className="flex gap-1.5">
-                      {pode('/cadastros/clientes', 'EDITAR') && <button onClick={() => setEditando(c)} className="text-[11px] bg-[#E8A317]/12 text-[#a9760a] border border-[#E8A317]/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
-                      {pode('/cadastros/clientes', 'EXCLUIR') && <button onClick={() => excluir(c)} className="text-slate-500 hover:text-[#c3352b] px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
+                      {pode('/cadastros/clientes', 'EDITAR') && <button onClick={() => setEditando(c)} className="text-[11px] bg-[#01B8FA]/12 text-[#0E86D4] border border-[#01B8FA]/30 px-2 py-1 rounded font-semibold hover:bg-[#01B8FA]/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                      {pode('/cadastros/clientes', 'EXCLUIR') && <button onClick={() => excluir(c)} className="text-slate-500 hover:text-[#FF6B7A] px-1"><Trash2 className="h-3.5 w-3.5" /></button>}
                     </div>
                   </td>
                 </tr>
@@ -165,19 +165,19 @@ function ModalCliente({ cliente, onClose, onSalvo }: { cliente: Cliente | null; 
             <Campo label="Limite de Crédito (R$)"><input type="number" step="0.01" min="0" value={f.limiteCredito} onChange={e => set('limiteCredito', e.target.value)} className={inp} /></Campo>
             <Campo label="Prazo de Pagamento (dias)"><input type="number" min="0" value={f.prazoMedio} onChange={e => set('prazoMedio', e.target.value)} className={inp} /></Campo>
             <Campo label="Situação">
-              <button type="button" onClick={() => set('ativo', !f.ativo)} className={`w-full rounded-lg px-3 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-[#0b7d4e] border-emerald-500/40' : 'bg-rose-500/15 text-[#c3352b] border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'BLOQUEADO'}</button>
+              <button type="button" onClick={() => set('ativo', !f.ativo)} className={`w-full rounded-lg px-3 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-[#2DD4A7] border-emerald-500/40' : 'bg-rose-500/15 text-[#FF6B7A] border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'BLOQUEADO'}</button>
             </Campo>
           </div>
-          <label className="flex items-center gap-2.5 bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg px-3 py-2.5 cursor-pointer">
+          <label className="flex items-center gap-2.5 bg-[#0C0D10] border border-[#23262F] rounded-lg px-3 py-2.5 cursor-pointer">
             <input type="checkbox" checked={f.exigeRastreabilidade} onChange={e => set('exigeRastreabilidade', e.target.checked)} className="accent-emerald-500 h-4 w-4" />
-            <QrCode className="h-4 w-4 text-[#0b7d4e]" />
+            <QrCode className="h-4 w-4 text-[#2DD4A7]" />
             <span className="text-sm text-[#5B5D69]">Exige <b>rastreabilidade</b> na entrega (etiqueta QR Code / cadastro em órgãos reguladores)</span>
           </label>
           <Campo label="Observações"><textarea value={f.observacoes} onChange={e => set('observacoes', e.target.value)} rows={2} className={`${inp} resize-none`} /></Campo>
         </Step>
       </SteppedForm>
 
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }

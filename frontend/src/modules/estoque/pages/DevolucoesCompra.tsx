@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { Undo2, RefreshCw, Plus, X, Trash2, PackageMinus, Search } from 'lucide-react';
+import { Undo2, RefreshCw, X, Trash2, PackageMinus, Search } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast } from '../../../components/ui/feedback';
 import { devolucoesCompraApi, fornecedoresApi, produtosApi, entradasApi } from '../../../services/api';
+import { CadastroShell, TopBar, TableCard, Th, Loader, Vazio, FAB } from '../../cadastros/ui';
 
 interface Devolucao {
   id: string;
@@ -39,67 +40,45 @@ export default function DevolucoesCompra() {
   useEffect(() => { carregar(); }, [carregar]);
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <span className="h-11 w-11 rounded-2xl bg-[#E8A317]/12 text-[#a9760a] flex items-center justify-center">
-            <Undo2 className="h-5 w-5" />
-          </span>
-          <div>
-            <h1 className="text-xl font-bold text-[#16171D]">Devoluções ao Fornecedor</h1>
-            <p className="text-[13px] text-slate-400">Devolve mercadoria de uma compra: baixa o estoque e reduz/estorna o título a pagar da entrada.</p>
-          </div>
-        </div>
-        {podeOperar && (
-          <button onClick={() => setCriando(true)} className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-bold px-3 py-2 rounded-lg">
-            <Plus className="h-4 w-4" /> Nova devolução
-          </button>
+    <CadastroShell>
+      <TopBar icon={<Undo2 className="h-5 w-5" />} titulo="Devoluções ao Fornecedor"
+        subtitulo="Devolve mercadoria de uma compra: baixa o estoque e reduz/estorna o título a pagar da entrada."
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-[#101216] border border-[#23262F] hover:bg-[#0C0D10] px-3 py-1.5 rounded-lg text-[#8A90A0] text-sm"><RefreshCw className={`h-4 w-4 text-[#01B8FA] ${loading ? 'animate-spin' : ''}`} /> Atualizar</button>} />
+      {podeOperar && <FAB onClick={() => setCriando(true)} label="Nova devolução" />}
+
+      <div className="flex-1 overflow-auto p-4">
+        {loading ? <Loader /> : lista.length === 0 ? <Vazio icon={<Undo2 className="h-10 w-10" />} texto="Nenhuma devolução registrada. Clique em Nova devolução para registrar." /> : (
+          <TableCard>
+            <thead><tr>
+              <Th>Nº</Th>
+              <Th>Data</Th>
+              <Th>Fornecedor</Th>
+              <Th>Motivo</Th>
+              <Th className="text-center">Itens</Th>
+              <Th className="text-right">Valor</Th>
+              <Th className="text-center">Status</Th>
+            </tr></thead>
+            <tbody>
+              {lista.map((d) => (
+                <tr key={d.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                  <td className="px-3 py-1 text-[#8A90A0] font-mono">#{d.numero}</td>
+                  <td className="px-3 py-1 text-slate-400">{dataBr(d.createdAt)}</td>
+                  <td className="px-3 py-1 font-semibold text-[#F7F8FA]">{d.fornecedorNome}</td>
+                  <td className="px-3 py-1 text-slate-400">{d.motivo || '—'}</td>
+                  <td className="px-3 py-1 text-center text-[#8A90A0]">{d.itens?.length ?? 0}</td>
+                  <td className="px-3 py-1 text-right text-[#F7F8FA] tabular-nums font-semibold font-mono">{brl(d.valorTotal)}</td>
+                  <td className="px-3 py-1 text-center">
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${d.status === 'CONFIRMADA' ? 'bg-[#2DD4A7]/12 text-[#2DD4A7]' : 'bg-[#16181F] text-[#8A90A0]'}`}>{d.status}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </TableCard>
         )}
       </div>
 
-      <div className="flex items-center justify-end mb-4">
-        <button onClick={carregar} className="h-9 w-9 rounded-lg bg-white hover:bg-[#EFEDE7] text-[#8B8D98] flex items-center justify-center">
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
-
-      <div className="rounded-2xl border border-[#E7E5DF] overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-[#FBFAF7] text-[11px] uppercase tracking-wider text-slate-500">
-            <tr>
-              <th className="text-left px-4 py-3 font-semibold">Nº</th>
-              <th className="text-left px-4 py-3 font-semibold">Data</th>
-              <th className="text-left px-4 py-3 font-semibold">Fornecedor</th>
-              <th className="text-left px-4 py-3 font-semibold">Motivo</th>
-              <th className="text-center px-4 py-3 font-semibold">Itens</th>
-              <th className="text-right px-4 py-3 font-semibold">Valor</th>
-              <th className="text-center px-4 py-3 font-semibold">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">Carregando…</td></tr>
-            ) : lista.length === 0 ? (
-              <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">Nenhuma devolução registrada.</td></tr>
-            ) : lista.map((d) => (
-              <tr key={d.id} className="border-t border-[#E7E5DF]">
-                <td className="px-4 py-3 text-[#8B8D98] font-mono">#{d.numero}</td>
-                <td className="px-4 py-3 text-slate-400">{dataBr(d.createdAt)}</td>
-                <td className="px-4 py-3 text-[#16171D] font-medium">{d.fornecedorNome}</td>
-                <td className="px-4 py-3 text-slate-400">{d.motivo || '—'}</td>
-                <td className="px-4 py-3 text-center text-[#8B8D98]">{d.itens?.length ?? 0}</td>
-                <td className="px-4 py-3 text-right text-[#16171D] tabular-nums font-semibold">{brl(d.valorTotal)}</td>
-                <td className="px-4 py-3 text-center">
-                  <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${d.status === 'CONFIRMADA' ? 'bg-emerald-500/10 text-[#0b7d4e]' : 'bg-slate-500/10 text-slate-400'}`}>{d.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       {criando && <ModalDevolucao onClose={() => setCriando(false)} onDone={() => { setCriando(false); carregar(); }} />}
-    </div>
+    </CadastroShell>
   );
 }
 
@@ -200,18 +179,18 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
   };
 
   return createPortal((
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#16171D]/40 animate-backdrop p-4" onClick={onClose}>
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-backdrop p-4" onClick={onClose}>
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-auto bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] p-5 animate-modal" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <h2 className="font-bold text-[#16171D] flex items-center gap-2"><PackageMinus className="h-5 w-5 text-[#a9760a]" /> Nova devolução ao fornecedor</h2>
-          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#F6F5F2] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
+          <h2 className="font-bold text-[#F7F8FA] flex items-center gap-2"><PackageMinus className="h-5 w-5 text-[#01B8FA]" /> Nova devolução ao fornecedor</h2>
+          <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-white/[0.06] text-slate-400 flex items-center justify-center"><X className="h-4 w-4" /></button>
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <label className="block">
             <span className="text-xs text-slate-400">Filial</span>
             <select value={filialId} onChange={e => setFilialId(e.target.value)}
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]">
               <option value="">Selecione…</option>
               {filiais.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
@@ -219,7 +198,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <label className="block">
             <span className="text-xs text-slate-400">Fornecedor</span>
             <select value={fornecedorId} onChange={e => setFornecedorId(e.target.value)}
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]">
               <option value="">Selecione…</option>
               {fornecedores.map((f) => <option key={f.id} value={f.id}>{f.nomeFantasia || f.razaoSocial}</option>)}
             </select>
@@ -230,7 +209,7 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           <label className="block mb-3">
             <span className="text-xs text-slate-400">Entrada de origem (opcional — prefill de itens + estorno do título)</span>
             <select value={entradaId} onChange={e => carregarEntrada(e.target.value)}
-              className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]">
+              className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]">
               <option value="">Sem vínculo</option>
               {entradas.map((e) => <option key={e.id} value={e.id}>NF {e.numeroNf || e.id.slice(0, 8)} — {brl(e.valorTotal)}</option>)}
             </select>
@@ -240,18 +219,18 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
         <label className="block mb-3">
           <span className="text-xs text-slate-400">Motivo</span>
           <input value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Avaria, divergência, validade…"
-            className="mt-1 w-full bg-white border border-[#E7E5DF] rounded-lg px-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+            className="mt-1 w-full bg-[#101216] border border-[#23262F] rounded-lg px-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]" />
         </label>
 
         {/* Adicionar produto */}
         <div className="relative mb-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           <input value={buscaProd} onChange={e => setBuscaProd(e.target.value)} placeholder="Adicionar produto por nome ou código…"
-            className="w-full bg-white border border-[#E7E5DF] rounded-lg pl-9 pr-3 py-2 text-sm text-[#16171D] focus:outline-none focus:border-[#E8A317]" />
+            className="w-full bg-[#101216] border border-[#23262F] rounded-lg pl-9 pr-3 py-2 text-sm text-[#F7F8FA] focus:outline-none focus:border-[#01B8FA]" />
           {produtos.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full max-h-52 overflow-auto bg-white border border-[#E7E5DF] rounded-lg shadow-xl">
+            <div className="absolute z-10 mt-1 w-full max-h-52 overflow-auto bg-[#101216] border border-[#23262F] rounded-lg shadow-xl">
               {produtos.map((pr) => (
-                <button key={pr.id} type="button" onClick={() => addProduto(pr)} className="w-full text-left px-3 py-2 text-sm text-[#5B5D69] hover:bg-[#F6F5F2]">
+                <button key={pr.id} type="button" onClick={() => addProduto(pr)} className="w-full text-left px-3 py-2 text-sm text-[#F7F8FA] hover:bg-white/[0.04]">
                   <span className="font-mono text-xs text-slate-500">{pr.codigo}</span> {pr.descricao}
                 </button>
               ))}
@@ -259,9 +238,9 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
           )}
         </div>
 
-        <div className="rounded-lg border border-[#E7E5DF] overflow-hidden mb-3">
+        <div className="rounded-lg border border-[#23262F] overflow-hidden mb-3">
           <table className="w-full text-sm">
-            <thead className="bg-[#FBFAF7] text-[11px] uppercase text-slate-500">
+            <thead className="bg-[#0C0D10] text-[11px] uppercase text-[#8A90A0]">
               <tr>
                 <th className="text-left px-3 py-2">Produto</th>
                 <th className="text-right px-3 py-2 w-24">Qtde</th>
@@ -276,19 +255,19 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
               ) : itens.map((l, idx) => {
                 const tot = (parseFloat(l.quantidade.replace(',', '.')) || 0) * (parseFloat(l.valorUnitario.replace(',', '.')) || 0);
                 return (
-                  <tr key={idx} className="border-t border-[#E7E5DF]">
-                    <td className="px-3 py-2 text-[#5B5D69]">{l.descricao}</td>
+                  <tr key={idx} className="border-t border-[#23262F]">
+                    <td className="px-3 py-2 text-[#F7F8FA]">{l.descricao}</td>
                     <td className="px-3 py-2 text-right">
                       <input value={l.quantidade} onChange={e => setLinha(idx, 'quantidade', e.target.value)}
-                        className="w-20 bg-white border border-[#E7E5DF] rounded px-2 py-1 text-right text-[#16171D] font-mono focus:outline-none focus:border-[#E8A317]" />
+                        className="w-20 bg-[#101216] border border-[#23262F] rounded px-2 py-1 text-right text-[#F7F8FA] font-mono focus:outline-none focus:border-[#01B8FA]" />
                     </td>
                     <td className="px-3 py-2 text-right">
                       <input value={l.valorUnitario} onChange={e => setLinha(idx, 'valorUnitario', e.target.value)}
-                        className="w-24 bg-white border border-[#E7E5DF] rounded px-2 py-1 text-right text-[#16171D] font-mono focus:outline-none focus:border-[#E8A317]" />
+                        className="w-24 bg-[#101216] border border-[#23262F] rounded px-2 py-1 text-right text-[#F7F8FA] font-mono focus:outline-none focus:border-[#01B8FA]" />
                     </td>
-                    <td className="px-3 py-2 text-right text-[#5B5D69] tabular-nums">{brl(tot)}</td>
+                    <td className="px-3 py-2 text-right text-[#F7F8FA] tabular-nums font-mono">{brl(tot)}</td>
                     <td className="px-2 py-2 text-center">
-                      <button onClick={() => removerLinha(idx)} className="h-7 w-7 rounded hover:bg-rose-500/10 text-[#c3352b] flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => removerLinha(idx)} className="h-7 w-7 rounded hover:bg-rose-500/10 text-[#FF6B7A] flex items-center justify-center"><Trash2 className="h-3.5 w-3.5" /></button>
                     </td>
                   </tr>
                 );
@@ -299,10 +278,10 @@ function ModalDevolucao({ onClose, onDone }: { onClose: () => void; onDone: () =
 
         <div className="flex items-center justify-between">
           <span className="text-sm text-slate-400">Total da devolução</span>
-          <span className="text-lg font-bold text-[#16171D] tabular-nums">{brl(total)}</span>
+          <span className="text-lg font-bold text-[#F7F8FA] tabular-nums font-mono">{brl(total)}</span>
         </div>
 
-        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold py-2.5 rounded-lg disabled:opacity-40">
+        <button onClick={confirmar} disabled={salvando} className="mt-4 w-full flex items-center justify-center gap-2 bg-[#01B8FA] hover:bg-[#22D3EE] text-[#04121A] font-bold py-2.5 rounded-lg shadow-[0_6px_18px_rgba(1,184,250,0.28)] transition-all disabled:opacity-40">
           <Undo2 className="h-4 w-4" /> Registrar devolução
         </button>
       </div>

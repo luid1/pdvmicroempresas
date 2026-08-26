@@ -39,16 +39,16 @@ export default function Filiais() {
                 const ocup = Number(f.ocupacaoPaletes) || 0;
                 const pct = cap > 0 ? (ocup / cap) * 100 : 0;
                 return (
-                  <tr key={f.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
-                    <td className="px-3 py-1.5"><p className="font-semibold text-[#16171D]">{f.nome}</p><p className="text-slate-500 text-xs font-mono">{f.codigo}</p></td>
-                    <td className="px-3 py-1.5 text-[#8B8D98] text-xs">{TIPO_LABEL[f.tipo] || f.tipo}</td>
-                    <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{f.cnpj || '—'}</td>
-                    <td className="px-3 py-1.5 text-[#8B8D98]">{f.responsavel || '—'}</td>
-                    <td className="px-3 py-1.5 text-center">{f.camaraFria ? <Snowflake className="h-4 w-4 text-[#0e7490] mx-auto" /> : <span className="text-slate-600">—</span>}</td>
-                    <td className="px-3 py-1.5">{cap > 0 ? <OcupacaoBar pct={pct} /> : <span className="text-slate-600 text-xs">não definida</span>}</td>
-                    <td className="px-3 py-1.5"><StatusBadge ativo={f.ativo} /></td>
-                    <td className="px-3 py-1.5">
-                      {pode('/cadastros/filiais', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-[#E8A317]/12 text-[#a9760a] border border-[#E8A317]/30 px-2 py-1 rounded font-semibold hover:bg-amber-500/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
+                  <tr key={f.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                    <td className="px-3 py-1"><p className="font-semibold text-[#F7F8FA]">{f.nome}</p><p className="text-slate-500 text-xs font-mono">{f.codigo}</p></td>
+                    <td className="px-3 py-1 text-[#8B8D98] text-xs">{TIPO_LABEL[f.tipo] || f.tipo}</td>
+                    <td className="px-3 py-1 font-mono text-slate-400 text-xs">{f.cnpj || '—'}</td>
+                    <td className="px-3 py-1 text-[#8B8D98]">{f.responsavel || '—'}</td>
+                    <td className="px-3 py-1 text-center">{f.camaraFria ? <Snowflake className="h-4 w-4 text-[#0e7490] mx-auto" /> : <span className="text-slate-600">—</span>}</td>
+                    <td className="px-3 py-1">{cap > 0 ? <OcupacaoBar pct={pct} /> : <span className="text-slate-600 text-xs">não definida</span>}</td>
+                    <td className="px-3 py-1"><StatusBadge ativo={f.ativo} /></td>
+                    <td className="px-3 py-1">
+                      {pode('/cadastros/filiais', 'EDITAR') && <button onClick={() => setEditando(f)} className="text-[11px] bg-[#01B8FA]/12 text-[#0E86D4] border border-[#01B8FA]/30 px-2 py-1 rounded font-semibold hover:bg-[#01B8FA]/20 flex items-center gap-1"><Pencil className="h-3 w-3" /> Editar</button>}
                     </td>
                   </tr>
                 );
@@ -119,7 +119,7 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
             </Campo>
           </div>
           {f.regimeTributario === 'MEI' && (
-            <p className="text-xs text-[#a9760a] bg-amber-500/[0.08] border border-[#E8A317]/40 rounded-lg px-3 py-2">
+            <p className="text-xs text-[#0E86D4] bg-[#01B8FA]/[0.08] border border-[#01B8FA]/40 rounded-lg px-3 py-2">
               <b>MEI:</b> nota sai como Simples (CSOSN 102, sem destaque de PIS/COFINS) e fora da reforma IBS/CBS. Atenção ao limite de faturamento (~R$ 81 mil/ano) e às atividades permitidas — confirme com seu contador.
             </p>
           )}
@@ -132,7 +132,7 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
             <Campo label="Capacidade (paletes)"><input type="number" min="0" value={f.capacidadePaletes} onChange={e => set('capacidadePaletes', e.target.value)} className={inp} /></Campo>
             <Campo label="Ocupação atual (paletes)"><input type="number" min="0" value={f.ocupacaoPaletes} onChange={e => set('ocupacaoPaletes', e.target.value)} className={inp} /></Campo>
           </div>
-          <label className="flex items-center gap-2.5 bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg px-3 py-2.5 cursor-pointer">
+          <label className="flex items-center gap-2.5 bg-[#0C0D10] border border-[#23262F] rounded-lg px-3 py-2.5 cursor-pointer">
             <input type="checkbox" checked={f.camaraFria} onChange={e => set('camaraFria', e.target.checked)} className="accent-cyan-500 h-4 w-4" />
             <Snowflake className="h-4 w-4 text-[#0e7490]" />
             <span className="text-sm text-[#5B5D69]">Possui <b>câmara fria</b> / refrigeração</span>
@@ -146,12 +146,12 @@ function ModalFilial({ item, onClose, onSalvo }: { item: any | null; onClose: ()
             <Campo label="UF" className="col-span-1"><select value={f.uf} onChange={e => set('uf', e.target.value)} className={inp}>{UFS.map(u => <option key={u}>{u}</option>)}</select></Campo>
           </div>
           <div className="flex justify-end">
-            <button type="button" onClick={() => set('ativo', !f.ativo)} className={`rounded-lg px-4 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-[#0b7d4e] border-emerald-500/40' : 'bg-rose-500/15 text-[#c3352b] border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'INATIVO'}</button>
+            <button type="button" onClick={() => set('ativo', !f.ativo)} className={`rounded-lg px-4 py-2 text-sm font-bold border ${f.ativo ? 'bg-emerald-500/15 text-[#2DD4A7] border-emerald-500/40' : 'bg-rose-500/15 text-[#FF6B7A] border-rose-500/40'}`}>{f.ativo ? 'ATIVO' : 'INATIVO'}</button>
           </div>
         </Step>
       </SteppedForm>
 
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }

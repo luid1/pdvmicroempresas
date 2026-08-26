@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Param, Body, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { NfceService } from './nfce.service';
+import { NFeService } from './nfe.service';
 import { CurrentTenant, CurrentUser, Modulo } from '../../common/decorators/context.decorator';
 
 @ApiTags('NFC-e')
@@ -8,7 +9,7 @@ import { CurrentTenant, CurrentUser, Modulo } from '../../common/decorators/cont
 @Modulo('NFE')
 @Controller('nfce')
 export class NfceController {
-  constructor(private service: NfceService) {}
+  constructor(private service: NfceService, private nfe: NFeService) {}
 
   @Get('status')
   @ApiOperation({ summary: 'Retorna se a emissão de NFC-e está habilitada e em qual modo' })
@@ -84,5 +85,23 @@ export class NfceController {
   @ApiOperation({ summary: 'Reenvia todos os documentos pendentes/contingência (fila de reenvio)' })
   reprocessar(@CurrentTenant() tenantId: string, @Body('filialId') filialId?: string) {
     return this.service.reprocessarPendentes(tenantId, filialId);
+  }
+
+  // ---- Devolução (estorno fiscal) de uma NFC-e autorizada ----
+  // Gera a NF-e de devolução (finalidade 4, espelho de entrada) referenciando a
+  // nota original e a emite em um passo só. A original permanece EMITIDO (auditoria);
+  // o Lumin passa a exibi-la como "Devolvida"/"Devolução parcial" e a exclui do
+  // faturamento líquido. `itens` (opcional) permite devolução parcial.
+  @Post('documento/:id/devolver')
+  @ApiOperation({ summary: 'Gera e emite a NF-e de devolução (total ou parcial) de uma NFC-e autorizada' })
+  async devolver(
+    @CurrentTenant() tenantId: string,
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body('itens') itens?: { itemNfeId: string; quantidade: number }[],
+  ) {
+    const devolucao = await this.nfe.gerarDevolucao(tenantId, id, user.id, itens);
+    const emitida = await this.nfe.emitirDevolucao(tenantId, devolucao.id, user.id);
+    return { devolucaoId: devolucao.id, numero: devolucao.numero, ...emitida };
   }
 }

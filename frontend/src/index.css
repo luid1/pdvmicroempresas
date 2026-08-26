@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 /* ============================================================
-   LUMIN DESIGN SYSTEM — "Luz"
+   LUMIN DESIGN SYSTEM — "Luz" (identidade AZUL, alinhada ao site)
    Área de trabalho clara (#F7F7F8) · tinta #202123 ·
-   verde-petróleo como assinatura da marca · painéis brancos com borda
-   de 1px · a Lu com halo cônico como assinatura do sistema.
+   moldura NAVY (#0B0F2B, do luminmkt.shop) · azul-marca (#2F5FE0)
+   como assinatura interativa · âmbar (#FFC24B) como destaque/CTA ·
+   painéis brancos com borda de 1px · a Lu com halo cônico.
    ============================================================ */
 
 @layer base {
@@ -44,14 +45,194 @@
     box-shadow: 0 4px 14px rgba(31,31,31,0.07);
   }
 
-  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-[#0F8A72] text-white rounded-xl text-xs font-semibold hover:bg-[#0B6F5C] active:bg-[#095E4E] transition-all duration-200 disabled:opacity-50 active:scale-[0.98]; }
+  .btn-primary { @apply inline-flex items-center gap-2 px-3 py-2 bg-[#2F5FE0] text-white rounded-xl text-xs font-semibold hover:bg-[#2348C7] active:bg-[#1D3AA8] transition-all duration-200 disabled:opacity-50 active:scale-[0.98]; }
   .btn-secondary { @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-300 active:scale-[0.98]; }
   .btn { @apply inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-[#E5E7EB] bg-white text-xs font-semibold text-[#4B5563] hover:bg-[#F7F7F8] transition-all duration-200; }
   .btn-danger { @apply inline-flex items-center gap-2 px-3 py-2 bg-[#E0483D] text-white rounded-xl text-xs font-semibold hover:bg-[#c93a30] transition-all duration-300 active:scale-[0.98]; }
-  .input { @apply w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#0F8A72]/20 focus:border-[#0F8A72] placeholder:text-[#8E8F94]; }
+  .input { @apply w-full px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2F5FE0]/20 focus:border-[#2F5FE0] placeholder:text-[#8E8F94]; }
   .label { @apply block text-xs font-semibold text-[#5F6065] uppercase tracking-wide mb-1.5; }
   .th { @apply text-left px-4 py-3 text-xs font-semibold text-[#8E8F94] uppercase tracking-wider; }
   .td { @apply px-4 py-3; }
+}
+
+/* ============================================================
+   TEMA "SITE" — traz a linguagem visual do luminmkt.shop para
+   dentro do app: navy profundo + âmbar, títulos em Bricolage
+   Grotesque, corpo em Inter Tight e números em JetBrains Mono.
+   Escopo em .theme-site p/ migrar tela-a-tela sem quebrar o
+   resto (que segue no tema claro "Luz"). Espelha os tokens do
+   site (site/index.html :root).
+   ============================================================ */
+.theme-site {
+  /* App mockup (app.luminmkt.shop): quase-preto + azul-ciano #01B8FA */
+  --s-bg: #08090A; --s-surface: #101216; --s-surface-2: #0C0D10;
+  --s-surface-hi: #16181F;         /* superfície elevada (KPIs) */
+  --s-line: #23262F;               /* borda visível */
+  --s-line-soft: #191B21;          /* borda sutil interna */
+  --s-ink: #F7F8FA; --s-ink-bright: #FFFFFF; --s-mut: #8A90A0; --s-mut-2: #5E6472;
+  --s-accent: #01B8FA; --s-accent-2: #0E86D4; --s-accent-soft: rgba(1,184,250,0.12); --s-ink-navy: #06222E;
+  --s-accent-glow: rgba(1,184,250,0.55);
+  /* hues p/ categóricos (status, aging) — leitura por cor */
+  --s-cyan: #22D3EE; --s-blue: #3B9EFF; --s-violet: #A78BFA; --s-green: #2DD4A7;
+  --s-rose: #FF6B7A; --s-orange: #FF9F45;
+  background: var(--s-bg);
+  color: var(--s-ink);
+  font-family: 'Inter Tight', ui-sans-serif, system-ui, sans-serif;
+}
+.theme-site h1, .theme-site h2, .theme-site h3, .theme-site h4 {
+  font-family: 'Bricolage Grotesque', 'Inter Tight', sans-serif;
+  letter-spacing: -0.02em; color: var(--s-ink-bright);
+}
+.theme-site .num, .theme-site .font-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-feature-settings: "tnum" 1, "zero" 1; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+}
+/* Eyebrow — rótulo mono, assinatura minimal do app */
+.theme-site .eyebrow {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--s-accent); font-weight: 500;
+}
+.theme-site .eyebrow.mut { color: var(--s-mut-2); }
+/* Pílula mono com borda azul */
+.theme-site .pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 13px;
+  border: 1px solid rgba(1,184,250,0.4); border-radius: 100px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--s-accent);
+}
+/* Superfícies — placas navy com brilho, como o site */
+.theme-site .card, .theme-site .glass {
+  background: var(--s-surface) !important;
+  border: 1px solid var(--s-line) !important;
+  border-radius: 16px;
+  box-shadow: 0 30px 70px -55px rgba(0,0,0,0.85) !important;
+  color: var(--s-ink);
+}
+.theme-site .card:hover, .theme-site .glass-hover:hover {
+  border-color: rgba(1,184,250,0.38) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 40px 90px -55px rgba(0,0,0,0.9) !important;
+}
+.theme-site .panel { background: var(--s-surface-2); border: 1px solid var(--s-line); border-radius: 14px; }
+/* Botões — CTA azul (texto escuro) + fantasma com borda */
+.theme-site .btn-accent {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px;
+  background: var(--s-accent); color: #04121A; border-radius: 9px;
+  font-weight: 700; font-size: 13px; border: 1px solid transparent; transition: .15s;
+}
+.theme-site .btn-accent:hover { filter: brightness(1.08); }
+.theme-site .btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px;
+  background: transparent; color: var(--s-ink); border: 1px solid var(--s-line);
+  border-radius: 9px; font-weight: 600; font-size: 13px; transition: .15s;
+}
+.theme-site .btn-ghost:hover { border-color: var(--s-accent); color: var(--s-ink-bright); }
+/* Segmented control (seletor de período) */
+.theme-site .seg { display: inline-flex; padding: 3px; border: 1px solid var(--s-line); border-radius: 10px; background: var(--s-surface-2); }
+.theme-site .seg button { padding: 5px 12px; font-size: 12px; font-weight: 600; border-radius: 7px; color: var(--s-mut); transition: .15s; }
+.theme-site .seg button:hover { color: var(--s-ink); }
+.theme-site .seg button.on { background: rgba(1,184,250,0.16); color: var(--s-accent); }
+/* Inputs no escuro */
+.theme-site input:not([type="checkbox"]):not([type="radio"]),
+.theme-site select, .theme-site textarea {
+  background: var(--s-surface-2) !important; color: var(--s-ink) !important;
+  border: 1px solid var(--s-line) !important;
+}
+.theme-site input::placeholder, .theme-site textarea::placeholder { color: var(--s-mut-2) !important; }
+.theme-site input:focus, .theme-site select:focus, .theme-site textarea:focus {
+  border-color: rgba(1,184,250,0.6) !important; box-shadow: 0 0 0 3px rgba(1,184,250,0.16) !important;
+}
+/* Tabelas no escuro */
+.theme-site .th, .theme-site thead th { color: var(--s-mut-2) !important; }
+.theme-site tbody tr { border-color: var(--s-line); }
+.theme-site tbody tr:hover { background: rgba(255,255,255,0.03) !important; }
+/* Utilitários de cor dentro do tema (para texto/linhas) */
+.theme-site .t-ink { color: var(--s-ink); }
+.theme-site .t-mut { color: var(--s-mut); }
+.theme-site .t-mut2 { color: var(--s-mut-2); }
+.theme-site .t-amber { color: var(--s-amber); }
+.theme-site .bd { border-color: var(--s-line) !important; }
+.theme-site .bg-soft { background: var(--s-surface-2); }
+.theme-site .track { background: rgba(255,255,255,0.07); }
+
+/* ============================================================
+   Dashboard — componentes premium (header, KPI, painéis)
+   ============================================================ */
+/* Header do dashboard — barra integrada, hairline sutil */
+.theme-site .dash-head {
+  position: relative;
+  padding: 9px 22px;
+  border-bottom: 1px solid var(--s-line-soft);
+  background:
+    radial-gradient(140% 120% at 0% -20%, rgba(1,184,250,0.07), rgba(1,184,250,0) 42%),
+    var(--s-bg);
+}
+.theme-site .dash-head::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, rgba(1,184,250,0.35), rgba(1,184,250,0) 55%);
+}
+/* Chip de ícone do título */
+.theme-site .head-badge {
+  height: 34px; width: 34px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--s-accent);
+  background: radial-gradient(120% 120% at 30% 20%, rgba(1,184,250,0.22), rgba(1,184,250,0.06));
+  border: 1px solid rgba(1,184,250,0.30);
+  box-shadow: 0 0 18px -6px var(--s-accent-glow), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* KPI card — placa elevada, chip com brilho, número mono branco */
+.theme-site .kpi {
+  position: relative; display: flex; flex-direction: column; text-align: left;
+  padding: 15px 16px 16px; border-radius: 16px;
+  background:
+    radial-gradient(130% 110% at 0% 0%, rgba(255,255,255,0.045), rgba(255,255,255,0) 52%),
+    var(--s-surface-hi);
+  border: 1px solid var(--s-line);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.035), 0 22px 44px -38px rgba(0,0,0,0.9);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  overflow: hidden;
+}
+.theme-site .kpi::before {   /* filete de cor no topo, tom do KPI */
+  content: ""; position: absolute; top: 0; left: 16px; right: 16px; height: 1px;
+  background: linear-gradient(90deg, var(--kpi-fg, transparent), transparent 70%);
+  opacity: .7;
+}
+.theme-site .kpi-int { cursor: pointer; }
+.theme-site .kpi-int:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--kpi-fg, var(--s-accent)) 45%, var(--s-line));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 30px 58px -38px rgba(0,0,0,0.95);
+}
+.theme-site .kpi-chip {
+  height: 34px; width: 34px; border-radius: 10px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--kpi-fg); background: var(--kpi-soft); border: 1px solid var(--kpi-line);
+  box-shadow: 0 0 18px -8px var(--kpi-fg);
+}
+.theme-site .kpi-label { margin-top: 14px; font-size: 10.5px; letter-spacing: 0.09em; }
+.theme-site .kpi-value {
+  margin-top: 3px; font-size: 23px; line-height: 1.08; font-weight: 700;
+  color: var(--s-ink-bright); letter-spacing: -0.02em;
+}
+.theme-site .kpi-sub { margin-top: 6px; font-size: 11px; color: var(--s-mut); }
+.theme-site .kpi-arrow {
+  position: absolute; bottom: 13px; right: 12px; height: 15px; width: 15px;
+  color: var(--kpi-fg); opacity: 0; transition: opacity .18s;
+}
+.theme-site .kpi-int:hover .kpi-arrow { opacity: .85; }
+
+/* Painel de conteúdo (gráficos / listas) */
+.theme-site .panelx {
+  position: relative; border-radius: 18px; padding: 20px;
+  background: var(--s-surface); border: 1px solid var(--s-line);
+  box-shadow: 0 30px 66px -52px rgba(0,0,0,0.9);
+}
+.theme-site .panelx-title { font-size: 14px; font-weight: 600; color: var(--s-ink-bright); }
+/* Número-manchete (headline) acima do gráfico */
+.theme-site .headline {
+  font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums;
+  font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: var(--s-ink-bright); line-height: 1;
 }
 
 /* Scrollbar minimalista */
@@ -124,9 +305,9 @@
 }
 .login-canvas {
   background:
-    radial-gradient(120% 120% at 0% 0%, rgba(19,161,132,0.18), transparent 55%),
-    radial-gradient(120% 120% at 100% 100%, rgba(15,138,114,0.16), transparent 55%),
-    linear-gradient(125deg, #171717 0%, #212121 45%, #262626 70%, #171717 100%);
+    radial-gradient(120% 120% at 0% 0%, rgba(47,95,224,0.22), transparent 55%),
+    radial-gradient(120% 120% at 100% 100%, rgba(255,194,75,0.14), transparent 55%),
+    linear-gradient(125deg, #0B0F2B 0%, #10142E 45%, #151A3D 70%, #0B0F2B 100%);
   background-size: 160% 160%, 160% 160%, 320% 320%;
   animation: loginPan 24s ease-in-out infinite;
 }
@@ -171,7 +352,7 @@
   width: 210%; aspect-ratio: 1;
   transform: translate(-50%, -50%);
   background: conic-gradient(from 0deg,
-    #13A184, #0F8A72 22%, #5B8DEF 46%, #0F8A72 70%, #13A184);
+    #5B7BF0, #2F5FE0 22%, #FFC24B 46%, #2F5FE0 70%, #5B7BF0);
   animation: luSpin 7s linear infinite;
 }
 .lu-ring > * { position: relative; z-index: 1; }
@@ -211,10 +392,39 @@
 @keyframes luRise { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
 .lu-rise { animation: luRise 0.36s cubic-bezier(0.16, 1, 0.3, 1); }
 
+/* ============================================================
+   LUMIN BOOT — tela de carregamento da marca. O ponto de luz do
+   "ı" acende e respira, um halo pulsa atrás e uma varredura de
+   luz cruza o wordmark. Trocadilho: a Lumin literalmente "acende".
+   ============================================================ */
+@keyframes luminSpark {
+  0%, 100% { box-shadow: 0 0 12px 1px rgba(1,184,250,0.55); opacity: 0.85; transform: translateX(-50%) scale(1); }
+  50%      { box-shadow: 0 0 22px 5px rgba(1,184,250,0.95); opacity: 1;    transform: translateX(-50%) scale(1.22); }
+}
+.lumin-spark { animation: luminSpark 1.7s ease-in-out infinite; }
+
+@keyframes luminHalo {
+  0%, 100% { opacity: 0.26; transform: translate(-50%, -50%) scale(0.82); }
+  50%      { opacity: 0.60; transform: translate(-50%, -50%) scale(1.08); }
+}
+.lumin-halo {
+  position: absolute; top: 50%; left: 50%; z-index: 0;
+  width: 280px; height: 140px; pointer-events: none;
+  background: radial-gradient(circle, rgba(1,184,250,0.5), rgba(1,184,250,0) 70%);
+  filter: blur(30px); border-radius: 999px;
+  animation: luminHalo 2.8s ease-in-out infinite;
+}
+
+@keyframes luminDots { 0%, 20% { opacity: 0.2; } 50% { opacity: 1; } 80%, 100% { opacity: 0.2; } }
+.lumin-dot-1 { animation: luminDots 1.4s ease-in-out infinite; }
+.lumin-dot-2 { animation: luminDots 1.4s ease-in-out 0.18s infinite; }
+.lumin-dot-3 { animation: luminDots 1.4s ease-in-out 0.36s infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   .animate-aurora, .animate-aurora-slow, .animate-pulse-glow, .skeleton::after,
   .login-canvas, .login-orb-1, .login-orb-2, .login-orb-3, .login-grid,
-  .lu-ring::before, .lu-aura, .lu-sweep, .lu-orb, .lu-rise { animation: none !important; }
+  .lu-ring::before, .lu-aura, .lu-sweep, .lu-orb, .lu-rise,
+  .lumin-spark, .lumin-halo, .lumin-dot-1, .lumin-dot-2, .lumin-dot-3 { animation: none !important; }
 }
 
 /* ============================================================
@@ -232,8 +442,10 @@
   --panel: #FFFFFF;      /* cards / painéis */
   --panel-2: #F3F4F6;    /* sub-superfície / zebra */
   --line: #E5E7EB;       /* bordas / linhas */
-  --night: #212121;      /* sidebar / superfícies escuras */
-  --night-2: #171717;
+  --night: #0B0F2B;      /* sidebar / moldura navy (do site) */
+  --night-2: #10142E;    /* navy mais profundo */
+  --night-surface: #151A3D; /* cards/tooltips sobre o navy */
+  --night-line: #2A3068; /* linhas sobre o navy */
 
   /* ── Tinta (texto) ───────────────────────────────────────────────────── */
   --ink: #202123;        /* texto principal */
@@ -241,11 +453,15 @@
   --ink-3: #8E8F94;      /* texto terciário / placeholder */
 
   /* ── Marca ───────────────────────────────────────────────────────────── */
-  --brand: #0F8A72;      /* verde-petróleo Lumin */
-  --brand-strong: #0B6F5C;
-  --brand-soft: #E8F5F1;
-  --gold: var(--brand);         /* alias de compatibilidade */
-  --gold-bright: #13A184;       /* alias de compatibilidade */
+  --brand: #2F5FE0;      /* azul-marca Lumin (identidade nova) */
+  --brand-strong: #2348C7;
+  --brand-active: #1D3AA8;
+  --brand-bright: #5B7BF0;      /* azul sobre navy */
+  --brand-soft: #EAF0FF;
+  --amber: #FFC24B;             /* âmbar do site — destaque/CTA/Lu */
+  --amber-deep: #C98A22;
+  --gold: var(--amber);         /* alias de compatibilidade */
+  --gold-bright: var(--brand-bright); /* alias de compatibilidade */
   --lumin: var(--brand);
 
   /* ── Semânticas (papéis fixos) ───────────────────────────────────────── */
@@ -264,11 +480,11 @@
   --shadow-elevated: 0 8px 30px rgba(31,31,31,0.12);
 
   /* ── Paleta de gráficos ──────────────────────────────────────────────── */
-  --chart-1: #0F8A72;
-  --chart-2: #5B8DEF;
+  --chart-1: #2F5FE0;
+  --chart-2: #5B7BF0;
   --chart-3: #8E8F94;
   --chart-4: #7C6BF0;
-  --chart-5: #0FA968;
+  --chart-5: #FFC24B;
   --chart-6: #E0483D;
 }
 body { background-color: var(--paper) !important; color: var(--ink) !important; }
@@ -292,9 +508,12 @@ body { background-color: var(--paper) !important; color: var(--ink) !important; 
 .border-gray-100, .border-slate-100, .border-gray-200, .border-slate-200 { border-color: var(--line) !important; }
 .border-gray-300, .border-slate-300 { border-color: #D1D5DB !important; }
 
-/* Inputs / selects / textarea */
+/* Inputs / selects / textarea.
+   Usa :where() para zerar a especificidade do :not() — assim uma única
+   classe Tailwind (bg-[#101216]/text-[#F7F8FA]) vence nas telas escuras já
+   migradas, enquanto telas legadas (sem bg explícito) continuam claras. */
 input, select, textarea { color-scheme: light; }
-input:not([type="checkbox"]):not([type="radio"]), select, textarea { background-color: var(--panel); color: var(--ink); }
+input:where(:not([type="checkbox"]):not([type="radio"])), select, textarea { background-color: var(--panel); color: var(--ink); }
 input::placeholder, textarea::placeholder { color: var(--ink-3); }
 
 /* Componentes utilitários legados */
@@ -307,11 +526,12 @@ input::placeholder, textarea::placeholder { color: var(--ink-3); }
 tbody tr { transition: background-color 0.2s ease-out; }
 tbody tr:hover { background-color: rgba(22,23,29,0.025) !important; }
 
-/* Foco de input — anel verde-petróleo sutil */
-.input:focus, input:not([type="checkbox"]):not([type="radio"]):focus, select:focus, textarea:focus {
+/* Foco de input legado — anel azul-marca sutil. Sem !important e com :where()
+   para que o foco ciano das telas migradas (focus:ring/border-[#01B8FA]) vença. */
+.input:focus, input:where(:not([type="checkbox"]):not([type="radio"])):focus, select:focus, textarea:focus {
   outline: none;
-  border-color: rgba(15,138,114,0.7) !important;
-  box-shadow: 0 0 0 3px rgba(15,138,114,0.14) !important;
+  border-color: rgba(47,95,224,0.7);
+  box-shadow: 0 0 0 3px rgba(47,95,224,0.16);
 }
 
 /* Dropdowns nativos */

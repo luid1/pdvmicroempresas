@@ -48,12 +48,15 @@ export class DreService {
     const { inicio, fim, label } = this.resolverPeriodo(filtros);
     const filialId = filtros?.filialId || undefined;
 
-    // 1. Receita bruta + impostos (NF-e emitidas no período).
+    // 1. Receita bruta + impostos — apenas NF-e de SAÍDA/venda (finalidade ≠ 4).
+    //    As notas de DEVOLUÇÃO (finalidade '4', ENTRADA) NÃO entram na receita:
+    //    elas estornam uma venda e são tratadas na linha "(-) Devoluções de Vendas".
     const nfes = await this.prisma.nFe.findMany({
       where: {
         tenantId,
         ...(filialId ? { filialId } : {}),
         status: StatusDFe.EMITIDO,
+        finalidade: { not: '4' },
         dataEmissao: { gte: inicio, lte: fim },
       },
       select: {
@@ -66,6 +69,21 @@ export class DreService {
     const deducoes = sumMoney(
       nfes.flatMap((n) => [n.valorIcms, n.valorIcmsSt, n.valorPis, n.valorCofins]),
     );
+
+    // 1a. Devoluções de vendas — NF-e de devolução (finalidade '4') EMITIDAS no
+    //     período. São redutoras da receita bruta (não custo/despesa), seguindo a
+    //     estrutura contábil: Receita Bruta − Devoluções − Impostos = Receita Líquida.
+    const notasDevolucao = await this.prisma.nFe.findMany({
+      where: {
+        tenantId,
+        ...(filialId ? { filialId } : {}),
+        status: StatusDFe.EMITIDO,
+        finalidade: '4',
+        dataEmissao: { gte: inicio, lte: fim },
+      },
+      select: { valorProdutos: true },
+    });
+    const devolucoes = sumMoney(notasDevolucao.map((n) => n.valorProdutos));
 
     // 1b. Vendas realizadas SEM documento fiscal. O PDV pode operar sem NFC-e
     //     (NFCE_MODO desligado / Central Fiscal inativa): a venda vira um Pedido
@@ -88,19 +106,35 @@ export class DreService {
     const receitaSemNota = sumMoney(vendasSemNota.map((p) => p.subtotal));
 
     const receitaBruta = money(receitaNota + receitaSemNota);
-    const receitaLiquida = money(receitaBruta - deducoes);
+    const receitaLiquida = money(receitaBruta - devolucoes - deducoes);
 
-    // 2. CMV — custo das saídas por venda no período.
-    const saidas = await this.prisma.movimentacaoEstoque.findMany({
-      where: {
-        tenantId,
-        ...(filialId ? { filialId } : {}),
-        tipo: TipoMovimentacao.SAIDA_VENDA,
-        dataMovimento: { gte: inicio, lte: fim },
-      },
-      select: { quantidade: true, custoUnitario: true },
-    });
-    const cmv = sumMoney(saidas.map((m) => Number(m.quantidade) * Number(m.custoUnitario)));
+    // 2. CMV — custo das saídas por venda no período, líquido das devoluções.
+    //    Ao devolver uma venda a mercadoria volta ao estoque (ENTRADA_DEVOLUCAO);
+    //    o custo dessa reentrada estorna o CMV da saída original, mantendo o lucro
+    //    bruto coerente com a receita já líquida de devoluções.
+    const [saidas, reentradasDev] = await Promise.all([
+      this.prisma.movimentacaoEstoque.findMany({
+        where: {
+          tenantId,
+          ...(filialId ? { filialId } : {}),
+          tipo: TipoMovimentacao.SAIDA_VENDA,
+          dataMovimento: { gte: inicio, lte: fim },
+        },
+        select: { quantidade: true, custoUnitario: true },
+      }),
+      this.prisma.movimentacaoEstoque.findMany({
+        where: {
+          tenantId,
+          ...(filialId ? { filialId } : {}),
+          tipo: TipoMovimentacao.ENTRADA_DEVOLUCAO,
+          dataMovimento: { gte: inicio, lte: fim },
+        },
+        select: { quantidade: true, custoUnitario: true },
+      }),
+    ]);
+    const cmvBruto = sumMoney(saidas.map((m) => Number(m.quantidade) * Number(m.custoUnitario)));
+    const cmvDevolucao = sumMoney(reentradasDev.map((m) => Number(m.quantidade) * Number(m.custoUnitario)));
+    const cmv = money(Math.max(0, cmvBruto - cmvDevolucao));
     const lucroBruto = money(receitaLiquida - cmv);
 
     // 3. Perdas e quebras — custo das movimentações PERDA/AVARIA.
@@ -134,6 +168,7 @@ export class DreService {
 
     const linhas: DreLinha[] = [
       { chave: 'receita_bruta', label: 'Receita Bruta de Vendas', valor: receitaBruta, tipo: 'receita', destaque: true },
+      { chave: 'devolucoes', label: '(-) Devoluções de Vendas', valor: -devolucoes, tipo: 'deducao' },
       { chave: 'deducoes', label: '(-) Impostos sobre Vendas (ICMS/ST/PIS/COFINS)', valor: -deducoes, tipo: 'deducao' },
       { chave: 'receita_liquida', label: '(=) Receita Líquida', valor: receitaLiquida, tipo: 'resultado', destaque: true },
       { chave: 'cmv', label: '(-) CMV — Custo da Mercadoria Vendida', valor: -cmv, tipo: 'custo' },
@@ -169,6 +204,7 @@ export class DreService {
       linhas,
       kpis: {
         receitaBruta,
+        devolucoes,
         deducoes,
         receitaLiquida,
         cmv,
@@ -184,12 +220,14 @@ export class DreService {
       },
       cobertura: {
         nfesEmitidas: nfes.length,
+        notasDevolucao: notasDevolucao.length,
         vendasSemNota: vendasSemNota.length,
         movimentacoesVenda: saidas.length,
         observacao:
-          'DRE realizada: receita = NF-e emitidas + vendas realizadas sem nota (Pedidos ' +
-          'faturados sem NF-e), sem dupla contagem; impostos das NF-e; CMV/perdas das ' +
-          'movimentações; despesas do Plano de Contas (contas a pagar categorizadas).',
+          'DRE realizada: receita = NF-e de venda emitidas + vendas realizadas sem nota ' +
+          '(Pedidos faturados sem NF-e), sem dupla contagem; (-) devoluções (NF-e finalidade 4); ' +
+          'impostos das NF-e; CMV líquido de devoluções e perdas das movimentações; ' +
+          'despesas do Plano de Contas (contas a pagar categorizadas).',
       },
     };
   }

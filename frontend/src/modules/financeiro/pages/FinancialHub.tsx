@@ -75,7 +75,7 @@ interface DreLinha {
 }
 
 interface DreKpis {
-  receitaBruta: number; deducoes: number; receitaLiquida: number;
+  receitaBruta: number; devolucoes?: number; deducoes: number; receitaLiquida: number;
   cmv: number; lucroBruto: number; perdas: number; resultado: number; margemBruta: number;
   despesasOperacionais: number; despesasFinanceiras: number; outrasReceitas: number;
   resultadoLiquido: number; margemLiquida: number;
@@ -84,7 +84,7 @@ interface DreCompleto {
   periodo: { inicio: string; fim: string; label: string };
   linhas: DreLinha[];
   kpis: DreKpis;
-  cobertura: { nfesEmitidas: number; vendasSemNota?: number; movimentacoesVenda: number; observacao: string };
+  cobertura: { nfesEmitidas: number; notasDevolucao?: number; vendasSemNota?: number; movimentacoesVenda: number; observacao: string };
 }
 
 /* ── Títulos reais (Contas a Pagar/Receber, vindas da API) ──
@@ -273,6 +273,15 @@ function DashboardDRE() {
           icon={ArrowUpRight}
           tom="neutro"
         />
+        {(k.devolucoes ?? 0) > 0 && (
+          <KpiGigante
+            label="(–) Devoluções de Vendas"
+            valor={-(k.devolucoes ?? 0)}
+            hint={`${dre.cobertura.notasDevolucao ?? 0} NF-e de devolução no período`}
+            icon={ArrowDownRight}
+            tom="deducao"
+          />
+        )}
         <KpiGigante
           label="(–) Impostos s/ Vendas"
           valor={-k.deducoes}

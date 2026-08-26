@@ -95,9 +95,9 @@ export default function Faturamento() {
         actions={
           <>
             <input type="date" value={data} onChange={e => setData(e.target.value)}
-              className="bg-[#F6F5F2] border border-[#E7E5DF] rounded-lg px-3 py-1.5 text-xs text-[#16171D] [color-scheme:dark] focus:outline-none focus:border-[#E8A317]/40" />
+              className="bg-[#101216] border border-[#23262F] rounded-lg px-3 py-1.5 text-xs text-[#F7F8FA] [color-scheme:dark] focus:outline-none focus:border-[#01B8FA]/60" />
             <button onClick={carregar} className={btnGlass}>
-              <RefreshCw className="h-3.5 w-3.5 text-[#a9760a]" /> Atualizar
+              <RefreshCw className="h-3.5 w-3.5" /> Atualizar
             </button>
           </>
         }
@@ -107,58 +107,58 @@ export default function Faturamento() {
 
 
       {/* Barra de ação em lote */}
-      <div className="bg-white border-b border-gray-200 px-5 py-2 flex items-center justify-between shrink-0">
-        <span className="text-sm text-gray-500">
-          {sel.size > 0 ? <><b>{sel.size}</b> selecionado(s) · total {R$(totalSel)}</> : 'Selecione pedidos para faturar em lote'}
+      <div className="bg-[#0C0D10] border-b border-[#23262F] px-5 py-2 flex items-center justify-between shrink-0">
+        <span className="text-sm text-[#8A90A0]">
+          {sel.size > 0 ? <><b className="text-[#F7F8FA]">{sel.size}</b> selecionado(s) · total {R$(totalSel)}</> : 'Selecione pedidos para faturar em lote'}
         </span>
         <button onClick={faturarSelecionados} disabled={sel.size === 0 || processando}
-          className="flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded-lg px-5 py-2 text-sm font-bold disabled:opacity-40">
+          className="flex items-center gap-2 bg-[#01B8FA] hover:bg-[#01B8FA]/90 text-[#04121A] rounded-lg px-5 py-2 text-sm font-bold disabled:opacity-40">
           {processando ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
           {processando ? 'Faturando…' : `Faturar selecionados (${sel.size})`}
         </button>
       </div>
 
-      {processando && andamento && <div className="px-5 py-2 text-xs text-amber-700 bg-amber-50 border-b border-amber-200">{andamento}</div>}
+      {processando && andamento && <div className="px-5 py-2 text-xs text-[#FF9F45] bg-[#FF9F45]/10 border-b border-[#FF9F45]/20">{andamento}</div>}
       {resultado && (
-        <div className={`px-5 py-2 text-xs border-b ${resultado.erros.length ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+        <div className={`px-5 py-2 text-xs border-b ${resultado.erros.length ? 'bg-[#FF9F45]/10 border-[#FF9F45]/20 text-[#FF9F45]' : 'bg-[#2DD4A7]/10 border-[#2DD4A7]/20 text-[#2DD4A7]'}`}>
           <b>{resultado.ok}</b> faturado(s) com sucesso{resultado.erros.length > 0 && <> · <b>{resultado.erros.length}</b> com erro: {resultado.erros.join(' · ')}</>}.
         </div>
       )}
 
       <div className="flex-1 overflow-auto p-4">
         {loading ? (
-          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full" /></div>
+          <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#01B8FA] border-t-transparent rounded-full" /></div>
         ) : pedidos.length === 0 ? (
-          <div className="text-center text-gray-400 py-16">
-            <Receipt className="h-10 w-10 mx-auto mb-2 text-gray-200" />
+          <div className="text-center text-[#8A90A0] py-16">
+            <Receipt className="h-10 w-10 mx-auto mb-2 text-[#23262F]" />
             Nenhum pedido liberado para faturamento nesta data. Separe pedidos na Operacional primeiro.
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-[#101216] rounded-xl border border-[#23262F] overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-100 text-xs text-gray-600">
+              <thead>
                 <tr>
-                  <th className="w-10 px-3 py-2"><input type="checkbox" checked={sel.size === pedidos.length && pedidos.length > 0} onChange={toggleAll} className="accent-amber-500 h-4 w-4" /></th>
-                  {['Nº', 'Cliente', 'Itens', 'Peso (kg)', 'Valor', ''].map(h => <th key={h} className="px-3 py-2 text-left font-semibold whitespace-nowrap">{h}</th>)}
+                  <th className="w-10 px-3 py-1.5 bg-[#0C0D10] border-b border-[#23262F]"><input type="checkbox" checked={sel.size === pedidos.length && pedidos.length > 0} onChange={toggleAll} className="accent-[#01B8FA] h-4 w-4" /></th>
+                  {['Nº', 'Cliente', 'Itens', 'Peso (kg)', 'Valor', ''].map(h => <th key={h} className="px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] bg-[#0C0D10] border-b border-[#23262F] whitespace-nowrap">{h}</th>)}
                 </tr>
               </thead>
               <tbody>
                 {pedidos.map(p => (
-                  <tr key={p.id} className={`border-t border-gray-100 ${sel.has(p.id) ? 'bg-amber-50/50' : 'hover:bg-gray-50'}`}>
-                    <td className="px-3 py-2"><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggle(p.id)} className="accent-amber-500 h-4 w-4" /></td>
-                    <td className="px-3 py-2 font-bold text-amber-700">{p.numero}</td>
-                    <td className="px-3 py-2 font-semibold text-gray-900">{p.cliente?.nomeFantasia || p.cliente?.razaoSocial}</td>
-                    <td className="px-3 py-2 text-center">{p._count?.itens ?? '—'}</td>
-                    <td className="px-3 py-2 text-right font-mono">{(Number(p.pesoTotal) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 3 })}</td>
-                    <td className="px-3 py-2 text-right font-mono font-bold">{R$(p.valorTotal)}</td>
+                  <tr key={p.id} className={`border-t border-[#23262F] ${sel.has(p.id) ? 'bg-[#01B8FA]/[0.06]' : 'hover:bg-white/[0.03]'}`}>
+                    <td className="px-3 py-2"><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggle(p.id)} className="accent-[#01B8FA] h-4 w-4" /></td>
+                    <td className="px-3 py-2 font-bold text-[#01B8FA]">{p.numero}</td>
+                    <td className="px-3 py-2 font-semibold text-[#F7F8FA]">{p.cliente?.nomeFantasia || p.cliente?.razaoSocial}</td>
+                    <td className="px-3 py-2 text-center text-[#F7F8FA]">{p._count?.itens ?? '—'}</td>
+                    <td className="px-3 py-2 text-right font-mono text-[#F7F8FA]">{(Number(p.pesoTotal) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 3 })}</td>
+                    <td className="px-3 py-2 text-right font-mono font-bold text-[#F7F8FA]">{R$(p.valorTotal)}</td>
                     <td className="px-3 py-2 text-right">
                       <div className="flex items-center gap-1 justify-end">
                         <button onClick={() => conferir(p)} disabled={processando}
-                          className="flex items-center gap-1 bg-white border border-amber-300 text-amber-700 hover:bg-amber-50 rounded px-2.5 py-1.5 text-xs font-bold disabled:opacity-40">
+                          className="flex items-center gap-1 bg-[#101216] border border-[#23262F] text-[#8A90A0] hover:text-[#F7F8FA] hover:bg-[#0C0D10] rounded px-2.5 py-1.5 text-xs font-bold disabled:opacity-40">
                           <ShieldCheck className="h-3.5 w-3.5" /> Conferir
                         </button>
                         <button onClick={() => faturarLinha(p.id)} disabled={processando}
-                          className="flex items-center gap-1 bg-amber-400 hover:bg-amber-300 text-slate-900 rounded px-3 py-1.5 text-xs font-bold disabled:opacity-40">
+                          className="flex items-center gap-1 bg-[#01B8FA] hover:bg-[#01B8FA]/90 text-[#04121A] rounded px-3 py-1.5 text-xs font-bold disabled:opacity-40">
                           <Check className="h-3.5 w-3.5" /> Faturar
                         </button>
                       </div>
@@ -169,41 +169,41 @@ export default function Faturamento() {
             </table>
           </div>
         )}
-        <p className="text-[11px] text-gray-400 mt-3 flex items-center gap-1"><Printer className="h-3 w-3" /> Ao faturar, a DANFE (modo teste) abre para impressão. As notas ficam em "NF-e Emitidas".</p>
+        <p className="text-[11px] text-[#8A90A0] mt-3 flex items-center gap-1"><Printer className="h-3 w-3" /> Ao faturar, a DANFE (modo teste) abre para impressão. As notas ficam em "NF-e Emitidas".</p>
       </div>
 
       {/* Modal de conferência: checklist anti-erro + preview de impostos */}
       {conferindo && createPortal((
-        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setConferindo(null)}>
-          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl z-10">
-              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-amber-500" /> Conferência — Pedido {conferindo.numero} · {conferindo.cliente?.nomeFantasia || conferindo.cliente?.razaoSocial}</h2>
-              <button onClick={() => setConferindo(null)}><X className="h-5 w-5 text-gray-400" /></button>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setConferindo(null)}>
+          <div className="bg-[#101216] border border-[#23262F] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3 border-b border-[#23262F] sticky top-0 bg-[#101216] z-10">
+              <h2 className="font-bold text-[#F7F8FA] flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-[#01B8FA]" /> Conferência — Pedido {conferindo.numero} · {conferindo.cliente?.nomeFantasia || conferindo.cliente?.razaoSocial}</h2>
+              <button onClick={() => setConferindo(null)}><X className="h-5 w-5 text-[#8A90A0] hover:text-[#F7F8FA]" /></button>
             </div>
 
             {carregandoConf ? (
-              <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full" /></div>
+              <div className="flex justify-center py-16"><div className="animate-spin h-6 w-6 border-2 border-[#01B8FA] border-t-transparent rounded-full" /></div>
             ) : (
               <div className="p-5 space-y-5">
                 {/* Checklist */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-sm text-gray-700">Validação anti-erro</h3>
+                    <h3 className="font-bold text-sm text-[#F7F8FA]">Validação anti-erro</h3>
                     {validacao && (
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${validacao.podeFaturar ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${validacao.podeFaturar ? 'bg-[#2DD4A7]/12 text-[#2DD4A7]' : 'bg-[#FF6B7A]/12 text-[#FF6B7A]'}`}>
                         {validacao.podeFaturar ? 'Liberado para faturar' : `${validacao.bloqueios} bloqueio(s)`}
                       </span>
                     )}
                   </div>
                   <div className="space-y-1">
                     {validacao?.checks.map((c: any) => (
-                      <div key={c.id} className={`flex items-start gap-2 text-sm px-2 py-1 rounded ${c.ok ? '' : c.severidade === 'BLOQUEIO' ? 'bg-red-50' : 'bg-amber-50'}`}>
-                        {c.ok ? <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" /> : c.severidade === 'BLOQUEIO' ? <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" /> : <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />}
+                      <div key={c.id} className={`flex items-start gap-2 text-sm px-2 py-1 rounded ${c.ok ? '' : c.severidade === 'BLOQUEIO' ? 'bg-[#FF6B7A]/10' : 'bg-[#FF9F45]/10'}`}>
+                        {c.ok ? <CheckCircle2 className="h-4 w-4 text-[#2DD4A7] mt-0.5 shrink-0" /> : c.severidade === 'BLOQUEIO' ? <XCircle className="h-4 w-4 text-[#FF6B7A] mt-0.5 shrink-0" /> : <AlertTriangle className="h-4 w-4 text-[#FF9F45] mt-0.5 shrink-0" />}
                         <div className="flex-1">
-                          <span className={c.ok ? 'text-gray-700' : 'font-semibold text-gray-800'}>{c.label}</span>
-                          {c.detalhe && <span className="text-xs text-gray-400 ml-1">— {c.detalhe}</span>}
+                          <span className={c.ok ? 'text-[#8A90A0]' : 'font-semibold text-[#F7F8FA]'}>{c.label}</span>
+                          {c.detalhe && <span className="text-xs text-[#8A90A0] ml-1">— {c.detalhe}</span>}
                         </div>
-                        {!c.ok && <span className={`text-[10px] font-bold ${c.severidade === 'BLOQUEIO' ? 'text-red-500' : 'text-amber-600'}`}>{c.severidade}</span>}
+                        {!c.ok && <span className={`text-[10px] font-bold ${c.severidade === 'BLOQUEIO' ? 'text-[#FF6B7A]' : 'text-[#FF9F45]'}`}>{c.severidade}</span>}
                       </div>
                     ))}
                   </div>
@@ -212,28 +212,28 @@ export default function Faturamento() {
                 {/* Preview de impostos */}
                 {preview && (
                   <div>
-                    <h3 className="font-bold text-sm text-gray-700 mb-2">Impostos calculados <span className="text-xs font-normal text-gray-400">({preview.contexto.interestadual ? 'interestadual' : 'interna'} · {preview.contexto.ufOrigem}→{preview.contexto.ufDestino}{preview.contexto.consumidorFinal ? ' · consumidor final' : ''})</span></h3>
-                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    <h3 className="font-bold text-sm text-[#F7F8FA] mb-2">Impostos calculados <span className="text-xs font-normal text-[#8A90A0]">({preview.contexto.interestadual ? 'interestadual' : 'interna'} · {preview.contexto.ufOrigem}→{preview.contexto.ufDestino}{preview.contexto.consumidorFinal ? ' · consumidor final' : ''})</span></h3>
+                    <div className="border border-[#23262F] rounded-lg overflow-hidden">
                       <table className="w-full text-xs">
-                        <thead className="bg-gray-100 text-gray-600">
+                        <thead className="bg-[#0C0D10] text-[#8A90A0]">
                           <tr>{['Item', 'NCM', 'CFOP', 'CST', 'Vlr', 'ICMS', 'PIS', 'COFINS'].map(h => <th key={h} className="px-2 py-1.5 text-left font-semibold">{h}</th>)}</tr>
                         </thead>
                         <tbody>
                           {preview.itens.map((it: any, i: number) => (
-                            <tr key={i} className="border-t border-gray-100">
-                              <td className="px-2 py-1 font-semibold text-gray-800 max-w-[180px] truncate">{it.descricao}</td>
-                              <td className="px-2 py-1 font-mono">{it.ncm}</td>
-                              <td className="px-2 py-1 font-mono">{it.cfop}</td>
-                              <td className="px-2 py-1 font-mono">{it.cstCsosn}</td>
-                              <td className="px-2 py-1 text-right font-mono">{R$(it.valorTotal)}</td>
-                              <td className="px-2 py-1 text-right font-mono">{R$(it.valorIcms)}</td>
-                              <td className="px-2 py-1 text-right font-mono">{R$(it.valorPis)}</td>
-                              <td className="px-2 py-1 text-right font-mono">{R$(it.valorCofins)}</td>
+                            <tr key={i} className="border-t border-[#23262F]">
+                              <td className="px-2 py-1 font-semibold text-[#F7F8FA] max-w-[180px] truncate">{it.descricao}</td>
+                              <td className="px-2 py-1 font-mono text-[#F7F8FA]">{it.ncm}</td>
+                              <td className="px-2 py-1 font-mono text-[#F7F8FA]">{it.cfop}</td>
+                              <td className="px-2 py-1 font-mono text-[#F7F8FA]">{it.cstCsosn}</td>
+                              <td className="px-2 py-1 text-right font-mono text-[#F7F8FA]">{R$(it.valorTotal)}</td>
+                              <td className="px-2 py-1 text-right font-mono text-[#F7F8FA]">{R$(it.valorIcms)}</td>
+                              <td className="px-2 py-1 text-right font-mono text-[#F7F8FA]">{R$(it.valorPis)}</td>
+                              <td className="px-2 py-1 text-right font-mono text-[#F7F8FA]">{R$(it.valorCofins)}</td>
                             </tr>
                           ))}
                         </tbody>
-                        <tfoot className="bg-gray-50 font-bold">
-                          <tr className="border-t border-gray-200">
+                        <tfoot className="bg-[#0C0D10] font-bold text-[#F7F8FA]">
+                          <tr className="border-t border-[#23262F]">
                             <td className="px-2 py-1.5" colSpan={5}>Totais — ST {R$(preview.totais.valorIcmsSt)} · IPI {R$(preview.totais.valorIpi)} · DIFAL {R$(preview.totais.valorDifal)}</td>
                             <td className="px-2 py-1.5 text-right font-mono">{R$(preview.totais.valorIcms)}</td>
                             <td className="px-2 py-1.5 text-right font-mono">{R$(preview.totais.valorPis)}</td>
@@ -247,12 +247,12 @@ export default function Faturamento() {
               </div>
             )}
 
-            <div className="px-5 py-3 border-t border-[#E7E5DF] flex justify-end gap-2 sticky bottom-0 bg-white backdrop-blur-xl">
-              <button onClick={() => setConferindo(null)} className="px-4 py-2 rounded-lg border border-[#E7E5DF] text-[#8B8D98] text-sm hover:bg-white/5">Fechar</button>
+            <div className="px-5 py-3 border-t border-[#23262F] flex justify-end gap-2 sticky bottom-0 bg-[#101216]">
+              <button onClick={() => setConferindo(null)} className="px-4 py-2 rounded-lg border border-[#23262F] text-[#8A90A0] text-sm hover:bg-white/[0.03] hover:text-[#F7F8FA]">Fechar</button>
               <button
                 disabled={!validacao?.podeFaturar || processando}
                 onClick={async () => { const id = conferindo.id; setConferindo(null); await faturarLinha(id); }}
-                className="px-5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold text-sm disabled:opacity-40">
+                className="px-5 py-2 rounded-lg bg-[#01B8FA] hover:bg-[#01B8FA]/90 text-[#04121A] font-bold text-sm disabled:opacity-40">
                 Faturar este pedido
               </button>
             </div>

@@ -18,9 +18,9 @@ interface LogRow {
 }
 
 const ACAO_COR: Record<string, string> = {
-  CREATE: 'bg-emerald-500/15 text-[#0b7d4e]',
+  CREATE: 'bg-emerald-500/15 text-[#2DD4A7]',
   UPDATE: 'bg-cyan-500/15 text-[#0e7490]',
-  DELETE: 'bg-rose-500/15 text-[#c3352b]',
+  DELETE: 'bg-rose-500/15 text-[#FF6B7A]',
   EMITIR: 'bg-violet-500/15 text-[#5a4fd0]',
   CANCELAR: 'bg-amber-500/15 text-[#a9760a]',
   LOGIN: 'bg-slate-500/15 text-[#8B8D98]',
@@ -130,8 +130,8 @@ export default function LogsAuditoria() {
 function DetalheLog({ log, onClose }: { log: LogRow; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[70] flex justify-end bg-[#16171D]/40 animate-fade-in" onClick={onClose}>
-      <div className="w-full max-w-md h-full bg-white backdrop-blur-2xl border-l border-[#E7E5DF] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl">
+      <div className="w-full max-w-md h-full bg-[#101216] backdrop-blur-2xl border-l border-[#E7E5DF] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-[#101216] backdrop-blur-xl">
           <h2 className="font-bold text-[#16171D] text-sm">Detalhe do evento</h2>
           <button onClick={onClose} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#5B5D69] hover:bg-[#F6F5F2]"><X className="h-4 w-4" /></button>
         </div>

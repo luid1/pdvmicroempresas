@@ -108,11 +108,10 @@ export const TELAS: TelaDef[] = [
   // ── Fiscal ─────────────────────────────────────────────────────────────
   { key: '/fiscal/emitir', label: 'Emitir Cupom (NFC-e)', grupo: 'Fiscal', icon: Receipt },
   { key: '/fiscal/monitor', label: 'Monitor Fiscal', grupo: 'Fiscal', icon: Gauge },
-  { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt },
+  { key: '/fiscal/nfe', label: 'Cupons / NF-e Emitidas', grupo: 'Fiscal', icon: Receipt, oculto: true },
   { key: '/fiscal/painel', label: 'Painel de Vendas', grupo: 'Fiscal', icon: BarChart3 },
   { key: 'grupo:gestao-fiscal', label: 'Gestão Fiscal', grupo: 'Fiscal', icon: ShieldCheck, pasta: true, submenu: [
-    { key: '/fiscal/configuracao', label: 'Central Fiscal', icon: ShieldCheck, hint: 'Cole o token, teste e ative a emissão' },
-    { key: '/fiscal/matriz', label: 'Matriz Fiscal', icon: FileText, hint: 'Regras e tributação por operação' },
+    { key: '/fiscal/configuracao', label: 'Configuração Fiscal', icon: Settings, hint: 'Provedor, credenciais e matriz de regras' },
     { key: '/fiscal/gestao', label: 'Visão Fiscal Consolidada', icon: Receipt, hint: 'Documentos e acompanhamento fiscal' },
   ] },
 

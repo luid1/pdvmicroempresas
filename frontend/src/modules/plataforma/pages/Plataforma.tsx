@@ -19,9 +19,9 @@ const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', '
 
 const STATUS_ASSINATURA: Record<string, { label: string; cls: string }> = {
   TRIAL: { label: 'Em teste', cls: 'bg-amber-500/12 text-[#a9760a] border-[#E8A317]/30' },
-  ATIVA: { label: 'Ativa', cls: 'bg-emerald-500/12 text-[#0b7d4e] border-emerald-500/30' },
+  ATIVA: { label: 'Ativa', cls: 'bg-emerald-500/12 text-[#2DD4A7] border-emerald-500/30' },
   SUSPENSA: { label: 'Suspensa', cls: 'bg-orange-500/12 text-[#c2590a] border-orange-500/30' },
-  CANCELADA: { label: 'Cancelada', cls: 'bg-rose-500/12 text-[#c3352b] border-rose-500/30' },
+  CANCELADA: { label: 'Cancelada', cls: 'bg-rose-500/12 text-[#FF6B7A] border-rose-500/30' },
 };
 
 const brl = (v: any) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -62,9 +62,9 @@ export default function Plataforma() {
   return (
     <div className="flex flex-col h-full">
       {/* Topbar */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 flex items-center justify-between shrink-0">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-[#13A184]/12 border border-[#13A184]/25 flex items-center justify-center text-[#0F8A72]">
+          <div className="h-9 w-9 rounded-xl bg-[#22D3EE]/12 border border-[#22D3EE]/25 flex items-center justify-center text-[#01B8FA]">
             <Store className="h-5 w-5" />
           </div>
           <div>
@@ -76,16 +76,16 @@ export default function Plataforma() {
         </div>
         <button
           onClick={() => setCriando(true)}
-          className="flex items-center gap-1.5 bg-[#13A184] hover:bg-[#0F8A72] text-white text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors active:scale-[0.98]"
+          className="flex items-center gap-1.5 bg-[#22D3EE] hover:bg-[#01B8FA] text-white text-sm font-semibold px-3.5 py-2 rounded-lg transition-colors active:scale-[0.98]"
         >
           <Plus className="h-4 w-4" /> Nova Loja
         </button>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white border-b border-[#E5E7EB] px-5 py-2.5 flex items-center gap-3 shrink-0">
+      <div className="bg-[#101216] border-b border-[#23262F] px-5 py-2.5 flex items-center gap-3 shrink-0">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8E8F94]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A90A0]" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -103,7 +103,7 @@ export default function Plataforma() {
               key={o.v}
               onClick={() => setStatus(o.v)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                status === o.v ? 'bg-white text-[#16171D] shadow-sm' : 'text-[#8B8D98] hover:text-[#16171D]'
+                status === o.v ? 'bg-[#101216] text-[#16171D] shadow-sm' : 'text-[#8B8D98] hover:text-[#16171D]'
               }`}
             >
               {o.l}
@@ -154,13 +154,13 @@ function LojaCard({ loja, onAbrir }: { loja: any; onAbrir: () => void }) {
   return (
     <button
       onClick={onAbrir}
-      className={`text-left bg-white border rounded-xl p-4 hover:shadow-md hover:border-[#13A184]/40 transition-all group ${
+      className={`text-left bg-[#101216] border rounded-xl p-4 hover:shadow-md hover:border-[#22D3EE]/40 transition-all group ${
         loja.ativo ? 'border-[#E7E5DF]' : 'border-rose-200 bg-rose-50/40'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-bold text-[#16171D] truncate group-hover:text-[#0F8A72]">
+          <p className="font-bold text-[#16171D] truncate group-hover:text-[#01B8FA]">
             {loja.nomeFantasia || loja.razaoSocial}
           </p>
           {loja.nomeFantasia && <p className="text-xs text-[#8B8D98] truncate">{loja.razaoSocial}</p>}
@@ -171,10 +171,10 @@ function LojaCard({ loja, onAbrir }: { loja: any; onAbrir: () => void }) {
 
       <div className="flex items-center gap-3 mt-3 text-xs text-[#5B5D69]">
         <span className="flex items-center gap-1">
-          <Building2 className="h-3.5 w-3.5 text-[#8E8F94]" /> {loja.filiaisCount} filial(is)
+          <Building2 className="h-3.5 w-3.5 text-[#8A90A0]" /> {loja.filiaisCount} filial(is)
         </span>
         <span className="flex items-center gap-1">
-          <Users className="h-3.5 w-3.5 text-[#8E8F94]" /> {loja.usuariosCount} usuário(s)
+          <Users className="h-3.5 w-3.5 text-[#8A90A0]" /> {loja.usuariosCount} usuário(s)
         </span>
       </div>
 
@@ -250,11 +250,11 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
-      <div className="relative w-full max-w-3xl bg-[#F7F7F8] h-full shadow-2xl flex flex-col animate-slide-in-right">
+      <div className="relative w-full max-w-3xl bg-[#0C0D10] h-full shadow-2xl flex flex-col animate-slide-in-right">
         {/* Cabeçalho */}
-        <div className="bg-white border-b border-[#E5E7EB] px-5 py-3 flex items-center justify-between shrink-0">
+        <div className="bg-[#101216] border-b border-[#23262F] px-5 py-3 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="h-9 w-9 rounded-xl bg-[#13A184]/12 border border-[#13A184]/25 flex items-center justify-center text-[#0F8A72] shrink-0">
+            <div className="h-9 w-9 rounded-xl bg-[#22D3EE]/12 border border-[#22D3EE]/25 flex items-center justify-center text-[#01B8FA] shrink-0">
               <Store className="h-5 w-5" />
             </div>
             <div className="min-w-0">
@@ -271,12 +271,12 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
 
         {loading || !loja ? (
           <div className="flex-1 flex items-center justify-center">
-            <Loader2 className="h-6 w-6 text-[#13A184] animate-spin" />
+            <Loader2 className="h-6 w-6 text-[#22D3EE] animate-spin" />
           </div>
         ) : (
           <div className="flex-1 overflow-auto p-4 space-y-4">
             {/* Dados & ações */}
-            <section className="bg-white border border-[#E7E5DF] rounded-xl p-4">
+            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-[#16171D]">Dados da loja</h3>
                 <div className="flex gap-2">
@@ -290,8 +290,8 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
                     onClick={toggleLoja}
                     className={`flex items-center gap-1 text-[11px] px-2 py-1 rounded font-semibold border ${
                       loja.ativo
-                        ? 'bg-rose-500/12 text-[#c3352b] border-rose-500/30 hover:bg-rose-500/20'
-                        : 'bg-emerald-500/12 text-[#0b7d4e] border-emerald-500/30 hover:bg-emerald-500/20'
+                        ? 'bg-rose-500/12 text-[#FF6B7A] border-rose-500/30 hover:bg-rose-500/20'
+                        : 'bg-emerald-500/12 text-[#2DD4A7] border-emerald-500/30 hover:bg-emerald-500/20'
                     }`}
                   >
                     <Power className="h-3 w-3" /> {loja.ativo ? 'Desativar' : 'Reativar'}
@@ -321,14 +321,14 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
             </section>
 
             {/* Filiais */}
-            <section className="bg-white border border-[#E7E5DF] rounded-xl p-4">
+            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold text-[#16171D] flex items-center gap-1.5">
-                  <Building2 className="h-4 w-4 text-[#8E8F94]" /> Filiais ({loja.filiais?.length || 0})
+                  <Building2 className="h-4 w-4 text-[#8A90A0]" /> Filiais ({loja.filiais?.length || 0})
                 </h3>
                 <button
                   onClick={() => setNovaFilial(true)}
-                  className="flex items-center gap-1 text-[11px] bg-[#13A184]/12 text-[#0F8A72] border border-[#13A184]/30 px-2 py-1 rounded font-semibold hover:bg-[#13A184]/20"
+                  className="flex items-center gap-1 text-[11px] bg-[#22D3EE]/12 text-[#01B8FA] border border-[#22D3EE]/30 px-2 py-1 rounded font-semibold hover:bg-[#22D3EE]/20"
                 >
                   <Plus className="h-3 w-3" /> Adicionar filial
                 </button>
@@ -367,7 +367,7 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
                         <button
                           onClick={() => toggleFilial(f)}
                           title={f.ativo ? 'Desativar' : 'Reativar'}
-                          className={`p-1.5 rounded-lg ${f.ativo ? 'text-[#c3352b] hover:bg-rose-500/10' : 'text-[#0b7d4e] hover:bg-emerald-500/10'}`}
+                          className={`p-1.5 rounded-lg ${f.ativo ? 'text-[#FF6B7A] hover:bg-rose-500/10' : 'text-[#2DD4A7] hover:bg-emerald-500/10'}`}
                         >
                           {f.ativo ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                         </button>
@@ -379,9 +379,9 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
             </section>
 
             {/* Usuários */}
-            <section className="bg-white border border-[#E7E5DF] rounded-xl p-4">
+            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
               <h3 className="text-sm font-bold text-[#16171D] flex items-center gap-1.5 mb-3">
-                <Users className="h-4 w-4 text-[#8E8F94]" /> Usuários ({loja.users?.length || 0})
+                <Users className="h-4 w-4 text-[#8A90A0]" /> Usuários ({loja.users?.length || 0})
               </h3>
               {(!loja.users || loja.users.length === 0) ? (
                 <p className="text-xs text-[#8B8D98] py-2">Nenhum usuário cadastrado.</p>
@@ -392,7 +392,7 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-[#16171D] truncate flex items-center gap-1.5">
                           {u.nome}
-                          {u.isSuperAdmin && <ShieldCheck className="h-3.5 w-3.5 text-[#0F8A72]" />}
+                          {u.isSuperAdmin && <ShieldCheck className="h-3.5 w-3.5 text-[#01B8FA]" />}
                         </p>
                         <p className="text-xs text-[#8B8D98] truncate">{u.email}</p>
                       </div>
@@ -524,7 +524,7 @@ function CriarLojaModal({ onClose, onCriado }: { onClose: () => void; onCriado: 
           </div>
         </div>
       </div>
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }
@@ -586,7 +586,7 @@ function EditarLojaModal({ loja, onClose, onSalvo }: { loja: any; onClose: () =>
           <input value={f.emailNfe} onChange={(e) => set('emailNfe', e.target.value)} className={inp} />
         </Campo>
       </div>
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }
@@ -663,7 +663,7 @@ function FilialModal({ lojaId, filial, onClose, onSalvo }: { lojaId: string; fil
           </select>
         </Campo>
       </div>
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }

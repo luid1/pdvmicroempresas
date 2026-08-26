@@ -45,12 +45,12 @@ function Toggle({ on, onClick }: { on: boolean; onClick: () => void }) {
       type="button"
       onClick={onClick}
       className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-        on ? 'bg-[#0F8A72]' : 'bg-[#D1D5DB]'
+        on ? 'bg-[#01B8FA]' : 'bg-[#D1D5DB]'
       }`}
       aria-pressed={on}
     >
       <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+        className={`inline-block h-5 w-5 transform rounded-full bg-[#101216] shadow transition-transform ${
           on ? 'translate-x-5' : 'translate-x-0.5'
         }`}
       />
@@ -135,20 +135,20 @@ export default function ConfigCaixa() {
         {/* Cabeçalho */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="flex items-center gap-2 text-xl font-semibold text-[#202123]">
-              <ShieldCheck className="h-5 w-5 text-[#0F8A72]" /> Segurança do Caixa
+            <h1 className="flex items-center gap-2 text-xl font-semibold text-[#F7F8FA]">
+              <ShieldCheck className="h-5 w-5 text-[#01B8FA]" /> Segurança do Caixa
             </h1>
-            <p className="mt-1 text-xs text-[#8E8F94]">
+            <p className="mt-1 text-xs text-[#8A90A0]">
               Defina a senha gerencial da loja e escolha quais operações do caixa exigem essa senha.
             </p>
           </div>
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-2.5 text-xs">
-              <Store className="h-4 w-4 text-[#8E8F94]" />
+            <div className="flex items-center gap-2 rounded-lg border border-[#23262F] bg-[#101216] px-2.5 text-xs">
+              <Store className="h-4 w-4 text-[#8A90A0]" />
               <select
                 value={filialId}
                 onChange={(e) => setFilialId(e.target.value)}
-                className="h-9 min-w-0 flex-1 bg-transparent py-1 pr-1 text-[#202123] outline-none sm:w-64"
+                className="h-9 min-w-0 flex-1 bg-transparent py-1 pr-1 text-[#F7F8FA] outline-none sm:w-64"
               >
                 {filiais.map((f) => (
                   <option key={f.id} value={f.id}>{f.codigo} — {f.nome}</option>
@@ -157,7 +157,7 @@ export default function ConfigCaixa() {
             </div>
             <button
               onClick={carregar}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 text-xs font-medium text-[#5F6065] transition-colors hover:bg-[#F7F7F8]"
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-[#23262F] bg-[#101216] px-3 text-xs font-medium text-[#8A90A0] transition-colors hover:bg-[#0C0D10]"
             >
               <RefreshCw className="h-4 w-4" /> Atualizar
             </button>
@@ -173,27 +173,27 @@ export default function ConfigCaixa() {
             Selecione uma loja para configurar a segurança do caixa.
           </div>
         ) : loading ? (
-          <div className="rounded-xl border border-[#E5E7EB] bg-white p-8 text-center text-sm text-[#8E8F94]">
+          <div className="rounded-xl border border-[#23262F] bg-[#101216] p-8 text-center text-sm text-[#8A90A0]">
             Carregando configuração…
           </div>
         ) : (
           <>
             {/* Senha gerencial */}
-            <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
+            <section className="rounded-2xl border border-[#23262F] bg-[#101216] p-5 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
               <div className="flex items-center gap-2">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F8A72]/10 ring-1 ring-inset ring-[#0F8A72]/20">
-                  <KeyRound className="h-5 w-5 text-[#0F8A72]" />
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#01B8FA]/10 ring-1 ring-inset ring-[#01B8FA]/20">
+                  <KeyRound className="h-5 w-5 text-[#01B8FA]" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-semibold text-[#202123]">Senha gerencial</h2>
-                  <p className="text-xs text-[#8E8F94]">
+                  <h2 className="text-sm font-semibold text-[#F7F8FA]">Senha gerencial</h2>
+                  <p className="text-xs text-[#8A90A0]">
                     Uma senha interna da loja — sem e-mail, sem cadastro. O operador digita para liberar.
                   </p>
                 </div>
                 <span
                   className={`ml-auto rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                     senhaDefinida
-                      ? 'bg-[#0F8A72]/10 text-[#0b7d4e] ring-1 ring-inset ring-[#0F8A72]/20'
+                      ? 'bg-[#01B8FA]/10 text-[#2DD4A7] ring-1 ring-inset ring-[#01B8FA]/20'
                       : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-300'
                   }`}
                 >
@@ -203,7 +203,7 @@ export default function ConfigCaixa() {
 
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <label className="block">
-                  <span className="text-xs font-medium text-[#5F6065]">
+                  <span className="text-xs font-medium text-[#8A90A0]">
                     {senhaDefinida ? 'Nova senha (deixe em branco p/ manter)' : 'Senha gerencial'}
                   </span>
                   <input
@@ -212,18 +212,18 @@ export default function ConfigCaixa() {
                     onChange={(e) => set('senhaGerencial', e.target.value)}
                     placeholder="••••"
                     autoComplete="new-password"
-                    className="mt-1 h-10 w-full rounded-lg border border-[#E5E7EB] bg-[#F7F7F8] px-3 text-sm text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                    className="mt-1 h-10 w-full rounded-lg border border-[#23262F] bg-[#0C0D10] px-3 text-sm text-[#F7F8FA] outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs font-medium text-[#5F6065]">Confirmar senha</span>
+                  <span className="text-xs font-medium text-[#8A90A0]">Confirmar senha</span>
                   <input
                     type="password"
                     value={form.senhaGerencial2}
                     onChange={(e) => set('senhaGerencial2', e.target.value)}
                     placeholder="••••"
                     autoComplete="new-password"
-                    className="mt-1 h-10 w-full rounded-lg border border-[#E5E7EB] bg-[#F7F7F8] px-3 text-sm text-[#202123] outline-none transition-all focus:border-[#0F8A72]/60 focus:bg-white focus:ring-4 focus:ring-[#0F8A72]/15"
+                    className="mt-1 h-10 w-full rounded-lg border border-[#23262F] bg-[#0C0D10] px-3 text-sm text-[#F7F8FA] outline-none transition-all focus:border-[#01B8FA]/60 focus:bg-[#101216] focus:ring-4 focus:ring-[#01B8FA]/15"
                   />
                 </label>
               </div>
@@ -236,15 +236,15 @@ export default function ConfigCaixa() {
             </section>
 
             {/* Operações que exigem senha */}
-            <section className="rounded-2xl border border-[#E5E7EB] bg-white p-5 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
-              <h2 className="text-sm font-semibold text-[#202123]">Operações que pedem senha</h2>
-              <p className="text-xs text-[#8E8F94]">Ligue o que, nesta loja, só um responsável pode liberar.</p>
+            <section className="rounded-2xl border border-[#23262F] bg-[#101216] p-5 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
+              <h2 className="text-sm font-semibold text-[#F7F8FA]">Operações que pedem senha</h2>
+              <p className="text-xs text-[#8A90A0]">Ligue o que, nesta loja, só um responsável pode liberar.</p>
               <div className="mt-3 divide-y divide-[#EEF0F2]">
                 {OPERACOES.map((o) => (
                   <div key={o.key} className="flex items-center justify-between gap-4 py-3">
                     <div className="min-w-0">
-                      <div className="text-sm font-medium text-[#202123]">{o.label}</div>
-                      <div className="text-xs text-[#8E8F94]">{o.hint}</div>
+                      <div className="text-sm font-medium text-[#F7F8FA]">{o.label}</div>
+                      <div className="text-xs text-[#8A90A0]">{o.hint}</div>
                     </div>
                     <Toggle on={form[o.key]} onClick={() => set(o.key, !form[o.key])} />
                   </div>
@@ -262,7 +262,7 @@ export default function ConfigCaixa() {
               <button
                 onClick={salvar}
                 disabled={salvando}
-                className="flex items-center gap-2 rounded-xl bg-[#0F8A72] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0d7a64] disabled:cursor-not-allowed disabled:bg-[#E5E7EB] disabled:text-[#B0B2B7]"
+                className="flex items-center gap-2 rounded-xl bg-[#01B8FA] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#0d7a64] disabled:cursor-not-allowed disabled:bg-[#23262F] disabled:text-[#B0B2B7]"
               >
                 <Save className="h-4 w-4" /> {salvando ? 'Salvando…' : 'Salvar configuração'}
               </button>

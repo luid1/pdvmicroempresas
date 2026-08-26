@@ -8,14 +8,14 @@ import { CadastroShell, TopBar, FilterBar, TableCard, Th, Modal, SteppedForm, St
 const dt = (v: any) => v ? new Date(v).toLocaleDateString('pt-BR') : '—';
 const UNIDADES = ['KG', 'UN', 'CX', 'MAÇO', 'SACA', 'DZ', 'LT'];
 const soDigitos = (v: string) => v.replace(/\D/g, '');
-const STATUS_COR: Record<string, string> = { CONFERIDA: 'bg-emerald-500/15 text-[#0b7d4e]', PENDENTE: 'bg-amber-500/15 text-[#a9760a]', DIVERGENTE: 'bg-rose-500/15 text-[#c3352b]', CANCELADA: 'bg-[#F0EEE9] text-slate-400' };
+const STATUS_COR: Record<string, string> = { CONFERIDA: 'bg-[#2DD4A7]/12 text-[#2DD4A7]', PENDENTE: 'bg-[#FF9F45]/12 text-[#FF9F45]', DIVERGENTE: 'bg-[#FF6B7A]/12 text-[#FF6B7A]', CANCELADA: 'bg-[#16181F] text-[#8A90A0]' };
 
 type Item = { produtoId: string; descricao: string; ncm: string; quantidade: string; unidade: string; valorUnitario: string; loteNumero: string; dataValidade: string; novo?: boolean; criarNovo?: boolean };
 const itemVazio = (): Item => ({ produtoId: '', descricao: '', ncm: '', quantidade: '', unidade: 'KG', valorUnitario: '', loteNumero: '', dataValidade: '' });
 
 // Campos densos do card de item — legíveis (text-sm) e alinhados ao kit "Luz".
-const fld = 'w-full bg-white border border-[#E5E7EB] rounded-lg px-2.5 py-2 text-sm text-[#202123] placeholder:text-[#B4B5BA] focus:outline-none focus:border-[#0F8A72]/60 focus:ring-2 focus:ring-[#0F8A72]/20 transition-all';
-const lb = 'block text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.08em] mb-1';
+const fld = 'w-full bg-[#101216] border border-[#23262F] rounded-lg px-2.5 py-2 text-sm text-[#F7F8FA] placeholder:text-[#8A90A0] focus:outline-none focus:border-[#01B8FA]/60 focus:ring-2 focus:ring-[#01B8FA]/20 transition-all';
+const lb = 'block text-[10px] font-semibold text-[#8A90A0] uppercase tracking-[0.08em] mb-1';
 
 export default function Entradas() {
   const { filialAtiva } = useAuth();
@@ -42,7 +42,7 @@ export default function Entradas() {
     <CadastroShell>
       <TopBar icon={<PackagePlus className="h-5 w-5" />} titulo="Entradas (XML NF-e)" subtitulo={`${lista.length} entrada(s) — recebimento de mercadoria`}
         novoLabel="Nova Entrada" onNovo={() => setModal(true)}
-        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-white border border-[#E5E7EB] hover:bg-[#F7F7F8] px-3 py-2 rounded-lg text-[#5F6065] text-sm"><RefreshCw className="h-4 w-4 text-[#0F8A72]" /> Atualizar</button>} />
+        extra={<button onClick={carregar} className="flex items-center gap-1.5 bg-[#101216] border border-[#23262F] hover:bg-[#0C0D10] px-3 py-2 rounded-lg text-[#8A90A0] text-sm"><RefreshCw className="h-4 w-4 text-[#01B8FA]" /> Atualizar</button>} />
       <FilterBar busca={busca} onBusca={setBusca} placeholder="Buscar por NF, chave ou fornecedor..." />
 
       <div className="flex-1 overflow-auto p-4">
@@ -51,14 +51,14 @@ export default function Entradas() {
             <thead><tr>{['Data', 'Fornecedor', 'NF', 'Chave', 'Itens', 'Valor', 'Status'].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {lista.map(e => (
-                <tr key={e.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
-                  <td className="px-3 py-2.5 text-[#8B8D98]">{dt(e.dataEntrada)}</td>
-                  <td className="px-3 py-2.5 font-semibold text-[#16171D]">{e.fornecedor?.nomeFantasia || e.fornecedor?.razaoSocial}</td>
-                  <td className="px-3 py-2.5 text-[#8B8D98]">{e.numeroNf ? `${e.numeroNf}/${e.serieNf || '1'}` : '—'}</td>
-                  <td className="px-3 py-2.5 font-mono text-slate-500 text-[11px] max-w-[220px] truncate">{e.chaveNfeEntrada || '—'}</td>
-                  <td className="px-3 py-2.5 text-center text-[#8B8D98]">{e._count?.itens ?? '—'}</td>
-                  <td className="px-3 py-2.5 text-right font-mono text-[#5B5D69]">{R$(e.valorTotal)}</td>
-                  <td className="px-3 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COR[e.status] || 'bg-[#F0EEE9]'}`}>{e.status}</span></td>
+                <tr key={e.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                  <td className="px-3 py-1 text-[#8A90A0]">{dt(e.dataEntrada)}</td>
+                  <td className="px-3 py-1 font-semibold text-[#F7F8FA]">{e.fornecedor?.nomeFantasia || e.fornecedor?.razaoSocial}</td>
+                  <td className="px-3 py-1 text-[#8A90A0]">{e.numeroNf ? `${e.numeroNf}/${e.serieNf || '1'}` : '—'}</td>
+                  <td className="px-3 py-1 font-mono text-slate-500 text-[11px] max-w-[220px] truncate">{e.chaveNfeEntrada || '—'}</td>
+                  <td className="px-3 py-1 text-center text-[#8A90A0]">{e._count?.itens ?? '—'}</td>
+                  <td className="px-3 py-1 text-right font-mono text-[#8A90A0]">{R$(e.valorTotal)}</td>
+                  <td className="px-3 py-1"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_COR[e.status] || 'bg-[#16181F] text-[#8A90A0]'}`}>{e.status}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -212,18 +212,18 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
             onDragLeave={() => setDragOver(false)}
             onDrop={onDrop}
             role="button"
-            className={`group flex items-center gap-4 rounded-2xl border-2 border-dashed px-5 py-5 cursor-pointer transition-all ${dragOver ? 'border-[#0F8A72] bg-[#0F8A72]/[0.06]' : 'border-[#D7DBDF] bg-[#F7F7F8] hover:border-[#0F8A72]/60 hover:bg-[#0F8A72]/[0.04]'}`}>
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#0F8A72]/10 text-[#0F8A72] group-hover:scale-105 transition-transform">
+            className={`group flex items-center gap-4 rounded-2xl border-2 border-dashed px-5 py-5 cursor-pointer transition-all ${dragOver ? 'border-[#01B8FA] bg-[#01B8FA]/[0.06]' : 'border-[#23262F] bg-[#0C0D10] hover:border-[#01B8FA]/60 hover:bg-[#01B8FA]/[0.04]'}`}>
+            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-[#01B8FA]/10 text-[#01B8FA] group-hover:scale-105 transition-transform">
               <Upload className="h-6 w-6" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-bold text-[#202123]">Importar XML da NF-e do fornecedor</p>
-              <p className="text-[13px] text-[#5F6065] mt-0.5">Arraste o arquivo aqui ou <span className="text-[#0F8A72] font-semibold underline decoration-dotted">clique para selecionar</span>. Ao adicionar, os itens são preenchidos <b>na hora</b> e casados com o seu catálogo automaticamente.</p>
+              <p className="text-[15px] font-bold text-[#F7F8FA]">Importar XML da NF-e do fornecedor</p>
+              <p className="text-[13px] text-[#8A90A0] mt-0.5">Arraste o arquivo aqui ou <span className="text-[#01B8FA] font-semibold underline decoration-dotted">clique para selecionar</span>. Ao adicionar, os itens são preenchidos <b>na hora</b> e casados com o seu catálogo automaticamente.</p>
             </div>
-            <FileCode className="h-6 w-6 text-[#B4B5BA] shrink-0 hidden sm:block" />
+            <FileCode className="h-6 w-6 text-[#5E6472] shrink-0 hidden sm:block" />
             <input ref={inputXmlRef} type="file" accept=".xml,text/xml" className="hidden" onChange={e => e.target.files?.[0] && onXml(e.target.files[0])} />
           </div>
-          {aviso && <p className="flex items-start gap-2 text-[13px] text-[#0B6F5C] bg-[#0F8A72]/[0.08] border border-[#0F8A72]/20 px-3.5 py-2.5 rounded-xl"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" />{aviso}</p>}
+          {aviso && <p className="flex items-start gap-2 text-[13px] text-[#0E86D4] bg-[#01B8FA]/[0.08] border border-[#01B8FA]/20 px-3.5 py-2.5 rounded-xl"><Sparkles className="h-4 w-4 mt-0.5 shrink-0" />{aviso}</p>}
 
           <div className="grid grid-cols-4 gap-3">
             <Campo label="Fornecedor *" className="col-span-2">
@@ -238,14 +238,14 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
           <div className="grid grid-cols-4 gap-3">
             <Campo label="Chave de acesso (opcional · 44 dígitos)" className="col-span-3">
               <input inputMode="numeric" maxLength={44} value={chave} onChange={e => setChave(soDigitos(e.target.value))} className={`${inp} font-mono text-xs`} placeholder="só números — deixe em branco se não tiver a NF-e" />
-              {chave.length > 0 && <span className={`text-[10px] ${chave.length === 44 ? 'text-[#0b7d4e]' : 'text-[#a9760a]'}`}>{chave.length}/44 dígitos</span>}
+              {chave.length > 0 && <span className={`text-[10px] ${chave.length === 44 ? 'text-[#2DD4A7]' : 'text-[#FF9F45]'}`}>{chave.length}/44 dígitos</span>}
             </Campo>
             <Campo label="Emissão"><input type="date" value={dataEmissao} onChange={e => setDataEmissao(e.target.value)} className={inp} /></Campo>
           </div>
         </Step>
 
         <Step title="Itens da entrada" icon={<Boxes className="h-3.5 w-3.5" />} hint="Ir para o financeiro" complete={temItemValido}>
-          {semVinculo > 0 && <p className="flex items-center gap-2 text-[12px] text-[#a9760a] bg-amber-500/10 px-3 py-2 rounded-lg"><span className="font-bold">{semVinculo} item(ns) sem vínculo.</span> O cadastro rápido já está aberto neles: confira o preço e cadastre — o produto entra vinculado e no estoque na hora.</p>}
+          {semVinculo > 0 && <p className="flex items-center gap-2 text-[12px] text-[#FF9F45] bg-[#FF9F45]/10 px-3 py-2 rounded-lg"><span className="font-bold">{semVinculo} item(ns) sem vínculo.</span> O cadastro rápido já está aberto neles: confira o preço e cadastre — o produto entra vinculado e no estoque na hora.</p>}
           <div className="space-y-2.5">
             {itens.map((it, i) => (
               <ItemEntrada
@@ -259,21 +259,21 @@ function ModalEntrada({ onClose, onSalvo, filialId, ocId }: { onClose: () => voi
             ))}
           </div>
           <div className="flex items-center justify-between pt-1">
-            <button onClick={addItem} className="flex items-center gap-1.5 text-[13px] text-[#0F8A72] hover:text-[#0B6F5C] font-semibold"><Plus className="h-4 w-4" /> Adicionar item manualmente</button>
-            <span className="text-sm text-[#5F6065]">Total da nota: <b className="text-[#202123]">{R$(totalNota)}</b></span>
+            <button onClick={addItem} className="flex items-center gap-1.5 text-[13px] text-[#01B8FA] hover:text-[#0E86D4] font-semibold"><Plus className="h-4 w-4" /> Adicionar item manualmente</button>
+            <span className="text-sm text-[#8A90A0]">Total da nota: <b className="text-[#F7F8FA]">{R$(totalNota)}</b></span>
           </div>
         </Step>
 
         <Step title="Financeiro" icon={<Wallet className="h-3.5 w-3.5" />} complete>
           <div className="flex flex-wrap items-center gap-4">
-            <label className="flex items-center gap-2 text-sm text-[#5F6065]"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-[#0F8A72] h-4 w-4" /> Gerar Contas a Pagar</label>
+            <label className="flex items-center gap-2 text-sm text-[#8A90A0]"><input type="checkbox" checked={gerarCP} onChange={e => setGerarCP(e.target.checked)} className="accent-[#01B8FA] h-4 w-4" /> Gerar Contas a Pagar</label>
             {gerarCP && <Campo label="Vencimento"><input type="date" value={dataVenc} onChange={e => setDataVenc(e.target.value)} className={inp} /></Campo>}
           </div>
-          <p className="text-[12px] text-[#8E8F94]">Itens vinculados a um produto dão entrada no estoque (com lote/validade se informados). Sem vínculo, entram só como documento e não movimentam estoque.</p>
+          <p className="text-[12px] text-[#8A90A0]">Itens vinculados a um produto dão entrada no estoque (com lote/validade se informados). Sem vínculo, entram só como documento e não movimentam estoque.</p>
         </Step>
       </SteppedForm>
 
-      {erro && <p className="mt-3 text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
+      {erro && <p className="mt-3 text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg">{erro}</p>}
     </Modal>
   );
 }
@@ -289,16 +289,16 @@ function ItemEntrada({ it, i, produtos, podeRemover, onSet, onEscolher, onToggle
   const mostrarNovo = !!it.criarNovo && !vinculado;
 
   return (
-    <div className={`rounded-xl border bg-white p-4 shadow-[0_1px_2px_rgba(22,23,29,0.04)] transition-colors ${vinculado ? 'border-[#0F8A72]/35' : 'border-[#E5E7EB]'}`}>
+    <div className={`rounded-xl border bg-[#101216] p-4 shadow-[0_1px_2px_rgba(22,23,29,0.04)] transition-colors ${vinculado ? 'border-[#01B8FA]/35' : 'border-[#23262F]'}`}>
       {/* Cabeçalho do card: nº + status + remover */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#F3F4F6] text-[11px] font-bold text-[#8E8F94]">{i + 1}</span>
+          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-[#16181F] text-[11px] font-bold text-[#8A90A0]">{i + 1}</span>
           {vinculado
-            ? <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0FA968]/12 px-2.5 py-1 text-[11px] font-bold text-[#0b7d4e]">{it.novo ? <><Sparkles className="h-3.5 w-3.5" /> Produto novo criado · entra no estoque</> : <><Link2 className="h-3.5 w-3.5" /> Vinculado · entra no estoque</>}</span>
-            : <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/12 px-2.5 py-1 text-[11px] font-bold text-[#a9760a]">Sem vínculo · não movimenta estoque</span>}
+            ? <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2DD4A7]/12 px-2.5 py-1 text-[11px] font-bold text-[#2DD4A7]">{it.novo ? <><Sparkles className="h-3.5 w-3.5" /> Produto novo criado · entra no estoque</> : <><Link2 className="h-3.5 w-3.5" /> Vinculado · entra no estoque</>}</span>
+            : <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF9F45]/12 px-2.5 py-1 text-[11px] font-bold text-[#FF9F45]">Sem vínculo · não movimenta estoque</span>}
         </div>
-        {podeRemover && <button onClick={onRemover} className="flex items-center gap-1 text-[#8E8F94] hover:text-[#c3352b] text-[12px] transition-colors"><Trash2 className="h-4 w-4" /><span className="hidden sm:inline">remover</span></button>}
+        {podeRemover && <button onClick={onRemover} className="flex items-center gap-1 text-[#8A90A0] hover:text-[#FF6B7A] text-[12px] transition-colors"><Trash2 className="h-4 w-4" /><span className="hidden sm:inline">remover</span></button>}
       </div>
 
       {/* Vínculo com o catálogo */}
@@ -312,12 +312,12 @@ function ItemEntrada({ it, i, produtos, podeRemover, onSet, onEscolher, onToggle
         </div>
         <div className="sm:col-span-4 flex sm:items-end">
           {!vinculado && !mostrarNovo && (
-            <button onClick={() => onToggleNovo(true)} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] font-semibold text-[#0B6F5C] bg-[#0F8A72]/[0.08] border border-[#0F8A72]/30 hover:bg-[#0F8A72]/[0.14] transition-all active:scale-[0.98]">
+            <button onClick={() => onToggleNovo(true)} className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-[13px] font-semibold text-[#0E86D4] bg-[#01B8FA]/[0.08] border border-[#01B8FA]/30 hover:bg-[#01B8FA]/[0.14] transition-all active:scale-[0.98]">
               <PlusCircle className="h-4 w-4" /> Cadastrar como novo produto
             </button>
           )}
           {vinculado && it.novo && (
-            <span className="w-full flex items-center justify-center gap-1.5 py-2 text-[13px] font-semibold text-[#0b7d4e]"><Check className="h-4 w-4" /> Cadastrado e já vendável</span>
+            <span className="w-full flex items-center justify-center gap-1.5 py-2 text-[13px] font-semibold text-[#2DD4A7]"><Check className="h-4 w-4" /> Cadastrado e já vendável</span>
           )}
         </div>
       </div>
@@ -346,7 +346,7 @@ function ItemEntrada({ it, i, produtos, podeRemover, onSet, onEscolher, onToggle
         <div className="col-span-5 sm:col-span-2"><label className={lb}>Lote</label><input value={it.loteNumero} onChange={e => onSet('loteNumero', e.target.value.toUpperCase())} className={fld} placeholder="opcional" /></div>
         <div className="col-span-7 sm:col-span-2"><label className={lb}>Validade</label><input type="date" value={it.dataValidade} onChange={e => onSet('dataValidade', e.target.value)} className={fld} /></div>
       </div>
-      <div className="text-right text-[12px] text-[#8E8F94] mt-2">Subtotal: <b className="text-[#5F6065]">{R$(subtotal)}</b></div>
+      <div className="text-right text-[12px] text-[#8A90A0] mt-2">Subtotal: <b className="text-[#8A90A0]">{R$(subtotal)}</b></div>
     </div>
   );
 }
@@ -377,20 +377,20 @@ function QuickAddProduto({ it, onCancelar, onCriado }: { it: Item; onCancelar: (
   };
 
   return (
-    <div className="mt-2.5 rounded-xl border border-[#0F8A72]/30 bg-[#0F8A72]/[0.05] p-3.5">
-      <div className="flex items-center gap-1.5 mb-2.5 text-[11px] font-bold text-[#0B6F5C] uppercase tracking-wide"><PlusCircle className="h-3.5 w-3.5" /> Cadastrar produto na hora</div>
+    <div className="mt-2.5 rounded-xl border border-[#01B8FA]/30 bg-[#01B8FA]/[0.05] p-3.5">
+      <div className="flex items-center gap-1.5 mb-2.5 text-[11px] font-bold text-[#0E86D4] uppercase tracking-wide"><PlusCircle className="h-3.5 w-3.5" /> Cadastrar produto na hora</div>
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
         <div className="sm:col-span-5"><label className={lb}>Código de barras (para bipar no caixa)</label><input inputMode="numeric" value={codigoBarras} onChange={e => setCodigoBarras(soDigitos(e.target.value))} className={`${fld} font-mono`} placeholder="opcional — bipe o produto" /></div>
         <div className="sm:col-span-3"><label className={lb}>Preço de venda (R$) *</label><input type="number" inputMode="decimal" min="0" step="0.01" value={precoVenda} onChange={e => setPrecoVenda(e.target.value)} className={`${fld} text-right`} placeholder="0,00" /></div>
         <div className="sm:col-span-4 flex items-end">
-          <label className="flex items-center gap-2 text-[13px] text-[#5F6065] pb-2"><input type="checkbox" checked={vendidoPorPeso} onChange={e => setVendidoPorPeso(e.target.checked)} className="accent-[#0F8A72] h-4 w-4" /> Vendido por peso (balança)</label>
+          <label className="flex items-center gap-2 text-[13px] text-[#8A90A0] pb-2"><input type="checkbox" checked={vendidoPorPeso} onChange={e => setVendidoPorPeso(e.target.checked)} className="accent-[#01B8FA] h-4 w-4" /> Vendido por peso (balança)</label>
         </div>
       </div>
-      <p className="text-[11px] text-[#8E8F94] mt-2">Usa a descrição, NCM e unidade do item. Sem preço, o produto é criado a R$ 0,00 (você ajusta depois em Produtos).</p>
-      {erro && <p className="text-[12px] text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-2">{erro}</p>}
+      <p className="text-[11px] text-[#8A90A0] mt-2">Usa a descrição, NCM e unidade do item. Sem preço, o produto é criado a R$ 0,00 (você ajusta depois em Produtos).</p>
+      {erro && <p className="text-[12px] text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-2">{erro}</p>}
       <div className="flex justify-end gap-2 mt-2.5">
-        <button onClick={onCancelar} className="px-3.5 py-2 rounded-lg text-[13px] text-[#5F6065] bg-white border border-[#E5E7EB] hover:bg-[#F7F7F8] transition-all">Cancelar</button>
-        <button onClick={cadastrar} disabled={salvando} className="px-4 py-2 rounded-lg text-[13px] font-bold text-white bg-[#0F8A72] hover:bg-[#13A184] disabled:opacity-40 flex items-center gap-1.5 shadow-[0_6px_18px_rgba(15,138,114,0.28)] transition-all active:scale-[0.98]">
+        <button onClick={onCancelar} className="px-3.5 py-2 rounded-lg text-[13px] text-[#8A90A0] bg-[#101216] border border-[#23262F] hover:bg-[#0C0D10] transition-all">Cancelar</button>
+        <button onClick={cadastrar} disabled={salvando} className="px-4 py-2 rounded-lg text-[13px] font-bold text-[#04121A] bg-[#01B8FA] hover:bg-[#22D3EE] disabled:opacity-40 flex items-center gap-1.5 shadow-[0_6px_18px_rgba(1,184,250,0.28)] transition-all active:scale-[0.98]">
           {salvando ? 'Cadastrando…' : <><Check className="h-4 w-4" /> Cadastrar e vincular</>}
         </button>
       </div>

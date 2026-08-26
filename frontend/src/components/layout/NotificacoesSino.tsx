@@ -19,7 +19,7 @@ const POLL_MS = 60_000;
 
 function iconePorSeveridade(sev: Notificacao['severidade']) {
   if (sev === 'CRITICO') return { Icon: AlertOctagon, cor: 'text-[#E0483D]' };
-  if (sev === 'AVISO') return { Icon: AlertTriangle, cor: 'text-[#0B6F5C]' };
+  if (sev === 'AVISO') return { Icon: AlertTriangle, cor: 'text-[#2348C7]' };
   return { Icon: Info, cor: 'text-[#8E8F94]' };
 }
 
@@ -40,7 +40,7 @@ export default function NotificacoesSino() {
   const [itens, setItens] = useState<Notificacao[]>([]);
   const [carregando, setCarregando] = useState(false);
   const btnRef = useRef<HTMLButtonElement | null>(null);
-  const [pos, setPos] = useState<{ top: number; right: number }>({ top: 52, right: 16 });
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number }>({ bottom: 12, left: 12 });
   const navigate = useNavigate();
 
   const atualizarContador = useCallback(async () => {
@@ -73,7 +73,14 @@ export default function NotificacoesSino() {
 
   const abrir = useCallback(() => {
     const r = btnRef.current?.getBoundingClientRect();
-    if (r) setPos({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
+    if (r) {
+      const PANEL_W = 320; // w-80
+      const openUp = r.top > window.innerHeight / 2; // sino no rodapé → abre p/ cima
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - PANEL_W - 12));
+      setPos(openUp
+        ? { bottom: Math.max(12, window.innerHeight - r.top + 8), left }
+        : { top: r.bottom + 8, left });
+    }
     setAberto(true);
     carregarLista();
   }, [carregarLista]);
@@ -119,7 +126,7 @@ export default function NotificacoesSino() {
       <button
         ref={btnRef}
         onClick={() => (aberto ? setAberto(false) : abrir())}
-        className="relative p-1.5 text-[#5F6065] hover:text-[#202123] hover:bg-[#F7F7F8] rounded-lg transition-all duration-300 active:scale-[0.95]"
+        className="relative p-1.5 text-[#8A90A0] hover:text-white hover:bg-white/[0.06] rounded-lg transition-all duration-300 active:scale-[0.95]"
         title="Notificações"
       >
         <Bell className="h-4 w-4" />
@@ -136,14 +143,14 @@ export default function NotificacoesSino() {
             <div className="fixed inset-0 z-[65]" onClick={() => setAberto(false)} />
             <div
               className="fixed z-[66] w-80 max-h-[70vh] flex flex-col rounded-xl border border-[#E5E7EB] bg-white shadow-[0_16px_48px_0_rgba(22,23,29,0.18)] animate-fade-in"
-              style={{ top: pos.top, right: pos.right }}
+              style={{ top: pos.top, bottom: pos.bottom, left: pos.left }}
             >
               <div className="flex items-center justify-between px-3 py-2 border-b border-[#E5E7EB]">
                 <p className="text-[12px] font-semibold text-[#202123]">Notificações</p>
                 <button
                   onClick={marcarTodas}
                   disabled={naoLidas === 0}
-                  className="flex items-center gap-1 text-[10px] text-[#8E8F94] hover:text-[#0B6F5C] disabled:opacity-40 disabled:hover:text-[#8E8F94] transition-colors"
+                  className="flex items-center gap-1 text-[10px] text-[#8E8F94] hover:text-[#2348C7] disabled:opacity-40 disabled:hover:text-[#8E8F94] transition-colors"
                 >
                   <CheckCheck className="h-3 w-3" /> Marcar todas
                 </button>
@@ -172,7 +179,7 @@ export default function NotificacoesSino() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <p className="text-[11px] font-semibold text-[#202123] truncate flex-1">{n.titulo}</p>
-                            {!n.lida && <span className="h-1.5 w-1.5 rounded-full bg-[#0F8A72] shrink-0" />}
+                            {!n.lida && <span className="h-1.5 w-1.5 rounded-full bg-[#2F5FE0] shrink-0" />}
                           </div>
                           <p className="text-[10px] text-[#5F6065] leading-snug line-clamp-2">{n.mensagem}</p>
                           <p className="text-[9px] text-[#8E8F94] mt-0.5">{tempoRelativo(n.createdAt)}</p>

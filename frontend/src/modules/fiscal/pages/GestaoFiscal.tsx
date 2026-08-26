@@ -3,11 +3,13 @@ import { createPortal } from 'react-dom';
 import {
   FileText, RefreshCw, Plus, Send, Ban, CheckCircle2,
   FileStack, Receipt, Search, Printer, Undo2, X, ListChecks,
+  Mail, FlaskConical, ShieldCheck,
 } from 'lucide-react';
 import api, { nfeApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { toast, confirmDialog, promptDialog } from '../../../components/ui/feedback';
 import { imprimirDanfe } from '../danfe';
+import { PageHeader, btnGlass, btnPrimary } from '../../cadastros/ui';
 
 /* ══════════════════════════════════════════════════════════════════════════════
    GESTÃO FISCAL — painel único das NF-e reais (tabela NFe / módulo DFe).
@@ -23,13 +25,13 @@ const dataBR = (v: any) => (v ? new Date(v).toLocaleDateString('pt-BR') : '—')
 
 type StatusDFe = 'RASCUNHO' | 'PENDENTE_EMISSAO' | 'EMITIDO' | 'CANCELADO' | 'DENEGADO' | 'INUTILIZADO' | 'CONTINGENCIA';
 const STATUS_META: Record<string, { label: string; cls: string }> = {
-  RASCUNHO: { label: 'Rascunho', cls: 'bg-slate-500/15 text-[#8B8D98] border-slate-500/30' },
-  PENDENTE_EMISSAO: { label: 'Pendente', cls: 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/30' },
-  EMITIDO: { label: 'Emitida', cls: 'bg-emerald-500/15 text-[#0b7d4e] border-emerald-500/30' },
-  CANCELADO: { label: 'Cancelada', cls: 'bg-rose-500/15 text-[#c3352b] border-rose-500/30' },
-  DENEGADO: { label: 'Denegada', cls: 'bg-amber-500/15 text-[#a9760a] border-[#E8A317]/30' },
-  INUTILIZADO: { label: 'Inutilizada', cls: 'bg-slate-500/15 text-slate-400 border-slate-500/30' },
-  CONTINGENCIA: { label: 'Contingência', cls: 'bg-slate-500/15 text-[#8B8D98] border-slate-500/30' },
+  RASCUNHO: { label: 'Rascunho', cls: 'bg-[#16181F] text-[#8A90A0] border-[#23262F]' },
+  PENDENTE_EMISSAO: { label: 'Pendente', cls: 'bg-[#FF9F45]/12 text-[#FF9F45] border-[#FF9F45]/30' },
+  EMITIDO: { label: 'Emitida', cls: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/30' },
+  CANCELADO: { label: 'Cancelada', cls: 'bg-[#FF6B7A]/12 text-[#FF6B7A] border-[#FF6B7A]/30' },
+  DENEGADO: { label: 'Denegada', cls: 'bg-[#FF9F45]/12 text-[#FF9F45] border-[#FF9F45]/30' },
+  INUTILIZADO: { label: 'Inutilizada', cls: 'bg-[#16181F] text-[#8A90A0] border-[#23262F]' },
+  CONTINGENCIA: { label: 'Contingência', cls: 'bg-[#16181F] text-[#8A90A0] border-[#23262F]' },
 };
 
 interface Nota {
@@ -44,6 +46,7 @@ interface Nota {
   bruto: number;
   emissao: string | null;
   chave: string | null;
+  finalidade: string | null;
 }
 
 // Mapeia uma NF-e do backend para a linha exibida.
@@ -63,6 +66,7 @@ function mapNota(nfe: any): Nota {
     bruto: Number(nfe.valorNfe || 0),
     emissao: nfe.dataEmissao || null,
     chave: nfe.chaveAcesso || null,
+    finalidade: nfe.finalidade ?? null,
   };
 }
 
@@ -92,21 +96,30 @@ export default function GestaoFiscal() {
   }, [filialId, ini, fim, status]);
   useEffect(() => { carregar(); }, [carregar]);
 
-  // Filtro por nº da nota (client-side) + resumo derivado da lista.
+  // Filtro por nº da nota, chave ou cliente (client-side) + resumo derivado da lista.
   const filtradas = useMemo(() => {
     const q = busca.trim().toLowerCase();
-    return q ? notas.filter((n) => String(n.numero).includes(q) || (n.chave || '').includes(q)) : notas;
+    return q ? notas.filter((n) => String(n.numero).includes(q) || (n.chave || '').includes(q) || n.cliente.toLowerCase().includes(q)) : notas;
   }, [notas, busca]);
 
   const resumo = useMemo(() => {
     const emitidas = filtradas.filter((n) => n.status === 'EMITIDO');
+    // Notas de venda (finalidade ≠ 4) compõem o faturamento; as de devolução
+    // (finalidade '4') o reduzem. Sem separar, uma devolução inflaria o emitido.
+    const vendas = emitidas.filter((n) => n.finalidade !== '4');
+    const devolucoesNotas = emitidas.filter((n) => n.finalidade === '4');
+    const bruto = vendas.reduce((s, n) => s + n.bruto, 0);
+    const valorDevolucoes = devolucoesNotas.reduce((s, n) => s + n.bruto, 0);
     return {
       totalNotas: filtradas.length,
-      valorEmitido: emitidas.reduce((s, n) => s + n.bruto, 0),
-      valorImpostosTotal: filtradas.reduce((s, n) => s + n.impostos, 0),
-      valorBrutoTotal: filtradas.reduce((s, n) => s + n.bruto, 0),
+      valorEmitido: bruto,
+      valorDevolucoes,
+      valorLiquido: bruto - valorDevolucoes,
+      valorImpostosTotal: vendas.reduce((s, n) => s + n.impostos, 0),
+      valorBrutoTotal: bruto,
     };
   }, [filtradas]);
+  const temDevolucao = resumo.valorDevolucoes > 0;
 
   const acao = async (fn: Promise<any>, ok: string) => {
     try { await fn; toast(ok, 'success'); carregar(); }
@@ -116,6 +129,25 @@ export default function GestaoFiscal() {
   const emitir = async (id: string) => {
     if (!(await confirmDialog('Emitir esta NF-e para a SEFAZ?', { okLabel: 'Emitir' }))) return;
     acao(nfeApi.emitir(id), 'NF-e emitida com sucesso.');
+  };
+
+  // Envia a nota por e-mail abrindo o cliente de correio do usuário (mailto).
+  // Não transmite nada pelo servidor — o próprio usuário revisa e envia.
+  const enviarEmail = async (nf: any) => {
+    let email = nf?.cliente?.email || '';
+    if (!email) {
+      const digitado = await promptDialog('E-mail do destinatário:');
+      if (digitado === null) return;
+      email = digitado.trim();
+    }
+    const numero = String(nf.numero).padStart(6, '0');
+    const assunto = encodeURIComponent(`NF-e ${numero}/${nf.serie}${filialAtiva?.nome ? ` — ${filialAtiva.nome}` : ''}`);
+    const corpo = encodeURIComponent(
+      `Olá,\n\nSegue a referência da NF-e ${numero}/${nf.serie}.\n` +
+      (nf.chaveAcesso ? `Chave de acesso: ${nf.chaveAcesso}\n` : '') +
+      `Valor total: ${R$(nf.valorNfe)}\n\nAtenciosamente.`,
+    );
+    window.location.href = `mailto:${email}?subject=${assunto}&body=${corpo}`;
   };
 
   // Detalhe da nota (abre o modal com todas as ações).
@@ -155,103 +187,105 @@ export default function GestaoFiscal() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white text-[#16171D]">
-      <div className="bg-white border-b border-[#E7E5DF] px-6 pt-4 pb-3 shrink-0">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-bold text-[#16171D] flex items-center gap-2">
-              <Receipt className="h-5 w-5 text-[#a9760a]" /> Gestão Fiscal
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5">Notas fiscais eletrônicas (NF-e) emitidas no faturamento</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">De
-              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+    <div className="flex flex-col h-full bg-[#08090A] text-[#F7F8FA]">
+      <PageHeader
+        icon={<Receipt className="h-4 w-4" />}
+        titulo="Gestão Fiscal"
+        subtitulo="Notas fiscais eletrônicas (NF-e) emitidas no faturamento"
+        actions={
+          <>
+            <SeloSimulacao filialId={filialId} />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">De
+              <input type="date" value={ini} onChange={e => setIni(e.target.value)} className="bg-[#101216] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA] [color-scheme:dark] focus:outline-none focus:border-[#01B8FA]/60" />
             </label>
-            <label className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold">Até
-              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-white border border-[#E7E5DF] rounded-lg px-2.5 py-1.5 text-sm text-[#16171D]" />
+            <label className="flex items-center gap-1.5 text-xs text-[#8A90A0] font-semibold">Até
+              <input type="date" value={fim} onChange={e => setFim(e.target.value)} className="bg-[#101216] border border-[#23262F] rounded-lg px-2.5 py-1.5 text-sm text-[#F7F8FA] [color-scheme:dark] focus:outline-none focus:border-[#01B8FA]/60" />
             </label>
-            <button onClick={carregar} className="flex items-center gap-1.5 bg-white hover:bg-[#EFEDE7] text-[#5B5D69] text-sm font-semibold px-3 py-1.5 rounded-lg border border-[#E7E5DF]">
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+            <button onClick={carregar} className={btnGlass}>
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} /> Atualizar
             </button>
-            <a href="/fiscal/emitir" className="flex items-center gap-1.5 bg-amber-400 hover:bg-amber-300 text-slate-900 text-sm font-semibold px-3 py-1.5 rounded-lg">
-              <Plus className="h-4 w-4" /> Nova nota
+            <a href="/fiscal/emitir" className={btnPrimary}>
+              <Plus className="h-3.5 w-3.5" /> Nova nota
             </a>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="flex-1 overflow-auto p-6 space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <Kpi icon={<FileStack className="h-4 w-4" />} cor="neutral" label="Notas no período" valor={loading ? null : String(resumo.totalNotas)} />
-          <Kpi icon={<CheckCircle2 className="h-4 w-4" />} cor="emerald" label="Valor emitido" valor={loading ? null : R$(resumo.valorEmitido)} />
+          <Kpi icon={<CheckCircle2 className="h-4 w-4" />} cor="emerald" label={temDevolucao ? 'Faturamento líquido' : 'Valor emitido'} valor={loading ? null : R$(temDevolucao ? resumo.valorLiquido : resumo.valorEmitido)} />
           <Kpi icon={<Receipt className="h-4 w-4" />} cor="amber" label="Impostos totais" valor={loading ? null : R$(resumo.valorImpostosTotal)} />
-          <Kpi icon={<FileText className="h-4 w-4" />} cor="neutral" label="Valor bruto total" valor={loading ? null : R$(resumo.valorBrutoTotal)} />
+          {temDevolucao
+            ? <Kpi icon={<Undo2 className="h-4 w-4" />} cor="rose" label="(−) Devoluções" valor={loading ? null : R$(resumo.valorDevolucoes)} />
+            : <Kpi icon={<FileText className="h-4 w-4" />} cor="neutral" label="Valor bruto total" valor={loading ? null : R$(resumo.valorBrutoTotal)} />}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center bg-white border border-[#E7E5DF] rounded-lg overflow-hidden">
+          <div className="flex items-center bg-[#101216] border border-[#23262F] rounded-lg overflow-hidden">
             {(['', 'RASCUNHO', 'EMITIDO', 'CANCELADO', 'DENEGADO'] as const).map(s => (
               <button key={s || 'all'} onClick={() => setStatus(s)}
-                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-amber-500/20 text-[#a9760a]' : 'text-slate-400 hover:text-[#5B5D69]'}`}>
+                className={`px-3 py-1.5 text-xs font-semibold transition-colors ${status === s ? 'bg-[#01B8FA]/15 text-[#01B8FA]' : 'text-[#8A90A0] hover:text-[#F7F8FA]'}`}>
                 {s === '' ? 'Todas' : STATUS_META[s].label}
               </button>
             ))}
           </div>
           <div className="relative">
-            <Search className="h-4 w-4 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
-            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nº da nota…"
-              className="bg-white border border-[#E7E5DF] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#16171D] w-48" />
+            <Search className="h-4 w-4 text-[#8A90A0] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input value={busca} onChange={e => setBusca(e.target.value)} placeholder="Nº, cliente ou chave…"
+              className="bg-[#101216] border border-[#23262F] rounded-lg pl-8 pr-3 py-1.5 text-sm text-[#F7F8FA] w-56 focus:outline-none focus:border-[#01B8FA]/60" />
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#E7E5DF] overflow-hidden">
+        <div className="bg-[#101216] rounded-2xl border border-[#23262F] overflow-hidden">
           {loading ? (
-            <div className="p-5 space-y-3">{[...Array(6)].map((_, i) => <div key={i} className="h-9 bg-[#F0EEE9] rounded animate-pulse" />)}</div>
+            <div className="p-5 space-y-3">{[...Array(6)].map((_, i) => <div key={i} className="h-9 bg-[#16181F] rounded animate-pulse" />)}</div>
           ) : filtradas.length === 0 ? (
-            <p className="text-sm text-slate-500 py-16 text-center">
+            <p className="text-sm text-[#8A90A0] py-16 text-center">
               {notas.length === 0 ? 'Nenhuma NF-e no período. Fature um pedido em "Faturamento" para gerar notas.' : 'Nenhuma nota encontrada para a busca.'}
             </p>
           ) : (
             <table className="w-full text-sm">
-              <thead className="bg-white text-xs text-slate-400">
+              <thead className="bg-[#0C0D10] text-xs text-[#8A90A0]">
                 <tr>
-                  <th className="px-4 py-2.5 text-left font-semibold">Número / Série</th>
-                  <th className="px-4 py-2.5 text-left font-semibold">Status</th>
-                  <th className="px-4 py-2.5 text-left font-semibold">Cliente / Pedido</th>
-                  <th className="px-4 py-2.5 text-right font-semibold">Líquido</th>
-                  <th className="px-4 py-2.5 text-right font-semibold">Impostos</th>
-                  <th className="px-4 py-2.5 text-right font-semibold">Bruto</th>
-                  <th className="px-4 py-2.5 text-left font-semibold">Emissão</th>
-                  <th className="px-4 py-2.5 text-right font-semibold">Ações</th>
+                  <th className="px-4 py-2.5 text-left font-semibold border-b border-[#23262F]">Número / Série</th>
+                  <th className="px-4 py-2.5 text-left font-semibold border-b border-[#23262F]">Status</th>
+                  <th className="px-4 py-2.5 text-left font-semibold border-b border-[#23262F]">Cliente / Pedido</th>
+                  <th className="px-4 py-2.5 text-right font-semibold border-b border-[#23262F]">Líquido</th>
+                  <th className="px-4 py-2.5 text-right font-semibold border-b border-[#23262F]">Impostos</th>
+                  <th className="px-4 py-2.5 text-right font-semibold border-b border-[#23262F]">Bruto</th>
+                  <th className="px-4 py-2.5 text-left font-semibold border-b border-[#23262F]">Emissão</th>
+                  <th className="px-4 py-2.5 text-right font-semibold border-b border-[#23262F]">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {filtradas.map(n => (
-                  <tr key={n.id} onClick={() => abrirDetalhe(n.id)} className="border-t border-[#E7E5DF] hover:bg-[#EFEDE7] cursor-pointer">
-                    <td className="px-4 py-2.5 font-semibold text-[#16171D]">{n.numero}<span className="text-slate-500 font-normal"> · {n.serie}</span></td>
+                  <tr key={n.id} onClick={() => abrirDetalhe(n.id)} className="border-t border-[#23262F] hover:bg-white/[0.03] cursor-pointer">
+                    <td className="px-4 py-2.5 font-semibold text-[#F7F8FA] whitespace-nowrap">{n.numero}<span className="text-[#8A90A0] font-normal"> · {n.serie}</span>
+                      {n.finalidade === '4' && <span className="ml-2 inline-flex items-center gap-1 align-middle rounded-full bg-[#A78BFA]/12 text-[#A78BFA] border border-[#A78BFA]/30 px-1.5 py-0.5 text-[10px] font-bold"><Undo2 className="h-3 w-3" /> Devolução</span>}
+                    </td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold border ${(STATUS_META[n.status] || STATUS_META.RASCUNHO).cls}`}>{(STATUS_META[n.status] || { label: n.status }).label}</span>
                     </td>
                     <td className="px-4 py-2.5">
-                      <p className="text-[#5B5D69] truncate max-w-[200px]">{n.cliente}</p>
-                      {n.pedidoNumero != null && <p className="text-[11px] text-slate-500">Pedido #{n.pedidoNumero}</p>}
+                      <p className="text-[#F7F8FA] truncate max-w-[200px]">{n.cliente}</p>
+                      {n.pedidoNumero != null && <p className="text-[11px] text-[#8A90A0]">Pedido #{n.pedidoNumero}</p>}
                     </td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[#8B8D98]">{R$(n.liquido)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-[#a9760a]">{R$(n.impostos)}</td>
-                    <td className="px-4 py-2.5 text-right font-mono font-bold text-[#16171D]">{R$(n.bruto)}</td>
-                    <td className="px-4 py-2.5 text-slate-400 text-xs">{dataBR(n.emissao)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#8A90A0]">{R$(n.liquido)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-[#FF9F45]">{R$(n.impostos)}</td>
+                    <td className="px-4 py-2.5 text-right font-mono font-bold text-[#F7F8FA]">{R$(n.bruto)}</td>
+                    <td className="px-4 py-2.5 text-[#8A90A0] text-xs">{dataBR(n.emissao)}</td>
                     <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
-                        <button onClick={() => abrirDanfe(n.id)} title="Imprimir DANFE" className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-[#F6F5F2]"><Printer className="h-4 w-4" /></button>
+                        <button onClick={() => abrirDanfe(n.id)} title="Imprimir DANFE" className="p-1.5 rounded-lg text-[#8A90A0] hover:text-[#F7F8FA] hover:bg-white/[0.05]"><Printer className="h-4 w-4" /></button>
                         {podeOperar && (n.status === 'RASCUNHO' || n.status === 'PENDENTE_EMISSAO') && (
-                          <button onClick={() => emitir(n.id)} title="Emitir na SEFAZ" className="p-1.5 rounded-lg text-[#0b7d4e] hover:bg-emerald-500/15"><Send className="h-4 w-4" /></button>
+                          <button onClick={() => emitir(n.id)} title="Emitir na SEFAZ" className="p-1.5 rounded-lg text-[#2DD4A7] hover:bg-[#2DD4A7]/15"><Send className="h-4 w-4" /></button>
                         )}
                         {podeOperar && n.status === 'EMITIDO' && (
                           <>
-                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-[#F6F5F2]"><FileText className="h-4 w-4" /></button>
-                            <button onClick={() => devolver(n.id)} title="Devolução" className="p-1.5 rounded-lg text-[#a9760a] hover:bg-amber-500/15"><Undo2 className="h-4 w-4" /></button>
-                            <button onClick={() => cancelar(n.id)} title="Cancelar nota" className="p-1.5 rounded-lg text-[#c3352b] hover:bg-rose-500/15"><Ban className="h-4 w-4" /></button>
+                            <button onClick={() => enviarCce(n.id)} title="Carta de Correção" className="p-1.5 rounded-lg text-[#8A90A0] hover:text-[#F7F8FA] hover:bg-white/[0.05]"><FileText className="h-4 w-4" /></button>
+                            <button onClick={() => devolver(n.id)} title="Devolução" className="p-1.5 rounded-lg text-[#FF9F45] hover:bg-[#FF9F45]/15"><Undo2 className="h-4 w-4" /></button>
+                            <button onClick={() => cancelar(n.id)} title="Cancelar nota" className="p-1.5 rounded-lg text-[#FF6B7A] hover:bg-[#FF6B7A]/15"><Ban className="h-4 w-4" /></button>
                           </>
                         )}
                       </div>
@@ -266,13 +300,13 @@ export default function GestaoFiscal() {
 
       {/* Detalhe da nota — DANFE / CC-e / Devolução / duplicatas */}
       {detalhe && createPortal((
-        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
-          <div className="bg-[#F6F5F2] backdrop-blur-2xl border border-[#E7E5DF] shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-[#F6F5F2] backdrop-blur-xl z-10">
-              <h2 className="font-bold text-[#16171D]">NF-e {String(detalhe.numero).padStart(6, '0')}/{detalhe.serie} · {detalhe.cliente?.razaoSocial || detalhe.destRazaoSocial || '—'}</h2>
-              <button onClick={() => setDetalhe(null)} className="text-slate-400 hover:text-[#16171D]"><X className="h-5 w-5" /></button>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setDetalhe(null)}>
+          <div className="bg-[#101216] border border-[#23262F] shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-auto animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23262F] sticky top-0 bg-[#101216] z-10">
+              <h2 className="font-bold text-[#F7F8FA]">NF-e {String(detalhe.numero).padStart(6, '0')}/{detalhe.serie} · {detalhe.cliente?.razaoSocial || detalhe.destRazaoSocial || '—'}</h2>
+              <button onClick={() => setDetalhe(null)} className="text-[#8A90A0] hover:text-[#F7F8FA]"><X className="h-5 w-5" /></button>
             </div>
-            <div className="p-5 space-y-4 text-sm text-[#5B5D69]">
+            <div className="p-5 space-y-4 text-sm text-[#8A90A0]">
               <div className="grid grid-cols-3 gap-3 text-xs">
                 <Info label="Status" value={(STATUS_META[detalhe.status] || { label: detalhe.status }).label} />
                 <Info label="CFOP" value={detalhe.cfop} />
@@ -285,31 +319,31 @@ export default function GestaoFiscal() {
               </div>
 
               <div>
-                <h3 className="font-bold text-xs text-[#8B8D98] mb-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> Duplicatas</h3>
+                <h3 className="font-bold text-xs text-[#8A90A0] mb-1 flex items-center gap-1"><ListChecks className="h-3.5 w-3.5" /> Duplicatas</h3>
                 {detalhe.duplicatas?.length ? (
-                  <div className="border border-[#E7E5DF] rounded-lg overflow-hidden">
+                  <div className="border border-[#23262F] rounded-lg overflow-hidden">
                     <table className="w-full text-xs">
-                      <thead className="bg-white text-slate-400"><tr>{['Parcela', 'Vencimento', 'Valor'].map(h => <th key={h} className="px-2 py-1 text-left font-semibold">{h}</th>)}</tr></thead>
+                      <thead className="bg-[#0C0D10] text-[#8A90A0]"><tr>{['Parcela', 'Vencimento', 'Valor'].map(h => <th key={h} className="px-2 py-1 text-left font-semibold">{h}</th>)}</tr></thead>
                       <tbody>
                         {detalhe.duplicatas.map((d: any) => (
-                          <tr key={d.id} className="border-t border-[#E7E5DF]">
-                            <td className="px-2 py-1 font-mono">{d.numero}</td>
-                            <td className="px-2 py-1">{dataBR(d.dataVenc)}</td>
-                            <td className="px-2 py-1 text-right font-mono">{R$(d.valor)}</td>
+                          <tr key={d.id} className="border-t border-[#23262F]">
+                            <td className="px-2 py-1 font-mono text-[#F7F8FA]">{d.numero}</td>
+                            <td className="px-2 py-1 text-[#F7F8FA]">{dataBR(d.dataVenc)}</td>
+                            <td className="px-2 py-1 text-right font-mono text-[#F7F8FA]">{R$(d.valor)}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                ) : <p className="text-xs text-slate-500">Sem parcelas registradas.</p>}
+                ) : <p className="text-xs text-[#8A90A0]">Sem parcelas registradas.</p>}
               </div>
 
               {detalhe.cartasCorrecao?.length > 0 && (
                 <div>
-                  <h3 className="font-bold text-xs text-[#8B8D98] mb-1">Cartas de Correção (CC-e)</h3>
+                  <h3 className="font-bold text-xs text-[#8A90A0] mb-1">Cartas de Correção (CC-e)</h3>
                   <div className="space-y-1">
                     {detalhe.cartasCorrecao.map((c: any) => (
-                      <div key={c.id} className="text-xs bg-[#F6F5F2] text-[#8B8D98] rounded px-2 py-1">
+                      <div key={c.id} className="text-xs bg-[#01B8FA]/[0.08] text-[#F7F8FA] rounded px-2 py-1">
                         <b>#{c.sequencia}</b> · {dataBR(c.dataEvento)} — {c.correcao}
                       </div>
                     ))}
@@ -317,13 +351,16 @@ export default function GestaoFiscal() {
                 </div>
               )}
             </div>
-            <div className="px-5 py-3.5 border-t border-[#E7E5DF] flex flex-wrap justify-end gap-2 sticky bottom-0 bg-white">
-              <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E7E5DF] text-[#5B5D69] text-sm flex items-center gap-1 hover:bg-[#EFEDE7]"><Printer className="h-4 w-4" /> DANFE</button>
+            <div className="px-5 py-3.5 border-t border-[#23262F] flex flex-wrap justify-end gap-2 sticky bottom-0 bg-[#101216]">
+              <button onClick={() => abrirDanfe(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#23262F] text-[#8A90A0] text-sm flex items-center gap-1 hover:bg-white/[0.03] hover:text-[#F7F8FA]"><Printer className="h-4 w-4" /> DANFE</button>
+              {detalhe.status === 'EMITIDO' && (
+                <button onClick={() => enviarEmail(detalhe)} className="px-3 py-2 rounded-lg border border-[#23262F] text-[#8A90A0] text-sm flex items-center gap-1 hover:bg-white/[0.03] hover:text-[#F7F8FA]"><Mail className="h-4 w-4" /> E-mail</button>
+              )}
               {podeOperar && detalhe.status === 'EMITIDO' && detalhe.finalidade !== '4' && (
                 <>
-                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E7E5DF] text-[#5B5D69] text-sm flex items-center gap-1 hover:bg-[#EFEDE7]"><FileText className="h-4 w-4" /> CC-e</button>
-                  <button disabled={busy} onClick={() => devolver(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#E8A317]/40 text-[#a9760a] text-sm flex items-center gap-1 disabled:opacity-40 hover:bg-[#E8A317]/12"><Undo2 className="h-4 w-4" /> Devolução</button>
-                  <button onClick={() => cancelar(detalhe.id)} className="px-3 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-sm flex items-center gap-1"><Ban className="h-4 w-4" /> Cancelar</button>
+                  <button onClick={() => enviarCce(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#23262F] text-[#8A90A0] text-sm flex items-center gap-1 hover:bg-white/[0.03] hover:text-[#F7F8FA]"><FileText className="h-4 w-4" /> CC-e</button>
+                  <button disabled={busy} onClick={() => devolver(detalhe.id)} className="px-3 py-2 rounded-lg border border-[#FF9F45]/40 text-[#FF9F45] text-sm flex items-center gap-1 disabled:opacity-40 hover:bg-[#FF9F45]/12"><Undo2 className="h-4 w-4" /> Devolução</button>
+                  <button onClick={() => cancelar(detalhe.id)} className="px-3 py-2 rounded-lg bg-[#FF6B7A] hover:bg-[#FF6B7A]/90 text-[#2A0B0E] text-sm font-semibold flex items-center gap-1"><Ban className="h-4 w-4" /> Cancelar</button>
                 </>
               )}
             </div>
@@ -335,23 +372,44 @@ export default function GestaoFiscal() {
 }
 
 function Info({ label, value, className = '' }: { label: string; value: any; className?: string }) {
-  return <div className={className}><div className="text-[10px] uppercase text-slate-500 font-semibold">{label}</div><div className="font-mono text-[#5B5D69] break-all">{value}</div></div>;
+  return <div className={className}><div className="text-[10px] uppercase text-[#8A90A0] font-semibold">{label}</div><div className="font-mono text-[#F7F8FA] break-all">{value}</div></div>;
+}
+
+// Selo do ambiente de emissão — deixa explícito quando as notas NÃO têm validade
+// fiscal (simulação/homologação) para ninguém confundir com produção.
+function SeloSimulacao({ filialId }: { filialId: string }) {
+  const [d, setD] = useState<any>(null);
+  useEffect(() => {
+    if (!filialId) { setD(null); return; }
+    api.get('/nfe/configuracao/status', { params: { filialId } }).then(r => setD(r.data)).catch(() => setD(null));
+  }, [filialId]);
+  if (!d) return null;
+  const producao = d.ambiente === 'PRODUCAO' && d.ativo && !d.simulacao;
+  const meta = producao
+    ? { cls: 'bg-[#2DD4A7]/12 text-[#2DD4A7] border-[#2DD4A7]/30', Icon: ShieldCheck, txt: 'Produção' }
+    : { cls: 'bg-[#FF9F45]/12 text-[#FF9F45] border-[#FF9F45]/30', Icon: FlaskConical, txt: d.simulacao ? 'Simulação' : 'Homologação' };
+  return (
+    <span title={d.aviso || (d.simulacao ? 'Modo simulação: as notas não têm validade fiscal.' : '')}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.cls}`}>
+      <meta.Icon className="h-3.5 w-3.5" /> {meta.txt}
+    </span>
+  );
 }
 
 const CORES: Record<string, string> = {
-  amber: 'bg-[#E8A317]/12 text-[#a9760a]',
-  neutral: 'bg-[#F6F5F2] text-[#8B8D98]',
-  rose: 'bg-rose-400/10 text-[#c3352b]',
-  emerald: 'bg-emerald-400/10 text-[#0b7d4e]',
+  amber: 'bg-[#FF9F45]/12 text-[#FF9F45]',
+  neutral: 'bg-[#16181F] text-[#8A90A0]',
+  rose: 'bg-[#FF6B7A]/12 text-[#FF6B7A]',
+  emerald: 'bg-[#2DD4A7]/12 text-[#2DD4A7]',
 };
 function Kpi({ icon, label, valor, cor }: { icon: any; label: string; valor: string | null; cor: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-[#E7E5DF] p-5">
+    <div className="bg-[#101216] rounded-2xl border border-[#23262F] p-5">
       <div className="flex items-center gap-2 mb-2">
         <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${CORES[cor]}`}>{icon}</span>
-        <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider truncate">{label}</p>
+        <p className="text-[10px] text-[#8A90A0] font-semibold uppercase tracking-wider truncate">{label}</p>
       </div>
-      {valor === null ? <div className="h-7 w-24 bg-[#F0EEE9] rounded animate-pulse" /> : <p className="text-2xl font-extrabold text-[#16171D] tracking-tight truncate">{valor}</p>}
+      {valor === null ? <div className="h-7 w-24 bg-[#16181F] rounded animate-pulse" /> : <p className="text-2xl font-extrabold text-[#F7F8FA] tracking-tight truncate">{valor}</p>}
     </div>
   );
 }

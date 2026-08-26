@@ -67,6 +67,15 @@ services:
       # Em produção real: "focus" + FOCUS_NFE_TOKEN + certificado A1 + dados fiscais.
       - key: NFCE_MODO
         value: simulado
+      # Criptografia dos segredos fiscais (token do provedor + senha do certificado
+      # A1). SEM FISCAL_ENC_KEY o backend NÃO salva o token: retorna 400
+      # "FISCAL_ENC_KEY não configurada". generateValue = o Render gera uma chave
+      # forte e ESTÁVEL uma única vez. ATENÇÃO: nunca troque essa chave depois de
+      # salvar credenciais — se trocar, os segredos já cifrados ficam ilegíveis.
+      - key: FISCAL_ENC_KEY
+        generateValue: true
+      - key: CERT_ENC_KEY
+        generateValue: true
       # ── Mercado Pago (assinaturas) ──────────────────────────────────────────
       # Comece em "simulado" para testar sem cobrança. Em produção: "producao"
       # + MP_ACCESS_TOKEN de produção (APP_USR-...) + FRONT_URL público https.

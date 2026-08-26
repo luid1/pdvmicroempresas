@@ -51,10 +51,10 @@ interface Status {
 const ORDEM: AddonKey[] = ['pdvs', 'usuarios', 'filiais'];
 
 const STATUS_LABEL: Record<string, { txt: string; cls: string }> = {
-  ATIVA: { txt: 'Ativa', cls: 'bg-emerald-500/15 text-[#0b7d4e]' },
+  ATIVA: { txt: 'Ativa', cls: 'bg-emerald-500/15 text-[#2DD4A7]' },
   TRIAL: { txt: 'Em teste', cls: 'bg-slate-500/15 text-[#8B8D98]' },
   SUSPENSA: { txt: 'Suspensa', cls: 'bg-amber-500/15 text-[#a9760a]' },
-  CANCELADA: { txt: 'Cancelada', cls: 'bg-rose-500/15 text-[#c3352b]' },
+  CANCELADA: { txt: 'Cancelada', cls: 'bg-rose-500/15 text-[#FF6B7A]' },
 };
 
 export default function MinhaAssinatura() {

@@ -38,7 +38,7 @@ const tones: Record<string, string> = {
   sky: 'text-[#1f74c9] bg-[#3896f0]/10 border-[#3896f0]/20',
   emerald: 'text-[#0b7d4e] bg-[#0FA968]/10 border-[#0FA968]/22',
   rose: 'text-[#c3352b] bg-[#E0483D]/10 border-[#E0483D]/22',
-  brand: 'text-[#0B6F5C] bg-[#0F8A72]/12 border-[#0F8A72]/25',
+  brand: 'text-[#2348C7] bg-[#2F5FE0]/12 border-[#2F5FE0]/25',
   amber: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
   warning: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
   violet: 'text-[#5a4fd0] bg-[#7C6BF0]/10 border-[#7C6BF0]/20',
@@ -238,7 +238,7 @@ export default function DetalheModal({
           {rota && (
             <button
               onClick={() => irPara(rota)}
-              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#0F8A72] hover:bg-[#13A184] active:bg-[#d69610] text-[#202123] text-sm font-bold transition-all duration-300 active:scale-[0.98]"
+              className="inline-flex items-center gap-1.5 px-5 py-2 rounded-lg bg-[#2F5FE0] hover:bg-[#5B7BF0] active:bg-[#d69610] text-[#202123] text-sm font-bold transition-all duration-300 active:scale-[0.98]"
             >
               {verMaisLabel || 'Ver mais'}
               <ArrowRight className="h-4 w-4" />

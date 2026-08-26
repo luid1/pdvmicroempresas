@@ -8,7 +8,6 @@ import {
   PackageCheck, Wallet, Scale, Users, Boxes, ArrowUpRight, ArrowDownRight, ChevronRight,
   CircleDollarSign, Landmark, Percent, ShoppingCart, CalendarRange, LayoutDashboard,
 } from 'lucide-react';
-import { PageHeader } from '../modules/cadastros/ui';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar, Cell,
@@ -34,6 +33,7 @@ interface Dash {
   kpis: Record<string, number>;
   financeiro: {
     faturamento: number; faturamentoAnterior: number; faturamentoDelta: number;
+    devolucoes?: number; faturamentoLiquido?: number;
     nfes: number; vendas?: number; ticketMedio: number; margemBruta: number; cmv: number; resultadoOperacional: number;
     receber: Aging; pagar: Aging; inadimplenciaPct: number; saldoProjetado: number;
   };
@@ -75,54 +75,66 @@ const lsSet = (k: string, v: string) => {
 };
 
 const STATUS_INFO: Record<string, { label: string; cor: string; rota: string }> = {
-  RASCUNHO: { label: 'Rascunho', cor: '#64748b', rota: '/logistica/pedidos' },
-  CONFIRMADO: { label: 'Pendente', cor: '#f43f5e', rota: '/logistica/pedidos' },
-  EM_SEPARACAO: { label: 'Separando', cor: '#0ea5e9', rota: '/logistica/operacional' },
-  SEPARADO: { label: 'Liberado', cor: '#10b981', rota: '/logistica/carga' },
-  FATURADO: { label: 'Faturado', cor: '#8b5cf6', rota: '/fiscal/gestao' },
-  ENTREGUE: { label: 'Entregue', cor: '#14b8a6', rota: '/logistica/torre' },
-  CANCELADO: { label: 'Cancelado', cor: '#475569', rota: '/logistica/pedidos' },
+  RASCUNHO: { label: 'Rascunho', cor: '#8A90A0', rota: '/logistica/pedidos' },
+  CONFIRMADO: { label: 'Pendente', cor: '#FF9F45', rota: '/logistica/pedidos' },
+  EM_SEPARACAO: { label: 'Separando', cor: '#01B8FA', rota: '/logistica/operacional' },
+  SEPARADO: { label: 'Liberado', cor: '#3B9EFF', rota: '/logistica/carga' },
+  FATURADO: { label: 'Faturado', cor: '#A78BFA', rota: '/fiscal/gestao' },
+  ENTREGUE: { label: 'Entregue', cor: '#2DD4A7', rota: '/logistica/torre' },
+  CANCELADO: { label: 'Cancelado', cor: '#5E6472', rota: '/logistica/pedidos' },
 };
 
 /* ─────────────── Componentes base ─────────────── */
 function Delta({ v }: { v: number }) {
-  if (!v) return <span className="text-[11px] text-[#8E8F94]">estável</span>;
+  if (!v) return <span className="text-[11px] text-[#5E6472]">estável</span>;
   const up = v > 0;
   return (
-    <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${up ? 'text-[#0FA968]' : 'text-[#E0483D]'}`}>
+    <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${up ? 'text-[#34D9A6]' : 'text-[#FF6B7A]'}`}>
       {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}{pct(Math.abs(v))}
     </span>
   );
 }
 
+/* Paleta de destaque (chip do ícone) — cada tom vira um trio fg/soft/line */
+type Tone = { fg: string; soft: string; line: string };
+const mkTone = (fg: string): Tone => ({ fg, soft: `${fg}1f`, line: `${fg}45` });
+const KPI_TONES: Record<string, Tone> = {
+  accent: mkTone('#01B8FA'),
+  cyan:   mkTone('#22D3EE'),
+  blue:   mkTone('#3B9EFF'),
+  violet: mkTone('#A78BFA'),
+  green:  mkTone('#2DD4A7'),
+  rose:   mkTone('#FF6B7A'),
+  amber:  mkTone('#FF9F45'),
+  slate:  { fg: '#8A90A0', soft: 'rgba(255,255,255,0.05)', line: 'rgba(255,255,255,0.09)' },
+};
+/* Nomes de tom usados nas telas → paleta do tema site */
+const TONE_ALIAS: Record<string, string> = {
+  brand: 'accent', emerald: 'green', sky: 'cyan', teal: 'cyan', indigo: 'blue',
+  warning: 'amber', amber: 'amber', rose: 'rose', violet: 'violet', slate: 'slate',
+};
+
 function Kpi({ icon: Icon, label, value, sub, tone = 'slate', delta, onClick }: {
   icon: any; label: string; value: string; sub?: React.ReactNode; tone?: string; delta?: number; onClick?: () => void;
 }) {
-  const tones: Record<string, string> = {
-    sky: 'text-[#1f74c9] bg-[#3896f0]/10 border-[#3896f0]/20', emerald: 'text-[#0b7d4e] bg-[#0FA968]/10 border-[#0FA968]/22',
-    rose: 'text-[#c3352b] bg-[#E0483D]/10 border-[#E0483D]/22',
-    brand: 'text-[#0B6F5C] bg-[#0F8A72]/12 border-[#0F8A72]/25',
-    amber: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
-    warning: 'text-[#A15C07] bg-[#D97706]/10 border-[#D97706]/25',
-    violet: 'text-[#5a4fd0] bg-[#7C6BF0]/10 border-[#7C6BF0]/20', teal: 'text-[#0e7490] bg-[#06b6d4]/10 border-[#06b6d4]/20',
-    blue: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20', indigo: 'text-[#4f46e5] bg-[#6366f1]/10 border-[#6366f1]/20',
-    slate: 'text-[#5F6065] bg-[#F7F7F8] border-[#E5E7EB]',
-  };
+  const t = KPI_TONES[TONE_ALIAS[tone] || tone] || KPI_TONES.slate;
+  const vars = { '--kpi-fg': t.fg, '--kpi-soft': t.soft, '--kpi-line': t.line } as React.CSSProperties;
   return (
     <button
       onClick={onClick} disabled={!onClick}
-      className={`card p-4 text-left relative overflow-hidden group ${onClick ? 'glass-hover cursor-pointer' : 'cursor-default'}`}
+      style={vars}
+      className={`kpi group ${onClick ? 'kpi-int' : ''}`}
     >
-      <div className="flex items-center justify-between mb-2.5">
-        <div className={`h-8 w-8 rounded-lg border flex items-center justify-center ${tones[tone]}`}>
-          <Icon className="h-4 w-4" strokeWidth={2} />
-        </div>
+      <div className="flex items-start justify-between">
+        <span className="kpi-chip">
+          <Icon className="h-[18px] w-[18px]" strokeWidth={2} />
+        </span>
         {delta !== undefined && <Delta v={delta} />}
       </div>
-      <p className="text-[10px] font-semibold text-[#8E8F94] uppercase tracking-[0.1em] truncate">{label}</p>
-      <p className="font-num text-2xl font-extrabold text-[#202123] tracking-tight tabular-nums truncate mt-0.5">{value}</p>
-      {sub && <div className="text-[11px] text-[#8E8F94] mt-1 truncate">{sub}</div>}
-      {onClick && <ChevronRight className="h-4 w-4 text-[#C7C9D4] absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity" />}
+      <p className="eyebrow mut kpi-label truncate">{label}</p>
+      <p className="num kpi-value truncate">{value}</p>
+      {sub && <div className="kpi-sub truncate">{sub}</div>}
+      {onClick && <ChevronRight className="kpi-arrow" />}
     </button>
   );
 }
@@ -131,7 +143,7 @@ function Secao({ icon: Icon, titulo, cor, children, acao }: { icon: any; titulo:
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-[11px] font-semibold text-[#8E8F94] uppercase tracking-[0.14em] flex items-center gap-2">
+        <h2 className="eyebrow flex items-center gap-2">
           <Icon className="h-3.5 w-3.5" style={{ color: cor }} /> {titulo}
         </h2>
         {acao}
@@ -141,8 +153,8 @@ function Secao({ icon: Icon, titulo, cor, children, acao }: { icon: any; titulo:
   );
 }
 
-/* Tooltip claro reutilizável p/ Recharts */
-const tipStyle = { background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: 10, fontSize: 12, color: '#202123', boxShadow: '0 8px 24px rgba(22,23,29,0.12)' };
+/* Tooltip escuro reutilizável p/ Recharts (tema site) */
+const tipStyle = { background: '#16181F', border: '1px solid #23262F', borderRadius: 10, fontSize: 12, color: '#F7F8FA', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' };
 
 /* ─────────────── Página ─────────────── */
 export default function DashboardPage() {
@@ -203,7 +215,7 @@ export default function DashboardPage() {
 
   const statusData = useMemo(() =>
     Object.entries(d?.pedidosPorStatus || {}).filter(([, v]) => v > 0)
-      .map(([k, v]) => ({ status: k, label: STATUS_INFO[k]?.label || k, valor: v, cor: STATUS_INFO[k]?.cor || '#64748b' })),
+      .map(([k, v]) => ({ status: k, label: STATUS_INFO[k]?.label || k, valor: v, cor: STATUS_INFO[k]?.cor || '#8A90A0' })),
     [d?.pedidosPorStatus]);
 
   const maxCliente = Math.max(1, ...(d?.topClientes || []).map(c => c.valor));
@@ -221,10 +233,17 @@ export default function DashboardPage() {
   const abrir = (key: string): DetalheCard | null => {
     switch (key) {
       case 'faturamento': return {
-        icon: TrendingUp, tone: 'brand', titulo: 'Faturamento', valorPrincipal: R$c(f?.faturamento ?? 0),
-        subtitulo: d?.periodoLabel, delta: f?.faturamentoDelta,
+        icon: TrendingUp, tone: 'brand', titulo: 'Faturamento',
+        valorPrincipal: R$c((f?.devolucoes ?? 0) > 0 ? (f?.faturamentoLiquido ?? f?.faturamento ?? 0) : (f?.faturamento ?? 0)),
+        subtitulo: (f?.devolucoes ?? 0) > 0 ? `${d?.periodoLabel} · líquido de devoluções` : d?.periodoLabel,
+        delta: f?.faturamentoDelta,
         serie: d?.serieFaturamento,
         linhas: [
+          ...((f?.devolucoes ?? 0) > 0 ? [
+            { label: 'Faturamento bruto', valor: R$c(f?.faturamento ?? 0) },
+            { label: '(−) Devoluções', valor: R$c(f?.devolucoes ?? 0), cor: 'text-[#E0483D]' },
+            { label: '= Faturamento líquido', valor: R$c(f?.faturamentoLiquido ?? 0), cor: 'text-[#0FA968]' },
+          ] : []),
           { label: 'Vendas', valor: num(f?.vendas ?? 0) },
           { label: 'Ticket médio', valor: R$c(f?.ticketMedio ?? 0) },
           { label: 'NF-e emitidas', valor: num(f?.nfes ?? 0) },
@@ -287,7 +306,7 @@ export default function DashboardPage() {
           return (Array.isArray(data) ? data : []).slice(0, 20).map((t: any): DetalheRegistro => ({
             titulo: t.fornecedor?.razaoSocial || t.fornecedor?.nomeFantasia || t.descricao || 'Título',
             subtitulo: `${t.numero ? `#${t.numero} · ` : ''}venc. ${dataBR(t.dataVencimento)}`,
-            valor: R$c(Number(t.valorAberto) || 0), cor: 'text-[#A15C07]',
+            valor: R$c(Number(t.valorAberto) || 0), cor: 'text-[#0E86D4]',
           }));
         },
       };
@@ -319,7 +338,7 @@ export default function DashboardPage() {
         icon: AlertTriangle, tone: (e?.validade.vencido ?? 0) ? 'rose' : 'warning', titulo: 'Validade', valorPrincipal: num((e?.validade.vencido ?? 0) + (e?.validade.ate3 ?? 0) + (e?.validade.ate7 ?? 0)), subtitulo: 'itens em atenção',
         linhas: [
           { label: 'Vencidos', valor: num(e?.validade.vencido ?? 0), cor: (e?.validade.vencido ?? 0) ? 'text-[#E0483D]' : undefined },
-          { label: 'Vencem em 3 dias', valor: num(e?.validade.ate3 ?? 0), cor: 'text-[#A15C07]' },
+          { label: 'Vencem em 3 dias', valor: num(e?.validade.ate3 ?? 0), cor: 'text-[#0E86D4]' },
           { label: 'Vencem em 7 dias', valor: num(e?.validade.ate7 ?? 0) },
         ],
         rota: '/wms/pereciveis', verMaisLabel: 'Ver perecíveis',
@@ -333,7 +352,7 @@ export default function DashboardPage() {
             return {
               titulo: `${s.produto?.codigo ? `${s.produto.codigo} · ` : ''}${s.produto?.descricao || 'Produto'}`,
               subtitulo: `${s.lote?.numero ? `Lote ${s.lote.numero} · ` : ''}val. ${dataBR(venc)}`,
-              valor: kg(Number(s.quantidadeDisponivel) || 0), cor: vencido ? 'text-[#E0483D]' : 'text-[#A15C07]',
+              valor: kg(Number(s.quantidadeDisponivel) || 0), cor: vencido ? 'text-[#E0483D]' : 'text-[#0E86D4]',
             };
           });
         },
@@ -357,7 +376,7 @@ export default function DashboardPage() {
           return (Array.isArray(data) ? data : []).slice(0, 20).map((p: any): DetalheRegistro => ({
             titulo: `${p.codigo ? `${p.codigo} · ` : ''}${p.descricao || 'Produto'}`,
             subtitulo: `disp. ${num(Number(p.disponivel) || 0)} · mín. ${num(Number(p.estoqueMinimo) || 0)}`,
-            valor: `+${num(Number(p.sugestaoCompra) || 0)}`, cor: p.negativo ? 'text-[#E0483D]' : 'text-[#A15C07]',
+            valor: `+${num(Number(p.sugestaoCompra) || 0)}`, cor: p.negativo ? 'text-[#E0483D]' : 'text-[#0E86D4]',
           }));
         },
       };
@@ -386,7 +405,7 @@ export default function DashboardPage() {
 
   const abrirStatus = (s: { status: string; label: string; valor: number }): DetalheCard => ({
     icon: PackageCheck, tone: 'brand', titulo: `Pedidos — ${s.label}`, valorPrincipal: num(s.valor), subtitulo: 'pedidos neste status',
-    linhas: Object.entries(d?.pedidosPorStatus || {}).filter(([, v]) => v > 0).map(([k, v]) => ({ label: STATUS_INFO[k]?.label || k, valor: num(v), cor: k === s.status ? 'text-[#0B6F5C]' : undefined })),
+    linhas: Object.entries(d?.pedidosPorStatus || {}).filter(([, v]) => v > 0).map(([k, v]) => ({ label: STATUS_INFO[k]?.label || k, valor: num(v), cor: k === s.status ? 'text-[#0E86D4]' : undefined })),
     rota: STATUS_INFO[s.status]?.rota || '/logistica/pedidos', verMaisLabel: 'Ver pedidos',
     listaTitulo: `Pedidos — ${s.label}`, listaVazia: 'Nenhum pedido neste status.',
     carregarLista: async (): Promise<DetalheRegistro[]> => {
@@ -405,53 +424,63 @@ export default function DashboardPage() {
     linhas: [
       { label: 'Entradas recebidas', valor: num(d?.fluxoDia.entradas ?? 0) },
       { label: 'Pedidos faturados', valor: num(d?.fluxoDia.faturados ?? 0) },
-      { label: 'Romaneios na rota', valor: num(d?.fluxoDia.romaneios ?? 0) },
+      { label: 'Pedidos em rota', valor: num(d?.fluxoDia.romaneios ?? 0) },
       { label: 'Entregas concluídas', valor: num(d?.fluxoDia.entregues ?? 0) },
     ],
     rota: item.rota, verMaisLabel: 'Ver mais',
   });
 
   return (
-    <div className="flex flex-col h-full">
-      <PageHeader
-        icon={<LayoutDashboard className="h-4 w-4" />}
-        titulo="Dashboard"
-        subtitulo={`${filialAtiva ? `${filialAtiva.codigo} — ${filialAtiva.nome}` : 'Todas as filiais'} · ${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}`}
-        actions={<>
-          <div className="flex rounded-lg border border-[#E5E7EB] bg-white p-0.5">
+    <div className="theme-site flex flex-col h-full">
+      {/* Header — barra integrada: chip com brilho + título Bricolage + controles */}
+      <header className="dash-head shrink-0 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="head-badge">
+            <LayoutDashboard className="h-[18px] w-[18px]" strokeWidth={1.9} />
+          </div>
+          <div className="flex items-baseline gap-2.5 min-w-0">
+            <h1 className="text-[19px] font-bold leading-none">Dashboard</h1>
+            <p className="text-[11px] text-[#8A90A0] truncate">
+              {filialAtiva ? `${filialAtiva.codigo} — ${filialAtiva.nome}` : 'Todas as filiais'} · {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="seg">
             {PERIODOS.map(p => (
-              <button key={p.key} onClick={() => setPeriodo(p.key)}
-                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${periodo === p.key ? 'bg-[#0F8A72]/15 text-[#0B6F5C]' : 'text-[#5F6065] hover:text-[#202123]'}`}>
-                {p.label}
-              </button>
+              <button key={p.key} onClick={() => setPeriodo(p.key)} className={periodo === p.key ? 'on' : ''}>{p.label}</button>
             ))}
-            <button onClick={() => setPeriodo('custom')}
-              className={`px-3 py-1 text-xs font-semibold rounded-md transition-all flex items-center gap-1 ${periodo === 'custom' ? 'bg-[#0F8A72]/15 text-[#0B6F5C]' : 'text-[#5F6065] hover:text-[#202123]'}`}>
+            <button onClick={() => setPeriodo('custom')} className={`flex items-center gap-1 ${periodo === 'custom' ? 'on' : ''}`}>
               <CalendarRange className="h-3.5 w-3.5" /> Personalizado
             </button>
           </div>
           {periodo === 'custom' && (
-            <div className="flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-2 py-1">
-              <span className="text-[10px] text-[#8E8F94] uppercase">De</span>
+            <div className="flex items-center gap-1.5 rounded-lg border border-[#23262F] bg-[#0C0D10] px-2 py-1.5">
+              <span className="text-[10px] text-[#5E6472] uppercase">De</span>
               <input type="date" value={dataInicio} max={dataFim} onChange={e => setDataInicio(e.target.value)}
-                className="bg-transparent text-xs text-[#202123] outline-none [color-scheme:light]" />
-              <span className="text-[10px] text-[#8E8F94] uppercase">Até</span>
+                className="bg-transparent text-xs text-[#F7F8FA] outline-none [color-scheme:dark] border-0" />
+              <span className="text-[10px] text-[#5E6472] uppercase">Até</span>
               <input type="date" value={dataFim} min={dataInicio} onChange={e => setDataFim(e.target.value)}
-                className="bg-transparent text-xs text-[#202123] outline-none [color-scheme:light]" />
+                className="bg-transparent text-xs text-[#F7F8FA] outline-none [color-scheme:dark] border-0" />
             </div>
           )}
-          <button onClick={carregar} className="flex items-center gap-1.5 bg-white border border-[#E5E7EB] hover:bg-[#F7F7F8] px-3 py-1.5 rounded-lg text-[#202123] text-sm transition-colors">
-            <RefreshCw className={`h-4 w-4 text-[#0F8A72] ${loading ? 'animate-spin' : ''}`} /> Atualizar
+          <button onClick={carregar} className="btn-accent">
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
           </button>
-        </>}
-      />
+        </div>
+      </header>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-7">
       {/* ═══ FINANCEIRO ═══ */}
       <Secao icon={CircleDollarSign} titulo={`Financeiro · ${d?.periodoLabel || ''}`} cor="#34d399">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
-          <Kpi icon={TrendingUp} label="Faturamento" value={R$c(f?.faturamento ?? 0)} tone="brand" delta={f?.faturamentoDelta}
-            sub={`${num(f?.vendas ?? 0)} vendas`} onClick={() => setDetalhe(abrir('faturamento'))} />
+          <Kpi icon={TrendingUp} label="Faturamento"
+            value={R$c((f?.devolucoes ?? 0) > 0 ? (f?.faturamentoLiquido ?? f?.faturamento ?? 0) : (f?.faturamento ?? 0))}
+            tone="brand" delta={f?.faturamentoDelta}
+            sub={(f?.devolucoes ?? 0) > 0
+              ? <span>{num(f?.vendas ?? 0)} vendas · <span className="text-[#E0483D]">−{R$c(f?.devolucoes ?? 0)} dev.</span></span>
+              : `${num(f?.vendas ?? 0)} vendas`}
+            onClick={() => setDetalhe(abrir('faturamento'))} />
           <Kpi icon={Receipt} label="Ticket Médio" value={R$c(f?.ticketMedio ?? 0)} tone="brand" sub="por venda" onClick={() => setDetalhe(abrir('ticket'))} />
           <Kpi icon={Percent} label="Margem Bruta" value={pct(f?.margemBruta ?? 0)} tone={(f?.margemBruta ?? 0) >= 0 ? 'emerald' : 'rose'}
             sub="do DRE realizado" onClick={() => setDetalhe(abrir('margem'))} />
@@ -467,53 +496,64 @@ export default function DashboardPage() {
 
         {/* Faturamento + aging */}
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
-          <div className="card p-5 xl:col-span-2">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-[#202123] text-sm">Faturamento — série diária</h3>
-              <span className="text-[11px] text-[#8E8F94]">{d?.serieFaturamento.length} dias</span>
+          <div className="panelx xl:col-span-2">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="eyebrow">FATURAMENTO · SÉRIE DIÁRIA</div>
+                <div className="flex items-end gap-2.5 mt-1.5">
+                  <span className="headline">{R$c((f?.devolucoes ?? 0) > 0 ? (f?.faturamentoLiquido ?? f?.faturamento ?? 0) : (f?.faturamento ?? 0))}</span>
+                  {f?.faturamentoDelta !== undefined && <span className="mb-1"><Delta v={f.faturamentoDelta} /></span>}
+                </div>
+                {(f?.devolucoes ?? 0) > 0
+                  ? <p className="text-[11px] text-[#8A90A0] mt-1">{num(f?.vendas ?? 0)} vendas · bruto {R$c(f?.faturamento ?? 0)} <span className="text-[#E0483D]">(−) {R$c(f?.devolucoes ?? 0)} devoluções</span></p>
+                  : <p className="text-[11px] text-[#8A90A0] mt-1">{num(f?.vendas ?? 0)} vendas no período</p>}
+              </div>
+              <span className="pill">{d?.serieFaturamento.length ?? 0} dias</span>
             </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <AreaChart data={d?.serieFaturamento || []} margin={{ top: 6, right: 8, left: -12, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={224}>
+              <AreaChart data={d?.serieFaturamento || []} margin={{ top: 8, right: 8, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gFat" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0FA968" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="#0FA968" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#01B8FA" stopOpacity={0.42} />
+                    <stop offset="55%" stopColor="#01B8FA" stopOpacity={0.12} />
+                    <stop offset="100%" stopColor="#01B8FA" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,23,29,0.06)" vertical={false} />
-                <XAxis dataKey="label" tick={{ fill: '#8E8F94', fontSize: 10 }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={16} />
-                <YAxis tick={{ fill: '#8E8F94', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => R$c(v).replace('R$ ', '')} width={54} />
-                <Tooltip contentStyle={tipStyle} formatter={(v: any) => [R$(v), 'Faturado']} labelStyle={{ color: '#8E8F94' }} cursor={{ stroke: 'rgba(15,169,104,0.35)' }} />
-                <Area type="monotone" dataKey="valor" stroke="#0FA968" strokeWidth={2} fill="url(#gFat)" />
+                <CartesianGrid strokeDasharray="2 6" stroke="rgba(255,255,255,0.055)" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: '#5E6472', fontSize: 10 }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={16} dy={4} />
+                <YAxis tick={{ fill: '#5E6472', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => R$c(v).replace('R$ ', '')} width={54} />
+                <Tooltip contentStyle={tipStyle} formatter={(v: any) => [R$(v), 'Faturado']} labelStyle={{ color: '#8A90A0' }} cursor={{ stroke: 'rgba(1,184,250,0.45)', strokeWidth: 1, strokeDasharray: '4 4' }} />
+                <Area type="monotone" dataKey="valor" stroke="#01B8FA" strokeWidth={2.5} fill="url(#gFat)"
+                  dot={false} activeDot={{ r: 4, fill: '#01B8FA', stroke: '#08090A', strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
           {/* Aging a receber/pagar */}
-          <div className="card p-5">
-            <h3 className="font-semibold text-[#202123] text-sm mb-3">Vencimentos (aging)</h3>
+          <div className="panelx">
+            <div className="eyebrow mb-4">VENCIMENTOS · AGING</div>
             {(['receber', 'pagar'] as const).map((tipo) => {
               const ag = f?.[tipo]; if (!ag) return null;
               const faixas = [
-                { k: 'vencido', label: 'Vencido', v: ag.vencido, cor: '#f43f5e' },
-                { k: 'ate7', label: '0–7 dias', v: ag.ate7, cor: '#f59e0b' },
-                { k: 'ate30', label: '8–30 dias', v: ag.ate30, cor: '#0ea5e9' },
-                { k: 'mais30', label: '+30 dias', v: ag.mais30, cor: '#64748b' },
+                { k: 'vencido', label: 'Vencido', v: ag.vencido, cor: '#FF6B7A' },
+                { k: 'ate7', label: '0–7 dias', v: ag.ate7, cor: '#01B8FA' },
+                { k: 'ate30', label: '8–30 dias', v: ag.ate30, cor: '#22D3EE' },
+                { k: 'mais30', label: '+30 dias', v: ag.mais30, cor: '#3B9EFF' },
               ];
               return (
                 <div key={tipo} className="mb-4 last:mb-0 cursor-pointer" onClick={() => setDetalhe(abrir(tipo === 'receber' ? 'receber' : 'pagar'))}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-[#8E8F94]">{tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
-                    <span className="font-num text-xs font-bold text-[#202123] tabular-nums">{R$c(ag.total)}</span>
+                    <span className="eyebrow mut">{tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
+                    <span className="num text-xs font-bold text-[#F7F8FA]">{R$c(ag.total)}</span>
                   </div>
-                  <div className="flex h-2.5 rounded-full overflow-hidden bg-[#EEF0F2]">
+                  <div className="flex h-2.5 rounded-full overflow-hidden track">
                     {faixas.map(fx => (ag.total > 0 && fx.v > 0) ? (
                       <div key={fx.k} title={`${fx.label}: ${R$(fx.v)}`} style={{ width: `${(fx.v / ag.total) * 100}%`, background: fx.cor }} />
                     ) : null)}
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5">
                     {faixas.filter(fx => fx.v > 0).map(fx => (
-                      <span key={fx.k} className="text-[10px] text-[#8E8F94] flex items-center gap-1">
+                      <span key={fx.k} className="text-[10px] text-[#8A90A0] flex items-center gap-1">
                         <span className="h-2 w-2 rounded-full" style={{ background: fx.cor }} />{fx.label} {R$c(fx.v)}
                       </span>
                     ))}
@@ -521,16 +561,16 @@ export default function DashboardPage() {
                 </div>
               );
             })}
-            <div className="mt-3 pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-[11px]">
-              <span className="text-[#8E8F94]">Inadimplência</span>
-              <span className={`font-bold ${(f?.inadimplenciaPct ?? 0) > 0 ? 'text-[#E0483D]' : 'text-[#0FA968]'}`}>{pct(f?.inadimplenciaPct ?? 0)}</span>
+            <div className="mt-3 pt-3 border-t border-[#23262F] flex items-center justify-between text-[11px]">
+              <span className="text-[#8A90A0]">Inadimplência</span>
+              <span className={`font-bold ${(f?.inadimplenciaPct ?? 0) > 0 ? 'text-[#FF6B7A]' : 'text-[#34D9A6]'}`}>{pct(f?.inadimplenciaPct ?? 0)}</span>
             </div>
           </div>
         </div>
       </Secao>
 
       {/* ═══ ESTOQUE / WMS ═══ */}
-      <Secao icon={Boxes} titulo="Estoque & WMS" cor="#FFC24B">
+      <Secao icon={Boxes} titulo="Estoque & WMS" cor="#01B8FA">
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
           <Kpi icon={Package} label="Itens c/ Saldo" value={num(e?.itensComSaldo ?? 0)} tone="brand" sub={`de ${num(e?.produtosAtivos ?? 0)} ativos`} onClick={() => setDetalhe(abrir('itens'))} />
           <Kpi icon={CircleDollarSign} label="Valor do Estoque" value={R$c(e?.valorEstoque ?? 0)} tone="brand" sub="a custo médio" onClick={() => setDetalhe(abrir('valorEstoque'))} />
@@ -545,13 +585,13 @@ export default function DashboardPage() {
       {/* ═══ VENDAS: pedidos + top ═══ */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
         {/* Pedidos por status */}
-        <div className="card p-5">
-          <h3 className="font-semibold text-[#202123] text-sm mb-4 flex items-center gap-2"><PackageCheck className="h-4 w-4 text-[#0F8A72]" /> Pedidos por status</h3>
+        <div className="panelx">
+          <h3 className="font-semibold text-[#FFFFFF] text-sm mb-4 flex items-center gap-2"><PackageCheck className="h-4 w-4 text-[#01B8FA]" /> Pedidos por status</h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={statusData} layout="vertical" margin={{ left: 8, right: 16, top: 0, bottom: 0 }}>
               <XAxis type="number" hide />
-              <YAxis type="category" dataKey="label" tick={{ fill: '#5F6065', fontSize: 11 }} axisLine={false} tickLine={false} width={72} />
-              <Tooltip contentStyle={tipStyle} cursor={{ fill: 'rgba(22,23,29,0.04)' }} formatter={(v: any) => [v, 'pedidos']} />
+              <YAxis type="category" dataKey="label" tick={{ fill: '#8A90A0', fontSize: 11 }} axisLine={false} tickLine={false} width={72} />
+              <Tooltip contentStyle={tipStyle} cursor={{ fill: 'rgba(255,255,255,0.04)' }} formatter={(v: any) => [v, 'pedidos']} />
               <Bar dataKey="valor" radius={[0, 5, 5, 0]} cursor="pointer" onClick={(p: any) => setDetalhe(abrirStatus({ status: p.status, label: p.label, valor: p.valor }))}>
                 {statusData.map((s) => <Cell key={s.status} fill={s.cor} />)}
               </Bar>
@@ -560,69 +600,69 @@ export default function DashboardPage() {
         </div>
 
         {/* Top clientes */}
-        <div className="card p-5">
+        <div className="panelx">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-[#202123] text-sm flex items-center gap-2"><Users className="h-4 w-4 text-[#0F8A72]" /> Top clientes</h3>
-            <span className="text-[10px] text-[#8E8F94]">por faturamento</span>
+            <h3 className="font-semibold text-[#FFFFFF] text-sm flex items-center gap-2"><Users className="h-4 w-4 text-[#01B8FA]" /> Top clientes</h3>
+            <span className="text-[10px] text-[#8A90A0]">por faturamento</span>
           </div>
           <div className="space-y-2.5">
             {(d?.topClientes || []).filter(c => c.valor > 0).slice(0, 6).map((c, i) => (
               <button key={c.clienteId} onClick={() => setDetalhe(abrirCliente(c))} className="w-full text-left group">
                 <div className="flex items-center justify-between text-xs mb-1">
-                  <span className="text-[#3a3b44] truncate flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-[#C7C9D4] w-3">{i + 1}</span>{c.nome}
+                  <span className="text-[#F7F8FA] truncate flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-[#5E6472] w-3">{i + 1}</span>{c.nome}
                   </span>
-                  <span className="font-num font-bold text-[#202123] tabular-nums shrink-0 ml-2">{R$c(c.valor)}</span>
+                  <span className="num font-bold text-[#F7F8FA] shrink-0 ml-2">{R$c(c.valor)}</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-[#EEF0F2] overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#0F8A72] to-[#13A184] rounded-full group-hover:brightness-105" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
+                <div className="h-1.5 rounded-full track overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-[#0E86D4] to-[#01B8FA] rounded-full group-hover:brightness-110" style={{ width: `${(c.valor / maxCliente) * 100}%` }} />
                 </div>
               </button>
             ))}
-            {!(d?.topClientes || []).some(c => c.valor > 0) && <p className="text-xs text-[#8E8F94] py-6 text-center">Sem faturamento no período.</p>}
+            {!(d?.topClientes || []).some(c => c.valor > 0) && <p className="text-xs text-[#8A90A0] py-6 text-center">Sem faturamento no período.</p>}
           </div>
         </div>
 
         {/* Top produtos */}
-        <div className="card p-5">
+        <div className="panelx">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-[#202123] text-sm flex items-center gap-2"><Boxes className="h-4 w-4 text-[#0F8A72]" /> Top produtos (saída)</h3>
-            <div className="flex rounded-md border border-[#E5E7EB] p-0.5 text-[10px]">
-              <button onClick={() => setOrdProduto('custo')} className={`px-2 py-0.5 rounded ${ordProduto === 'custo' ? 'bg-[#0F8A72]/15 text-[#0B6F5C]' : 'text-[#8E8F94]'}`}>R$</button>
-              <button onClick={() => setOrdProduto('qtd')} className={`px-2 py-0.5 rounded ${ordProduto === 'qtd' ? 'bg-[#0F8A72]/15 text-[#0B6F5C]' : 'text-[#8E8F94]'}`}>kg</button>
+            <h3 className="font-semibold text-[#FFFFFF] text-sm flex items-center gap-2"><Boxes className="h-4 w-4 text-[#01B8FA]" /> Top produtos (saída)</h3>
+            <div className="seg text-[10px]">
+              <button onClick={() => setOrdProduto('custo')} className={ordProduto === 'custo' ? 'on' : ''}>R$</button>
+              <button onClick={() => setOrdProduto('qtd')} className={ordProduto === 'qtd' ? 'on' : ''}>kg</button>
             </div>
           </div>
           <div className="space-y-1.5">
             {produtosOrdenados.slice(0, 6).map((p) => (
-              <button key={p.produtoId} onClick={() => setDetalhe(abrirProduto(p))} className="w-full flex items-center justify-between text-xs py-1 hover:bg-[#F7F7F8] rounded px-1.5 -mx-1.5">
-                <span className="text-[#3a3b44] truncate flex items-center gap-1.5">
-                  <span className="text-[9px] font-mono text-[#C7C9D4]">{p.codigo}</span>{p.descricao}
+              <button key={p.produtoId} onClick={() => setDetalhe(abrirProduto(p))} className="w-full flex items-center justify-between text-xs py-1 hover:bg-white/[0.04] rounded px-1.5 -mx-1.5">
+                <span className="text-[#F7F8FA] truncate flex items-center gap-1.5">
+                  <span className="text-[9px] num text-[#5E6472]">{p.codigo}</span>{p.descricao}
                 </span>
-                <span className="font-num font-bold text-[#202123] tabular-nums shrink-0 ml-2">{ordProduto === 'custo' ? R$c(p.custo) : kg(p.qtd)}</span>
+                <span className="num font-bold text-[#F7F8FA] shrink-0 ml-2">{ordProduto === 'custo' ? R$c(p.custo) : kg(p.qtd)}</span>
               </button>
             ))}
-            {produtosOrdenados.length === 0 && <p className="text-xs text-[#8E8F94] py-6 text-center">Sem saídas no período.</p>}
+            {produtosOrdenados.length === 0 && <p className="text-xs text-[#8A90A0] py-6 text-center">Sem saídas no período.</p>}
           </div>
         </div>
       </div>
 
       {/* ═══ FLUXO OPERACIONAL ═══ */}
-      <Secao icon={Activity} titulo="Fluxo operacional do dia" cor="#FFC24B">
-        <div className="card p-5">
+      <Secao icon={Activity} titulo="Fluxo operacional do dia" cor="#01B8FA">
+        <div className="panelx">
           <div className="grid grid-cols-4 gap-0">
             {[
-              { label: 'Entradas\nrecebidas', value: `${d?.fluxoDia.entradas ?? 0}`, cor: '#0ea5e9', rota: '/wms/entradas', step: 1 },
-              { label: 'Pedidos\nfaturados', value: `${d?.fluxoDia.faturados ?? 0} NF-e`, cor: '#10b981', rota: '/fiscal/gestao', step: 2 },
-              { label: 'Romaneios\nna rota', value: `${d?.fluxoDia.romaneios ?? 0} rota(s)`, cor: '#f59e0b', rota: '/logistica/torre', step: 3 },
-              { label: 'Entregas\nconcluídas', value: `${d?.fluxoDia.entregues ?? 0}`, cor: '#8b5cf6', rota: '/logistica/torre', step: 4 },
+              { label: 'Entradas\nrecebidas', value: `${d?.fluxoDia.entradas ?? 0}`, cor: '#01B8FA', rota: '/wms/entradas', step: 1 },
+              { label: 'Pedidos\nfaturados', value: `${d?.fluxoDia.faturados ?? 0} NF-e`, cor: '#22D3EE', rota: '/fiscal/gestao', step: 2 },
+              { label: 'Pedidos\nem rota', value: `${d?.fluxoDia.romaneios ?? 0}`, cor: '#2DD4A7', rota: '/logistica/torre', step: 3 },
+              { label: 'Entregas\nconcluídas', value: `${d?.fluxoDia.entregues ?? 0}`, cor: '#A78BFA', rota: '/logistica/torre', step: 4 },
             ].map((item, i, arr) => (
               <div key={i} className="flex items-center">
                 <button onClick={() => setDetalhe(abrirFluxo({ titulo: item.label.replace('\n', ' '), valor: item.value, rota: item.rota }))} className="flex flex-col items-center flex-1 group">
-                  <div className="h-11 w-11 rounded-full flex items-center justify-center text-white text-sm font-bold ring-4 ring-[#EEF0F2] shadow-sm group-hover:scale-105 transition-transform" style={{ background: item.cor }}>{item.step}</div>
-                  <p className="text-[11px] font-medium text-[#5F6065] mt-2 text-center whitespace-pre-line">{item.label}</p>
-                  <p className="font-num text-sm font-bold text-[#202123] mt-0.5">{item.value}</p>
+                  <div className="h-11 w-11 rounded-full flex items-center justify-center text-[#08090A] text-sm font-bold ring-4 ring-white/[0.06] group-hover:scale-105 transition-transform" style={{ background: item.cor, boxShadow: `0 0 22px -6px ${item.cor}` }}>{item.step}</div>
+                  <p className="text-[11px] font-medium text-[#8A90A0] mt-2.5 text-center whitespace-pre-line">{item.label}</p>
+                  <p className="num text-sm font-bold text-[#F7F8FA] mt-1">{item.value}</p>
                 </button>
-                {i < arr.length - 1 && <div className="h-0.5 w-full bg-[#E5E7EB] mx-1 mb-9" />}
+                {i < arr.length - 1 && <div className="h-px w-full bg-[#23262F] mx-1 mb-9" />}
               </div>
             ))}
           </div>

@@ -1,6 +1,6 @@
 import { toast, confirmDialog } from '../../../components/ui/feedback';
-import { useState, useEffect } from 'react';
-import { Apple, Pencil, Trash2, Package, Box, Tag, Copy, Barcode, ShieldCheck, Ruler, Layers3 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Pencil, Trash2, Package, Box, Tag, Copy, Barcode, ShieldCheck, Ruler, Layers3 } from 'lucide-react';
 import api from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { CadastroShell, TopBar, FilterBar, Chips, TableCard, Th, StatusBadge, Modal, SteppedForm, Step, Campo, Loader, Vazio, inp, R$ } from '../ui';
@@ -10,17 +10,6 @@ const CATEGORIAS = ['FRUTA', 'LEGUME', 'VERDURA'];
 const CLASSIFICACOES = ['Extra', 'Tipo 1', 'Tipo 2', 'Graúdo', 'Médio', 'Miúdo'];
 const CAIXARIAS = ['Caixa Madeira 20kg', 'Caixa Madeira 18kg', 'Caixa Plástica H (reutilizável)', 'Saca 50kg', 'Maço', 'Engradado'];
 const UNIDADES = ['KG', 'CX', 'MAÇO', 'SACA', 'UN', 'DZ'];
-
-// Ícone ilustrativo simples por nome/categoria
-const emojiDe = (nome: string, cat?: string) => {
-  const n = (nome || '').toLowerCase();
-  if (n.includes('banana')) return '🍌'; if (n.includes('tomate')) return '🍅'; if (n.includes('maç') || n.includes('maca')) return '🍎';
-  if (n.includes('laranja')) return '🍊'; if (n.includes('cebola')) return '🧅'; if (n.includes('batata')) return '🥔';
-  if (n.includes('cenoura')) return '🥕'; if (n.includes('alface') || n.includes('verdura')) return '🥬'; if (n.includes('melancia')) return '🍉';
-  if (n.includes('mamão') || n.includes('mamao')) return '🥭'; if (n.includes('uva')) return '🍇'; if (n.includes('milho')) return '🌽';
-  if (n.includes('piment')) return '🫑'; if (n.includes('ovo')) return '🥚'; if (n.includes('abacaxi')) return '🍍'; if (n.includes('limão') || n.includes('limao')) return '🍋';
-  return cat === 'LEGUME' ? '🥔' : cat === 'VERDURA' ? '🥬' : '🍏';
-};
 
 export default function Produtos() {
   const { pode } = useAuth();
@@ -40,6 +29,14 @@ export default function Produtos() {
 
   const filtrados = cat ? lista.filter(p => p.categoria === cat) : lista;
 
+  // Taxonomia real: os chips saem das categorias que existem nos dados
+  // (Mercearia, Bebidas, Higiene, Açougue, Limpeza…), não de uma lista fixa.
+  const categorias = useMemo(
+    () => Array.from(new Set(lista.map(p => (p.categoria || '').trim()).filter(Boolean)))
+      .sort((a, b) => a.localeCompare(b, 'pt-BR')),
+    [lista],
+  );
+
   const copiar = (texto: string, msg: string) => {
     navigator.clipboard?.writeText(String(texto ?? '')).then(() => toast(msg)).catch(() => toast('Não foi possível copiar.'));
   };
@@ -52,10 +49,10 @@ export default function Produtos() {
 
   return (
     <CadastroShell>
-      <TopBar icon={<Apple className="h-5 w-5" />} titulo="Produtos & NCM" novoLabel="Novo Cadastro"
+      <TopBar icon={<Package className="h-5 w-5" />} titulo="Produtos & NCM" novoLabel="Novo Cadastro"
         subtitulo={`${filtrados.length} item(ns) — classificação, caixaria e NCM`} onNovo={() => setCriando(true)} />
       <FilterBar busca={search} onBusca={setSearch} placeholder="Buscar por nome, código ou código de barras...">
-        <Chips value={cat} onChange={setCat} options={[{ value: '', label: 'Todos' }, ...CATEGORIAS.map(c => ({ value: c, label: c.charAt(0) + c.slice(1).toLowerCase() }))]} />
+        <Chips value={cat} onChange={setCat} options={[{ value: '', label: 'Todos' }, ...categorias.map(c => ({ value: c, label: c }))]} />
       </FilterBar>
 
       <div className="flex-1 overflow-auto p-4">
@@ -64,24 +61,22 @@ export default function Produtos() {
             <thead><tr>{['Produto', 'NCM', 'Categoria', 'Classificação', 'Caixaria', 'Estoque', 'Preço', 'Status', ''].map(h => <Th key={h}>{h}</Th>)}</tr></thead>
             <tbody>
               {filtrados.map(p => (
-                <tr key={p.id} className="border-t border-[#E7E5DF] hover:bg-amber-500/5">
-                  <td className="px-3 py-1.5">
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xl w-7 text-center">{emojiDe(p.descricao, p.categoria)}</span>
-                      <div><p className="font-semibold text-[#16171D] truncate max-w-[200px]">{p.descricao}</p><p className="text-slate-500 text-xs font-mono">{p.codigo}</p></div>
-                    </div>
+                <tr key={p.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                  <td className="px-3 py-1">
+                    <p className="font-semibold text-[12.5px] leading-tight text-[#F7F8FA] truncate max-w-[240px]">{p.descricao}</p>
+                    <p className="text-slate-500 text-[10.5px] font-mono leading-tight">{p.codigo}</p>
                   </td>
-                  <td className="px-3 py-1.5 font-mono text-slate-400 text-xs">{p.ncm}</td>
-                  <td className="px-3 py-1.5"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F0EEE9] text-[#8B8D98]">{p.categoria || '—'}</span></td>
-                  <td className="px-3 py-1.5 text-[#8B8D98] text-xs">{p.classificacao || '—'}</td>
-                  <td className="px-3 py-1.5 text-slate-400 text-xs truncate max-w-[140px]">{p.tipoCaixaria || '—'}</td>
-                  <td className="px-3 py-1.5 text-xs">
-                    <span className="font-mono text-[#5B5D69]">{(Number(p.estoqueKg) || 0).toLocaleString('pt-BR')} kg</span>
+                  <td className="px-3 py-1 font-mono text-slate-400 text-xs">{p.ncm}</td>
+                  <td className="px-3 py-1"><span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#16181F] border border-[#23262F] text-[#8A90A0]">{p.categoria || '—'}</span></td>
+                  <td className="px-3 py-1 text-[#8B8D98] text-xs">{p.classificacao || '—'}</td>
+                  <td className="px-3 py-1 text-slate-400 text-xs truncate max-w-[140px]">{p.tipoCaixaria || '—'}</td>
+                  <td className="px-3 py-1 text-xs">
+                    <span className="font-mono text-[#8A90A0]">{(Number(p.estoqueKg) || 0).toLocaleString('pt-BR')} kg</span>
                     {p.estoqueCaixas != null && <span className="text-slate-500 ml-1">· {Math.floor(p.estoqueCaixas)} cx</span>}
                   </td>
-                  <td className="px-3 py-1.5 text-right font-mono text-[#8B8D98]">{R$(p.precoVenda)}</td>
-                  <td className="px-3 py-1.5"><StatusBadge ativo={p.ativo} /></td>
-                  <td className="px-3 py-1.5 text-right"><div className="flex justify-end">
+                  <td className="px-3 py-1 text-right font-mono text-[#8B8D98]">{R$(p.precoVenda)}</td>
+                  <td className="px-3 py-1"><StatusBadge ativo={p.ativo} /></td>
+                  <td className="px-3 py-1 text-right"><div className="flex justify-end">
                     <Menu items={[
                       { titulo: true, label: p.descricao },
                       ...(pode('/cadastros/produtos', 'EDITAR') ? [{ label: 'Editar', icon: <Pencil />, onClick: () => setEditando(p) }] : []),
@@ -171,7 +166,7 @@ function ModalProduto({ item, onClose, onSalvo }: { item: any | null; onClose: (
         </Step>
       </SteppedForm>
 
-      {erro && <p className="text-xs text-[#c3352b] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
     </Modal>
   );
 }
@@ -231,7 +226,7 @@ function ModalProdutoCompleto({ item, onClose, onSalvo }: { item: any | null; on
         <div className="grid grid-cols-6 gap-3"><Campo label="NCM *"><I k="ncm" placeholder="8 dígitos" /></Campo><Campo label="CEST"><I k="cest" /></Campo><Campo label="CFOP padrão"><I k="cfop" /></Campo><Campo label="EX TIPI"><I k="exTipi" /></Campo><Campo label="cBenef"><I k="codigoBeneficioFiscal" /></Campo><Campo label="Gênero"><I k="generoItem" /></Campo></div>
         <div className="grid grid-cols-6 gap-3"><Campo label="CST/CSOSN ICMS"><I k="cstIcms" /></Campo><Campo label="Alíquota ICMS %"><I k="aliquotaIcms" type="number" /></Campo><Campo label="CST PIS"><I k="cstPis" /></Campo><Campo label="Alíquota PIS %"><I k="aliquotaPis" type="number" /></Campo><Campo label="CST COFINS"><I k="cstCofins" /></Campo><Campo label="Alíquota COFINS %"><I k="aliquotaCofins" type="number" /></Campo></div>
         <div className="grid grid-cols-5 gap-3"><Campo label="CST IBS/CBS"><I k="cstIbsCbs" placeholder="000" /></Campo><Campo label="cClassTrib"><I k="classTribIbsCbs" placeholder="000001" /></Campo><Campo label="IBS UF %"><I k="aliquotaIbsUf" type="number" /></Campo><Campo label="IBS Município %"><I k="aliquotaIbsMun" type="number" /></Campo><Campo label="CBS %"><I k="aliquotaCbs" type="number" /></Campo></div>
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-[10px] text-amber-800">Esses campos classificam o produto. A alíquota final deve vir da Matriz Fiscal conforme UF, operação, regime e destinatário.</p>
+        <p className="rounded-lg bg-[#FF9F45]/12 px-3 py-2 text-[10px] text-[#FF9F45]">Esses campos classificam o produto. A alíquota final deve vir da Matriz Fiscal conforme UF, operação, regime e destinatário.</p>
       </Step>
 
       <Step title="Comercial e estoque" icon={<Layers3 className="h-3.5 w-3.5" />} hint="Preço, unidade e política de reposição" complete={Number(f.precoVenda) >= 0}>
@@ -246,6 +241,6 @@ function ModalProdutoCompleto({ item, onClose, onSalvo }: { item: any | null; on
         <p className="text-[11px] text-slate-500">O saldo não é digitado no cadastro: entradas, inventários, vendas e transferências entre filiais atualizam o estoque com histórico.</p>
       </Step>
     </SteppedForm>
-    {erro && <p className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700">{erro}</p>}
+    {erro && <p className="mt-3 rounded-lg bg-rose-500/10 px-3 py-2 text-xs text-[#FF6B7A]">{erro}</p>}
   </Modal>;
 }

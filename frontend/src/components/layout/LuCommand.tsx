@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { ArrowRight, Barcode, CornerDownLeft, PackagePlus, Plus, Search, Send, ShieldCheck, Sparkles, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { podeVerTela, TELAS, type TelaDef } from '../../config/telas';
 import api, { financeiroApi, iaApi, tesourariaApi, type ComandoLuResp } from '../../services/api';
@@ -44,7 +44,7 @@ function Digitando() {
   return (
     <span className="inline-flex items-center gap-1 py-0.5">
       {[0, 1, 2].map((i) => (
-        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#0F8A72]/80 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
+        <span key={i} className="h-1.5 w-1.5 rounded-full bg-[#01B8FA]/80 animate-pulse" style={{ animationDelay: `${i * 150}ms` }} />
       ))}
     </span>
   );
@@ -88,6 +88,14 @@ export default function LuCommand() {
   const abrir = useCallback(() => {
     setAberto(true);
     setTimeout(() => inputRef.current?.focus(), 30);
+  }, []);
+
+  // "Novo chat" — limpa a conversa e volta ao estado inicial.
+  const novaConversa = useCallback(() => {
+    setMensagens([]);
+    setTexto('');
+    setSel(-1);
+    setTimeout(() => inputRef.current?.focus(), 0);
   }, []);
 
   // ⌘/Ctrl+K abre/fecha de qualquer tela; Esc fecha.
@@ -166,8 +174,6 @@ export default function LuCommand() {
     [navMatches.length],
   );
 
-  const semThread = mensagens.length === 0;
-
   // Sugestões de partida adaptadas ao MODO DE OPERAÇÃO (mesmo motor da Lu; muda
   // só o vocabulário exemplificado). Restaurante fala de CMV, pratos e mesas.
   const ehRestaurante = segmento !== 'VAREJO';
@@ -184,149 +190,143 @@ export default function LuCommand() {
           onClick={abrir}
           aria-label="Abrir a Lu (Ctrl+K)"
           title="Falar com a Lu — Ctrl+K"
-          className="group fixed bottom-4 right-4 z-[60] grid h-12 w-12 place-items-center rounded-full border border-[#D9E4E1] bg-white text-[#0F8A72] shadow-[0_12px_36px_rgba(22,23,29,0.20)] backdrop-blur-xl transition-all hover:scale-105 hover:border-[#0F8A72]/55 hover:text-[#0B6E5B] active:scale-95 sm:bottom-6 sm:right-6"
+          className="group fixed bottom-5 right-5 z-[60] grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-[#101216]/90 text-[#8A90A0] shadow-[0_10px_30px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all hover:-translate-y-0.5 hover:border-[#01B8FA]/50 hover:text-[#01B8FA] hover:shadow-[0_0_24px_-6px_rgba(1,184,250,0.6)] active:translate-y-0 active:scale-95 sm:bottom-6 sm:right-6"
         >
-          <Sparkles className="h-5 w-5 transition-transform group-hover:rotate-12" />
-          <span className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#39C5A5]" />
+          <Sparkles className="h-[18px] w-[18px] transition-transform duration-300 group-hover:rotate-[18deg]" />
         </button>
       )}
 
-      {/* Spotlight */}
+      {/* Chat da Lu — janela única no padrão do dashboard */}
       {aberto && (
-        <div className="fixed inset-0 z-[80] flex items-start justify-center px-4 pt-[8vh]">
-          <div className="absolute inset-0 bg-[#202123]/25 animate-backdrop" onClick={fechar} />
+        <div className="theme-site fixed inset-0 z-[80] flex items-start justify-center px-4 pt-[7vh]">
+          <div className="absolute inset-0 bg-[#08090A]/70 backdrop-blur-[2px] animate-backdrop" onClick={fechar} />
 
-          <div className="relative w-full max-w-2xl lu-rise">
-            {/* Barra principal com aparência limpa, inspirada em uma conversa. */}
-            <div className="rounded-[22px] border border-[#D9E4E1] bg-white shadow-[0_28px_80px_-16px_rgba(22,23,29,0.35)]">
-              <form
-                onSubmit={onSubmit}
-                className="relative overflow-hidden rounded-[21px] bg-white/95 backdrop-blur-2xl"
-              >
-                {/* brilho superior sutil + varredura quando pensando */}
-                <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#202123]/10 to-transparent" />
-                {carregando && <span className="pointer-events-none absolute inset-0 lu-sweep" />}
+          <div className="relative flex w-full max-w-xl max-h-[74vh] flex-col overflow-hidden rounded-2xl border border-[#23262F] bg-[#101216] shadow-[0_28px_80px_-16px_rgba(0,0,0,0.75)] lu-rise">
+            {/* Cabeçalho — identidade da Lu + novo chat */}
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-[#23262F]">
+              <span className={`grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[#01B8FA]/25 bg-[#01B8FA]/[0.12] text-[#01B8FA] ${carregando ? 'animate-pulse' : ''}`}>
+                <Sparkles className="h-4 w-4" />
+              </span>
+              <div className="min-w-0 flex-1 leading-none">
+                <p className="text-[13px] font-semibold text-[#F7F8FA]">Lu</p>
+                <p className="text-[10px] text-[#5E6472] mt-1">Assistente do ERP</p>
+              </div>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[#01B8FA]/10 px-2 py-0.5 text-[9px] font-semibold text-[#22D3EE]">
+                <ShieldCheck className="h-2.5 w-2.5" /> Somente consulta
+              </span>
+              {mensagens.length > 0 && (
+                <button onClick={novaConversa} title="Novo chat" className="flex items-center gap-1 rounded-lg border border-[#23262F] px-2 py-1 text-[10px] font-medium text-[#8A90A0] hover:text-[#F7F8FA] hover:border-[#01B8FA]/40 transition-colors">
+                  <Plus className="h-3 w-3" /> Novo chat
+                </button>
+              )}
+              <button onClick={fechar} title="Fechar (Esc)" className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-[#5E6472] hover:bg-white/[0.06] hover:text-[#F7F8FA] transition-colors">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
 
-                <div className="flex items-center gap-3.5 px-4 py-4">
-                  <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#212121] ${carregando ? 'animate-pulse' : ''}`}>
-                    <span className="grid h-full w-full place-items-center">
-                      {texto && sel < 0 ? <Search className="h-4 w-4 text-[#13A184]" /> : <Sparkles className="h-4 w-4 text-[#13A184]" />}
-                    </span>
-                  </span>
-                  <input
-                    ref={inputRef}
-                    value={texto}
-                    onChange={(e) => setTexto(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    disabled={carregando}
-                    placeholder="Pergunte sobre os dados do ERP…"
-                    className="flex-1 min-w-0 bg-transparent text-[18px] text-[#202123] placeholder:text-[#8E8F94] outline-none disabled:opacity-60"
-                  />
-                  {texto ? (
-                    <button type="submit" disabled={carregando} title="Enviar" className="grid h-9 w-9 place-items-center rounded-xl bg-[#F7F7F8] text-[#5F6065] hover:bg-[#0F8A72]/20 hover:text-[#0B6F5C] disabled:opacity-40 transition-colors">
-                      <Send className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button type="button" onClick={fechar} title="Fechar (Esc)" className="grid h-9 w-9 place-items-center rounded-xl text-[#8E8F94] hover:bg-[#F7F7F8] hover:text-[#202123] transition-colors">
-                      <X className="h-4 w-4" />
-                    </button>
+            {/* Corpo — conversa OU estado inicial */}
+            <div ref={threadRef} className="flex-1 overflow-y-auto">
+              {mensagens.length > 0 ? (
+                <div className="px-4 py-3.5 space-y-3">
+                  {mensagens.map((m, i) =>
+                    m.autor === 'user' ? (
+                      <div key={i} className="flex justify-end">
+                        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-[#01B8FA]/[0.14] border border-[#01B8FA]/30 px-3 py-2 text-[13px] text-[#F7F8FA]">{m.texto}</div>
+                      </div>
+                    ) : (
+                      <div key={i} className="flex justify-start gap-2">
+                        <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#01B8FA]/[0.12] text-[#01B8FA]"><Sparkles className="h-3 w-3" /></span>
+                        <div className="max-w-[82%] rounded-2xl rounded-bl-sm bg-[#16181F] border border-[#23262F] px-3 py-2.5 text-[13px] text-[#E7E8EC] leading-relaxed whitespace-pre-line">{m.texto}</div>
+                      </div>
+                    ),
+                  )}
+                  {carregando && (
+                    <div className="flex justify-start gap-2">
+                      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-lg bg-[#01B8FA]/[0.12] text-[#01B8FA]"><Sparkles className="h-3 w-3" /></span>
+                      <div className="rounded-2xl rounded-bl-sm bg-[#16181F] border border-[#23262F] px-3 py-2.5"><Digitando /></div>
+                    </div>
                   )}
                 </div>
-              </form>
-            </div>
-
-            {/* Painel de resultados */}
-            <div className="relative mt-2.5 overflow-hidden rounded-[18px] border border-[#E5E7EB] bg-white shadow-[0_24px_70px_-12px_rgba(22,23,29,0.28)]">
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0F8A72]/30 to-transparent" />
-              <>
-                  {/* Sugestões de navegação (aparecem enquanto digita) */}
-                  {texto && (
-                    <div className="p-1.5">
+              ) : (
+                <div className="p-4">
+                  <p className="text-[11px] uppercase tracking-wide text-[#5E6472] mb-3">Experimente</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sugestoesIniciais.map((s) => (
                       <button
-                        onMouseEnter={() => setSel(-1)}
-                        onClick={() => enviar()}
-                        className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel < 0 ? 'bg-[#0F8A72]/[0.12]' : 'hover:bg-[#F7F7F8]'}`}
+                        key={s}
+                        onClick={() => { setTexto(s); setTimeout(() => inputRef.current?.focus(), 0); }}
+                        className="rounded-full border border-[#23262F] bg-[#16181F] px-3 py-1.5 text-[12px] text-[#8A90A0] hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.10] hover:text-[#22D3EE] transition-colors"
                       >
-                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#0F8A72]/15 text-[#0F8A72]">
-                          <Sparkles className="h-3.5 w-3.5" />
-                        </span>
-                        <span className="flex-1 min-w-0 truncate text-[13px] text-[#202123]">
-                          Perguntar à Lu: <span className="text-[#8E8F94]">"{texto}"</span>
-                        </span>
-                        <CornerDownLeft className="h-3.5 w-3.5 text-[#C7C9D4]" />
+                        {s}
                       </button>
-
-                      {navMatches.map((t, i) => {
-                        const Icon = t.icon;
-                        return (
-                          <button
-                            key={t.key}
-                            onMouseEnter={() => setSel(i)}
-                            onClick={() => irPara(t.key)}
-                            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${sel === i ? 'bg-[#0F8A72]/[0.12]' : 'hover:bg-[#F7F7F8]'}`}
-                          >
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#F7F7F8] text-[#5F6065]">
-                              {Icon ? <Icon className="h-3.5 w-3.5" /> : <Search className="h-3.5 w-3.5" />}
-                            </span>
-                            <span className="flex-1 min-w-0 truncate text-[13px] text-[#202123]">{t.label}</span>
-                            <span className="text-[10px] uppercase tracking-wide text-[#8E8F94]">{t.grupo}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Conversa */}
-                  {mensagens.length > 0 && (
-                    <div ref={threadRef} className="max-h-[54vh] overflow-y-auto px-4 py-3.5 space-y-3">
-                      {mensagens.map((m, i) =>
-                        m.autor === 'user' ? (
-                          <div key={i} className="flex justify-end">
-                            <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-[#0F8A72]/[0.12] border border-[#0F8A72]/25 px-3 py-2 text-[13px] text-[#202123]">{m.texto}</div>
-                          </div>
-                        ) : (
-                          <div key={i} className="flex justify-start">
-                            <div className="max-w-[86%] rounded-2xl rounded-bl-sm bg-[#F7F7F8] border border-[#E5E7EB] px-3 py-2.5 text-[13px] text-[#202123] leading-relaxed whitespace-pre-line">{m.texto}</div>
-                          </div>
-                        ),
-                      )}
-                      {carregando && (
-                        <div className="flex justify-start">
-                          <div className="rounded-2xl rounded-bl-sm bg-[#F7F7F8] border border-[#E5E7EB] px-3 py-2.5">
-                            <Digitando />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Estado inicial — atalhos de partida */}
-                  {semThread && !texto && (
-                    <div className="p-4">
-                      <div className="mb-3 flex items-center justify-between gap-3">
-                        <p className="text-[11px] uppercase tracking-wide text-[#8E8F94]">Experimente</p>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-[10px] font-semibold text-[#0B6F5C]"><ShieldCheck className="h-3 w-3" /> Somente consulta</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {sugestoesIniciais.map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => { setTexto(s); setTimeout(() => inputRef.current?.focus(), 0); }}
-                            className="rounded-full border border-[#E5E7EB] bg-white px-3 py-1.5 text-[12px] text-[#5F6065] hover:bg-[#0F8A72]/[0.12] hover:border-[#0F8A72]/40 hover:text-[#0B6F5C] transition-colors"
-                          >
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="mt-4 flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-[#8E8F94]">
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F7F7F8] px-1.5 py-0.5 text-[#5F6065] ring-1 ring-[#E5E7EB]">↑↓</kbd> navegar</span>
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F7F7F8] px-1.5 py-0.5 text-[#5F6065] ring-1 ring-[#E5E7EB]">↵</kbd> abrir / perguntar</span>
-                        <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#F7F7F8] px-1.5 py-0.5 text-[#5F6065] ring-1 ring-[#E5E7EB]">esc</kbd> fechar</span>
-                      </div>
-                    </div>
-                  )}
-              </>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-3 font-mono text-[10px] uppercase tracking-wider text-[#5E6472]">
+                    <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#16181F] px-1.5 py-0.5 text-[#8A90A0] ring-1 ring-[#23262F]">↑↓</kbd> navegar</span>
+                    <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#16181F] px-1.5 py-0.5 text-[#8A90A0] ring-1 ring-[#23262F]">↵</kbd> abrir / perguntar</span>
+                    <span className="flex items-center gap-1.5"><kbd className="rounded bg-[#16181F] px-1.5 py-0.5 text-[#8A90A0] ring-1 ring-[#23262F]">esc</kbd> fechar</span>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Sugestões de navegação — autocomplete acima do input */}
+            {texto && (
+              <div className="border-t border-[#23262F] p-1.5 max-h-52 overflow-y-auto">
+                <button
+                  onMouseEnter={() => setSel(-1)}
+                  onClick={() => enviar()}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors ${sel < 0 ? 'bg-[#01B8FA]/[0.12]' : 'hover:bg-white/[0.04]'}`}
+                >
+                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-[#01B8FA]/15 text-[#01B8FA]"><Sparkles className="h-3.5 w-3.5" /></span>
+                  <span className="flex-1 min-w-0 truncate text-[13px] text-[#F7F8FA]">Perguntar à Lu: <span className="text-[#8A90A0]">"{texto}"</span></span>
+                  <CornerDownLeft className="h-3.5 w-3.5 text-[#5E6472]" />
+                </button>
+                {navMatches.map((t, i) => {
+                  const Icon = t.icon;
+                  return (
+                    <button
+                      key={t.key}
+                      onMouseEnter={() => setSel(i)}
+                      onClick={() => irPara(t.key)}
+                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-colors ${sel === i ? 'bg-[#01B8FA]/[0.12]' : 'hover:bg-white/[0.04]'}`}
+                    >
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/[0.05] text-[#8A90A0]">
+                        {Icon ? <Icon className="h-3.5 w-3.5" /> : <Search className="h-3.5 w-3.5" />}
+                      </span>
+                      <span className="flex-1 min-w-0 truncate text-[13px] text-[#F7F8FA]">{t.label}</span>
+                      <span className="text-[10px] uppercase tracking-wide text-[#5E6472]">{t.grupo}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Input (rodapé, estilo chat) */}
+            <form onSubmit={onSubmit} className="border-t border-[#23262F] p-2.5">
+              <div className="flex items-center gap-2 rounded-xl border border-[#23262F] bg-[#0C0D10] pl-3 pr-2 py-1.5 transition-colors focus-within:border-[#01B8FA]/50">
+                <span className="shrink-0 text-[#01B8FA]">
+                  {texto && sel < 0 ? <Search className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}
+                </span>
+                <input
+                  ref={inputRef}
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  disabled={carregando}
+                  placeholder="Pergunte sobre os dados do ERP…"
+                  className="flex-1 min-w-0 bg-transparent py-1 text-[15px] text-[#F7F8FA] placeholder:text-[#5E6472] outline-none disabled:opacity-60"
+                />
+                <button
+                  type="submit"
+                  disabled={carregando || !texto.trim()}
+                  title="Enviar"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-[#01B8FA] text-[#08090A] transition hover:brightness-110 disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Send className="h-4 w-4" />
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -361,13 +361,13 @@ function FormTransferencia({ acao, onCancelar, onFeito }: {
     finally { setSalvando(false); }
   };
   return <div className="p-4">
-    <div className="mb-3 flex items-center gap-2"><PackagePlus className="h-4 w-4 text-[#0F8A72]" /><b className="text-[13px] text-[#202123]">Revisar transferência</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">aguarda sua confirmação</span></div>
-    <div className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-3 text-[13px]"><b className="min-w-0 flex-1 truncate">{r.filialOrigemNome}</b><ArrowRight className="h-4 w-4 shrink-0 text-[#0F8A72]" /><b className="min-w-0 flex-1 truncate text-right">{r.filialDestinoNome}</b></div>
+    <div className="mb-3 flex items-center gap-2"><PackagePlus className="h-4 w-4 text-[#2F5FE0]" /><b className="text-[13px] text-[#202123]">Revisar transferência</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">aguarda sua confirmação</span></div>
+    <div className="flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F7F7F8] px-3 py-3 text-[13px]"><b className="min-w-0 flex-1 truncate">{r.filialOrigemNome}</b><ArrowRight className="h-4 w-4 shrink-0 text-[#2F5FE0]" /><b className="min-w-0 flex-1 truncate text-right">{r.filialDestinoNome}</b></div>
     <div className="mt-3 rounded-xl border border-[#E5E7EB] p-3"><p className="text-[12px] font-semibold text-[#202123]">{r.produtoCodigo} · {r.produtoDescricao}</p><p className="mt-1 text-[11px] text-[#8E8F94]">Saldo disponível na origem: {r.saldoDisponivel.toLocaleString('pt-BR')} {r.unidade}</p></div>
     <div className="mt-3 grid gap-2.5 sm:grid-cols-[160px_1fr]"><label className="text-[11px] text-[#5F6065]">Quantidade<input value={quantidade} onChange={(e) => setQuantidade(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" /></label><label className="text-[11px] text-[#5F6065]">Observações (opcional)<input value={observacoes} onChange={(e) => setObservacoes(e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" placeholder="Prioridade, transporte, conferência..." /></label></div>
     {qtd > r.saldoDisponivel && <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">A quantidade é maior que o saldo atual. A solicitação pode ser criada, mas o despacho exigirá saldo suficiente.</p>}
     {erro && <p className="mt-2 text-[12px] text-[#c3352b]">{erro}</p>}
-    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#0F8A72] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Solicitando…' : 'Confirmar transferência'}</button></div>
+    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#2F5FE0] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Solicitando…' : 'Confirmar transferência'}</button></div>
   </div>;
 }
 
@@ -394,11 +394,11 @@ function FormProduto({ acao, onCancelar, onFeito }: {
   };
   const campo = (label: string, k: keyof typeof f, placeholder = '') => <label className="text-[11px] text-[#5F6065]">{label}<input value={String(f[k])} onChange={(e) => set(k, e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none" placeholder={placeholder} /></label>;
   return <div className="p-4">
-    <div className="mb-3 flex items-center gap-2"><Barcode className="h-4 w-4 text-[#0F8A72]" /><b className="text-[13px] text-[#202123]">Revisar novo produto</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">rascunho da Lu</span></div>
+    <div className="mb-3 flex items-center gap-2"><Barcode className="h-4 w-4 text-[#2F5FE0]" /><b className="text-[13px] text-[#202123]">Revisar novo produto</b><span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] text-amber-700">rascunho da Lu</span></div>
     <div className="grid gap-2.5 sm:grid-cols-2">{campo('Descrição *', 'descricao')}{campo('SKU / código interno', 'codigo', 'Automático se vazio')}{campo('Código de barras / GTIN', 'codigoBarras')}{campo('NCM', 'ncm', '8 dígitos; pode completar depois')}{campo('Categoria', 'categoria')}<label className="text-[11px] text-[#5F6065]">Unidade<select value={f.unidadeSigla} onChange={(e) => set('unidadeSigla', e.target.value)} className="mt-1 w-full rounded-lg border border-[#E5E7EB] px-2.5 py-2 text-[13px] outline-none">{['UN', 'KG', 'CX', 'PC', 'LT', 'ML'].map((u) => <option key={u}>{u}</option>)}</select></label>{campo('Preço de compra', 'precoCompra')}{campo('Preço de venda', 'precoVenda')}{campo('Estoque mínimo', 'estoqueMinimo')}<label className="flex items-end gap-2 pb-2 text-[12px] text-[#5F6065]"><input type="checkbox" checked={f.vendidoPorPeso} onChange={(e) => set('vendidoPorPeso', e.target.checked)} /> Vendido por peso</label></div>
     {!f.ncm && <p className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] text-amber-800">O produto será salvo com NCM provisório 00000000. Complete a classificação fiscal antes de emitir nota.</p>}
     {erro && <p className="mt-2 text-[12px] text-[#c3352b]">{erro}</p>}
-    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#0F8A72] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Cadastrando…' : 'Cadastrar produto'}</button></div>
+    <div className="mt-3.5 flex justify-end gap-2"><button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8]">Cancelar</button><button onClick={confirmar} disabled={salvando} className="rounded-lg bg-[#2F5FE0] px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-50">{salvando ? 'Cadastrando…' : 'Cadastrar produto'}</button></div>
   </div>;
 }
 
@@ -516,7 +516,7 @@ function FormLancamento({
 
       <div className="mt-3.5 flex items-center justify-end gap-2">
         <button onClick={onCancelar} disabled={salvando} className="rounded-lg px-3.5 py-2 text-[13px] text-[#5F6065] hover:bg-[#F7F7F8] disabled:opacity-40 transition-colors">Cancelar</button>
-        <button onClick={confirmar} disabled={salvando} className="rounded-lg bg-gradient-to-br from-[#13A184] to-[#0F8A72] px-4 py-2 text-[13px] font-semibold text-[#202123] shadow-[0_6px_20px_rgba(15,138,114,0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all">
+        <button onClick={confirmar} disabled={salvando} className="rounded-lg bg-gradient-to-br from-[#5B7BF0] to-[#2F5FE0] px-4 py-2 text-[13px] font-semibold text-[#202123] shadow-[0_6px_20px_rgba(47,95,224,0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 transition-all">
           {salvando ? 'Lançando…' : 'Confirmar lançamento'}
         </button>
       </div>

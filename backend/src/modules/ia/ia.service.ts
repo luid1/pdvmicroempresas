@@ -65,6 +65,8 @@ interface FatosDoDia {
   dataLabel: string;
   vendas?: {
     faturamento: number;
+    devolucoes: number;
+    faturamentoLiquido: number;
     faturamentoDelta: number;
     vendas: number;
     ticketMedio: number;
@@ -692,7 +694,13 @@ export class IaService {
         .slice(0, 5);
       const linhas = [
         'VENDAS:',
-        `- Faturamento no período: ${brl(Number(fin.faturamento) || 0)}`,
+        ...(Number(fin.devolucoes) > 0
+          ? [
+              `- Faturamento bruto no período: ${brl(Number(fin.faturamento) || 0)}`,
+              `- (-) Devoluções de vendas: ${brl(Number(fin.devolucoes) || 0)}`,
+              `- Faturamento líquido (o que de fato entrou): ${brl(Number(fin.faturamentoLiquido) || 0)}`,
+            ]
+          : [`- Faturamento no período: ${brl(Number(fin.faturamento) || 0)}`]),
         `- Nº de vendas: ${Number(fin.vendas) || 0}`,
         `- Ticket médio: ${brl(Number(fin.ticketMedio) || 0)}`,
       ];
@@ -848,6 +856,8 @@ export class IaService {
     if (permite.vendas) {
       fatos.vendas = {
         faturamento: Number(fin.faturamento) || 0,
+        devolucoes: Number(fin.devolucoes) || 0,
+        faturamentoLiquido: Number(fin.faturamentoLiquido) || Number(fin.faturamento) || 0,
         faturamentoDelta: Number(fin.faturamentoDelta) || 0,
         vendas: Number(fin.vendas) || 0,
         ticketMedio: Number(fin.ticketMedio) || 0,
@@ -879,7 +889,13 @@ export class IaService {
     ];
     if (f.vendas) {
       const delta = `${f.vendas.faturamentoDelta > 0 ? '+' : ''}${f.vendas.faturamentoDelta}%`;
-      linhas.push(`- Faturamento: ${brl(f.vendas.faturamento)} (variação vs. período anterior: ${delta})`);
+      if (f.vendas.devolucoes > 0) {
+        linhas.push(`- Faturamento bruto: ${brl(f.vendas.faturamento)} (variação vs. período anterior: ${delta})`);
+        linhas.push(`- (-) Devoluções de vendas: ${brl(f.vendas.devolucoes)}`);
+        linhas.push(`- Faturamento líquido (o que de fato entrou): ${brl(f.vendas.faturamentoLiquido)}`);
+      } else {
+        linhas.push(`- Faturamento: ${brl(f.vendas.faturamento)} (variação vs. período anterior: ${delta})`);
+      }
       linhas.push(`- Número de vendas: ${f.vendas.vendas}`);
       linhas.push(`- Ticket médio: ${brl(f.vendas.ticketMedio)}`);
       linhas.push(

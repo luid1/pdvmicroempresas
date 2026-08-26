@@ -72,7 +72,7 @@ const TIPOS_ITEM = [
 // ─── Formatação ──────────────────────────────────
 const fmtN = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
 const fmtR = (v: number) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const negClass = (v: number) => v < 0 ? 'text-red-600' : '';
+const negClass = (v: number) => v < 0 ? 'text-[#FF6B7A]' : '';
 const hoje = () => new Date().toISOString().split('T')[0];
 
 // ─── Exportar CSV ────────────────────────────────
@@ -299,7 +299,7 @@ export default function AnaliseEstoqueFisico() {
       return { ...np, saldoFinal, valorAtualEstoque, diferencaEstoque };
     }));
   };
-  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-[#E7E5DF] bg-[#F6F5F2] text-[#16171D] focus:outline-none focus:ring-1 focus:ring-amber-400/40 focus:border-[#E8A317]/40';
+  const cellInp = 'w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded border border-[#23262F] bg-[#0C0D10] text-[#F7F8FA] focus:outline-none focus:ring-1 focus:ring-[#01B8FA]/40 focus:border-[#01B8FA]/40';
 
   // Célula editável por clique: mostra o número limpo; vira input só no clique.
   const isEditing = (id: string, campo: string) => editCell?.id === id && editCell?.campo === campo;
@@ -312,7 +312,7 @@ export default function AnaliseEstoqueFisico() {
           placeholder={placeholder}
           onBlur={(e) => { commit(e.target.value); setEditCell(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditCell(null); }}
-          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-[#E8A317]/12 border border-[#E8A317]/40 text-[#16171D] focus:outline-none focus:ring-1 focus:ring-amber-400/40"
+          className="w-full text-right font-mono text-[11px] px-1.5 py-0.5 rounded bg-[#01B8FA]/12 border border-[#01B8FA]/40 text-[#F7F8FA] focus:outline-none focus:ring-1 focus:ring-[#01B8FA]/40"
         />
       );
     }
@@ -320,7 +320,7 @@ export default function AnaliseEstoqueFisico() {
     return (
       <button
         onClick={(e) => { e.stopPropagation(); setEditCell({ id, campo }); }}
-        className={`w-full text-right font-mono px-1.5 py-0.5 rounded hover:bg-[#E8A317]/12 hover:ring-1 hover:ring-amber-400/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? 'text-[#a9760a] font-semibold' : ''}`}
+        className={`w-full text-right font-mono px-1.5 py-0.5 rounded text-[#C7CCD6] hover:bg-[#01B8FA]/12 hover:ring-1 hover:ring-[#01B8FA]/25 transition-all duration-150 ${alerta && (valor || 0) > 0 ? '!text-[#FF9F45] font-semibold' : ''}`}
       >
         {vazio ? <span className="text-slate-600">{placeholder || '—'}</span> : fmtN(valor as number)}
       </button>
@@ -407,7 +407,7 @@ export default function AnaliseEstoqueFisico() {
         subtitulo="Contagem, quebra e faturamento de perdas"
         actions={
           <>
-            <button onClick={() => handleExecutar()} disabled={processando} className={btnPrimary + ' bg-emerald-500 hover:bg-emerald-400 shadow-emerald-500/20'}>
+            <button onClick={() => handleExecutar()} disabled={processando} className={btnPrimary + ' !bg-[#2DD4A7] hover:!bg-[#26BE95] !text-[#04121A] shadow-[0_6px_18px_rgba(45,212,167,0.28)]'}>
               {processando ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />} Executar
             </button>
             <button onClick={() => imprimirRelatorio(produtosFiltrados, dataIni, dataFim)} disabled={!executado} className={btnGlass}>
@@ -420,11 +420,11 @@ export default function AnaliseEstoqueFisico() {
               onClick={handleFaturarQuebra}
               disabled={!executado || faturando || pendentes.length === 0}
               title={pendentes.length === 0 ? 'Digite valores em Quebra para faturar' : `Baixar ${pendentes.length} item(ns) — R$ ${fmtR(valorPendente)} perdido`}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-500 hover:bg-rose-400 text-white shadow-lg shadow-rose-500/20 transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:bg-[#F6F5F2] disabled:text-slate-500 disabled:shadow-none"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-[#FF6B7A] hover:bg-[#FF8391] text-[#2A0A0F] shadow-[0_6px_18px_rgba(255,107,122,0.28)] transition-all duration-300 active:scale-[0.98] disabled:opacity-30 disabled:bg-[#16181F] disabled:text-slate-500 disabled:shadow-none"
             >
               <TrendingDown className="h-3.5 w-3.5" />
               {faturando ? 'Faturando…' : 'Faturar Quebra'}
-              {pendentes.length > 0 && !faturando && <span className="bg-white/25 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{pendentes.length}</span>}
+              {pendentes.length > 0 && !faturando && <span className="bg-black/25 rounded-full px-1.5 py-0.5 text-[10px] leading-none">{pendentes.length}</span>}
             </button>
           </>
         }
@@ -432,20 +432,20 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Alerta colapsado: produtos a repor / em falta ── */}
       {aRepor.length > 0 && (
-        <div className="bg-amber-500/[0.06] border-b border-[#E8A317]/40 px-5 py-1.5 shrink-0 flex items-center gap-2 text-[11px]">
-          <AlertTriangle className="h-3.5 w-3.5 text-[#a9760a] shrink-0" />
-          <span className="text-[#a9760a] font-semibold">
-            {emFalta > 0 && <><span className="text-[#c3352b]">{emFalta} em falta</span> · </>}
+        <div className="bg-[#FF9F45]/[0.06] border-b border-[#FF9F45]/30 px-5 py-1.5 shrink-0 flex items-center gap-2 text-[11px]">
+          <AlertTriangle className="h-3.5 w-3.5 text-[#FF9F45] shrink-0" />
+          <span className="text-[#FF9F45] font-semibold">
+            {emFalta > 0 && <><span className="text-[#FF6B7A]">{emFalta} em falta</span> · </>}
             {aRepor.length} produto(s) a repor
           </span>
-          <button onClick={() => setDrawerRepor(true)} className="ml-auto text-[#a9760a] hover:text-[#a9760a] font-semibold underline underline-offset-2 decoration-amber-400/40">
+          <button onClick={() => setDrawerRepor(true)} className="ml-auto text-[#FF9F45] hover:text-[#FFB86B] font-semibold underline underline-offset-2 decoration-[#FF9F45]/40">
             Ver lista
           </button>
         </div>
       )}
 
       {/* ── Corpo ── */}
-      <div className="flex-1 flex flex-col overflow-hidden p-5 gap-4">
+      <div className="flex-1 flex flex-col overflow-x-hidden overflow-y-auto p-5 gap-4">
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
@@ -459,9 +459,9 @@ export default function AnaliseEstoqueFisico() {
         <div className="flex shrink-0 flex-col gap-2.5 sm:flex-row sm:items-center">
           <SearchField busca={busca} onBusca={setBusca} placeholder="Filtrar por código ou descrição..." className="sm:max-w-[520px] sm:flex-1" />
           <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pb-1 sm:justify-end sm:overflow-visible sm:pb-0">
-            {familia !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-semibold text-[#0B6F5C]">{familia}<button onClick={() => handleFamiliaChange('<Todas>')} aria-label="Remover filtro de família"><X className="h-3 w-3" /></button></span>}
-            {grupo !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#F0F2F3] px-2.5 py-1 text-xs font-semibold text-[#5F6065]">{grupo}<button onClick={() => setGrupo('<Todas>')} aria-label="Remover filtro de grupo"><X className="h-3 w-3" /></button></span>}
-            {confFisica && <span className="shrink-0 rounded-full bg-[#0F8A72]/10 px-2.5 py-1 text-xs font-semibold text-[#0B6F5C]">Conferência física</span>}
+            {familia !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#01B8FA]/12 px-2.5 py-1 text-xs font-semibold text-[#01B8FA]">{familia}<button onClick={() => handleFamiliaChange('<Todas>')} aria-label="Remover filtro de família"><X className="h-3 w-3" /></button></span>}
+            {grupo !== '<Todas>' && <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#16181F] border border-[#23262F] px-2.5 py-1 text-xs font-semibold text-[#8A90A0]">{grupo}<button onClick={() => setGrupo('<Todas>')} aria-label="Remover filtro de grupo"><X className="h-3 w-3" /></button></span>}
+            {confFisica && <span className="shrink-0 rounded-full bg-[#01B8FA]/12 px-2.5 py-1 text-xs font-semibold text-[#01B8FA]">Conferência física</span>}
             <button onClick={() => setFiltros(true)} className={btnGlass + ' ml-auto shrink-0'}>
               <SlidersHorizontal className="h-3.5 w-3.5" /> Filtros
             </button>
@@ -469,40 +469,40 @@ export default function AnaliseEstoqueFisico() {
         </div>
 
         {/* ── Grade em card de vidro ── */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#F6F5F2] backdrop-blur-xl rounded-2xl border border-[#E7E5DF] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
-        <div className="flex-1 overflow-auto">
+        <div className="flex flex-col overflow-hidden bg-[#101216] rounded-2xl border border-[#23262F] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)]">
+        <div className="overflow-x-auto">
         {!executado && !processando ? (
-          <div className="flex items-center justify-center h-full text-slate-500">
+          <div className="flex items-center justify-center py-16 text-slate-500">
             <div className="text-center">
               <CheckCircle className="h-12 w-12 mx-auto mb-3 text-slate-700" />
-              <p className="text-sm font-medium">Clique em <strong className="text-[#0b7d4e]">Executar</strong> para carregar a análise de estoque</p>
+              <p className="text-sm font-medium">Clique em <strong className="text-[#2DD4A7]">Executar</strong> para carregar a análise de estoque</p>
               <p className="text-xs text-slate-600 mt-1">Selecione os filtros desejados e clique no botão verde</p>
             </div>
           </div>
         ) : (
-          <table className="w-full border-collapse text-[11px]" style={{ minWidth: 1300 }}>
+          <table className="w-full text-[12px]" style={{ minWidth: 1300 }}>
             <thead className="sticky top-0 z-10">
-              <tr className="bg-[#FBFAF7] border-b border-[#E7E5DF]">
-                <th className="sticky left-0 z-20 bg-[#FBFAF7] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Código</th>
-                <th className="sticky left-24 z-20 bg-[#FBFAF7] px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap min-w-[180px]">Descrição</th>
-                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-16">Família</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Saldo Inicial</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Entrada</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Chão</th>
+              <tr className="bg-[#0C0D10] border-b border-[#23262F]">
+                <th className="sticky left-0 z-20 bg-[#0C0D10] px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Código</th>
+                <th className="sticky left-24 z-20 bg-[#0C0D10] px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap min-w-[180px]">Descrição</th>
+                <th className="px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-28">Família</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Saldo Inicial</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Entrada</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Chão</th>
                 {!semOrdCompra && (
-                  <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Ordem de Compra</th>
+                  <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Ordem de Compra</th>
                 )}
-                <th className="px-2 py-1.5 text-right font-semibold text-[#a9760a]/80 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-20">Quebra</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-[#0b7d4e]/80 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Saldo Final</th>
-                <th className="px-2 py-1.5 text-left font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-12">Und</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-20">Quebra</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Saldo Final</th>
+                <th className="px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-12">Und</th>
                 {confFisica && (
                   <>
-                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-24">Contagem Física</th>
-                    <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-28">Diferença</th>
+                    <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-24">Contagem Física</th>
+                    <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-28">Diferença</th>
                   </>
                 )}
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide border-r border-[#E7E5DF] whitespace-nowrap w-20">Preço Custo</th>
-                <th className="px-2 py-1.5 text-right font-semibold text-slate-400 uppercase tracking-wide whitespace-nowrap w-28">Valor Estoque</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-20">Preço Custo</th>
+                <th className="px-3 py-1.5 text-right font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap w-28">Valor Estoque</th>
               </tr>
             </thead>
             <tbody>
@@ -513,44 +513,44 @@ export default function AnaliseEstoqueFisico() {
                     key={p.id}
                     onClick={() => setSelId(p.id)}
                     onDoubleClick={() => setDetalheAberto(p)}
-                    className={`group border-b border-[#E7E5DF] cursor-pointer transition-colors ${sel ? 'bg-[#E8A317]/15 text-[#a9760a]' : 'hover:bg-[#F6F5F2]'}`}
+                    className={`group border-t border-[#23262F] cursor-pointer transition-colors ${sel ? 'bg-[#01B8FA]/12 text-[#01B8FA]' : 'hover:bg-white/[0.03]'}`}
                     title="Duplo clique para ver movimentações"
                   >
-                    <td className={`sticky left-0 z-10 px-2 py-1 border-r border-[#E7E5DF] ${sel ? 'bg-[#E8A317]/[0.18]' : 'bg-white group-hover:bg-[#F6F5F2]'}`}>
+                    <td className={`sticky left-0 z-10 px-3 py-1 ${sel ? 'bg-[#01B8FA]/[0.14]' : 'bg-[#101216] group-hover:bg-[#16181F]'}`}>
                       <div className="flex items-center gap-1">
-                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-[#a9760a]/70' : 'text-slate-600'}`} />
-                        <span className={`font-semibold ${sel ? 'text-[#a9760a]' : 'text-[#a9760a]'}`}>{p.codigo}</span>
+                        <ChevronRight className={`h-3 w-3 shrink-0 ${sel ? 'text-[#01B8FA]/70' : 'text-slate-600'}`} />
+                        <span className={`font-mono ${sel ? 'text-[#01B8FA]' : 'text-[#8A90A0]'}`}>{p.codigo}</span>
                       </div>
                     </td>
-                    <td className={`sticky left-24 z-10 px-2 py-1 border-r border-[#E7E5DF] ${sel ? 'bg-[#E8A317]/[0.18] text-[#a9760a]' : 'bg-white group-hover:bg-[#F6F5F2] text-[#5B5D69]'}`}>{p.descricao}</td>
-                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-slate-400">{p.familia}</td>
-                    <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono ${sel ? '' : p.saldoInicial < 0 ? 'text-[#c3352b]' : 'text-[#8B8D98]'}`} title="Calculado pelo sistema (não editável)">{fmtN(p.saldoInicial)}</td>
-                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
+                    <td className={`sticky left-24 z-10 px-3 py-1 font-semibold ${sel ? 'bg-[#01B8FA]/[0.14] text-[#01B8FA]' : 'bg-[#101216] group-hover:bg-[#16181F] text-[#F7F8FA]'}`}>{p.descricao}</td>
+                    <td className="px-3 py-1">{p.familia ? <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#16181F] border border-[#23262F] text-[#8A90A0] whitespace-nowrap">{p.familia}</span> : <span className="text-slate-600">—</span>}</td>
+                    <td className={`px-3 py-1 text-right font-mono ${sel ? '' : p.saldoInicial < 0 ? 'text-[#FF6B7A]' : 'text-[#8A90A0]'}`} title="Calculado pelo sistema (não editável)">{fmtN(p.saldoInicial)}</td>
+                    <td className="px-1 py-0.5" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="entradas" valor={p.entradas ?? 0} commit={(v) => setCampo(p.id, 'entradas', v)} />
                     </td>
-                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
+                    <td className="px-1 py-0.5" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="chao" valor={p.chao ?? 0} commit={(v) => setCampo(p.id, 'chao', v)} />
                     </td>
                     {!semOrdCompra && (
-                      <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono ${sel ? '' : 'text-slate-500'}`} title="Já incluído na Entrada (informativo)">{p.ordensCompra ? fmtN(p.ordensCompra) : '—'}</td>
+                      <td className={`px-3 py-1 text-right font-mono ${sel ? '' : 'text-slate-500'}`} title="Já incluído na Entrada (informativo)">{p.ordensCompra ? fmtN(p.ordensCompra) : '—'}</td>
                     )}
-                    <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
+                    <td className="px-1 py-0.5" onClick={e => e.stopPropagation()}>
                       <EditNum id={p.id} campo="quebra" valor={p.quebra ?? 0} commit={(v) => setCampo(p.id, 'quebra', v)} alerta />
                     </td>
-                    <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold ${sel ? 'text-[#16171D]' : p.saldoFinal < 0 ? 'text-[#c3352b]' : 'text-[#0b7d4e]'}`}>{fmtN(p.saldoFinal)}</td>
-                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-slate-400">{p.undEstoque}</td>
+                    <td className={`px-3 py-1 text-right font-mono font-bold ${sel ? 'text-[#F7F8FA]' : p.saldoFinal < 0 ? 'text-[#FF6B7A]' : 'text-[#2DD4A7]'}`}>{fmtN(p.saldoFinal)}</td>
+                    <td className="px-3 py-1 text-slate-400">{p.undEstoque}</td>
                     {confFisica && (
                       <>
-                        <td className="px-1 py-0.5 border-r border-[#E7E5DF]" onClick={e => e.stopPropagation()}>
+                        <td className="px-1 py-0.5" onClick={e => e.stopPropagation()}>
                           <EditNum id={p.id} campo="contagemFisica" valor={p.contagemFisica} commit={(v) => handleContagemChange(p.id, v)} placeholder="0,000" />
                         </td>
-                        <td className={`px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold ${sel ? '' : p.diferencaEstoque < 0 ? 'text-[#c3352b]' : p.diferencaEstoque > 0 ? 'text-[#0b7d4e]' : 'text-slate-500'}`}>
+                        <td className={`px-3 py-1 text-right font-mono font-bold ${sel ? '' : p.diferencaEstoque < 0 ? 'text-[#FF6B7A]' : p.diferencaEstoque > 0 ? 'text-[#2DD4A7]' : 'text-slate-500'}`}>
                           {p.contagemFisica !== null ? fmtN(p.diferencaEstoque) : '—'}
                         </td>
                       </>
                     )}
-                    <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono text-slate-400">{fmtR(p.precoCusto)}</td>
-                    <td className={`px-2 py-1 text-right font-mono font-semibold ${sel ? '' : negClass(p.valorAtualEstoque)}`}>{fmtR(p.valorAtualEstoque)}</td>
+                    <td className="px-3 py-1 text-right font-mono text-slate-400">{fmtR(p.precoCusto)}</td>
+                    <td className={`px-3 py-1 text-right font-mono font-semibold ${sel ? '' : negClass(p.valorAtualEstoque)}`}>{fmtR(p.valorAtualEstoque)}</td>
                   </tr>
                 );
               })}
@@ -563,18 +563,18 @@ export default function AnaliseEstoqueFisico() {
       </div>
 
       {/* ── Rodapé com totais ── */}
-      <div className="shrink-0 bg-[#F6F5F2] backdrop-blur-xl border-t border-[#E7E5DF] px-4 py-2 flex items-center justify-between text-[#8B8D98]">
+      <div className="shrink-0 bg-[#0C0D10] border-t border-[#23262F] px-4 py-2 flex items-center justify-between text-[#8A90A0]">
         <span className="flex items-center gap-3">
-          Registros encontrados: <strong>{totais.count}</strong>
+          Registros encontrados: <strong className="text-[#F7F8FA]">{totais.count}</strong>
           {totais.valorPerdido > 0 && (
-            <span className="inline-flex items-center gap-1 bg-rose-600/20 text-[#c3352b] border border-rose-500/40 px-2 py-0.5 rounded text-[11px] font-semibold">
+            <span className="inline-flex items-center gap-1 bg-[#FF6B7A]/12 text-[#FF6B7A] border border-[#FF6B7A]/40 px-2 py-0.5 rounded text-[11px] font-semibold">
               <TrendingDown className="h-3 w-3" /> Valor perdido: R$ {fmtR(totais.valorPerdido)}
             </span>
           )}
         </span>
-        <div className="flex gap-8 font-mono text-[11px]">
+        <div className="flex gap-8 font-mono text-[11px] text-[#F7F8FA]">
           <span className={negClass(totais.saldoFinal)}>{fmtN(totais.saldoFinal)}</span>
-          <span className={totais.diferenca !== 0 ? (totais.diferenca < 0 ? 'text-red-600 font-bold' : 'text-green-600 font-bold') : ''}>{fmtN(totais.diferenca)}</span>
+          <span className={totais.diferenca !== 0 ? (totais.diferenca < 0 ? 'text-[#FF6B7A] font-bold' : 'text-[#2DD4A7] font-bold') : ''}>{fmtN(totais.diferenca)}</span>
           <span className={`font-bold ${negClass(totais.valorTotal)}`}>{fmtR(totais.valorTotal)}</span>
         </div>
       </div>
@@ -583,14 +583,14 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal "Processando..." ── */}
       {processando && createPortal((
-        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] animate-backdrop">
-          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] p-6 w-80 text-center animate-modal">
-            <p className="text-xs text-gray-500">Análise de Estoque</p>
-            <p className="text-sm text-gray-600 mt-1">Processando...</p>
-            <p className="text-xl font-bold text-gray-900 mt-2">Aguarde...</p>
-            <p className="text-xs text-gray-500 mt-2">Produto: <strong>{prodProcessando}</strong></p>
-            <div className="animate-spin h-6 w-6 border-2 border-[#E8A317] border-t-transparent rounded-full mx-auto mt-3" />
-            <button onClick={() => setProcessando(false)} className="mt-4 px-4 py-1 bg-gray-200 border border-gray-400 rounded text-xs text-gray-700 hover:bg-gray-300">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] animate-backdrop">
+          <div className="bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] p-6 w-80 text-center animate-modal">
+            <p className="text-xs text-[#8A90A0]">Análise de Estoque</p>
+            <p className="text-sm text-[#8A90A0] mt-1">Processando...</p>
+            <p className="text-xl font-bold text-[#F7F8FA] mt-2">Aguarde...</p>
+            <p className="text-xs text-[#8A90A0] mt-2">Produto: <strong className="text-[#F7F8FA]">{prodProcessando}</strong></p>
+            <div className="animate-spin h-6 w-6 border-2 border-[#01B8FA] border-t-transparent rounded-full mx-auto mt-3" />
+            <button onClick={() => setProcessando(false)} className="mt-4 px-4 py-1 bg-[#16181F] border border-[#23262F] rounded text-xs text-[#8A90A0] hover:bg-[#0C0D10] hover:text-[#F7F8FA] transition-all">
               Cancelar
             </button>
           </div>
@@ -599,58 +599,58 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal Detalhamento do Registro ── */}
       {detalheAberto && createPortal((
-        <div className="fixed inset-0 bg-[#16171D]/40 flex items-center justify-center z-[70] p-4 animate-backdrop">
-          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden animate-modal">
-            <div className="flex items-center justify-between px-4 py-2 border-b border-[#E7E5DF] bg-[#F6F5F2] shrink-0">
-              <span className="text-xs font-semibold text-gray-700">⊞ Detalhamento do Registro</span>
-              <button onClick={() => setDetalheAberto(null)} className="text-gray-500 hover:text-gray-800">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop">
+          <div className="bg-[#101216] border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] w-full max-w-5xl max-h-[85vh] flex flex-col overflow-hidden animate-modal">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-[#23262F] bg-[#0C0D10] shrink-0">
+              <span className="text-xs font-semibold text-[#F7F8FA]">⊞ Detalhamento do Registro</span>
+              <button onClick={() => setDetalheAberto(null)} className="text-slate-500 hover:text-[#F7F8FA] transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="px-4 py-2 border-b border-gray-200 bg-gray-50 flex flex-wrap items-center gap-4 shrink-0 text-xs">
+            <div className="px-4 py-2 border-b border-[#23262F] bg-[#0C0D10] flex flex-wrap items-center gap-4 shrink-0 text-xs">
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-600">Código do Produto</span>
-                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-mono font-bold">{detalheAberto.codigo}</span>
+                <span className="text-[#8A90A0]">Código do Produto</span>
+                <span className="border border-[#23262F] bg-[#16181F] text-[#F7F8FA] px-2 py-0.5 rounded font-mono font-bold">{detalheAberto.codigo}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-600">Descrição do Produto</span>
-                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-semibold">{detalheAberto.descricao}</span>
+                <span className="text-[#8A90A0]">Descrição do Produto</span>
+                <span className="border border-[#23262F] bg-[#16181F] text-[#F7F8FA] px-2 py-0.5 rounded font-semibold">{detalheAberto.descricao}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-600">Quantidade Total</span>
-                <span className="border border-[#E7E5DF] bg-[#F6F5F2] px-2 py-0.5 rounded font-mono">{fmtN(Math.abs(detalheAberto.saidas))}</span>
-                <span className="font-bold">{detalheAberto.undEstoque}</span>
+                <span className="text-[#8A90A0]">Quantidade Total</span>
+                <span className="border border-[#23262F] bg-[#16181F] text-[#F7F8FA] px-2 py-0.5 rounded font-mono">{fmtN(Math.abs(detalheAberto.saidas))}</span>
+                <span className="font-bold text-[#F7F8FA]">{detalheAberto.undEstoque}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-gray-600">Saldo Atual</span>
-                <span className="bg-amber-500 text-slate-900 px-3 py-1 rounded font-bold font-mono text-sm">
+                <span className="text-[#8A90A0]">Saldo Atual</span>
+                <span className="bg-[#01B8FA] text-[#04121A] px-3 py-1 rounded font-bold font-mono text-sm">
                   {fmtN(detalheAberto.saldoFinal)}
                 </span>
               </div>
             </div>
 
             <div className="flex-1 overflow-auto">
-              <table className="w-full border-collapse text-[11px]">
-                <thead className="sticky top-0 bg-gray-200 border-b border-gray-400">
+              <table className="w-full text-[12px] text-[#C7CCD6]">
+                <thead className="sticky top-0 bg-[#0C0D10] border-b border-[#23262F]">
                   <tr>
                     {['Data/Hora','Tipo','Quantidade','Saldo anterior','Saldo final','Custo unitário','Lote','Usuário','Observações'].map(h => (
-                      <th key={h} className="px-2 py-1 text-left font-semibold text-gray-700 border-r border-gray-300 whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-3 py-1.5 text-left font-semibold text-[#8A90A0] text-[10px] uppercase tracking-[0.08em] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {movimentacoesDetalhe.map((m) => (
-                    <tr key={m.id} className="border-b border-gray-100 hover:bg-[#F6F5F2]">
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-mono whitespace-nowrap">{new Date(m.dataMovimento).toLocaleString('pt-BR')}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] font-semibold">{m.tipo.replace(/_/g, ' ')}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono font-bold">{fmtN(Number(m.quantidade))}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtN(Number(m.saldoAnterior))}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{fmtN(Number(m.saldoFinal))}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF] text-right font-mono">{m.custoUnitario ? `R$ ${fmtR(Number(m.custoUnitario))}` : '—'}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.lote?.numero || '—'}</td>
-                      <td className="px-2 py-1 border-r border-[#E7E5DF]">{m.usuario?.nome || '—'}</td>
-                      <td className="px-2 py-1">{m.observacoes || '—'}</td>
+                    <tr key={m.id} className="border-t border-[#23262F] hover:bg-white/[0.03]">
+                      <td className="px-3 py-1 font-mono whitespace-nowrap">{new Date(m.dataMovimento).toLocaleString('pt-BR')}</td>
+                      <td className="px-3 py-1 font-semibold">{m.tipo.replace(/_/g, ' ')}</td>
+                      <td className="px-3 py-1 text-right font-mono font-bold">{fmtN(Number(m.quantidade))}</td>
+                      <td className="px-3 py-1 text-right font-mono">{fmtN(Number(m.saldoAnterior))}</td>
+                      <td className="px-3 py-1 text-right font-mono">{fmtN(Number(m.saldoFinal))}</td>
+                      <td className="px-3 py-1 text-right font-mono">{m.custoUnitario ? `R$ ${fmtR(Number(m.custoUnitario))}` : '—'}</td>
+                      <td className="px-3 py-1">{m.lote?.numero || '—'}</td>
+                      <td className="px-3 py-1">{m.usuario?.nome || '—'}</td>
+                      <td className="px-3 py-1">{m.observacoes || '—'}</td>
                     </tr>
                   ))}
                   {carregandoDetalhe && (
@@ -663,8 +663,8 @@ export default function AnaliseEstoqueFisico() {
               </table>
             </div>
 
-            <div className="shrink-0 bg-gray-100 border-t border-gray-300 px-4 py-2 flex items-center justify-between text-xs">
-              <span className="text-gray-500">Registros reais encontrados: <strong>{movimentacoesDetalhe.length}</strong></span>
+            <div className="shrink-0 bg-[#0C0D10] border-t border-[#23262F] px-4 py-2 flex items-center justify-between text-xs">
+              <span className="text-[#8A90A0]">Registros reais encontrados: <strong className="text-[#F7F8FA]">{movimentacoesDetalhe.length}</strong></span>
               <div className="flex gap-2">
                 <button
                   onClick={() => {
@@ -684,11 +684,11 @@ export default function AnaliseEstoqueFisico() {
                     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                     a.download = `movimentacoes_${detalheAberto.codigo}_${hoje()}.csv`; a.click();
                   }}
-                  className="px-3 py-1 bg-white border border-gray-400 rounded hover:bg-gray-50 text-gray-700 font-medium flex items-center gap-1"
+                  className="px-3 py-1 bg-[#101216] border border-[#23262F] rounded hover:bg-[#0C0D10] text-[#8A90A0] hover:text-[#F7F8FA] font-medium flex items-center gap-1 transition-all"
                 >
                   <Download className="h-3 w-3" /> Exportar
                 </button>
-                <button onClick={() => setDetalheAberto(null)} className="px-4 py-1 bg-amber-500 text-slate-900 rounded font-medium hover:bg-amber-400">
+                <button onClick={() => setDetalheAberto(null)} className="px-4 py-1 bg-[#01B8FA] text-[#04121A] rounded font-medium hover:bg-[#22D3EE] transition-all">
                   OK
                 </button>
               </div>
@@ -699,11 +699,11 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Modal Filtros ── */}
       {filtrosAberto && createPortal((
-        <div className="fixed inset-0 bg-[#16171D]/40 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setFiltros(false)}>
-          <div className="bg-white backdrop-blur-2xl border border-[#E7E5DF] rounded-2xl shadow-[0_24px_80px_-12px_rgba(22,23,29,0.18)] w-full max-w-lg animate-modal" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF]">
-              <h2 className="font-bold text-[#16171D] text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-[#a9760a]" /> Filtros</h2>
-              <button onClick={() => setFiltros(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#5B5D69] hover:bg-[#F6F5F2]"><X className="h-4 w-4" /></button>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4 animate-backdrop" onClick={() => setFiltros(false)}>
+          <div className="bg-[#101216] backdrop-blur-2xl border border-[#23262F] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.6)] w-full max-w-lg animate-modal" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23262F]">
+              <h2 className="font-bold text-[#F7F8FA] text-sm flex items-center gap-2"><SlidersHorizontal className="h-4 w-4 text-[#01B8FA]" /> Filtros</h2>
+              <button onClick={() => setFiltros(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#F7F8FA] hover:bg-white/[0.06]"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -719,16 +719,16 @@ export default function AnaliseEstoqueFisico() {
               <div>
                 <label className={fLbl}>Unidade de Apuração</label>
                 <div className="flex gap-4 mt-1">
-                  <label className="flex items-center gap-1.5 text-[#8B8D98] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-amber-500" /> Estoque</label>
-                  <label className="flex items-center gap-1.5 text-[#8B8D98] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-amber-500" /> Principal</label>
+                  <label className="flex items-center gap-1.5 text-[#8A90A0] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Estoque'} onChange={() => setUndApuracao('Estoque')} className="accent-[#01B8FA]" /> Estoque</label>
+                  <label className="flex items-center gap-1.5 text-[#8A90A0] text-sm cursor-pointer"><input type="radio" name="undf" checked={undApuracao === 'Principal'} onChange={() => setUndApuracao('Principal')} className="accent-[#01B8FA]" /> Principal</label>
                 </div>
               </div>
-              <div className="flex flex-col gap-2 pt-1 border-t border-[#E7E5DF]">
-                <label className="flex items-center gap-2 text-[#8B8D98] text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-amber-500" /> Conferência Física (mostra colunas de contagem)</label>
-                <label className="flex items-center gap-2 text-[#8B8D98] text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-amber-500" /> Não mostrar Ordens de Compra</label>
+              <div className="flex flex-col gap-2 pt-1 border-t border-[#23262F]">
+                <label className="flex items-center gap-2 text-[#8A90A0] text-sm cursor-pointer pt-2"><input type="checkbox" checked={confFisica} onChange={e => setConfFisica(e.target.checked)} className="accent-[#01B8FA]" /> Conferência Física (mostra colunas de contagem)</label>
+                <label className="flex items-center gap-2 text-[#8A90A0] text-sm cursor-pointer"><input type="checkbox" checked={semOrdCompra} onChange={e => setSemOrdCompra(e.target.checked)} className="accent-[#01B8FA]" /> Não mostrar Ordens de Compra</label>
               </div>
             </div>
-            <div className="flex justify-end gap-2 px-5 py-3 border-t border-[#E7E5DF]">
+            <div className="flex justify-end gap-2 px-5 py-3 border-t border-[#23262F]">
               <button onClick={() => setFiltros(false)} className={btnGlass}>Fechar</button>
               <button onClick={() => { setFiltros(false); handleExecutar(); }} className={btnPrimary}>Aplicar filtros</button>
             </div>
@@ -738,20 +738,20 @@ export default function AnaliseEstoqueFisico() {
 
       {/* ── Drawer Reposição ── */}
       {drawerRepor && createPortal((
-        <div className="fixed inset-0 z-[70] flex justify-end bg-[#16171D]/40 animate-fade-in" onClick={() => setDrawerRepor(false)}>
-          <div className="w-full max-w-md h-full bg-white backdrop-blur-2xl border-l border-[#E7E5DF] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E7E5DF] sticky top-0 bg-white backdrop-blur-xl">
-              <h2 className="font-bold text-[#16171D] text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[#a9760a]" /> Produtos a repor <span className="text-slate-500 font-normal">({aRepor.length})</span></h2>
-              <button onClick={() => setDrawerRepor(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#5B5D69] hover:bg-[#F6F5F2]"><X className="h-4 w-4" /></button>
+        <div className="fixed inset-0 z-[70] flex justify-end bg-black/70 backdrop-blur-sm animate-fade-in" onClick={() => setDrawerRepor(false)}>
+          <div className="w-full max-w-md h-full bg-[#101216] backdrop-blur-2xl border-l border-[#23262F] shadow-2xl overflow-y-auto animate-fade-in-up" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#23262F] sticky top-0 bg-[#101216] backdrop-blur-xl">
+              <h2 className="font-bold text-[#F7F8FA] text-sm flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-[#FF9F45]" /> Produtos a repor <span className="text-slate-500 font-normal">({aRepor.length})</span></h2>
+              <button onClick={() => setDrawerRepor(false)} className="h-7 w-7 flex items-center justify-center rounded-lg text-slate-500 hover:text-[#F7F8FA] hover:bg-white/[0.06]"><X className="h-4 w-4" /></button>
             </div>
             <div className="p-4 space-y-1.5">
               {aRepor.map((p: any) => (
-                <div key={p.produtoId} className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${p.negativo ? 'bg-rose-500/[0.08] border-rose-500/20' : 'bg-[#F6F5F2] border-[#E7E5DF]'}`}>
+                <div key={p.produtoId} className={`flex items-center gap-3 px-3 py-2 rounded-xl border ${p.negativo ? 'bg-rose-500/[0.08] border-rose-500/20' : 'bg-[#16181F] border-[#23262F]'}`}>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[#5B5D69] text-sm font-medium truncate">{p.descricao}</p>
+                    <p className="text-[#F7F8FA] text-sm font-medium truncate">{p.descricao}</p>
                     <p className="text-[11px] text-slate-500">disp. {p.disponivel}{p.negativo && ` · comprar ${p.sugestaoCompra}`}</p>
                   </div>
-                  {p.negativo && <span className="text-[10px] font-bold text-[#c3352b] bg-rose-500/15 px-2 py-0.5 rounded-full shrink-0">FALTA</span>}
+                  {p.negativo && <span className="text-[10px] font-bold text-[#FF6B7A] bg-rose-500/15 px-2 py-0.5 rounded-full shrink-0">FALTA</span>}
                 </div>
               ))}
               {aRepor.length === 0 && <p className="text-slate-500 text-sm text-center py-8">Nada a repor.</p>}
@@ -765,11 +765,11 @@ export default function AnaliseEstoqueFisico() {
 
 // Card de KPI — número oversized (padrão do ERP)
 function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; label: string; value: string; accent?: boolean; tone?: 'rose' | 'amber' }) {
-  const cor = tone === 'rose' ? 'text-[#c3352b]' : tone === 'amber' ? 'text-[#a9760a]' : accent ? 'text-[#a9760a]' : 'text-[#16171D]';
+  const cor = tone === 'rose' ? 'text-[#FF6B7A]' : tone === 'amber' ? 'text-[#FF9F45]' : accent ? 'text-[#01B8FA]' : 'text-[#F7F8FA]';
   return (
-    <div className="bg-[#F6F5F2] backdrop-blur-xl rounded-2xl border border-[#E7E5DF] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] px-4 py-3">
+    <div className="bg-[#16181F] rounded-2xl border border-[#23262F] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] px-4 py-3">
       <div className="flex items-center gap-2 text-slate-500">
-        <span className="text-[#a9760a]/70">{icon}</span>
+        <span className="text-[#01B8FA]/70">{icon}</span>
         <span className="text-[10px] font-semibold uppercase tracking-[0.12em]">{label}</span>
       </div>
       <p className={`mt-1.5 text-2xl font-extrabold tracking-tight tabular-nums ${cor}`}>{value}</p>
@@ -777,5 +777,5 @@ function KpiCard({ icon, label, value, accent, tone }: { icon: React.ReactNode; 
   );
 }
 
-const fLbl = 'block text-[10px] font-semibold text-slate-500 uppercase tracking-wide mb-1';
-const fInp = 'w-full border border-[#E7E5DF] bg-[#F6F5F2] text-[#16171D] text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-[#E8A317]/40';
+const fLbl = 'block text-[10px] font-semibold text-[#8A90A0] uppercase tracking-wide mb-1';
+const fInp = 'w-full border border-[#23262F] bg-[#101216] text-[#F7F8FA] text-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-[#01B8FA]/60';

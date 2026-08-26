@@ -96,7 +96,7 @@ export class DashboardService {
       this.prisma.contaReceber.findMany({ where: { tenantId, ...(filialId && { filialId }), status: { in: ['ABERTO', 'PARCIAL', 'VENCIDO'] } }, select: { valorOriginal: true, valorPago: true, dataVencimento: true } }),
       this.prisma.contaPagar.findMany({ where: { tenantId, ...(filialId && { filialId }), status: { in: ['ABERTO', 'PARCIAL', 'VENCIDO'] } }, select: { valorOriginal: true, valorPago: true, dataVencimento: true } }),
       this.prisma.pedido.findMany({ where: { tenantId, ...pedF, tipo: 'VENDA', status: { notIn: ['CANCELADO', 'DEVOLVIDO', 'RASCUNHO'] }, dataEmissao: { gte: inicio, lte: fim } }, select: { dataEmissao: true, valorTotal: true } }),
-      this.prisma.nFe.groupBy({ by: ['clienteId'], where: { tenantId, ...filF, status: 'EMITIDO', dataEmissao: { gte: inicio, lte: fim }, clienteId: { not: null } }, _sum: { valorNfe: true }, _count: true }),
+      this.prisma.nFe.groupBy({ by: ['clienteId'], where: { tenantId, ...filF, status: 'EMITIDO', finalidade: { not: '4' }, dataEmissao: { gte: inicio, lte: fim }, clienteId: { not: null } }, _sum: { valorNfe: true }, _count: true }),
       this.prisma.movimentacaoEstoque.count({ where: { tenantId, ...filF, dataMovimento: { gte: inicio, lte: fim } } }),
       this.prisma.entradaMercadoria.count({ where: { tenantId, dataEntrada: { gte: inicio, lte: fim } } }),
       this.prisma.produto.count({ where: { tenantId, ativo: true } }),
@@ -222,6 +222,10 @@ export class DashboardService {
       },
       financeiro: {
         faturamento, faturamentoAnterior: faturamentoAnt, faturamentoDelta: delta(faturamento, faturamentoAnt),
+        // Devoluções do período (NF-e finalidade 4, vindas do DRE) e faturamento
+        // líquido de devoluções. `faturamento` permanece o BRUTO (compat).
+        devolucoes: dreRes.kpis.devolucoes || 0,
+        faturamentoLiquido: r2(faturamento - (dreRes.kpis.devolucoes || 0)),
         nfes: nfesPeriodo, nfesAnterior: 0, vendas: vendasCount,
         ticketMedio,
         margemBruta: dreRes.kpis.margemBruta,
@@ -245,6 +249,8 @@ export class DashboardService {
       fluxoDia: {
         entradas: entradasPeriodo,
         faturados: nfesPeriodo,
+        // "Na rota": pedidos liberados/separados aguardando carga+entrega.
+        romaneios: (statusMap['SEPARADO'] || 0) + (statusMap['FATURADO'] || 0),
         entregues: statusMap['ENTREGUE'] || 0,
       },
     };
