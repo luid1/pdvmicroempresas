@@ -48,11 +48,31 @@ export class RestauranteService {
   }
 
   async criarMesa(tenantId: string, dto: CriarMesaDto) {
-    const jaExiste = await this.prisma.mesa.findFirst({
+    // A numeração é única por (tenant, filial, número) INCLUINDO mesas arquivadas
+    // (removerMesa faz soft delete → ativo:false, preservando o histórico de comandas).
+    // Por isso não basta checar "já existe": se a mesa com esse número existe mas está
+    // ARQUIVADA, o salão aparece vazio (a listagem só traz ativas) e um create novo
+    // violaria a constraint única. A cura é REAPROVEITAR a mesa arquivada (reativar),
+    // e só recusar quando o número já está em uso por uma mesa ATIVA.
+    const existente = await this.prisma.mesa.findFirst({
       where: { tenantId, filialId: dto.filialId, numero: dto.numero },
-      select: { id: true },
     });
-    if (jaExiste) throw new BadRequestException(`Já existe a mesa nº ${dto.numero} nesta filial.`);
+    if (existente) {
+      if (existente.ativo) {
+        throw new BadRequestException(`Já existe a mesa nº ${dto.numero} nesta filial.`);
+      }
+      return this.prisma.mesa.update({
+        where: { id: existente.id },
+        data: {
+          ativo: true,
+          status: 'LIVRE',
+          apelido: dto.apelido ?? existente.apelido,
+          lugares: dto.lugares ?? existente.lugares,
+          posX: dto.posX ?? existente.posX,
+          posY: dto.posY ?? existente.posY,
+        },
+      });
+    }
     return this.prisma.mesa.create({
       data: {
         tenantId,

@@ -112,6 +112,20 @@ function minutosDesde(iso: string): number {
   return Math.max(0, Math.floor(ms / 60000));
 }
 
+/** Extrai a mensagem real do erro do backend (Nest devolve em response.data.error.message
+ *  ou response.data.message). Sem isso, o usuário só via um "tente novamente" genérico
+ *  que escondia a causa (400 de validação, 403 de permissão, 500 do servidor, etc.). */
+function msgErro(err: unknown, fallback: string): string {
+  const e = err as { response?: { status?: number; data?: any }; message?: string };
+  const data = e?.response?.data;
+  const backend = data?.error?.message || data?.message;
+  if (Array.isArray(backend)) return backend.join(' · ');
+  if (typeof backend === 'string' && backend.trim()) return backend;
+  if (e?.response?.status) return `${fallback} (erro ${e.response.status}).`;
+  if (e?.message === 'Network Error') return 'Sem conexão com o servidor. Verifique a internet.';
+  return fallback;
+}
+
 export default function Mesas() {
   const { filialAtiva } = useAuth();
   const filialId = filialAtiva?.id;
@@ -137,8 +151,8 @@ export default function Mesas() {
       ]);
       setMesasApi(rMesas.data ?? []);
       setComandas([...(rAbertas.data ?? []), ...(rFechando.data ?? [])]);
-    } catch {
-      setErro('Não consegui carregar o salão. Verifique a conexão e tente de novo.');
+    } catch (err) {
+      setErro(msgErro(err, 'Não consegui carregar o salão. Verifique a conexão e tente de novo.'));
     } finally {
       setCarregando(false);
     }
@@ -198,8 +212,8 @@ export default function Mesas() {
     try {
       await fn();
       await carregar();
-    } catch {
-      setErro('Não consegui concluir a ação. Tente novamente.');
+    } catch (err) {
+      setErro(msgErro(err, 'Não consegui concluir a ação. Tente novamente.'));
     } finally {
       setBusy(false);
     }
