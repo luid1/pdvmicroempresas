@@ -63,6 +63,16 @@ interface MesaVM {
   comanda?: ComandaVM;
 }
 
+// Opções escolhidas no fechamento da conta (caixa/balcão).
+type FecharOpts = { aplicarTaxa10: boolean; desconto: number; formaPagamento?: string };
+
+const PAGAMENTOS: { id: string; label: string }[] = [
+  { id: 'DINHEIRO', label: 'Dinheiro' },
+  { id: 'PIX', label: 'PIX' },
+  { id: 'CARTAO_CREDITO', label: 'Crédito' },
+  { id: 'CARTAO_DEBITO', label: 'Débito' },
+];
+
 const brl = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -233,8 +243,8 @@ export default function Mesas() {
   const pedirConta = (comandaId: string) =>
     acao(() => restauranteApi.pedirConta(comandaId));
 
-  const fecharConta = (comandaId: string) =>
-    acao(async () => { await restauranteApi.fecharComanda(comandaId, {}); setSelId(null); });
+  const fecharConta = (comandaId: string, opts: FecharOpts) =>
+    acao(async () => { await restauranteApi.fecharComanda(comandaId, opts); setSelId(null); });
 
   const criarMesas = (quantidade: number) =>
     acao(async () => {
@@ -405,7 +415,7 @@ export default function Mesas() {
           onAddItem={(item) => selecionada.comanda && adicionarItem(selecionada.comanda.id, item)}
           onTirarItem={(itemId) => selecionada.comanda && tirarItem(selecionada.comanda.id, itemId)}
           onPedirConta={() => selecionada.comanda && pedirConta(selecionada.comanda.id)}
-          onFecharConta={() => selecionada.comanda && fecharConta(selecionada.comanda.id)}
+          onFecharConta={(opts) => selecionada.comanda && fecharConta(selecionada.comanda.id, opts)}
         />
       )}
     </div>
@@ -518,12 +528,13 @@ function DetalheMesa({
   onAddItem: (item: { nome: string; preco: number; produtoId?: string }) => void;
   onTirarItem: (itemId: string) => void;
   onPedirConta: () => void;
-  onFecharConta: () => void;
+  onFecharConta: (opts: FecharOpts) => void;
 }) {
   const ui = STATUS_UI[mesa.status];
   const aberta = mesa.status === 'OCUPADA' || mesa.status === 'CONTA';
   const itens = mesa.comanda?.itens || [];
   const total = mesa.comanda?.total || 0;
+  const [checkout, setCheckout] = useState(false);
 
   return (
     <>
@@ -649,9 +660,9 @@ function DetalheMesa({
             </button>
           ) : mesa.status === 'CONTA' ? (
             <button
-              onClick={onFecharConta}
+              onClick={() => setCheckout(true)}
               disabled={busy}
-              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#2DD4A7] hover:bg-[#0a6b43] text-white transition-colors disabled:opacity-50"
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#2DD4A7] hover:bg-[#26b892] text-[#04121A] transition-colors disabled:opacity-50"
             >
               Fechar conta • {brl(total)}
             </button>
@@ -662,7 +673,230 @@ function DetalheMesa({
           )}
         </div>
       </aside>
+
+      {checkout && (
+        <ModalFechamento
+          mesa={mesa}
+          busy={busy}
+          onClose={() => setCheckout(false)}
+          onConfirmar={onFecharConta}
+        />
+      )}
     </>
+  );
+}
+
+// ── Fechamento da conta (caixa/balcão) + visão-cliente ──
+function ModalFechamento({
+  mesa, busy, onClose, onConfirmar,
+}: {
+  mesa: MesaVM;
+  busy: boolean;
+  onClose: () => void;
+  onConfirmar: (opts: FecharOpts) => void;
+}) {
+  const itens = mesa.comanda?.itens || [];
+  const subtotal = mesa.comanda?.total || 0;
+  const [taxa10, setTaxa10] = useState(true);
+  const [descontoStr, setDescontoStr] = useState('');
+  const [forma, setForma] = useState<string | undefined>(undefined);
+  const [modoCliente, setModoCliente] = useState(false);
+
+  const desconto = Math.max(0, Number(descontoStr.replace(',', '.')) || 0);
+  const taxa = taxa10 ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
+  const total = Math.max(0, subtotal + taxa - desconto);
+
+  if (modoCliente) {
+    return (
+      <VisaoCliente
+        mesa={mesa}
+        itens={itens}
+        subtotal={subtotal}
+        taxa={taxa}
+        desconto={desconto}
+        total={total}
+        onVoltar={() => setModoCliente(false)}
+      />
+    );
+  }
+
+  return (
+    <>
+      <div className="fixed inset-0 bg-black/50 z-[60]" onClick={onClose} />
+      <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 pointer-events-none">
+        <div className="w-full max-w-md bg-[#101216] border border-[#23262F] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] pointer-events-auto">
+          <div className="px-5 py-4 border-b border-[#23262F] flex items-center justify-between">
+            <div>
+              <p className="text-[11px] text-[#8A90A0]">Fechar conta</p>
+              <h2 className="text-lg font-black text-[#F7F8FA] leading-none">Mesa Nº {mesa.numero}</h2>
+            </div>
+            <button onClick={onClose} className="h-8 w-8 rounded-lg hover:bg-[#0C0D10] flex items-center justify-center text-[#8A90A0]">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="px-5 py-4 space-y-4 overflow-auto">
+            {/* Itens */}
+            <ul className="rounded-xl border border-[#23262F] bg-[#0C0D10] divide-y divide-[#23262F] max-h-40 overflow-y-auto">
+              {itens.map((i) => (
+                <li key={i.descricao} className="px-3.5 py-2 flex items-center justify-between gap-2">
+                  <span className="text-[13px] text-[#F7F8FA] truncate">{i.qtd}× {i.descricao}</span>
+                  <span className="text-[13px] font-bold text-[#F7F8FA] tabular-nums shrink-0">{brl(i.preco * i.qtd)}</span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Taxa e desconto */}
+            <div className="space-y-2">
+              <button
+                onClick={() => setTaxa10((v) => !v)}
+                className="w-full flex items-center justify-between rounded-xl border border-[#23262F] bg-[#0C0D10] px-3.5 py-2.5"
+              >
+                <span className="text-sm text-[#F7F8FA]">Taxa de serviço (10%)</span>
+                <span className={`h-5 w-9 rounded-full flex items-center px-0.5 transition-colors ${taxa10 ? 'bg-[#2DD4A7] justify-end' : 'bg-[#23262F] justify-start'}`}>
+                  <span className="h-4 w-4 rounded-full bg-white" />
+                </span>
+              </button>
+              <div className="flex items-center justify-between rounded-xl border border-[#23262F] bg-[#0C0D10] px-3.5 py-2">
+                <span className="text-sm text-[#F7F8FA]">Desconto (R$)</span>
+                <input
+                  value={descontoStr}
+                  onChange={(e) => setDescontoStr(e.target.value)}
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  className="w-24 text-right bg-transparent text-sm font-bold text-[#F7F8FA] tabular-nums placeholder:text-[#5E6472] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Resumo */}
+            <div className="rounded-xl border border-[#23262F] bg-[#0C0D10] px-3.5 py-3 space-y-1.5">
+              <Linha label="Subtotal" valor={brl(subtotal)} />
+              {taxa > 0 && <Linha label="Taxa de serviço (10%)" valor={brl(taxa)} />}
+              {desconto > 0 && <Linha label="Desconto" valor={`- ${brl(desconto)}`} cor="text-[#FF6B7A]" />}
+              <div className="pt-1.5 border-t border-[#23262F] flex items-center justify-between">
+                <span className="text-sm font-bold text-[#F7F8FA]">Total</span>
+                <span className="text-xl font-black text-[#2DD4A7] tabular-nums">{brl(total)}</span>
+              </div>
+            </div>
+
+            {/* Forma de pagamento */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-[#8A90A0] mb-1.5">Forma de pagamento</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {PAGAMENTOS.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setForma((f) => (f === p.id ? undefined : p.id))}
+                    className={`text-sm font-semibold px-3 py-2 rounded-lg border transition-colors ${
+                      forma === p.id
+                        ? 'border-[#01B8FA] bg-[#01B8FA]/[0.08] text-[#01B8FA]'
+                        : 'border-[#23262F] bg-[#101216] text-[#F7F8FA] hover:border-[#01B8FA]/40'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="px-5 py-4 border-t border-[#23262F] flex gap-2">
+            <button
+              onClick={() => setModoCliente(true)}
+              className="text-sm font-bold px-4 py-2.5 rounded-xl bg-[#16181F] border border-[#23262F] text-[#F7F8FA] hover:border-[#01B8FA]/40 transition-colors flex items-center gap-1.5"
+            >
+              <Receipt className="h-4 w-4" /> Mostrar ao cliente
+            </button>
+            <button
+              onClick={() => onConfirmar({ aplicarTaxa10: taxa10, desconto, formaPagamento: forma })}
+              disabled={busy}
+              className="flex-1 text-sm font-bold px-4 py-2.5 rounded-xl bg-[#2DD4A7] hover:bg-[#26b892] text-[#04121A] transition-colors disabled:opacity-50"
+            >
+              {busy ? 'Fechando…' : `Confirmar • ${brl(total)}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Linha({ label, valor, cor }: { label: string; valor: string; cor?: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-[13px] text-[#8A90A0]">{label}</span>
+      <span className={`text-[13px] font-semibold tabular-nums ${cor || 'text-[#F7F8FA]'}`}>{valor}</span>
+    </div>
+  );
+}
+
+// Tela cheia, limpa e grande — girada para o cliente conferir a conta no balcão.
+function VisaoCliente({
+  mesa, itens, subtotal, taxa, desconto, total, onVoltar,
+}: {
+  mesa: MesaVM;
+  itens: GrupoItem[];
+  subtotal: number;
+  taxa: number;
+  desconto: number;
+  total: number;
+  onVoltar: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[80] bg-[#08090A] flex flex-col">
+      <div className="px-6 py-5 border-b border-[#23262F] flex items-center justify-between">
+        <div>
+          <p className="text-sm text-[#8A90A0]">Sua conta</p>
+          <h1 className="text-2xl font-black text-[#F7F8FA]">Mesa Nº {mesa.numero}</h1>
+        </div>
+        <button
+          onClick={onVoltar}
+          className="h-10 w-10 rounded-xl bg-[#16181F] border border-[#23262F] flex items-center justify-center text-[#8A90A0] hover:text-[#F7F8FA]"
+          title="Voltar ao caixa"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto px-6 py-6 max-w-2xl w-full mx-auto">
+        <ul className="divide-y divide-[#23262F]">
+          {itens.map((i) => (
+            <li key={i.descricao} className="py-3 flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-lg text-[#F7F8FA] font-semibold truncate">{i.descricao}</p>
+                <p className="text-sm text-[#8A90A0]">{i.qtd} × {brl(i.preco)}</p>
+              </div>
+              <span className="text-lg font-bold text-[#F7F8FA] tabular-nums shrink-0">{brl(i.preco * i.qtd)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="border-t border-[#23262F] px-6 py-6 max-w-2xl w-full mx-auto space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-base text-[#8A90A0]">Subtotal</span>
+          <span className="text-base font-semibold text-[#F7F8FA] tabular-nums">{brl(subtotal)}</span>
+        </div>
+        {taxa > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-base text-[#8A90A0]">Taxa de serviço (10%)</span>
+            <span className="text-base font-semibold text-[#F7F8FA] tabular-nums">{brl(taxa)}</span>
+          </div>
+        )}
+        {desconto > 0 && (
+          <div className="flex items-center justify-between">
+            <span className="text-base text-[#8A90A0]">Desconto</span>
+            <span className="text-base font-semibold text-[#FF6B7A] tabular-nums">- {brl(desconto)}</span>
+          </div>
+        )}
+        <div className="pt-3 mt-1 border-t border-[#23262F] flex items-end justify-between">
+          <span className="text-xl font-bold text-[#F7F8FA]">Total</span>
+          <span className="text-4xl font-black text-[#2DD4A7] tabular-nums">{brl(total)}</span>
+        </div>
+        <p className="text-center text-[13px] text-[#5E6472] pt-2">Confira os itens com o atendente antes de pagar.</p>
+      </div>
+    </div>
   );
 }
 
