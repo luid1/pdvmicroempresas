@@ -288,9 +288,9 @@ export default function LoginPage() {
     localStorage.setItem('wms_filiais', JSON.stringify(filiais));
     if (filiais[0]) localStorage.setItem('wms_filial', JSON.stringify(filiais[0]));
     let destinoFinal = destino || rotaInicial(data.usuario.telas, data.usuario.role, data.usuario.telaInicial);
-    // Sem tela inicial fixada e empresa em modo Restaurante → cai no painel do restaurante.
+    // Sem tela inicial fixada e empresa em modo Restaurante → cai no salão (mesas).
     if (!destino && destinoFinal === '/dashboard' && data.tenant?.modo === 'RESTAURANTE') {
-      destinoFinal = '/restaurante/dashboard';
+      destinoFinal = '/restaurante/mesas';
     }
     window.location.href = destinoFinal;
   }

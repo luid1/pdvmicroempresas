@@ -34,7 +34,9 @@ export default defineConfig(({ mode }) => {
         display: 'standalone',
         orientation: 'any',
         scope: '/',
-        start_url: '/pdv',
+        // Abre na raiz e deixa o app decidir a tela inicial pelo MODO da empresa
+        // (Restaurante → salão/mesas; Varejo → dashboard). Ver HomeRedirect no App.
+        start_url: '/',
         categories: ['business', 'productivity', 'shopping'],
         icons: [
           { src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },

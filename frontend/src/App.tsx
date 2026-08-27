@@ -99,8 +99,9 @@ function MobileGuard({ children }: { children: React.ReactNode }) {
 function HomeRedirect() {
   const { user, segmento } = useAuth();
   let destino = rotaInicial(user?.telas, user?.role, user?.telaInicial);
+  // Só sobrescreve o destino GENÉRICO (/dashboard); uma telaInicial fixada sempre vence.
   if (destino === '/dashboard' && segmento === 'RESTAURANTE') {
-    destino = '/restaurante/dashboard';
+    destino = '/restaurante/mesas';
   }
   return <Navigate to={destino} replace />;
 }
