@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   LayoutGrid, Users, Clock, Receipt, Plus, Search, CheckCircle2, X, Minus, Trash2,
-  RefreshCw, AlertCircle, Loader2,
+  RefreshCw, AlertCircle, Loader2, ChefHat, Zap,
 } from 'lucide-react';
 import { restauranteApi, pdvApi, type ItemComandaInput } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -560,12 +560,20 @@ function DetalheMesa({
 
   const totalCarrinho = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
 
-  const enviarCozinha = async () => {
+  // paraCozinha=true → itens vão pro KDS (FILA). false → lançados direto na conta
+  // (ENTREGUE), sem passar pela cozinha (bebidas, itens já prontos).
+  const enviar = async (paraCozinha: boolean) => {
     if (carrinho.length === 0) return;
     setEnviando(true);
     try {
       await onEnviar(
-        carrinho.map((c) => ({ descricao: c.nome, quantidade: c.qtd, precoUnitario: c.preco, produtoId: c.produtoId })),
+        carrinho.map((c) => ({
+          descricao: c.nome,
+          quantidade: c.qtd,
+          precoUnitario: c.preco,
+          produtoId: c.produtoId,
+          ...(paraCozinha ? {} : { etapaKds: 'ENTREGUE' as const }),
+        })),
       );
       setCarrinho([]);
     } finally {
@@ -675,13 +683,26 @@ function DetalheMesa({
                     <span className="text-sm text-[#8A90A0]">Subtotal a enviar</span>
                     <span className="text-sm font-bold text-[#F7F8FA] tabular-nums">{brl(totalCarrinho)}</span>
                   </div>
-                  <button
-                    onClick={enviarCozinha}
-                    disabled={busy || enviando}
-                    className="w-full text-sm font-bold px-4 py-2.5 bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#04121A] transition-colors disabled:opacity-50"
-                  >
-                    {enviando ? 'Enviando…' : 'Enviar pra cozinha'}
-                  </button>
+                  <div className="grid grid-cols-2 gap-px bg-[#01B8FA]/20">
+                    <button
+                      onClick={() => enviar(true)}
+                      disabled={busy || enviando}
+                      className="text-sm font-bold px-3 py-2.5 bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#04121A] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                      title="Manda os itens pro painel da cozinha (KDS)"
+                    >
+                      <ChefHat className="h-4 w-4" />
+                      {enviando ? 'Enviando…' : 'Pra cozinha'}
+                    </button>
+                    <button
+                      onClick={() => enviar(false)}
+                      disabled={busy || enviando}
+                      className="text-sm font-bold px-3 py-2.5 bg-[#0C0D10] hover:bg-[#23262F] text-[#F7F8FA] transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+                      title="Lança direto na conta, sem passar pela cozinha (bebidas, itens prontos)"
+                    >
+                      <Zap className="h-4 w-4 text-[#01B8FA]" />
+                      {enviando ? 'Lançando…' : 'Lançar direto'}
+                    </button>
+                  </div>
                 </div>
               )}
 

@@ -40,6 +40,9 @@ export class ItemComandaInputDto {
   @IsNumber() @Min(0.001) quantidade!: number;
   @IsNumber() @Min(0) precoUnitario!: number;
   @IsOptional() @IsString() @MaxLength(180) observacao?: string;
+  // Etapa inicial no KDS. Omitido → FILA (vai pra cozinha). Bebidas/itens prontos
+  // podem vir como ENTREGUE para lançar direto na conta, sem passar pela cozinha.
+  @IsOptional() @IsEnum(EtapaKds) etapaKds?: EtapaKds;
 }
 
 // ── Comandas ──

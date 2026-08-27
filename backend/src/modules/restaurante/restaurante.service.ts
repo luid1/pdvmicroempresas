@@ -361,6 +361,9 @@ export class RestauranteService {
       precoUnitario: new Prisma.Decimal(preco),
       valorTotal: new Prisma.Decimal(valorTotal),
       observacao: i.observacao ?? null,
+      // Sem etapaKds → default do schema (FILA, vai pra cozinha). ENTREGUE = lançado
+      // direto na conta, sem aparecer no KDS (bebidas, itens já prontos).
+      ...(i.etapaKds ? { etapaKds: i.etapaKds } : {}),
     };
   }
 

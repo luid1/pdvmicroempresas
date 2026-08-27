@@ -445,6 +445,8 @@ export interface ItemComandaInput {
   quantidade: number;
   precoUnitario: number;
   observacao?: string;
+  // Omitido → vai pra cozinha (FILA). 'ENTREGUE' lança direto na conta (sem cozinha).
+  etapaKds?: 'FILA' | 'PREPARO' | 'PRONTO' | 'ENTREGUE' | 'CANCELADO';
 }
 export const restauranteApi = {
   // Mesas
