@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuthService } from '../auth/auth.service';
 import { FiliaisService } from '../filiais/filiais.service';
+import { UsuariosService } from '../usuarios/usuarios.service';
 import { AtualizarLojaDto, CriarLojaDto } from './dto/plataforma.dto';
 
 /**
@@ -15,6 +16,7 @@ export class PlataformaService {
     private prisma: PrismaService,
     private auth: AuthService,
     private filiais: FiliaisService,
+    private usuarios: UsuariosService,
   ) {}
 
   /** Lista todas as lojas (tenants) com contadores e status de assinatura. */
@@ -150,5 +152,53 @@ export class PlataformaService {
     if (!filial) throw new NotFoundException('Filial não encontrada.');
     if (typeof ativo !== 'boolean') throw new BadRequestException('Informe o novo estado (ativo).');
     return this.prisma.filial.update({ where: { id: filialId }, data: { ativo } });
+  }
+
+  // ── Logins (usuários) cross-tenant ──────────────────────────────────────
+  // O dono da plataforma pode adicionar/remover logins de QUALQUER loja.
+  // Reaproveita o UsuariosService (que já valida e-mail duplicado, perfil, etc.),
+  // passando o tenant alvo explicitamente.
+
+  /** Lista os perfis (roles) da loja — necessário para escolher ao criar um login. */
+  async listarRolesLoja(lojaId: string) {
+    const loja = await this.prisma.tenant.findUnique({ where: { id: lojaId }, select: { id: true } });
+    if (!loja) throw new NotFoundException('Loja não encontrada.');
+    return this.usuarios.listRoles(lojaId);
+  }
+
+  /** Cria um login (usuário) na loja alvo e devolve a loja atualizada. */
+  async criarUsuario(
+    lojaId: string,
+    dto: { nome: string; email: string; senha: string; roleId: string; cpf?: string; filialIds?: string[] },
+  ) {
+    const loja = await this.prisma.tenant.findUnique({ where: { id: lojaId }, select: { id: true } });
+    if (!loja) throw new NotFoundException('Loja não encontrada.');
+    await this.usuarios.createUsuario(lojaId, dto);
+    return this.obterLoja(lojaId);
+  }
+
+  /** Resolve o tenant do usuário (e protege o dono da plataforma). */
+  private async carregarUsuario(usuarioId: string) {
+    const u = await this.prisma.usuario.findUnique({
+      where: { id: usuarioId },
+      select: { tenantId: true, isSuperAdmin: true },
+    });
+    if (!u) throw new NotFoundException('Usuário não encontrado.');
+    return u;
+  }
+
+  /** Ativa/desativa um login. Não permite mexer no dono da plataforma. */
+  async toggleUsuario(usuarioId: string, ativo: boolean) {
+    if (typeof ativo !== 'boolean') throw new BadRequestException('Informe o novo estado (ativo).');
+    const u = await this.carregarUsuario(usuarioId);
+    if (u.isSuperAdmin) throw new BadRequestException('O dono da plataforma não pode ser desativado por aqui.');
+    await this.prisma.usuario.update({ where: { id: usuarioId }, data: { ativo } });
+    return this.obterLoja(u.tenantId);
+  }
+
+  /** Redefine a senha de um login. */
+  async resetSenhaUsuario(usuarioId: string, senha: string) {
+    const u = await this.carregarUsuario(usuarioId);
+    return this.usuarios.resetSenha(u.tenantId, usuarioId, senha);
   }
 }

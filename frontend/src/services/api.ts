@@ -436,6 +436,16 @@ export const plataformaApi = {
     api.put(`/plataforma/filiais/${filialId}`, data),
   toggleFilial: (filialId: string, ativo: boolean) =>
     api.patch(`/plataforma/filiais/${filialId}/toggle`, { ativo }),
+  // Logins (usuários) de qualquer loja
+  listarRolesLoja: (lojaId: string) => api.get(`/plataforma/lojas/${lojaId}/roles`),
+  criarUsuario: (
+    lojaId: string,
+    data: { nome: string; email: string; senha: string; roleId: string; cpf?: string; filialIds?: string[] },
+  ) => api.post(`/plataforma/lojas/${lojaId}/usuarios`, data),
+  toggleUsuario: (usuarioId: string, ativo: boolean) =>
+    api.patch(`/plataforma/usuarios/${usuarioId}/toggle`, { ativo }),
+  resetSenhaUsuario: (usuarioId: string, senha: string) =>
+    api.patch(`/plataforma/usuarios/${usuarioId}/senha`, { senha }),
 };
 
 // Restaurante — mesas, comandas e KDS (modos Restaurante/Híbrido)

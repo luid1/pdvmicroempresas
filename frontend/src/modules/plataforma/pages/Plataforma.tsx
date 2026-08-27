@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Store, Plus, Search, Building2, Users, Pencil, Power, X,
-  ShieldCheck, Loader2, MapPin, CheckCircle2, Ban,
+  ShieldCheck, Loader2, MapPin, CheckCircle2, Ban, UserPlus, KeyRound,
 } from 'lucide-react';
 import { plataformaApi } from '../../../services/api';
 import { inp, StatusBadge, Modal, Campo, Loader, Vazio } from '../../cadastros/ui';
-import { toast, confirmDialog } from '../../../components/ui/feedback';
+import { toast, confirmDialog, promptDialog } from '../../../components/ui/feedback';
 
 // ── Constantes ──────────────────────────────────────────────────────────
 const REGIMES = [
@@ -68,7 +68,7 @@ export default function Plataforma() {
             <Store className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Painel da Plataforma</h1>
+            <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Painel da Plataforma</h1>
             <p className="text-xs text-[#8B8D98]">
               {lojas.length} loja(s) · {totalFiliais} filial(is) · {totalUsuarios} usuário(s)
             </p>
@@ -93,7 +93,7 @@ export default function Plataforma() {
             className={`${inp} pl-9`}
           />
         </div>
-        <div className="flex gap-1 bg-[#F1F1F3] rounded-lg p-0.5">
+        <div className="flex gap-1 bg-white/[0.05] rounded-lg p-0.5">
           {[
             { v: 'todas', l: 'Todas' },
             { v: 'ativas', l: 'Ativas' },
@@ -103,7 +103,7 @@ export default function Plataforma() {
               key={o.v}
               onClick={() => setStatus(o.v)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                status === o.v ? 'bg-[#101216] text-[#16171D] shadow-sm' : 'text-[#8B8D98] hover:text-[#16171D]'
+                status === o.v ? 'bg-[#01B8FA] text-white shadow-sm' : 'text-[#8B8D98] hover:text-[#F7F8FA]'
               }`}
             >
               {o.l}
@@ -155,12 +155,12 @@ function LojaCard({ loja, onAbrir }: { loja: any; onAbrir: () => void }) {
     <button
       onClick={onAbrir}
       className={`text-left bg-[#101216] border rounded-xl p-4 hover:shadow-md hover:border-[#22D3EE]/40 transition-all group ${
-        loja.ativo ? 'border-[#E7E5DF]' : 'border-rose-200 bg-rose-50/40'
+        loja.ativo ? 'border-[#23262F]' : 'border-rose-200 bg-rose-50/40'
       }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <p className="font-bold text-[#16171D] truncate group-hover:text-[#01B8FA]">
+          <p className="font-bold text-[#F7F8FA] truncate group-hover:text-[#01B8FA]">
             {loja.nomeFantasia || loja.razaoSocial}
           </p>
           {loja.nomeFantasia && <p className="text-xs text-[#8B8D98] truncate">{loja.razaoSocial}</p>}
@@ -178,7 +178,7 @@ function LojaCard({ loja, onAbrir }: { loja: any; onAbrir: () => void }) {
         </span>
       </div>
 
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#F0EEE9]">
+      <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/[0.06]">
         <span className="text-xs text-[#8B8D98]">
           {loja.assinatura?.plano?.nome || loja.plano || 'Sem plano'}
         </span>
@@ -199,6 +199,7 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
   const [editando, setEditando] = useState(false);
   const [filialEdit, setFilialEdit] = useState<any | null>(null);
   const [novaFilial, setNovaFilial] = useState(false);
+  const [novoUsuario, setNovoUsuario] = useState(false);
 
   const carregar = useCallback(() => {
     setLoading(true);
@@ -247,6 +248,35 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
     }
   };
 
+  const toggleUsuario = async (u: any) => {
+    const ok = await confirmDialog(
+      u.ativo
+        ? `Desativar o login de "${u.nome}"? Ele perde o acesso ao sistema.`
+        : `Reativar o login de "${u.nome}"?`,
+      u.ativo ? { tone: 'danger', okLabel: 'Desativar' } : { okLabel: 'Reativar' },
+    );
+    if (!ok) return;
+    try {
+      await plataformaApi.toggleUsuario(u.id, !u.ativo);
+      toast(u.ativo ? 'Login desativado.' : 'Login reativado.', 'success');
+      recarregarTudo();
+    } catch (e: any) {
+      toast(e.response?.data?.message || 'Erro ao atualizar o login.', 'error');
+    }
+  };
+
+  const resetSenha = async (u: any) => {
+    const nova = await promptDialog(`Nova senha para "${u.nome}" (mín. 6 caracteres):`);
+    if (nova === null) return;
+    if (nova.trim().length < 6) return toast('A senha deve ter ao menos 6 caracteres.', 'error');
+    try {
+      await plataformaApi.resetSenhaUsuario(u.id, nova.trim());
+      toast('Senha redefinida.', 'success');
+    } catch (e: any) {
+      toast(e.response?.data?.message || 'Erro ao redefinir a senha.', 'error');
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
@@ -258,13 +288,13 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
               <Store className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h2 className="font-bold text-[#16171D] truncate">
+              <h2 className="font-bold text-[#F7F8FA] truncate">
                 {loja ? loja.nomeFantasia || loja.razaoSocial : 'Carregando...'}
               </h2>
               {loja && <p className="text-xs font-mono text-[#A0A2AD]">{fmtCnpj(loja.cnpj)}</p>}
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-[#F1F1F3] hover:text-[#16171D]">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-[#8B8D98] hover:bg-white/[0.06] hover:text-[#F7F8FA]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -276,9 +306,9 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
         ) : (
           <div className="flex-1 overflow-auto p-4 space-y-4">
             {/* Dados & ações */}
-            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
+            <section className="bg-[#101216] border border-[#23262F] rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-[#16171D]">Dados da loja</h3>
+                <h3 className="text-sm font-bold text-[#F7F8FA]">Dados da loja</h3>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setEditando(true)}
@@ -321,9 +351,9 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
             </section>
 
             {/* Filiais */}
-            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
+            <section className="bg-[#101216] border border-[#23262F] rounded-xl p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-[#16171D] flex items-center gap-1.5">
+                <h3 className="text-sm font-bold text-[#F7F8FA] flex items-center gap-1.5">
                   <Building2 className="h-4 w-4 text-[#8A90A0]" /> Filiais ({loja.filiais?.length || 0})
                 </h3>
                 <button
@@ -336,11 +366,11 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
               {(!loja.filiais || loja.filiais.length === 0) ? (
                 <p className="text-xs text-[#8B8D98] py-2">Nenhuma filial cadastrada.</p>
               ) : (
-                <div className="divide-y divide-[#F0EEE9]">
+                <div className="divide-y divide-white/[0.06]">
                   {loja.filiais.map((f: any) => (
                     <div key={f.id} className="flex items-center justify-between py-2 gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#16171D] truncate">
+                        <p className="text-sm font-semibold text-[#F7F8FA] truncate">
                           <span className="font-mono text-[#A0A2AD] mr-1.5">{f.codigo}</span>
                           {f.nome}
                         </p>
@@ -378,29 +408,55 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
               )}
             </section>
 
-            {/* Usuários */}
-            <section className="bg-[#101216] border border-[#E7E5DF] rounded-xl p-4">
-              <h3 className="text-sm font-bold text-[#16171D] flex items-center gap-1.5 mb-3">
-                <Users className="h-4 w-4 text-[#8A90A0]" /> Usuários ({loja.users?.length || 0})
-              </h3>
+            {/* Usuários (logins) */}
+            <section className="bg-[#101216] border border-[#23262F] rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-[#F7F8FA] flex items-center gap-1.5">
+                  <Users className="h-4 w-4 text-[#8A90A0]" /> Logins ({loja.users?.length || 0})
+                </h3>
+                <button
+                  onClick={() => setNovoUsuario(true)}
+                  className="flex items-center gap-1 text-[11px] bg-[#22D3EE]/12 text-[#01B8FA] border border-[#22D3EE]/30 px-2 py-1 rounded font-semibold hover:bg-[#22D3EE]/20"
+                >
+                  <UserPlus className="h-3 w-3" /> Adicionar login
+                </button>
+              </div>
               {(!loja.users || loja.users.length === 0) ? (
-                <p className="text-xs text-[#8B8D98] py-2">Nenhum usuário cadastrado.</p>
+                <p className="text-xs text-[#8B8D98] py-2">Nenhum login cadastrado.</p>
               ) : (
-                <div className="divide-y divide-[#F0EEE9]">
+                <div className="divide-y divide-white/[0.06]">
                   {loja.users.map((u: any) => (
                     <div key={u.id} className="flex items-center justify-between py-2 gap-2">
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-[#16171D] truncate flex items-center gap-1.5">
+                        <p className="text-sm font-semibold text-[#F7F8FA] truncate flex items-center gap-1.5">
                           {u.nome}
                           {u.isSuperAdmin && <ShieldCheck className="h-3.5 w-3.5 text-[#01B8FA]" />}
                         </p>
                         <p className="text-xs text-[#8B8D98] truncate">{u.email}</p>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-[10px] font-semibold text-[#8B8D98] bg-[#F1F1F3] px-2 py-0.5 rounded-full">
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-[10px] font-semibold text-[#8B8D98] bg-white/[0.05] px-2 py-0.5 rounded-full">
                           {u.role?.nome || '—'}
                         </span>
                         <StatusBadge ativo={u.ativo} />
+                        {!u.isSuperAdmin && (
+                          <>
+                            <button
+                              onClick={() => resetSenha(u)}
+                              title="Redefinir senha"
+                              className="p-1.5 rounded-lg text-[#a9760a] hover:bg-amber-500/10"
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => toggleUsuario(u)}
+                              title={u.ativo ? 'Desativar login' : 'Reativar login'}
+                              className={`p-1.5 rounded-lg ${u.ativo ? 'text-[#FF6B7A] hover:bg-rose-500/10' : 'text-[#2DD4A7] hover:bg-emerald-500/10'}`}
+                            >
+                              {u.ativo ? <Ban className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -422,7 +478,89 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
           onSalvo={() => { setNovaFilial(false); setFilialEdit(null); recarregarTudo(); }}
         />
       )}
+      {novoUsuario && loja && (
+        <CriarUsuarioModal
+          lojaId={id}
+          onClose={() => setNovoUsuario(false)}
+          onSalvo={() => { setNovoUsuario(false); recarregarTudo(); }}
+        />
+      )}
     </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  MODAL — criar um login (usuário) na loja
+// ══════════════════════════════════════════════════════════════════════
+function CriarUsuarioModal({ lojaId, onClose, onSalvo }: { lojaId: string; onClose: () => void; onSalvo: () => void }) {
+  const [roles, setRoles] = useState<any[]>([]);
+  const [carregandoRoles, setCarregandoRoles] = useState(true);
+  const [f, setF] = useState({ nome: '', email: '', senha: '', roleId: '' });
+  const set = (k: string, v: any) => setF((p) => ({ ...p, [k]: v }));
+  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    plataformaApi
+      .listarRolesLoja(lojaId)
+      .then((r) => {
+        const lista = r.data || [];
+        setRoles(lista);
+        // Pré-seleciona ADMIN se existir, senão o primeiro perfil.
+        const admin = lista.find((x: any) => x.nome === 'ADMIN');
+        setF((p) => ({ ...p, roleId: admin?.id || lista[0]?.id || '' }));
+      })
+      .catch(() => setRoles([]))
+      .finally(() => setCarregandoRoles(false));
+  }, [lojaId]);
+
+  const salvar = async () => {
+    if (!f.nome.trim()) return setErro('Informe o nome.');
+    if (!f.email.trim()) return setErro('Informe o e-mail.');
+    if (f.senha.length < 6) return setErro('A senha deve ter ao menos 6 caracteres.');
+    if (!f.roleId) return setErro('Escolha um perfil.');
+    setSalvando(true); setErro('');
+    try {
+      await plataformaApi.criarUsuario(lojaId, {
+        nome: f.nome.trim(),
+        email: f.email.trim(),
+        senha: f.senha,
+        roleId: f.roleId,
+      });
+      toast('Login criado com sucesso.', 'success');
+      onSalvo();
+    } catch (e: any) {
+      setErro(e.response?.data?.message || 'Erro ao criar o login.');
+      setSalvando(false);
+    }
+  };
+
+  return (
+    <Modal titulo="Novo login" onClose={onClose} onSalvar={salvar} salvando={salvando || carregandoRoles} salvarLabel="Criar login">
+      <div className="grid grid-cols-6 gap-3">
+        <Campo label="Nome *" className="col-span-6">
+          <input value={f.nome} onChange={(e) => set('nome', e.target.value)} className={inp} />
+        </Campo>
+        <Campo label="E-mail *" className="col-span-6">
+          <input type="email" value={f.email} onChange={(e) => set('email', e.target.value)} className={inp} placeholder="pessoa@empresa.com.br" />
+        </Campo>
+        <Campo label="Senha *" className="col-span-3">
+          <input type="password" value={f.senha} onChange={(e) => set('senha', e.target.value)} className={inp} placeholder="mín. 6 caracteres" />
+        </Campo>
+        <Campo label="Perfil *" className="col-span-3">
+          <select value={f.roleId} onChange={(e) => set('roleId', e.target.value)} className={inp} disabled={carregandoRoles}>
+            {carregandoRoles ? (
+              <option>Carregando…</option>
+            ) : roles.length === 0 ? (
+              <option value="">Nenhum perfil disponível</option>
+            ) : (
+              roles.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)
+            )}
+          </select>
+        </Campo>
+      </div>
+      {erro && <p className="text-xs text-[#FF6B7A] bg-rose-500/10 px-3 py-2 rounded-lg mt-3">{erro}</p>}
+    </Modal>
   );
 }
 
@@ -430,7 +568,7 @@ function Dado({ label, valor }: { label: string; valor?: string | null }) {
   return (
     <div>
       <p className="text-[#A0A2AD]">{label}</p>
-      <p className="text-[#16171D] font-medium truncate">{valor || '—'}</p>
+      <p className="text-[#F7F8FA] font-medium truncate">{valor || '—'}</p>
     </div>
   );
 }

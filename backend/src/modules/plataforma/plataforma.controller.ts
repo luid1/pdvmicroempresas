@@ -59,4 +59,29 @@ export class PlataformaController {
   toggleFilial(@Param('id') id: string, @Body() dto: ToggleFilialDto) {
     return this.service.toggleFilial(id, dto.ativo);
   }
+
+  // ── Logins (usuários) de qualquer loja ──
+  @Get('lojas/:id/roles')
+  @ApiOperation({ summary: 'Lista os perfis (roles) da loja — p/ escolher ao criar login' })
+  listarRoles(@Param('id') id: string) {
+    return this.service.listarRolesLoja(id);
+  }
+
+  @Post('lojas/:id/usuarios')
+  @ApiOperation({ summary: 'Cria um login (usuário) na loja alvo' })
+  criarUsuario(@Param('id') id: string, @Body() dto: any) {
+    return this.service.criarUsuario(id, dto);
+  }
+
+  @Patch('usuarios/:id/toggle')
+  @ApiOperation({ summary: 'Ativa/desativa um login (não afeta o dono da plataforma)' })
+  toggleUsuario(@Param('id') id: string, @Body() dto: { ativo: boolean }) {
+    return this.service.toggleUsuario(id, dto.ativo);
+  }
+
+  @Patch('usuarios/:id/senha')
+  @ApiOperation({ summary: 'Redefine a senha de um login' })
+  resetSenha(@Param('id') id: string, @Body() dto: { senha: string }) {
+    return this.service.resetSenhaUsuario(id, dto.senha);
+  }
 }

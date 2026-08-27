@@ -72,7 +72,7 @@ export default function Assinaturas() {
           <Coins className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-[15px] font-bold text-[#16171D] leading-tight">Assinaturas & Receita</h1>
+          <h1 className="text-[15px] font-bold text-[#F7F8FA] leading-tight">Assinaturas & Receita</h1>
           <p className="text-xs text-[#8B8D98]">Cobrança de todas as lojas — status, planos e receita recorrente.</p>
         </div>
       </div>
@@ -91,13 +91,13 @@ export default function Assinaturas() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A90A0]" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar loja por nome ou CNPJ..." className={`${inp} pl-9`} />
         </div>
-        <div className="flex gap-1 bg-[#F1F1F3] rounded-lg p-0.5 flex-wrap">
+        <div className="flex gap-1 bg-white/[0.05] rounded-lg p-0.5 flex-wrap">
           {FILTROS.map((o) => (
             <button
               key={o.v}
               onClick={() => setFiltro(o.v)}
               className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-                filtro === o.v ? 'bg-[#101216] text-[#16171D] shadow-sm' : 'text-[#8B8D98] hover:text-[#16171D]'
+                filtro === o.v ? 'bg-[#01B8FA] text-white shadow-sm' : 'text-[#8B8D98] hover:text-[#F7F8FA]'
               }`}
             >
               {o.l}
@@ -121,7 +121,7 @@ export default function Assinaturas() {
               <div className="col-span-2">Status</div>
               <div className="col-span-2 text-right">Receita/mês</div>
             </div>
-            <div className="divide-y divide-[#F0EEE9]">
+            <div className="divide-y divide-white/[0.06]">
               {lista.map((l) => {
                 const st = l.assinatura?.status || 'SEM';
                 const meta = STATUS_ASSINATURA[st] || STATUS_ASSINATURA.SEM;
@@ -132,7 +132,7 @@ export default function Assinaturas() {
                     className="w-full grid grid-cols-2 md:grid-cols-12 gap-2 px-4 py-2.5 text-left hover:bg-white/[0.03] items-center"
                   >
                     <div className="col-span-2 md:col-span-5 min-w-0">
-                      <p className="text-sm font-semibold text-[#16171D] truncate">{l.nomeFantasia || l.razaoSocial}</p>
+                      <p className="text-sm font-semibold text-[#F7F8FA] truncate">{l.nomeFantasia || l.razaoSocial}</p>
                       <p className="text-xs text-[#8B8D98] truncate">{l.razaoSocial}</p>
                     </div>
                     <div className="md:col-span-3 min-w-0">
@@ -142,7 +142,7 @@ export default function Assinaturas() {
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${meta.cls}`}>{meta.label}</span>
                     </div>
                     <div className="md:col-span-2 md:text-right">
-                      <span className="text-sm font-bold text-[#16171D]">{precoDaLoja(l) > 0 ? brl(precoDaLoja(l)) : '—'}</span>
+                      <span className="text-sm font-bold text-[#F7F8FA]">{precoDaLoja(l) > 0 ? brl(precoDaLoja(l)) : '—'}</span>
                     </div>
                   </button>
                 );
@@ -163,7 +163,7 @@ function Resumo({ icon: Icon, cor, titulo, valor }: { icon: any; cor: string; ti
       </span>
       <div className="min-w-0">
         <p className="text-[10px] font-semibold text-[#8B8D98] uppercase tracking-wide truncate">{titulo}</p>
-        <p className="text-base font-bold text-[#16171D] leading-tight">{valor}</p>
+        <p className="text-base font-bold text-[#F7F8FA] leading-tight">{valor}</p>
       </div>
     </div>
   );
