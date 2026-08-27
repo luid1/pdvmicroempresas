@@ -85,18 +85,6 @@ const STATUS_UI: Record<StatusMesa, { label: string; dot: string; card: string; 
   RESERVADA: { label: 'Reservada', dot: 'bg-[#8A90A0]',  card: 'border-[#23262F] bg-[#0C0D10]',                      chip: 'bg-[#16181F] text-[#8A90A0] border-[#23262F]' },
 };
 
-/** Menu rápido do garçom — os itens mais lançados, para bater na comanda num toque. */
-const MENU_RAPIDO: { nome: string; preco: number }[] = [
-  { nome: 'Pizza Calabresa (G)', preco: 49.9 },
-  { nome: 'X-Bacon Artesanal', preco: 28.0 },
-  { nome: 'Smash Duplo', preco: 32.0 },
-  { nome: 'Espaguete à Bolonhesa', preco: 39.9 },
-  { nome: 'Refrigerante Lata', preco: 7.0 },
-  { nome: 'Suco Natural', preco: 12.0 },
-  { nome: 'Chopp 300ml', preco: 11.5 },
-  { nome: 'Sobremesa do dia', preco: 18.0 },
-];
-
 const FILTROS: { id: StatusMesa | 'TODAS'; label: string }[] = [
   { id: 'TODAS', label: 'Todas' },
   { id: 'LIVRE', label: 'Livres' },
@@ -538,6 +526,18 @@ function DetalheMesa({
   const [carrinho, setCarrinho] = useState<{ nome: string; preco: number; produtoId?: string; qtd: number }[]>([]);
   const [enviando, setEnviando] = useState(false);
 
+  // Menu rápido = os primeiros produtos ATIVOS do catálogo da loja (os mesmos de
+  // Produtos & Código de Barras), pra bater na comanda num toque — sem digitar.
+  const [menuRapido, setMenuRapido] = useState<ProdutoBusca[]>([]);
+  useEffect(() => {
+    let vivo = true;
+    pdvApi
+      .buscarProdutos('', filialId)
+      .then(({ data }) => { if (vivo) setMenuRapido(Array.isArray(data) ? data.slice(0, 8) : []); })
+      .catch(() => { if (vivo) setMenuRapido([]); });
+    return () => { vivo = false; };
+  }, [filialId]);
+
   const addAoCarrinho = (item: { nome: string; preco: number; produtoId?: string }) =>
     setCarrinho((cur) => {
       const idx = cur.findIndex((c) => (item.produtoId ? c.produtoId === item.produtoId : c.nome === item.nome));
@@ -706,20 +706,20 @@ function DetalheMesa({
                 </div>
               )}
 
-              {/* Menu rápido */}
-              {mesa.status === 'OCUPADA' && (
+              {/* Menu rápido — produtos reais do catálogo da loja */}
+              {mesa.status === 'OCUPADA' && menuRapido.length > 0 && (
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wide text-[#8A90A0] mb-1.5">Menu rápido</p>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {MENU_RAPIDO.map((item) => (
+                    {menuRapido.map((item) => (
                       <button
-                        key={item.nome}
-                        onClick={() => addAoCarrinho(item)}
+                        key={item.id}
+                        onClick={() => addAoCarrinho({ nome: item.descricao, preco: item.precoVenda, produtoId: item.id })}
                         disabled={busy}
                         className="text-left rounded-lg border border-[#23262F] bg-[#101216] px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors disabled:opacity-50"
                       >
-                        <p className="text-[12px] text-[#F7F8FA] font-medium leading-tight truncate">{item.nome}</p>
-                        <p className="text-[11px] text-[#8A90A0]">{brl(item.preco)}</p>
+                        <p className="text-[12px] text-[#F7F8FA] font-medium leading-tight truncate">{item.descricao}</p>
+                        <p className="text-[11px] text-[#8A90A0]">{brl(item.precoVenda)}</p>
                       </button>
                     ))}
                   </div>

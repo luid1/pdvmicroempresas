@@ -107,17 +107,25 @@ export class PdvService {
    */
   async buscarProdutos(tenantId: string, termo: string, filialId?: string) {
     const t = (termo || '').trim();
-    if (t.length < 2) return [];
+
+    // Sem termo (ou com 1 letra) devolve os primeiros produtos ativos — serve de
+    // "cardápio rápido" no restaurante e de catálogo inicial. Com ≥2 letras filtra.
+    const filtro =
+      t.length >= 2
+        ? {
+            OR: [
+              { descricao: { contains: t, mode: 'insensitive' as const } },
+              { codigo: { startsWith: t } },
+              { codigoBarras: { startsWith: t } },
+            ],
+          }
+        : {};
 
     const produtos = await this.prisma.produto.findMany({
       where: {
         tenantId,
         ativo: true,
-        OR: [
-          { descricao: { contains: t, mode: 'insensitive' } },
-          { codigo: { startsWith: t } },
-          { codigoBarras: { startsWith: t } },
-        ],
+        ...filtro,
       },
       include: {
         unidadeMedida: { select: { sigla: true } },

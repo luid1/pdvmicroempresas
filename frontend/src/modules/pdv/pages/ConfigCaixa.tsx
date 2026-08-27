@@ -130,7 +130,7 @@ export default function ConfigCaixa() {
   const algumLigado = OPERACOES.some((o) => form[o.key]);
 
   return (
-    <div className="min-h-full bg-[#F4F5F7] p-4 sm:p-6">
+    <div className="min-h-full bg-[#0C0D10] p-4 sm:p-6">
       <div className="mx-auto max-w-3xl space-y-4 pb-24">
         {/* Cabeçalho */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -165,11 +165,11 @@ export default function ConfigCaixa() {
         </div>
 
         {erro && (
-          <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{erro}</div>
+          <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-[#FF6B7A]">{erro}</div>
         )}
 
         {!filialId ? (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm text-[#E8A317]">
             Selecione uma loja para configurar a segurança do caixa.
           </div>
         ) : loading ? (
@@ -194,7 +194,7 @@ export default function ConfigCaixa() {
                   className={`ml-auto rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                     senhaDefinida
                       ? 'bg-[#01B8FA]/10 text-[#2DD4A7] ring-1 ring-inset ring-[#01B8FA]/20'
-                      : 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-300'
+                      : 'bg-amber-500/10 text-[#E8A317] ring-1 ring-inset ring-amber-500/30'
                   }`}
                 >
                   {senhaDefinida ? 'Configurada' : 'Não configurada'}
@@ -228,7 +228,7 @@ export default function ConfigCaixa() {
                 </label>
               </div>
               {!senhaDefinida && (
-                <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700">
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-[#E8A317]">
                   <Lock className="h-3.5 w-3.5" />
                   Enquanto não houver senha, as operações marcadas ficam bloqueadas no caixa.
                 </p>
@@ -239,7 +239,7 @@ export default function ConfigCaixa() {
             <section className="rounded-2xl border border-[#23262F] bg-[#101216] p-5 shadow-[0_1px_2px_rgba(22,23,29,0.04)]">
               <h2 className="text-sm font-semibold text-[#F7F8FA]">Operações que pedem senha</h2>
               <p className="text-xs text-[#8A90A0]">Ligue o que, nesta loja, só um responsável pode liberar.</p>
-              <div className="mt-3 divide-y divide-[#EEF0F2]">
+              <div className="mt-3 divide-y divide-white/[0.06]">
                 {OPERACOES.map((o) => (
                   <div key={o.key} className="flex items-center justify-between gap-4 py-3">
                     <div className="min-w-0">
@@ -251,7 +251,7 @@ export default function ConfigCaixa() {
                 ))}
               </div>
               {algumLigado && !senhaDefinida && form.senhaGerencial.trim() === '' && (
-                <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                <p className="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-[#E8A317]">
                   Defina uma senha gerencial acima para que essas exigências funcionem.
                 </p>
               )}
