@@ -12,9 +12,10 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { OrigemComanda, EtapaKds } from '@prisma/client';
+import { TenantAwareDto } from '../../../common/dto/tenant-aware.dto';
 
 // ── Mesas ──
-export class CriarMesaDto {
+export class CriarMesaDto extends TenantAwareDto {
   @IsString() filialId!: string;
   @IsInt() @Min(1) numero!: number;
   @IsOptional() @IsString() @MaxLength(60) apelido?: string;
@@ -23,7 +24,7 @@ export class CriarMesaDto {
   @IsOptional() @IsInt() posY?: number;
 }
 
-export class AtualizarMesaDto {
+export class AtualizarMesaDto extends TenantAwareDto {
   @IsOptional() @IsInt() @Min(1) numero?: number;
   @IsOptional() @IsString() @MaxLength(60) apelido?: string;
   @IsOptional() @IsInt() @Min(1) lugares?: number;
@@ -42,7 +43,7 @@ export class ItemComandaInputDto {
 }
 
 // ── Comandas ──
-export class AbrirComandaDto {
+export class AbrirComandaDto extends TenantAwareDto {
   @IsString() filialId!: string;
   @IsOptional() @IsEnum(OrigemComanda) origem?: OrigemComanda;
   @IsOptional() @IsString() mesaId?: string;
@@ -57,14 +58,14 @@ export class AbrirComandaDto {
   itens?: ItemComandaInputDto[];
 }
 
-export class AdicionarItensDto {
+export class AdicionarItensDto extends TenantAwareDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ItemComandaInputDto)
   itens!: ItemComandaInputDto[];
 }
 
-export class FecharComandaDto {
+export class FecharComandaDto extends TenantAwareDto {
   @IsOptional() @IsNumber() @Min(0) taxaServico?: number; // valor em R$ (ex.: 10% já calculado)
   @IsOptional() @IsBoolean() aplicarTaxa10?: boolean; // se true, calcula 10% do subtotal
   @IsOptional() @IsNumber() @Min(0) desconto?: number;
@@ -73,6 +74,6 @@ export class FecharComandaDto {
 }
 
 // ── KDS ──
-export class MoverEtapaKdsDto {
+export class MoverEtapaKdsDto extends TenantAwareDto {
   @IsEnum(EtapaKds) etapa!: EtapaKds;
 }
