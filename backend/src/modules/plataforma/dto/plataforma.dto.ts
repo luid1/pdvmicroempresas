@@ -1,7 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, MinLength, MaxLength,
+  IsString, IsNotEmpty, IsOptional, IsEmail, IsBoolean, IsEnum, MinLength, MaxLength,
 } from 'class-validator';
+import { ModoOperacao } from '@prisma/client';
 
 /** Cria uma nova loja (tenant) + filial matriz + usuário admin master. */
 export class CriarLojaDto {
@@ -65,6 +66,10 @@ export class AtualizarLojaDto {
 
   @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(120)
   emailNfe?: string;
+
+  @ApiPropertyOptional({ description: 'Modo de operação da loja', enum: ModoOperacao })
+  @IsOptional() @IsEnum(ModoOperacao)
+  modo?: ModoOperacao;
 }
 
 /** Ativa/desativa uma filial específica de uma loja. */

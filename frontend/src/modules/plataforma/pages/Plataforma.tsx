@@ -6,6 +6,7 @@ import {
 import { plataformaApi } from '../../../services/api';
 import { inp, StatusBadge, Modal, Campo, Loader, Vazio } from '../../cadastros/ui';
 import { toast, confirmDialog, promptDialog } from '../../../components/ui/feedback';
+import { SEGMENTOS } from '../../../config/segmentos';
 
 // ── Constantes ──────────────────────────────────────────────────────────
 const REGIMES = [
@@ -277,6 +278,21 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
     }
   };
 
+  const [salvandoModo, setSalvandoModo] = useState(false);
+  const definirModo = async (modo: string) => {
+    if (!loja || loja.modo === modo || salvandoModo) return;
+    setSalvandoModo(true);
+    try {
+      await plataformaApi.atualizarLoja(id, { modo });
+      toast('Modo de operação atualizado.', 'success');
+      recarregarTudo();
+    } catch (e: any) {
+      toast(e.response?.data?.message || 'Erro ao alterar o modo de operação.', 'error');
+    } finally {
+      setSalvandoModo(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" onClick={onClose} />
@@ -347,6 +363,39 @@ function LojaDrawer({ id, onClose, onMudou }: { id: string; onClose: () => void;
                     }`}
                   />
                 )}
+              </div>
+            </section>
+
+            {/* Modo de operação — cada loja opera do seu jeito */}
+            <section className="bg-[#101216] border border-[#23262F] rounded-xl p-4">
+              <h3 className="text-sm font-bold text-[#F7F8FA] mb-1">Modo de operação</h3>
+              <p className="text-xs text-[#8B8D98] mb-3">Define quais telas e fluxos esta loja enxerga.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {SEGMENTOS.map((s) => {
+                  const Icon = s.icon;
+                  const ativo = (loja.modo || 'VAREJO') === s.key;
+                  return (
+                    <button
+                      key={s.key}
+                      onClick={() => definirModo(s.key)}
+                      disabled={salvandoModo}
+                      className={`text-left rounded-xl border p-3 transition-colors disabled:opacity-60 ${
+                        ativo
+                          ? 'bg-[#22D3EE]/12 border-[#22D3EE]/40'
+                          : 'bg-white/[0.02] border-[#23262F] hover:border-[#22D3EE]/30'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`h-7 w-7 rounded-lg flex items-center justify-center shrink-0 ${ativo ? 'bg-[#22D3EE]/20 text-[#01B8FA]' : 'bg-white/[0.05] text-[#8B8D98]'}`}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className={`text-sm font-bold ${ativo ? 'text-[#F7F8FA]' : 'text-[#C7C9D1]'}`}>{s.label}</span>
+                        {ativo && <CheckCircle2 className="h-4 w-4 text-[#2DD4A7] ml-auto" />}
+                      </div>
+                      <p className="text-[11px] text-[#8B8D98] leading-snug">{s.descricao}</p>
+                    </button>
+                  );
+                })}
               </div>
             </section>
 

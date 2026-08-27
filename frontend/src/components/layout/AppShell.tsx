@@ -291,7 +291,7 @@ export default function AppShell() {
                   <p className="text-white text-[11px] font-medium truncate">{user?.nome}</p>
                   <p className="text-[#6B6E82] text-[9px]">{user?.role}</p>
                 </div>
-                <NotificacoesSino />
+                {!user?.isSuperAdmin && <NotificacoesSino />}
               </div>
               <button onClick={() => { logout(); navigate('/login'); }} className="flex items-center gap-1.5 text-[#8B8EA0] hover:text-white text-[10px] w-full px-2 py-1.5 rounded-lg hover:bg-white/[0.05] transition-all duration-300 active:scale-[0.98]">
                 <LogOut className="h-3 w-3" /> Sair
@@ -299,7 +299,7 @@ export default function AppShell() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-1.5">
-              <NotificacoesSino />
+              {!user?.isSuperAdmin && <NotificacoesSino />}
               <button onClick={() => { logout(); navigate('/login'); }} className="text-[#8B8EA0] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-all duration-300" title="Sair">
                 <LogOut className="h-3.5 w-3.5" />
               </button>

@@ -63,7 +63,7 @@ export class PlataformaService {
       select: {
         id: true, razaoSocial: true, nomeFantasia: true, cnpj: true, ie: true,
         im: true, emailNfe: true, plano: true, ativo: true, regimeTributario: true,
-        crt: true, createdAt: true,
+        crt: true, modo: true, createdAt: true,
         assinatura: {
           select: {
             status: true, periodo: true, trialAte: true, proximaCobranca: true,
@@ -127,6 +127,7 @@ export class PlataformaService {
         ...(dto.regimeTributario !== undefined && { regimeTributario: dto.regimeTributario }),
         ...(dto.ie !== undefined && { ie: dto.ie || null }),
         ...(dto.emailNfe !== undefined && { emailNfe: dto.emailNfe || null }),
+        ...(dto.modo !== undefined && { modo: dto.modo }),
       },
     });
     return this.obterLoja(id);

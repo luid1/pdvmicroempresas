@@ -147,9 +147,8 @@ export const TELAS: TelaDef[] = [
   { key: '/plataforma/visao', label: 'Visão Geral', grupo: 'Plataforma', icon: LayoutDashboard, soDono: true, highlight: true },
   { key: '/plataforma', label: 'Lojas & Clientes', grupo: 'Plataforma', icon: Store, soDono: true },
   { key: '/plataforma/assinaturas', label: 'Assinaturas & Receita', grupo: 'Plataforma', icon: Coins, soDono: true },
-  // Modo de operação (Varejo/Restaurante/Híbrido) é decisão do DONO DO SaaS na
-  // criação do sistema — não do lojista. Só o super-admin enxerga/acessa.
-  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Plataforma', icon: LayoutGrid, soDono: true },
+  // O modo de operação (Varejo/Restaurante/Híbrido) é definido POR LOJA, dentro
+  // do cadastro de cada empresa em "Lojas & Clientes" — cada uma opera do seu jeito.
 
   // ══════════════════════════════════════════════════════════════════════
   //  RECURSOS ESPECIALIZADOS — distribuídos por Estoque, Compras, Fiscal
