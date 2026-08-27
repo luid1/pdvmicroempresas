@@ -42,6 +42,8 @@ import MonitorFiscal from './modules/fiscal/pages/MonitorFiscal';
 import Pdv from './modules/pdv/pages/Pdv';
 import ConfigCaixa from './modules/pdv/pages/ConfigCaixa';
 import Plataforma from './modules/plataforma/pages/Plataforma';
+import VisaoGeral from './modules/plataforma/pages/VisaoGeral';
+import Assinaturas from './modules/plataforma/pages/Assinaturas';
 import ModoOperacao from './modules/config/pages/ModoOperacao';
 import Mesas from './modules/restaurante/pages/Mesas';
 import Comandas from './modules/restaurante/pages/Comandas';
@@ -180,7 +182,9 @@ export default function App() {
             <Route path="gerencial/assinatura" element={<MinhaAssinatura />} />
 
             {/* Plataforma (dono do SaaS) — só o super-admin acessa (TelaGuard + soDono) */}
+            <Route path="plataforma/visao" element={<VisaoGeral />} />
             <Route path="plataforma" element={<Plataforma />} />
+            <Route path="plataforma/assinaturas" element={<Assinaturas />} />
           </Route>
         </Routes>
         <PwaPrompt />

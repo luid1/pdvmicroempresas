@@ -11,7 +11,7 @@ import {
   ChevronLeft, ChevronRight, LogOut, Building2, Menu, Circle,
 } from 'lucide-react';
 
-interface NavItem { to: string; icon: React.ElementType; label: string; badge?: string; badgeColor?: string; highlight?: boolean; pasta?: boolean; submenu?: SubTela[] }
+interface NavItem { to: string; icon: React.ElementType; label: string; badge?: string; badgeColor?: string; highlight?: boolean; pasta?: boolean; soDono?: boolean; submenu?: SubTela[] }
 interface NavGroup { group: string; items: NavItem[] }
 
 // Menu derivado da FONTE ÚNICA (config/telas.ts) — sem lista paralela.
@@ -27,6 +27,7 @@ function montarNavegacao(segmento: Segmento): NavGroup[] {
       badgeColor: t.badgeColor,
       highlight: t.highlight,
       pasta: t.pasta,
+      soDono: t.soDono,
       submenu: t.submenu,
     })),
   }));
@@ -56,6 +57,11 @@ export default function AppShell() {
 
   // Filtra o menu pelas telas que o perfil do usuário pode ver.
   // Também filtra os subitens do flyout pela permissão (herdam a permissão da própria rota).
+  //
+  // DONO DA PLATAFORMA (super-admin): mesmo logando com role ADMIN, ele NÃO é
+  // lojista — não deve ver as abas de loja (PDV, Estoque, Financeiro, etc.).
+  // Para ele o menu mostra SÓ as telas da plataforma (marcadas `soDono`).
+  const soDono = !!user?.isSuperAdmin;
   const navVisivel = useMemo(() => montarNavegacao(segmento)
     .map((g) => ({
       ...g,
@@ -68,9 +74,11 @@ export default function AppShell() {
         // Pasta: aparece se tiver ao menos um filho visível. Página: pela permissão da rota.
         .filter((i) => i.pasta
           ? !!(i.submenu && i.submenu.length > 0)
-          : podeVerTela(user?.telas, user?.role, i.to, user?.isSuperAdmin)),
+          : podeVerTela(user?.telas, user?.role, i.to, user?.isSuperAdmin))
+        // Dono da plataforma: só enxerga as telas da plataforma (soDono).
+        .filter((i) => !soDono || i.soDono),
     }))
-    .filter((g) => g.items.length > 0), [user?.telas, user?.role, user?.isSuperAdmin, segmento]);
+    .filter((g) => g.items.length > 0), [user?.telas, user?.role, user?.isSuperAdmin, segmento, soDono]);
 
   // Flyout (submenu que abre ao passar o mouse sobre o item pai)
   const [flyout, setFlyout] = useState<FlyoutState | null>(null);

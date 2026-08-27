@@ -136,16 +136,20 @@ export const TELAS: TelaDef[] = [
     { key: '/gerencial/configuracoes', label: 'Configurações', icon: Settings, hint: 'Parâmetros do sistema' },
     { key: '/gerencial/auditoria', label: 'Logs de Auditoria', icon: ShieldCheck, hint: 'Trilha de eventos' },
   ] },
-  // Modo de operação (Varejo/Restaurante/Híbrido) é decisão do DONO DO SaaS na
-  // criação do sistema — não do lojista. Só o super-admin enxerga/acessa.
-  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Gerência', icon: LayoutGrid, soDono: true },
   { key: '/gerencial/usuarios', label: 'Usuários & Acessos', grupo: 'Gerência', icon: Users, oculto: true },
   { key: '/gerencial/configuracoes', label: 'Configurações', grupo: 'Gerência', icon: Settings, oculto: true },
   { key: '/gerencial/auditoria', label: 'Logs de Auditoria', grupo: 'Gerência', icon: ShieldCheck, oculto: true },
   { key: '/gerencial/assinatura', label: 'Minha Assinatura', grupo: 'Gerência', icon: Gauge },
 
-  // ── Plataforma (DONO DO SaaS) — cross-tenant, só o super-admin enxerga ──
-  { key: '/plataforma', label: 'Painel da Plataforma', grupo: 'Plataforma', icon: Store, soDono: true },
+  // ── Plataforma (DONO DO SaaS) — cross-tenant, só o super-admin enxerga.
+  //     Este é o ÚNICO grupo que o dono da plataforma vê no menu: nenhuma aba
+  //     de loja (PDV, Estoque, Financeiro, etc.) aparece para ele. ──
+  { key: '/plataforma/visao', label: 'Visão Geral', grupo: 'Plataforma', icon: LayoutDashboard, soDono: true, highlight: true },
+  { key: '/plataforma', label: 'Lojas & Clientes', grupo: 'Plataforma', icon: Store, soDono: true },
+  { key: '/plataforma/assinaturas', label: 'Assinaturas & Receita', grupo: 'Plataforma', icon: Coins, soDono: true },
+  // Modo de operação (Varejo/Restaurante/Híbrido) é decisão do DONO DO SaaS na
+  // criação do sistema — não do lojista. Só o super-admin enxerga/acessa.
+  { key: '/gerencial/modo-operacao', label: 'Modo de Operação', grupo: 'Plataforma', icon: LayoutGrid, soDono: true },
 
   // ══════════════════════════════════════════════════════════════════════
   //  RECURSOS ESPECIALIZADOS — distribuídos por Estoque, Compras, Fiscal
