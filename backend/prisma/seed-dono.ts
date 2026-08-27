@@ -43,18 +43,33 @@ if (!DONO_SENHA || DONO_SENHA.length < 10) {
 async function main() {
   console.log('🌱 Seed do DONO DA PLATAFORMA...\n');
 
-  // ── 1. Tenant âncora: Mercado Central ──────────────────────────
-  const tenant = await prisma.tenant.findUnique({ where: { cnpj: '00.000.000/0001-00' } });
+  // ── 1. Tenant âncora ───────────────────────────────────────────
+  // O dono precisa pertencer a um tenant (exigência do schema). Ordem de escolha:
+  //   1) DONO_CNPJ, se você informar um CNPJ específico;
+  //   2) o "Mercado Central" (tenant demo padrão), se existir;
+  //   3) qualquer primeiro tenant existente no banco — assim o script funciona
+  //      mesmo num banco de produção que nunca recebeu o seed demo.
+  const DONO_CNPJ = (process.env.DONO_CNPJ || '').replace(/\D/g, '');
+  let tenant =
+    (DONO_CNPJ
+      ? await prisma.tenant.findFirst({ where: { cnpj: { contains: DONO_CNPJ } } })
+      : null) ||
+    (await prisma.tenant.findUnique({ where: { cnpj: '00.000.000/0001-00' } })) ||
+    (await prisma.tenant.findFirst({ orderBy: { createdAt: 'asc' } }));
   if (!tenant) {
-    throw new Error('Tenant "Mercado Central" não encontrado. Rode o seed principal antes (npx ts-node prisma/seed.ts).');
+    throw new Error(
+      'Nenhum tenant/empresa encontrado no banco. Crie ao menos uma empresa antes ' +
+      '(ou rode o seed demo: npx ts-node prisma/seed.ts).',
+    );
   }
+  console.log(`🏢 Tenant âncora: ${tenant.razaoSocial || tenant.cnpj}`);
 
-  // ── 2. Role ADMIN desse tenant ─────────────────────────────────
-  const roleAdmin = await prisma.role.findUnique({
-    where: { tenantId_nome: { tenantId: tenant.id, nome: 'ADMIN' } },
-  });
+  // ── 2. Role do dono nesse tenant (ADMIN, ou o primeiro que existir) ─
+  const roleAdmin =
+    (await prisma.role.findUnique({ where: { tenantId_nome: { tenantId: tenant.id, nome: 'ADMIN' } } })) ||
+    (await prisma.role.findFirst({ where: { tenantId: tenant.id } }));
   if (!roleAdmin) {
-    throw new Error('Role ADMIN não encontrada no tenant. Rode o seed principal antes.');
+    throw new Error('Nenhum perfil (role) encontrado no tenant âncora. Rode o seed principal antes.');
   }
 
   // ── 3. Filiais do admin (para espelhar no dono) ────────────────
