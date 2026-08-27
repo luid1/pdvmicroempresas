@@ -3,7 +3,7 @@ import {
   LayoutGrid, Users, Clock, Receipt, Plus, Search, CheckCircle2, X, Minus, Trash2,
   RefreshCw, AlertCircle, Loader2,
 } from 'lucide-react';
-import { restauranteApi } from '../../../services/api';
+import { restauranteApi, pdvApi } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 
 /**
@@ -222,9 +222,9 @@ export default function Mesas() {
   const abrirComanda = (mesaId: string) =>
     acao(() => restauranteApi.abrirComanda({ filialId: filialId!, mesaId, origem: 'MESA' }));
 
-  const adicionarItem = (comandaId: string, novo: { nome: string; preco: number }) =>
+  const adicionarItem = (comandaId: string, novo: { nome: string; preco: number; produtoId?: string }) =>
     acao(() => restauranteApi.adicionarItens(comandaId, [
-      { descricao: novo.nome, quantidade: 1, precoUnitario: novo.preco },
+      { descricao: novo.nome, quantidade: 1, precoUnitario: novo.preco, produtoId: novo.produtoId },
     ]));
 
   const tirarItem = (comandaId: string, itemId: string) =>
@@ -398,6 +398,7 @@ export default function Mesas() {
       {selecionada && (
         <DetalheMesa
           mesa={selecionada}
+          filialId={filialId!}
           busy={busy}
           onFechar={() => setSelId(null)}
           onAbrir={() => abrirComanda(selecionada.id)}
@@ -425,14 +426,96 @@ function ResumoKpi({
   );
 }
 
+// ── Busca no cardápio real (produtos do estoque/catálogo) ──
+interface ProdutoBusca {
+  id: string;
+  codigo: string | null;
+  descricao: string;
+  unidade: string;
+  precoVenda: number;
+  estoqueDisponivel: number;
+}
+
+function BuscaCardapio({
+  filialId, busy, onAdd,
+}: {
+  filialId: string;
+  busy: boolean;
+  onAdd: (item: { nome: string; preco: number; produtoId: string }) => void;
+}) {
+  const [termo, setTermo] = useState('');
+  const [resultados, setResultados] = useState<ProdutoBusca[]>([]);
+  const [buscando, setBuscando] = useState(false);
+
+  useEffect(() => {
+    const t = termo.trim();
+    if (t.length < 2) { setResultados([]); setBuscando(false); return; }
+    setBuscando(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await pdvApi.buscarProdutos(t, filialId);
+        setResultados(Array.isArray(data) ? data : []);
+      } catch {
+        setResultados([]);
+      } finally {
+        setBuscando(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [termo, filialId]);
+
+  return (
+    <div>
+      <p className="text-[11px] font-bold uppercase tracking-wide text-[#8A90A0] mb-1.5">Adicionar do cardápio</p>
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#5E6472]" />
+        <input
+          value={termo}
+          onChange={(e) => setTermo(e.target.value)}
+          placeholder="Buscar produto por nome ou código…"
+          className="w-full rounded-lg border border-[#23262F] bg-[#0C0D10] pl-8 pr-8 py-2 text-sm text-[#F7F8FA] placeholder:text-[#5E6472] focus:border-[#01B8FA]/50 focus:outline-none"
+        />
+        {buscando && <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#5E6472] animate-spin" />}
+      </div>
+
+      {termo.trim().length >= 2 && (
+        <div className="mt-1.5 rounded-lg border border-[#23262F] bg-[#101216] overflow-hidden divide-y divide-[#23262F] max-h-64 overflow-y-auto">
+          {resultados.length === 0 && !buscando ? (
+            <p className="px-3 py-3 text-center text-[12px] text-[#8A90A0]">Nenhum produto encontrado.</p>
+          ) : (
+            resultados.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => { onAdd({ nome: p.descricao, preco: p.precoVenda, produtoId: p.id }); setTermo(''); }}
+                disabled={busy}
+                className="w-full text-left px-3 py-2 flex items-center justify-between gap-2 hover:bg-[#01B8FA]/[0.05] disabled:opacity-50 transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-[13px] text-[#F7F8FA] font-medium truncate">{p.descricao}</p>
+                  <p className="text-[11px] text-[#8A90A0]">{p.codigo ? `Cód. ${p.codigo} · ` : ''}{p.unidade}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[13px] font-bold text-[#F7F8FA] tabular-nums">{brl(p.precoVenda)}</span>
+                  <span className="h-6 w-6 rounded-md bg-[#01B8FA]/15 text-[#01B8FA] flex items-center justify-center"><Plus className="h-3.5 w-3.5" /></span>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function DetalheMesa({
-  mesa, busy, onFechar, onAbrir, onAddItem, onTirarItem, onPedirConta, onFecharConta,
+  mesa, filialId, busy, onFechar, onAbrir, onAddItem, onTirarItem, onPedirConta, onFecharConta,
 }: {
   mesa: MesaVM;
+  filialId: string;
   busy: boolean;
   onFechar: () => void;
   onAbrir: () => void;
-  onAddItem: (item: { nome: string; preco: number }) => void;
+  onAddItem: (item: { nome: string; preco: number; produtoId?: string }) => void;
   onTirarItem: (itemId: string) => void;
   onPedirConta: () => void;
   onFecharConta: () => void;
@@ -508,6 +591,11 @@ function DetalheMesa({
                   <span className="text-lg font-black text-[#F7F8FA]">{brl(total)}</span>
                 </div>
               </div>
+
+              {/* Adicionar do cardápio real */}
+              {mesa.status === 'OCUPADA' && (
+                <BuscaCardapio filialId={filialId} busy={busy} onAdd={onAddItem} />
+              )}
 
               {/* Menu rápido */}
               {mesa.status === 'OCUPADA' && (
