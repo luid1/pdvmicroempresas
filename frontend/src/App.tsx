@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { rotaInicial } from './config/telas';
 import PwaPrompt from './components/PwaPrompt';
 import AppShell from './components/layout/AppShell';
 import LoginPage from './pages/LoginPage';
@@ -93,6 +94,17 @@ function MobileGuard({ children }: { children: React.ReactNode }) {
   return user ? <>{children}</> : <Navigate to="/app/login" replace />;
 }
 
+/** Tela inicial ao abrir "/": respeita a telaInicial do usuário; se não houver
+ *  uma fixada e o modo da empresa for Restaurante, cai no painel do restaurante. */
+function HomeRedirect() {
+  const { user, segmento } = useAuth();
+  let destino = rotaInicial(user?.telas, user?.role, user?.telaInicial);
+  if (destino === '/dashboard' && segmento === 'RESTAURANTE') {
+    destino = '/restaurante/dashboard';
+  }
+  return <Navigate to={destino} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -105,7 +117,7 @@ export default function App() {
           {/* PDV — tela cheia (sem AppShell), mas exige login (operador de caixa) */}
           <Route path="/pdv" element={<Guard><Pdv /></Guard>} />
           <Route path="/" element={<Guard><AppShell /></Guard>}>
-            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route index element={<HomeRedirect />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="pdv/config" element={<ConfigCaixa />} />
 

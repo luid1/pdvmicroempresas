@@ -287,7 +287,12 @@ export default function LoginPage() {
     localStorage.setItem('wms_user', JSON.stringify(authUser));
     localStorage.setItem('wms_filiais', JSON.stringify(filiais));
     if (filiais[0]) localStorage.setItem('wms_filial', JSON.stringify(filiais[0]));
-    window.location.href = destino || rotaInicial(data.usuario.telas, data.usuario.role, data.usuario.telaInicial);
+    let destinoFinal = destino || rotaInicial(data.usuario.telas, data.usuario.role, data.usuario.telaInicial);
+    // Sem tela inicial fixada e empresa em modo Restaurante → cai no painel do restaurante.
+    if (!destino && destinoFinal === '/dashboard' && data.tenant?.modo === 'RESTAURANTE') {
+      destinoFinal = '/restaurante/dashboard';
+    }
+    window.location.href = destinoFinal;
   }
 
   function desvincular() {
