@@ -3,7 +3,7 @@ import {
   LayoutGrid, Users, Clock, Receipt, Plus, Search, CheckCircle2, X, Minus, Trash2,
   RefreshCw, AlertCircle, Loader2,
 } from 'lucide-react';
-import { restauranteApi, pdvApi } from '../../../services/api';
+import { restauranteApi, pdvApi, type ItemComandaInput } from '../../../services/api';
 import { useAuth } from '../../../contexts/AuthContext';
 
 /**
@@ -232,10 +232,8 @@ export default function Mesas() {
   const abrirComanda = (mesaId: string) =>
     acao(() => restauranteApi.abrirComanda({ filialId: filialId!, mesaId, origem: 'MESA' }));
 
-  const adicionarItem = (comandaId: string, novo: { nome: string; preco: number; produtoId?: string }) =>
-    acao(() => restauranteApi.adicionarItens(comandaId, [
-      { descricao: novo.nome, quantidade: 1, precoUnitario: novo.preco, produtoId: novo.produtoId },
-    ]));
+  const enviarItens = (comandaId: string, itens: ItemComandaInput[]) =>
+    acao(() => restauranteApi.adicionarItens(comandaId, itens));
 
   const tirarItem = (comandaId: string, itemId: string) =>
     acao(() => restauranteApi.removerItem(comandaId, itemId));
@@ -412,7 +410,7 @@ export default function Mesas() {
           busy={busy}
           onFechar={() => setSelId(null)}
           onAbrir={() => abrirComanda(selecionada.id)}
-          onAddItem={(item) => selecionada.comanda && adicionarItem(selecionada.comanda.id, item)}
+          onEnviar={(itens) => (selecionada.comanda ? enviarItens(selecionada.comanda.id, itens) : Promise.resolve())}
           onTirarItem={(itemId) => selecionada.comanda && tirarItem(selecionada.comanda.id, itemId)}
           onPedirConta={() => selecionada.comanda && pedirConta(selecionada.comanda.id)}
           onFecharConta={(opts) => selecionada.comanda && fecharConta(selecionada.comanda.id, opts)}
@@ -518,14 +516,14 @@ function BuscaCardapio({
 }
 
 function DetalheMesa({
-  mesa, filialId, busy, onFechar, onAbrir, onAddItem, onTirarItem, onPedirConta, onFecharConta,
+  mesa, filialId, busy, onFechar, onAbrir, onEnviar, onTirarItem, onPedirConta, onFecharConta,
 }: {
   mesa: MesaVM;
   filialId: string;
   busy: boolean;
   onFechar: () => void;
   onAbrir: () => void;
-  onAddItem: (item: { nome: string; preco: number; produtoId?: string }) => void;
+  onEnviar: (itens: ItemComandaInput[]) => Promise<unknown>;
   onTirarItem: (itemId: string) => void;
   onPedirConta: () => void;
   onFecharConta: (opts: FecharOpts) => void;
@@ -535,6 +533,45 @@ function DetalheMesa({
   const itens = mesa.comanda?.itens || [];
   const total = mesa.comanda?.total || 0;
   const [checkout, setCheckout] = useState(false);
+
+  // Carrinho local: o garçom monta o pedido e só ao "Enviar" grava/manda pra cozinha.
+  const [carrinho, setCarrinho] = useState<{ nome: string; preco: number; produtoId?: string; qtd: number }[]>([]);
+  const [enviando, setEnviando] = useState(false);
+
+  const addAoCarrinho = (item: { nome: string; preco: number; produtoId?: string }) =>
+    setCarrinho((cur) => {
+      const idx = cur.findIndex((c) => (item.produtoId ? c.produtoId === item.produtoId : c.nome === item.nome));
+      if (idx >= 0) {
+        const copia = [...cur];
+        copia[idx] = { ...copia[idx], qtd: copia[idx].qtd + 1 };
+        return copia;
+      }
+      return [...cur, { ...item, qtd: 1 }];
+    });
+
+  const mudarQtd = (idx: number, delta: number) =>
+    setCarrinho((cur) =>
+      cur.flatMap((c, i) => {
+        if (i !== idx) return [c];
+        const q = c.qtd + delta;
+        return q <= 0 ? [] : [{ ...c, qtd: q }];
+      }),
+    );
+
+  const totalCarrinho = carrinho.reduce((s, c) => s + c.preco * c.qtd, 0);
+
+  const enviarCozinha = async () => {
+    if (carrinho.length === 0) return;
+    setEnviando(true);
+    try {
+      await onEnviar(
+        carrinho.map((c) => ({ descricao: c.nome, quantidade: c.qtd, precoUnitario: c.preco, produtoId: c.produtoId })),
+      );
+      setCarrinho([]);
+    } finally {
+      setEnviando(false);
+    }
+  };
 
   return (
     <>
@@ -571,7 +608,7 @@ function DetalheMesa({
                   <span className="text-[11px] text-[#8A90A0]">{itens.reduce((s, i) => s + i.qtd, 0)} itens</span>
                 </div>
                 {itens.length === 0 ? (
-                  <p className="px-3.5 py-6 text-center text-sm text-[#8A90A0]">Nenhum item ainda. Use o menu rápido abaixo.</p>
+                  <p className="px-3.5 py-6 text-center text-sm text-[#8A90A0]">Nenhum item enviado ainda. Monte o pedido abaixo e envie pra cozinha.</p>
                 ) : (
                   <ul className="divide-y divide-[#23262F]">
                     {itens.map((i) => (
@@ -605,7 +642,47 @@ function DetalheMesa({
 
               {/* Adicionar do cardápio real */}
               {mesa.status === 'OCUPADA' && (
-                <BuscaCardapio filialId={filialId} busy={busy} onAdd={onAddItem} />
+                <BuscaCardapio filialId={filialId} busy={busy} onAdd={addAoCarrinho} />
+              )}
+
+              {/* Carrinho — pedido a enviar pra cozinha */}
+              {mesa.status === 'OCUPADA' && carrinho.length > 0 && (
+                <div className="rounded-xl border border-[#01B8FA]/30 bg-[#01B8FA]/[0.04] overflow-hidden">
+                  <div className="px-3.5 py-2 border-b border-[#01B8FA]/20 flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wide text-[#01B8FA]">A enviar</span>
+                    <span className="text-[11px] text-[#8A90A0]">{carrinho.reduce((s, c) => s + c.qtd, 0)} itens</span>
+                  </div>
+                  <ul className="divide-y divide-[#01B8FA]/10">
+                    {carrinho.map((c, idx) => (
+                      <li key={c.produtoId || c.nome} className="px-3.5 py-2 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm text-[#F7F8FA] font-medium truncate">{c.nome}</p>
+                          <p className="text-[11px] text-[#8A90A0] tabular-nums">{brl(c.preco)}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button onClick={() => mudarQtd(idx, -1)} className="h-6 w-6 rounded-md bg-[#0C0D10] hover:bg-[#23262F] text-[#8A90A0] flex items-center justify-center">
+                            <Minus className="h-3 w-3" />
+                          </button>
+                          <span className="text-sm font-bold text-[#F7F8FA] w-5 text-center tabular-nums">{c.qtd}</span>
+                          <button onClick={() => mudarQtd(idx, 1)} className="h-6 w-6 rounded-md bg-[#0C0D10] hover:bg-[#23262F] text-[#8A90A0] flex items-center justify-center">
+                            <Plus className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="px-3.5 py-2 border-t border-[#01B8FA]/20 flex items-center justify-between">
+                    <span className="text-sm text-[#8A90A0]">Subtotal a enviar</span>
+                    <span className="text-sm font-bold text-[#F7F8FA] tabular-nums">{brl(totalCarrinho)}</span>
+                  </div>
+                  <button
+                    onClick={enviarCozinha}
+                    disabled={busy || enviando}
+                    className="w-full text-sm font-bold px-4 py-2.5 bg-[#01B8FA] hover:bg-[#3DC8FB] text-[#04121A] transition-colors disabled:opacity-50"
+                  >
+                    {enviando ? 'Enviando…' : 'Enviar pra cozinha'}
+                  </button>
+                </div>
               )}
 
               {/* Menu rápido */}
@@ -616,7 +693,7 @@ function DetalheMesa({
                     {MENU_RAPIDO.map((item) => (
                       <button
                         key={item.nome}
-                        onClick={() => onAddItem(item)}
+                        onClick={() => addAoCarrinho(item)}
                         disabled={busy}
                         className="text-left rounded-lg border border-[#23262F] bg-[#101216] px-2.5 py-2 hover:border-[#01B8FA]/40 hover:bg-[#01B8FA]/[0.04] transition-colors disabled:opacity-50"
                       >
